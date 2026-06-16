@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulator Đầu Tư BĐS v3 · Một Quỹ Tiền Mặt Duy Nhất</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root{
+  --ink:#0D1B2A; --navy:#1A2E4A; --steel:#2C4A6E;
+  --platinum:#E8E4D8; --gold:#C9A227; --gold-soft:#E0C766;
+  --green:#3FB985; --red:#E5634D; --amber:#E5A84D;
+  --line:rgba(232,228,216,.10); --line2:rgba(232,228,216,.18);
+  --txt:#E8E4D8; --txt-dim:#9DAEC4; --txt-faint:#6B7E96;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--ink);
+  background-image:radial-gradient(ellipse at 20% -10%, rgba(44,74,110,.35), transparent 55%),
+                   radial-gradient(ellipse at 90% 0%, rgba(201,162,39,.06), transparent 45%);
+  color:var(--txt); font-family:'Outfit',sans-serif; line-height:1.5;
+  min-height:100vh; padding:0 0 80px;
+}
+.wrap{max-width:1320px;margin:0 auto;padding:0 28px}
+
+header{padding:48px 0 28px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.32em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+h1{font-family:'DM Serif Display',serif;font-size:42px;line-height:1.08;font-weight:400;
+  letter-spacing:-.01em;color:var(--platinum)}
+h1 em{font-style:italic;color:var(--gold-soft)}
+.sub{color:var(--txt-dim);font-size:15px;max-width:720px;margin-top:14px;font-weight:300}
+
+.grid{display:grid;grid-template-columns:400px 1fr;gap:32px;margin-top:36px}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+
+.panel{background:linear-gradient(180deg, rgba(26,46,74,.55), rgba(13,27,42,.4));
+  border:1px solid var(--line2);border-radius:14px;padding:26px}
+.panel h2{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--txt-faint);margin-bottom:20px;font-weight:500}
+
+.fld{margin-bottom:16px}
+.fld label{display:flex;justify-content:space-between;align-items:baseline;
+  font-size:13px;color:var(--txt-dim);margin-bottom:7px;font-weight:400}
+.fld .val{font-family:'DM Mono',monospace;color:var(--gold-soft);font-size:13px;font-weight:500}
+input[type=number]{width:100%;background:rgba(13,27,42,.6);border:1px solid var(--line2);
+  border-radius:8px;color:var(--txt);font-family:'DM Mono',monospace;font-size:14px;
+  padding:10px 12px;outline:none;transition:border .2s}
+input[type=number]:focus{border-color:var(--gold)}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:4px;
+  background:linear-gradient(90deg,var(--steel),var(--gold-soft));outline:none;margin-top:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
+  border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--ink);
+  box-shadow:0 0 0 1px var(--gold)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--gold);
+  cursor:pointer;border:2px solid var(--ink)}
+
+.divider{height:1px;background:var(--line);margin:20px 0}
+.sec-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:14px;opacity:.85}
+
+.derived{background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.25);
+  border-radius:9px;padding:13px 15px;margin:8px 0 16px;font-size:13px;color:var(--txt-dim)}
+.derived .d-row{display:flex;justify-content:space-between;margin:3px 0}
+.derived .d-row b{font-family:'DM Mono',monospace;color:var(--gold-soft)}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+@media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:rgba(13,27,42,.5);border:1px solid var(--line2);border-radius:12px;padding:16px 15px}
+.kpi .k-lbl{font-size:11px;color:var(--txt-faint);letter-spacing:.04em;margin-bottom:8px;
+  font-family:'DM Mono',monospace;text-transform:uppercase}
+.kpi .k-val{font-family:'DM Serif Display',serif;font-size:25px;color:var(--platinum);line-height:1}
+.kpi .k-sub{font-size:11px;color:var(--txt-dim);margin-top:6px}
+.kpi.pos .k-val{color:var(--green)}
+.kpi.neg .k-val{color:var(--red)}
+.kpi.warn{border-color:rgba(229,168,77,.4)}
+.kpi.warn .k-val{color:var(--amber)}
+.kpi.danger{border-color:rgba(229,99,77,.45)}
+.kpi.danger .k-val{color:var(--red)}
+
+.alert{border-radius:10px;padding:14px 18px;margin-bottom:22px;font-size:14px;
+  display:flex;gap:12px;align-items:flex-start}
+.alert.danger{background:rgba(229,99,77,.12);border:1px solid rgba(229,99,77,.4);color:#F2B0A4}
+.alert.ok{background:rgba(63,185,133,.1);border:1px solid rgba(63,185,133,.35);color:#8DDFBE}
+.alert.warn{background:rgba(229,168,77,.1);border:1px solid rgba(229,168,77,.4);color:#F0CE96}
+.alert .ico{font-size:18px;line-height:1.2}
+.alert b{color:#fff}
+
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line2);border-radius:12px;max-height:560px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:1000px}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--txt-faint);font-weight:500;text-align:right;background:#10243a;
+  position:sticky;top:0;z-index:2}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:#10243a}
+td:first-child{background:rgba(13,27,42,.95)}
+td{font-family:'DM Mono',monospace;color:var(--txt-dim)}
+td.mono-strong{color:var(--platinum)}
+tr.r-pay td{background:rgba(44,74,110,.18)}
+tr.r-peak td{background:rgba(201,162,39,.08)}
+tr.r-goc td{background:rgba(229,99,77,.08)}
+tr.r-exit td{background:rgba(63,185,133,.08)}
+tr.r-post td{color:var(--txt-faint);opacity:.7}
+tr.r-post td.mono-strong{color:var(--txt-dim)}
+.neg-cell{color:var(--red)}
+.pos-cell{color:var(--green)}
+.cov-pill{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10.5px;font-weight:600}
+.cov-safe{background:rgba(63,185,133,.15);color:var(--green)}
+.cov-mid{background:rgba(229,168,77,.15);color:var(--amber)}
+.cov-bad{background:rgba(229,99,77,.15);color:var(--red)}
+
+.note{font-size:12px;color:var(--txt-faint);margin-top:14px;line-height:1.6}
+.note b{color:var(--gold-soft)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--txt-faint);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+.scenario-tabs{display:flex;gap:8px;margin-bottom:14px}
+.stab{flex:1;padding:11px;text-align:center;border:1px solid var(--line2);border-radius:9px;
+  font-size:13px;cursor:pointer;color:var(--txt-dim);background:rgba(13,27,42,.4);
+  transition:all .2s;font-weight:500}
+.stab.active{border-color:var(--gold);color:var(--gold-soft);background:rgba(201,162,39,.1)}
+.stab .st-sub{font-size:10px;color:var(--txt-faint);font-family:'DM Mono',monospace;margin-top:3px}
+
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.tb-btn{background:rgba(13,27,42,.6);border:1px solid var(--line2);border-radius:8px;
+  color:var(--txt-dim);font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;
+  padding:9px 14px;cursor:pointer;transition:all .2s}
+.tb-btn:hover{border-color:var(--gold);color:var(--gold-soft)}
+.tb-btn.primary{background:rgba(201,162,39,.12);border-color:rgba(201,162,39,.4);color:var(--gold-soft)}
+.tb-btn.primary:hover{background:rgba(201,162,39,.2)}
+.tb-status{font-family:'DM Mono',monospace;font-size:11px;color:var(--txt-faint);margin-left:4px}
+
+.block-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gold);margin:30px 0 14px}
+
+.foot{margin-top:32px;padding-top:22px;border-top:1px solid var(--line);
+  font-size:12px;color:var(--txt-faint);line-height:1.7}
+.foot b{color:var(--gold-soft)}
+
+/* view toggle — hidden on desktop, shown on phone */
+.view-toggle{display:none;gap:8px;margin-bottom:14px}
+.vt-btn{flex:1;padding:10px;border:1px solid var(--line2);border-radius:9px;
+  background:rgba(13,27,42,.4);color:var(--txt-dim);font-family:'Outfit',sans-serif;
+  font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+.vt-btn.active{border-color:var(--gold);color:var(--gold-soft);background:rgba(201,162,39,.1)}
+
+/* cards — hidden by default, used on phone detail mode */
+.cards{display:none;flex-direction:column;gap:12px}
+.mcard{background:rgba(13,27,42,.5);border:1px solid var(--line2);border-radius:12px;
+  padding:14px 16px}
+.mcard.c-pay{border-color:rgba(44,74,110,.6)}
+.mcard.c-peak{border-color:rgba(201,162,39,.45)}
+.mcard.c-goc{border-color:rgba(229,99,77,.45)}
+.mcard.c-exit{border-color:rgba(63,185,133,.45)}
+.mcard.c-post{opacity:.62}
+.mcard-head{display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.mcard-th{font-family:'DM Serif Display',serif;font-size:20px;color:var(--platinum)}
+.mcard-th span{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold-soft);
+  margin-left:8px;font-weight:400}
+.mcard-ev{font-size:11px;color:var(--txt-dim);font-family:'DM Mono',monospace}
+.mcard-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px}
+.mrow{display:flex;justify-content:space-between;font-size:13px;
+  padding:3px 0;border-bottom:1px solid rgba(232,228,216,.05)}
+.mrow .ml{color:var(--txt-faint)}
+.mrow .mv{font-family:'DM Mono',monospace;color:var(--txt-dim)}
+.mrow .mv.pos{color:var(--green)} .mrow .mv.neg{color:var(--red)}
+.mrow .mv.strong{color:var(--platinum)}
+.mcard-foot{display:flex;justify-content:space-between;align-items:center;
+  margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.mcard-foot .mf-lbl{font-size:11px;color:var(--txt-faint);text-transform:uppercase;
+  letter-spacing:.06em;font-family:'DM Mono',monospace}
+
+@media(max-width:760px){
+  .wrap{padding:0 16px}
+  h1{font-size:30px}
+  .sub{font-size:14px}
+  .grid{gap:24px;margin-top:24px}
+  .panel{padding:20px}
+  .kpis{grid-template-columns:1fr 1fr;gap:10px}
+  .kpi .k-val{font-size:22px}
+  .scenario-tabs{flex-wrap:wrap}
+  .stab{min-width:calc(33% - 6px);padding:9px}
+  .toolbar .tb-btn{flex:1;min-width:calc(50% - 5px);text-align:center}
+  .view-toggle{display:flex}
+  /* OVERVIEW mode: keep table but hide secondary columns */
+  body.mode-overview #tblWrap{display:block}
+  body.mode-overview #cardsWrap{display:none}
+  body.mode-overview table{min-width:0;width:100%;font-size:12.5px}
+  body.mode-overview th:nth-child(3),body.mode-overview td:nth-child(3),   /* thu nhập */
+  body.mode-overview th:nth-child(4),body.mode-overview td:nth-child(4),   /* chi tyeu */
+  body.mode-overview th:nth-child(5),body.mode-overview td:nth-child(5),   /* chi ktyeu */
+  body.mode-overview th:nth-child(6),body.mode-overview td:nth-child(6),   /* lai */
+  body.mode-overview th:nth-child(7),body.mode-overview td:nth-child(7),   /* goc */
+  body.mode-overview th:nth-child(8),body.mode-overview td:nth-child(8),   /* giai ngan */
+  body.mode-overview th:nth-child(9),body.mode-overview td:nth-child(9){display:none} /* doi ung */
+  /* DETAIL mode: cards instead of table */
+  body.mode-detail #tblWrap{display:none}
+  body.mode-detail #cardsWrap{display:flex}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">CFO Toolkit · Real Estate · v5</div>
+  <h1>Giải ngân theo tiến độ — <em>vay đúng cách ngân hàng thật sự cho vay</em></h1>
+  <p class="sub">Ngân hàng giải ngân theo tiến độ hợp đồng: mỗi đợt đóng tiền, NH bơm phần tài trợ đã duyệt, bạn lo phần đối ứng. Dư nợ và lãi phát sinh ngay từ đợt đầu, không phải khi cạn tiền mặt. Bảng dưới hiện đủ mọi tháng để bạn tự audit từng dòng — và cảnh báo khi tiền mặt không đủ trả phần đối ứng của mình.</p>
+</header>
+
+<div class="grid">
+  <!-- INPUTS -->
+  <div class="panel">
+    <h2>Tham số đầu vào</h2>
+
+    <div class="sec-label">Sản phẩm & giá</div>
+    <div class="fld">
+      <label>Giá CĐT giao F1 (triệu/căn) <span class="val" id="v_priceF1">3.000</span></label>
+      <input type="number" id="priceF1" value="3000" step="50">
+    </div>
+    <div class="fld">
+      <label>Ưu đãi so với F1 (%) <span class="val" id="v_disc">3,0</span></label>
+      <input type="range" id="disc" min="0" max="10" value="3" step="0.5">
+    </div>
+    <div class="fld">
+      <label>Số căn đầu tư <span class="val" id="v_units">2</span></label>
+      <input type="range" id="units" min="1" max="6" value="2" step="1">
+    </div>
+
+    <div class="divider"></div>
+    <div class="sec-label">Vốn & vay</div>
+    <div class="fld">
+      <label>Tiền mặt ban đầu (triệu) <span class="val" id="v_equity">2.000</span></label>
+      <input type="number" id="equity" value="2000" step="100">
+    </div>
+    <div class="fld">
+      <label>Tỷ lệ NH tài trợ (%) <span class="val" id="v_ltv">70</span></label>
+      <input type="range" id="ltv" min="0" max="80" value="70" step="5">
+    </div>
+    <div class="fld">
+      <label>Lãi suất vay (%/năm) <span class="val" id="v_rate">11,0</span></label>
+      <input type="range" id="rate" min="6" max="16" value="11" step="0.5">
+    </div>
+    <div class="fld">
+      <label>Tổng kỳ hạn vay (năm) <span class="val" id="v_term">20</span></label>
+      <input type="range" id="term" min="5" max="30" value="20" step="1">
+    </div>
+    <div class="fld">
+      <label>Ân hạn gốc (tháng) <span class="val" id="v_grace">12</span></label>
+      <input type="range" id="grace" min="0" max="36" value="12" step="1">
+    </div>
+    <div class="derived" id="derivedBox"></div>
+
+    <div class="divider"></div>
+    <div class="sec-label">Tiến độ & exit</div>
+    <div class="fld">
+      <label>Số đợt thanh toán đến bàn giao <span class="val" id="v_tranches">5</span></label>
+      <input type="range" id="tranches" min="3" max="8" value="5" step="1">
+    </div>
+    <div class="fld">
+      <label>Khoảng cách mỗi đợt (tháng) <span class="val" id="v_gap">3</span></label>
+      <input type="range" id="gap" min="1" max="6" value="3" step="1">
+    </div>
+    <div class="fld">
+      <label>Tháng bán ra (kể từ T0) <span class="val" id="v_exit">15</span></label>
+      <input type="range" id="exit" min="6" max="48" value="15" step="1">
+    </div>
+    <div class="fld">
+      <label>Tăng giá kỳ vọng (%/năm) <span class="val" id="v_growth">12</span></label>
+      <input type="range" id="growth" min="-10" max="30" value="12" step="1">
+    </div>
+    <div class="fld">
+      <label>Chi phí giao dịch khi bán (%) <span class="val" id="v_txcost">4,0</span></label>
+      <input type="range" id="txcost" min="0" max="8" value="4" step="0.5">
+    </div>
+
+    <div class="divider"></div>
+    <div class="sec-label">Dòng tiền cá nhân</div>
+    <div class="fld">
+      <label>Thu nhập / tháng (triệu) <span class="val" id="v_income">80</span></label>
+      <input type="number" id="income" value="80" step="5">
+    </div>
+    <div class="fld">
+      <label>Chi tiêu thiết yếu / tháng (triệu) <span class="val" id="v_essential">35</span></label>
+      <input type="number" id="essential" value="35" step="5">
+    </div>
+    <div class="fld">
+      <label>Chi không thiết yếu / tháng (triệu) <span class="val" id="v_discr">15</span></label>
+      <input type="number" id="discr" value="15" step="5">
+    </div>
+    <div class="derived" id="flowBox"></div>
+  </div>
+
+  <!-- OUTPUTS -->
+  <div>
+    <div class="scenario-tabs">
+      <div class="stab active" data-s="base">Kỳ vọng<div class="st-sub" id="tab_base">+12%/n</div></div>
+      <div class="stab" data-s="slow">Chậm thanh khoản<div class="st-sub">bán trễ 6 th</div></div>
+      <div class="stab" data-s="down">Thị trường xấu<div class="st-sub">−5%/n</div></div>
+    </div>
+
+    <div class="toolbar">
+      <button class="tb-btn" id="btnSave">⬇ Lưu kịch bản (.json)</button>
+      <button class="tb-btn" id="btnLoad">⬆ Tải kịch bản</button>
+      <button class="tb-btn primary" id="btnCsv">⊞ Xuất báo cáo CSV</button>
+      <input type="file" id="fileInput" accept=".json" style="display:none">
+      <span class="tb-status" id="tbStatus"></span>
+    </div>
+
+    <div id="alertBox"></div>
+
+    <div class="kpis">
+      <div class="kpi" id="kpiPeak">
+        <div class="k-lbl">Cần vay (đỉnh)</div>
+        <div class="k-val" id="o_peak">—</div>
+        <div class="k-sub" id="o_peak_sub"></div>
+      </div>
+      <div class="kpi" id="kpiProfit">
+        <div class="k-lbl">Lãi / lỗ ròng</div>
+        <div class="k-val" id="o_profit">—</div>
+        <div class="k-sub">sau lãi vay & phí</div>
+      </div>
+      <div class="kpi" id="kpiRoi">
+        <div class="k-lbl">ROI / năm</div>
+        <div class="k-val" id="o_roi">—</div>
+        <div class="k-sub" id="o_roi_sub"></div>
+      </div>
+      <div class="kpi" id="kpiCov">
+        <div class="k-lbl">Hệ số thấp nhất</div>
+        <div class="k-val" id="o_cov">—</div>
+        <div class="k-sub" id="o_cov_sub"></div>
+      </div>
+    </div>
+
+    <div class="block-title">Bảng dòng tiền master · mọi tháng từ T0</div>
+    <div class="view-toggle" id="viewToggle">
+      <button class="vt-btn active" data-v="overview">Tổng quan</button>
+      <button class="vt-btn" data-v="detail">Chi tiết</button>
+    </div>
+    <div class="panel" style="margin-bottom:0">
+      <div class="tbl-wrap" id="tblWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Th</th><th>Sự kiện</th>
+              <th>Thu nhập</th><th>Chi t.yếu</th><th>Chi k.t.yếu</th>
+              <th>Lãi vay</th><th>Gốc vay</th><th>NH giải ngân</th><th>Đối ứng</th>
+              <th>Ròng tháng</th><th>Tiền mặt cuối</th><th>Dư nợ</th><th>Hệ số BP</th>
+            </tr>
+          </thead>
+          <tbody id="masterBody"></tbody>
+        </table>
+      </div>
+      <div class="cards" id="cardsWrap"></div>
+      <div class="legend">
+        <span><i style="background:rgba(44,74,110,.6)"></i> Tháng đóng đợt</span>
+        <span><i style="background:rgba(201,162,39,.5)"></i> Đỉnh dư nợ</span>
+        <span><i style="background:rgba(229,99,77,.5)"></i> Gốc vào / thiếu đối ứng</span>
+        <span><i style="background:rgba(63,185,133,.5)"></i> Bán ra</span>
+      </div>
+      <p class="note" id="masterNote"></p>
+    </div>
+
+    <div class="foot">
+      <b>Giải ngân theo tiến độ.</b> Mỗi đợt đóng tiền: NH giải ngân = đợt × tỷ lệ tài trợ, bạn bỏ tiền mặt phần đối ứng = đợt × (1 − tỷ lệ). Dư nợ và lãi phát sinh ngay từ đợt đầu, tăng theo tiến độ — không phụ thuộc tiền mặt còn hay hết. Nếu tiền mặt không đủ phần đối ứng của một đợt → cảnh báo vỡ.<br><br>
+      <b>Hệ số bao phủ</b> = Tiền mặt cuối tháng ÷ (Lãi vay + Gốc vay + Chi thiết yếu) tháng đó — quỹ tiền hiện có gánh được bao nhiêu tháng nghĩa vụ cứng nếu kẹt hàng (đã cắt chi không thiết yếu). <b>≥6</b> an toàn · <b>3–6</b> theo dõi · <b>&lt;3</b> rủi ro cao.<br><br>
+      <b>Giả định:</b> ân hạn tính từ giải ngân đầu tiên (T0); gốc/tháng sau ân hạn = tổng NH tài trợ ÷ số tháng còn lại của kỳ hạn; giá bán = tổng giá mua × (1 + tăng giá/năm)^(số tháng giữ ÷ 12); khi bán trả hết dư nợ. Công cụ ước lượng — thay số thật để dùng.
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString('vi-VN');
+const fmtB=n=>{const b=n/1000;return (Math.abs(b)>=10?b.toFixed(1):b.toFixed(2)).replace('.',',')+' tỷ';};
+let scenario='base', LAST=null;
+
+const ids=['priceF1','disc','units','equity','ltv','rate','term','grace','tranches','gap','exit','growth','txcost','income','essential','discr'];
+ids.forEach(id=>$(id).addEventListener('input',run));
+document.querySelectorAll('.stab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.stab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active'); scenario=t.dataset.s; run();
+}));
+
+// view toggle (phone only): overview = compact table, detail = cards
+document.body.classList.add('mode-overview');
+document.querySelectorAll('.vt-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('.vt-btn').forEach(x=>x.classList.remove('active'));
+  btn.classList.add('active');
+  document.body.classList.toggle('mode-overview', btn.dataset.v==='overview');
+  document.body.classList.toggle('mode-detail', btn.dataset.v==='detail');
+}));
+
+function readInputs(){const o={};ids.forEach(id=>o[id]=+$(id).value);return o;}
+function applyInputs(o){if(!o)return;ids.forEach(id=>{if(o[id]!==undefined)$(id).value=o[id];});}
+
+function syncLabels(p){
+  $('v_priceF1').textContent=fmt(p.priceF1);
+  $('v_disc').textContent=p.disc.toFixed(1).replace('.',',');
+  $('v_units').textContent=p.units;
+  $('v_equity').textContent=fmt(p.equity);
+  $('v_ltv').textContent=p.ltv;
+  $('v_rate').textContent=p.rate.toFixed(1).replace('.',',');
+  $('v_term').textContent=p.term;
+  $('v_grace').textContent=p.grace;
+  $('v_tranches').textContent=p.tranches;
+  $('v_gap').textContent=p.gap;
+  $('v_exit').textContent=p.exit;
+  $('v_growth').textContent=p.growth;
+  $('v_txcost').textContent=p.txcost.toFixed(1).replace('.',',');
+  $('v_income').textContent=fmt(p.income);
+  $('v_essential').textContent=fmt(p.essential);
+  $('v_discr').textContent=fmt(p.discr);
+  $('tab_base').textContent=(p.growth>=0?'+':'')+p.growth+'%/n';
+}
+function covClass(c){return c>=6?'cov-safe':(c>=3?'cov-mid':'cov-bad');}
+
+function simulate(p,scn){
+  let exitMonth=p.exit, growthYr=p.growth;
+  if(scn==='slow')exitMonth=p.exit+6;
+  if(scn==='down')growthYr=-5;
+
+  const buyPrice=p.priceF1*(1-p.disc/100);
+  const totalBuy=buyPrice*p.units;
+  const mRate=p.rate/100/12;
+  const ltv=p.ltv/100;
+  const trancheAmt=totalBuy/p.tranches;
+  const handover=(p.tranches-1)*p.gap;          // tháng đóng đợt cuối
+  const graceEnd=0+p.grace;                      // ân hạn tính từ giải ngân đầu (T0)
+  const principalMonths=Math.max(p.term*12-p.grace,1);
+  const plannedDebt=totalBuy*ltv;               // tổng NH tài trợ đến bàn giao
+  const principalPerMonth=plannedDebt/principalMonths;
+
+  const rows=[];
+  let cash=p.equity, debt=0, peakDebt=0, peakMonth=0;
+  let minCov=Infinity, minCovMonth=null;
+  let totalInterest=0, shortfall=false, shortMonth=null;
+  let salePrice=0, txCost=0, sold=false;
+  const HORIZON=24;                              // luôn vẽ đủ 24 tháng
+
+  for(let m=0;m<=HORIZON;m++){
+    // --- tranche due this month (chỉ trước/đến bàn giao) ---
+    let tranche=0, ev=[];
+    for(let t=0;t<p.tranches;t++){
+      if(m===t*p.gap){tranche+=trancheAmt; ev.push(t===p.tranches-1?'Bàn giao':'Đợt '+(t+1));}
+    }
+    const disb=tranche*ltv;            // NH giải ngân theo tiến độ
+    const ownPay=tranche*(1-ltv);      // tiền mặt đối ứng của nhà đầu tư
+    debt+=disb;                        // dư nợ tăng theo tiến độ, độc lập tiền mặt
+
+    // --- interest on current debt ---
+    const interest=debt*mRate;
+    if(m<=exitMonth) totalInterest+=interest;
+    // --- principal only after grace ---
+    let principal=0;
+    if(m>graceEnd && debt>0){ principal=Math.min(principalPerMonth, debt); }
+    const gocStart=(m===graceEnd+1)&&debt>0;
+
+    // --- personal flow (T0 = mốc bắt đầu) — chạy suốt 24 tháng kể cả sau exit ---
+    const income=(m===0)?0:p.income;
+    const essential=(m===0)?0:p.essential;
+    const discr=(m===0)?0:p.discr;
+
+    // --- sale at exit ---
+    let saleIn=0;
+    if(m===exitMonth){
+      salePrice=totalBuy*Math.pow(1+growthYr/100, exitMonth/12);
+      txCost=salePrice*p.txcost/100;
+      saleIn=salePrice-txCost;
+    }
+
+    let net=income - essential - discr - interest - principal - ownPay + saleIn;
+    cash += net;
+    if(m>graceEnd) debt-=principal;
+    if(m===exitMonth && debt>0){ cash-=debt; debt=0; sold=true; }
+
+    // --- shortfall: tiền mặt không đủ phần đối ứng → vỡ (chỉ tính giai đoạn còn đầu tư) ---
+    if(cash<-0.001 && m<=exitMonth){ shortfall=true; if(shortMonth===null)shortMonth=m; }
+
+    if(debt>peakDebt){peakDebt=debt;peakMonth=m;}
+
+    // --- coverage: cash / (interest+principal+essential) ---
+    const postExit=m>exitMonth;
+    const burden=interest+principal+(m===0?0:p.essential);
+    const cov=burden>0.001 ? cash/burden : 99;
+    if(m>0 && m<=exitMonth && cov<minCov && m!==exitMonth){minCov=cov;minCovMonth=m;}
+
+    rows.push({m,ev:ev.join('+'),income,essential,discr,interest,principal,
+      disb,ownPay,net,cash,debt,cov,gocStart,postExit,
+      isExit:m===exitMonth,isPay:tranche>0,isPeakRow:false,isGoc:gocStart,
+      isShort:cash<-0.001 && m<=exitMonth});
+  }
+  rows.forEach(r=>{if(r.m===peakMonth&&peakDebt>0)r.isPeakRow=true;});
+
+  const totalOwn=totalBuy*(1-ltv);
+  const profit=salePrice-txCost-totalBuy-totalInterest;
+  const cashInvested=totalOwn;       // tiền mặt thực bỏ ra = tổng phần đối ứng
+  const roiTotal=profit/Math.max(cashInvested,1);          // ROI tổng cả kỳ (tỷ lệ)
+  const holdYears=exitMonth/12;
+  // ROI annualized (CAGR) — quy về /năm để so sánh các kịch bản
+  const roiAnnual=holdYears>0 ? (Math.pow(1+roiTotal, 1/holdYears)-1)*100 : roiTotal*100;
+  const roi=roiTotal*100;
+
+  return {rows,buyPrice,totalBuy,salePrice,txCost,profit,roi,roiAnnual,holdYears,cashInvested,totalOwn,
+    peakDebt,peakMonth,plannedDebt,principalPerMonth,minCov:minCov===Infinity?99:minCov,minCovMonth,
+    totalInterest,graceEnd,handover,exitMonth,principalMonths,growthYr,mRate,ltv,shortfall,shortMonth};
+}
+
+function run(){
+  const p=readInputs(); syncLabels(p);
+  const r=simulate(p,scenario); LAST=r;
+
+  const principalPerMonth=r.principalPerMonth;
+  $('derivedBox').innerHTML=
+    '<div class="d-row"><span>Giá mua sau ưu đãi</span><b>'+fmt(r.buyPrice)+' tr/căn</b></div>'+
+    '<div class="d-row"><span>Tổng giá mua ('+p.units+' căn)</span><b>'+fmtB(r.totalBuy)+'</b></div>'+
+    '<div class="d-row"><span>NH tài trợ ('+p.ltv+'%)</span><b>'+fmtB(r.plannedDebt)+'</b></div>'+
+    '<div class="d-row"><span>Tiền mặt phải bỏ ra (đối ứng)</span><b>'+fmtB(r.totalOwn)+'</b></div>'+
+    '<div class="d-row"><span>Gốc/tháng sau ân hạn</span><b>'+fmt(principalPerMonth)+' tr</b></div>';
+
+  $('flowBox').innerHTML=
+    '<div class="d-row"><span>Dòng tiền cá nhân/tháng (chưa tính vay)</span><b>'+
+      ((p.income-p.essential-p.discr)>=0?'+':'−')+fmt(Math.abs(p.income-p.essential-p.discr))+' tr</b></div>'+
+    '<div class="d-row"><span style="font-size:11px;color:var(--txt-faint)">= '+p.income+' − '+p.essential+' − '+p.discr+' · lãi/gốc trừ riêng theo tháng</span></div>';
+
+  // KPIs
+  $('o_peak').textContent=fmtB(r.peakDebt);
+  $('o_peak_sub').textContent='đỉnh tại T'+r.peakMonth+' · đối ứng '+fmtB(r.totalOwn);
+  $('o_profit').textContent=(r.profit>=0?'+':'−')+fmtB(Math.abs(r.profit));
+  $('kpiProfit').className='kpi '+(r.profit>=0?'pos':'neg');
+  $('o_roi').textContent=(r.roiAnnual>=0?'+':'−')+Math.abs(r.roiAnnual).toFixed(0)+'%';
+  $('o_roi_sub').textContent='/năm · tổng '+(r.roi>=0?'+':'−')+Math.abs(r.roi).toFixed(0)+'% qua '+r.holdYears.toFixed(1)+'n';
+  $('kpiRoi').className='kpi '+(r.roiAnnual>=0?'pos':'neg');
+  $('o_cov').textContent=r.minCov>=99?'—':r.minCov.toFixed(1);
+  $('o_cov_sub').textContent=r.minCovMonth?('thấp nhất tại T'+r.minCovMonth):'';
+  $('kpiCov').className='kpi '+(r.minCov>=6?'pos':(r.minCov>=3?'warn':'danger'));
+  $('kpiPeak').className='kpi';
+
+  // alert
+  let ab='';
+  const cashFloor=Math.min(...r.rows.filter(x=>!x.isExit).map(x=>x.cash));
+  if(r.shortfall){
+    ab='<div class="alert danger"><span class="ico">⚠</span><div><b>Vỡ phần đối ứng.</b> Tại T'+r.shortMonth+', tiền mặt không đủ trả phần đối ứng của bạn cho đợt đóng tiền (NH chỉ bơm phần tài trợ, phần còn lại bạn phải tự lo). Đây là tình huống kẹt thật. Cần tăng tiền mặt ban đầu, giảm số căn, hoặc thương lượng tỷ lệ tài trợ cao hơn.</div></div>';
+  } else if(r.minCov<3){
+    ab='<div class="alert danger"><span class="ico">⚠</span><div><b>Sức chịu đựng mỏng.</b> Hệ số bao phủ thấp nhất '+r.minCov.toFixed(1)+' (dưới 3) tại T'+r.minCovMonth+'. Nếu kẹt hàng đúng lúc này, quỹ tiền không gánh nổi lãi+gốc+chi thiết yếu. Giảm số căn, kéo dài ân hạn, hoặc bán trước thời điểm đó.</div></div>';
+  } else if(r.minCov<6){
+    ab='<div class="alert warn"><span class="ico">◐</span><div><b>Trong vùng theo dõi.</b> Hệ số thấp nhất '+r.minCov.toFixed(1)+' (3–6) tại T'+r.minCovMonth+'. Chịu được nhưng không nhiều dư địa — nên có kế hoạch bán dứt điểm quanh mốc này.</div></div>';
+  } else if(r.profit<0){
+    ab='<div class="alert danger"><span class="ico">⚠</span><div><b>Dòng tiền ổn nhưng kịch bản này lỗ.</b> Hệ số bao phủ '+r.minCov.toFixed(1)+' (an toàn), nhưng sau lãi vay '+fmt(r.totalInterest)+' tr và phí giao dịch, lãi ròng âm. Cần biên tăng giá cao hơn hoặc exit sớm hơn.</div></div>';
+  } else {
+    ab='<div class="alert ok"><span class="ico">✓</span><div><b>Cả hai mặt đều ổn.</b> Hệ số bao phủ thấp nhất '+r.minCov.toFixed(1)+' (≥6), lãi ròng dương. Vẫn nên bấm tab "Chậm thanh khoản" xem nếu bán trễ 6 tháng.</div></div>';
+  }
+  $('alertBox').innerHTML=ab;
+
+  // master table
+  let b='';
+  r.rows.forEach(row=>{
+    let cls=[];
+    if(row.isPay)cls.push('r-pay');
+    if(row.isPeakRow)cls.push('r-peak');
+    if(row.isGoc)cls.push('r-goc');
+    if(row.isExit)cls.push('r-exit');
+    if(row.isShort)cls.push('r-goc');
+    if(row.postExit)cls.push('r-post');
+    let evt=row.ev||'';
+    if(row.isGoc)evt=(evt?evt+' · ':'')+'gốc vào';
+    if(row.isExit)evt=(evt?evt+' · ':'')+'BÁN';
+    if(row.isPeakRow&&!row.isExit)evt=(evt?evt+' ':'')+'◆';
+    if(row.isShort)evt=(evt?evt+' · ':'')+'THIẾU ĐỐI ỨNG';
+    if(row.postExit&&!evt)evt='hậu exit';
+    const netCls=row.net>=0?'pos-cell':'neg-cell';
+    b+='<tr class="'+cls.join(' ')+'">'+
+      '<td class="mono-strong">'+row.m+'</td>'+
+      '<td style="text-align:left">'+evt+'</td>'+
+      '<td>'+(row.income>0?fmt(row.income):'—')+'</td>'+
+      '<td>'+(row.essential>0?fmt(row.essential):'—')+'</td>'+
+      '<td>'+(row.discr>0?fmt(row.discr):'—')+'</td>'+
+      '<td>'+(row.interest>0.5?fmt(row.interest):'—')+'</td>'+
+      '<td class="'+(row.principal>0.5?'neg-cell':'')+'">'+(row.principal>0.5?fmt(row.principal):'—')+'</td>'+
+      '<td class="'+(row.disb>0.5?'pos-cell':'')+'">'+(row.disb>0.5?fmt(row.disb):'—')+'</td>'+
+      '<td class="'+(row.ownPay>0.5?'neg-cell':'')+'">'+(row.ownPay>0.5?fmt(row.ownPay):'—')+'</td>'+
+      '<td class="'+netCls+'">'+(row.net>=0?'+':'−')+fmt(Math.abs(row.net))+'</td>'+
+      '<td class="mono-strong '+(row.cash<-0.001?'neg-cell':'')+'">'+fmt(row.cash)+'</td>'+
+      '<td class="'+(row.debt>0?'neg-cell':'')+'">'+(row.debt>0?fmt(row.debt):'—')+'</td>'+
+      '<td>'+((row.isExit||row.postExit)?'<span style="color:var(--txt-faint)">—</span>':'<span class="cov-pill '+covClass(row.cov)+'">'+(row.cov>=99?'∞':row.cov.toFixed(1))+'</span>')+'</td>'+
+      '</tr>';
+  });
+  $('masterBody').innerHTML=b;
+
+  // build cards (phone detail mode) — same data, vertical layout
+  let cc='';
+  r.rows.forEach(row=>{
+    let ccls=[];
+    if(row.isPay)ccls.push('c-pay');
+    if(row.isPeakRow)ccls.push('c-peak');
+    if(row.isGoc||row.isShort)ccls.push('c-goc');
+    if(row.isExit)ccls.push('c-exit');
+    if(row.postExit)ccls.push('c-post');
+    let cev=row.ev||'';
+    if(row.isGoc)cev=(cev?cev+' · ':'')+'gốc vào';
+    if(row.isExit)cev=(cev?cev+' · ':'')+'BÁN';
+    if(row.isPeakRow&&!row.isExit)cev=(cev?cev+' ':'')+'◆ đỉnh nợ';
+    if(row.isShort)cev=(cev?cev+' · ':'')+'THIẾU ĐỐI ỨNG';
+    if(row.postExit&&!row.ev)cev='hậu exit';
+    const nC=row.net>=0?'pos':'neg';
+    const mr=(l,v,c)=>'<div class="mrow"><span class="ml">'+l+'</span><span class="mv'+(c?' '+c:'')+'">'+v+'</span></div>';
+    cc+='<div class="mcard '+ccls.join(' ')+'">'+
+      '<div class="mcard-head"><div class="mcard-th">T'+row.m+(cev?'<span>'+cev+'</span>':'')+'</div></div>'+
+      '<div class="mcard-grid">'+
+        mr('Thu nhập', row.income>0?fmt(row.income):'—')+
+        mr('Lãi vay', row.interest>0.5?fmt(row.interest):'—')+
+        mr('Chi thiết yếu', row.essential>0?fmt(row.essential):'—')+
+        mr('Gốc vay', row.principal>0.5?fmt(row.principal):'—','neg')+
+        mr('Chi k.thiết yếu', row.discr>0?fmt(row.discr):'—')+
+        mr('NH giải ngân', row.disb>0.5?fmt(row.disb):'—','pos')+
+        mr('Đối ứng', row.ownPay>0.5?fmt(row.ownPay):'—','neg')+
+        mr('Dư nợ', row.debt>0?fmt(row.debt):'—',row.debt>0?'neg':'')+
+      '</div>'+
+      '<div class="mcard-foot">'+
+        '<span class="mf-lbl">Ròng <b class="mv '+nC+'">'+(row.net>=0?'+':'−')+fmt(Math.abs(row.net))+'</b></span>'+
+        '<span class="mf-lbl">Tiền mặt <b class="mv strong">'+fmt(row.cash)+'</b></span>'+
+        '<span class="mf-lbl">BP '+((row.isExit||row.postExit)?'—':'<span class="cov-pill '+covClass(row.cov)+'">'+(row.cov>=99?'∞':row.cov.toFixed(1))+'</span>')+'</span>'+
+      '</div>'+
+    '</div>';
+  });
+  $('cardsWrap').innerHTML=cc;
+  $('masterNote').innerHTML='Đơn vị: triệu đồng · vẽ đủ 24 tháng (sau exit là dòng tiền cá nhân thuần). Giá bán <b>'+fmt(r.salePrice)+'</b> tr · phí '+fmt(r.txCost)+
+    ' tr · tổng lãi vay đến exit '+fmt(r.totalInterest)+' tr. ◆ = đỉnh dư nợ (T'+r.peakMonth+'). '+
+    'Tiền mặt thấp nhất (trước exit): '+fmt(cashFloor)+' tr.';
+
+  autosave();
+}
+
+// ---------- AUTOSAVE ----------
+const SKEY='bds_sim_v5';
+function autosave(){
+  try{ localStorage.setItem(SKEY,JSON.stringify({inputs:readInputs(),scenario,ts:Date.now()}));
+    status('Đã tự lưu '+new Date().toLocaleTimeString('vi-VN'));
+  }catch(e){ status('Tự lưu không khả dụng (file://) — dùng nút Lưu kịch bản'); }
+}
+function restore(){
+  try{ const raw=localStorage.getItem(SKEY); if(!raw)return;
+    const d=JSON.parse(raw); applyInputs(d.inputs);
+    if(d.scenario){scenario=d.scenario;
+      document.querySelectorAll('.stab').forEach(x=>x.classList.toggle('active',x.dataset.s===scenario));}
+  }catch(e){}
+}
+function status(m){ $('tbStatus').textContent=m; }
+
+// ---------- SAVE / LOAD JSON ----------
+$('btnSave').addEventListener('click',()=>{
+  download('kich-ban-bds-'+stamp()+'.json',
+    JSON.stringify({inputs:readInputs(),scenario,version:'v5',ts:new Date().toISOString()},null,2),
+    'application/json'); status('Đã tải file kịch bản');
+});
+$('btnLoad').addEventListener('click',()=>$('fileInput').click());
+$('fileInput').addEventListener('change',ev=>{
+  const f=ev.target.files[0]; if(!f)return;
+  const rd=new FileReader();
+  rd.onload=e=>{try{ const d=JSON.parse(e.target.result); applyInputs(d.inputs);
+    if(d.scenario){scenario=d.scenario;
+      document.querySelectorAll('.stab').forEach(x=>x.classList.toggle('active',x.dataset.s===scenario));}
+    run(); status('Đã nạp từ '+f.name);
+  }catch(err){status('File không hợp lệ');}};
+  rd.readAsText(f); ev.target.value='';
+});
+
+// ---------- EXPORT CSV ----------
+$('btnCsv').addEventListener('click',()=>{
+  const p=readInputs(); const r=LAST||simulate(p,scenario);
+  const scnName={base:'Ky vong',slow:'Cham thanh khoan',down:'Thi truong xau'}[scenario];
+  const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const L=[];
+  L.push(['BAO CAO MO PHONG DAU TU BDS - v5']);
+  L.push(['Kich ban',scnName]); L.push(['Xuat luc',new Date().toLocaleString('vi-VN')]); L.push([]);
+  L.push(['--- TOM TAT KPI ---']);
+  L.push(['Can vay (dinh) - trieu',Math.round(r.peakDebt)]);
+  L.push(['Lai/lo rong - trieu',Math.round(r.profit)]);
+  L.push(['ROI/nam (CAGR) - %',r.roiAnnual.toFixed(1)]);
+  L.push(['ROI tong ca ky - %',r.roi.toFixed(1)]);
+  L.push(['So nam giu',r.holdYears.toFixed(2)]);
+  L.push(['He so bao phu thap nhat',r.minCov>=99?'-':r.minCov.toFixed(2)]);
+  L.push(['Thang he so thap nhat',r.minCovMonth?'T'+r.minCovMonth:'-']);
+  L.push(['Tong lai vay den exit - trieu',Math.round(r.totalInterest)]);
+  L.push([]);
+  L.push(['--- THAM SO DAU VAO ---']);
+  const lbl={priceF1:'Gia CDT giao F1 (tr/can)',disc:'Uu dai (%)',units:'So can',
+    equity:'Tien mat ban dau (tr)',ltv:'Ty le NH tai tro (%)',rate:'Lai suat (%/nam)',term:'Ky han vay (nam)',grace:'An han goc (thang)',
+    tranches:'So dot',gap:'Khoang cach dot (thang)',exit:'Thang ban ra',growth:'Tang gia (%/nam)',
+    txcost:'Chi phi giao dich (%)',income:'Thu nhap/thang (tr)',essential:'Chi thiet yeu/thang (tr)',
+    discr:'Chi khong thiet yeu/thang (tr)'};
+  ids.forEach(id=>L.push([lbl[id]||id,p[id]]));
+  L.push([]);
+  L.push(['--- DONG TIEN MASTER (moi thang tu T0) ---']);
+  L.push(['Thang','Su kien','Thu nhap','Chi thiet yeu','Chi khong thiet yeu','Lai vay','Goc vay','NH giai ngan','Doi ung','Rong thang','Tien mat cuoi','Du no','He so bao phu']);
+  r.rows.forEach(row=>{
+    let ev=row.ev||''; if(row.isGoc)ev+=' goc vao'; if(row.isExit)ev+=' BAN'; if(row.isShort)ev+=' THIEU DOI UNG'; if(row.postExit&&!row.ev)ev='hau exit';
+    L.push(['T'+row.m,ev.trim(),Math.round(row.income),Math.round(row.essential),Math.round(row.discr),
+      Math.round(row.interest),Math.round(row.principal),Math.round(row.disb),Math.round(row.ownPay),Math.round(row.net),
+      Math.round(row.cash),Math.round(row.debt),row.cov>=99?'-':row.cov.toFixed(2)]);
+  });
+  const csv='\uFEFF'+L.map(r=>r.map(c=>q(c)).join(',')).join('\r\n');
+  download('bao-cao-bds-'+scenario+'-'+stamp()+'.csv',csv,'text/csv;charset=utf-8');
+  status('Da xuat CSV ('+scnName+')');
+});
+
+function download(name,content,type){
+  const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+function stamp(){const d=new Date();return d.getFullYear()+''+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'-'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0');}
+
+restore();
+run();
+</script>
+</body>
+</html>
