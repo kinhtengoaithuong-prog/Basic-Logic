@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cost-to-Journal Engine — Demo · ideaLAB</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700&display=swap');
+:root{
+  --ink:#0D1B2A; --navy:#1A2E4A; --steel:#2C4A6E; --plat:#C8A96E;
+  --paper:#0D1B2A; --surface:#16263b; --surface2:#1d3450; --border:#2C4A6E;
+  --border2:#3a5a82; --text:#E8EDF4; --sub:#9DB2CC; --dim:#5d7595;
+  --green:#3BC871; --red:#E05555; --amber:#E0A23B; --teal:#46C4B8; --purple:#9B8CFF;
+  --fh:'Outfit',sans-serif; --fm:'DM Mono',monospace; --fd:'DM Serif Display',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fh);background:var(--ink);color:var(--text);line-height:1.55;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 0 60px}
+.hdr{background:linear-gradient(135deg,#0D1B2A,#16263b);border-bottom:1px solid var(--border);padding:26px 30px}
+.hdr-eyebrow{font-family:var(--fm);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--plat);margin-bottom:8px}
+.hdr h1{font-family:var(--fd);font-size:27px;font-weight:400;color:#fff;line-height:1.2}
+.hdr-sub{font-size:13px;color:var(--sub);margin-top:6px;max-width:680px}
+.flow-strip{display:flex;gap:0;align-items:center;margin-top:18px;flex-wrap:wrap}
+.fs-node{font-family:var(--fm);font-size:10.5px;letter-spacing:.5px;color:var(--text);background:var(--surface);border:1px solid var(--border);padding:5px 12px;border-radius:5px}
+.fs-arrow{color:var(--plat);margin:0 7px;font-weight:700}
+.fs-node.det{border-color:var(--teal);color:var(--teal)}
+
+.bar{padding:18px 30px 0;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.bar label{font-family:var(--fm);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub)}
+.sel{background:var(--surface);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:8px 12px;font-family:var(--fh);font-size:13px;min-width:280px;cursor:pointer}
+.btn{background:none;border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:8px 16px;font-family:var(--fh);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
+.btn:hover{border-color:var(--plat);color:var(--plat)}
+.btn-gold{background:var(--plat);border-color:var(--plat);color:var(--ink);font-weight:600}
+.btn-gold:hover{background:#d9bd87;color:var(--ink)}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:22px 30px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.card-head{background:#13233a;border-bottom:1px solid var(--border);padding:11px 16px;display:flex;align-items:center;gap:9px}
+.card-head .tag{font-family:var(--fm);font-size:9px;letter-spacing:1px;color:var(--ink);background:var(--plat);padding:2px 7px;border-radius:4px;font-weight:500}
+.card-head h3{font-size:13.5px;font-weight:600;color:var(--text)}
+.card-body{padding:14px 16px;max-height:520px;overflow:auto}
+
+.kv{font-family:var(--fm);font-size:11.5px;white-space:pre;color:var(--sub);line-height:1.7}
+.kv .k{color:var(--plat)}
+.kv .s{color:var(--teal)}
+.kv .n{color:var(--amber)}
+
+table.je{width:100%;border-collapse:collapse;font-size:12px}
+table.je th{font-family:var(--fm);font-size:9px;letter-spacing:.6px;text-transform:uppercase;color:var(--sub);text-align:right;padding:7px 9px;border-bottom:1px solid var(--border2);position:sticky;top:0;background:var(--surface)}
+table.je th.l{text-align:left}
+table.je td{padding:7px 9px;border-bottom:1px solid rgba(44,74,110,.4);text-align:right;font-family:var(--fm)}
+table.je td.l{text-align:left;font-family:var(--fh)}
+table.je td.dim{color:var(--dim)}
+table.je .grp td{background:rgba(200,169,110,.08);color:var(--plat);font-size:9px;letter-spacing:1px;text-transform:uppercase;font-family:var(--fm)}
+.dr{color:var(--teal)}
+.cr{color:var(--purple)}
+.bal{margin:14px 30px 0;padding:12px 18px;border-radius:8px;font-family:var(--fm);font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.bal.ok{background:rgba(59,200,113,.1);border:1px solid rgba(59,200,113,.3);color:var(--green)}
+.bal.bad{background:rgba(224,85,85,.1);border:1px solid rgba(224,85,85,.3);color:var(--red)}
+.note{margin:18px 30px 0;padding:12px 16px;background:rgba(200,169,110,.07);border:1px solid rgba(200,169,110,.25);border-radius:8px;font-size:12.5px;color:#d8c9a8;line-height:1.6}
+.note b{color:var(--plat)}
+.foot{padding:24px 30px 0;font-size:11px;color:var(--dim);font-family:var(--fm);letter-spacing:.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <div class="hdr-eyebrow">ideaLAB · Cost-to-Journal Engine</div>
+    <h1>Một engine, mọi quy trình</h1>
+    <div class="hdr-sub">Lõi deterministic đọc config → sinh bút toán cân Nợ/Có → xuất kế toán. Đổi quy trình = đổi config, không sửa code. Chọn case bên dưới để thấy cùng một engine chạy hai nghiệp vụ khác hẳn nhau.</div>
+    <div class="flow-strip">
+      <span class="fs-node det">read</span><span class="fs-arrow">→</span>
+      <span class="fs-node det">allocate</span><span class="fs-arrow">→</span>
+      <span class="fs-node det">map</span><span class="fs-arrow">→</span>
+      <span class="fs-node det">balance</span><span class="fs-arrow">→</span>
+      <span class="fs-node det">export</span>
+    </div>
+  </div>
+
+  <div class="bar">
+    <label>Config (quy trình)</label>
+    <select class="sel" id="cfgSel" onchange="run()"></select>
+    <button class="btn" onclick="toggleRaw()">⛭ Xem config JSON</button>
+    <button class="btn btn-gold" onclick="exportXlsx()">⬇ Export Journal → Excel</button>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-head"><span class="tag">INPUT</span><h3 id="srcTitle">Bản ghi đầu vào</h3></div>
+      <div class="card-body"><table class="je" id="srcTbl"></table></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="tag">RULE</span><h3>Config đang áp dụng</h3></div>
+      <div class="card-body"><div class="kv" id="ruleView"></div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin:0 30px">
+    <div class="card-head"><span class="tag">OUTPUT</span><h3>Journal Entry — sinh tự động từ engine</h3></div>
+    <div class="card-body"><table class="je" id="jeTbl"></table></div>
+  </div>
+
+  <div class="bal" id="balBox"></div>
+  <div class="note" id="noteBox"></div>
+  <div class="foot" id="footBox"></div>
+</div>
+
+<script>
+/* ============================================================
+   LÕI ENGINE — DETERMINISTIC, BẤT BIẾN
+   Không chứa mã tài khoản, tên kênh, hay tỷ lệ nào.
+   Chỉ hiểu 5 động từ: read → allocate → map → balance → export
+   ============================================================ */
+const Engine=(()=>{
+  const round=n=>Math.round(n);
+
+  // ---- ALLOCATE: 4 pattern, không hơn ----
+  function allocate(record,rule){
+    const amt=record[rule.amount_field]||0;
+    if(rule.pattern==='direct_map'){
+      return [{dim:record[rule.dimension_key]||'—',amount:amt}];
+    }
+    if(rule.pattern==='fixed_pct'){
+      const w=rule.weights||{};
+      const keys=Object.keys(w).filter(k=>w[k]>0);
+      let parts=keys.map(k=>({dim:k,amount:amt*w[k]/100}));
+      return largestRemainder(parts,amt,rule.rounding);
+    }
+    if(rule.pattern==='manual_table'){
+      // bảng trọng số nằm trong record[table_field]: [{dim, weight}]
+      const tbl=record[rule.table_field]||[];
+      const tot=tbl.reduce((s,r)=>s+(r[rule.weight_field]||0),0)||1;
+      let parts=tbl.map(r=>({dim:r[rule.dimension_key],amount:amt*(r[rule.weight_field]||0)/tot}));
+      return largestRemainder(parts,amt,rule.rounding);
+    }
+    if(rule.pattern==='driver_weighted'){
+      const arr=record[rule.split_over]||[];
+      const tot=arr.reduce((s,r)=>s+(r[rule.weight_by]||0),0)||1;
+      let parts=arr.map(r=>({dim:r[rule.dimension_key],amount:amt*(r[rule.weight_by]||0)/tot}));
+      return largestRemainder(parts,amt,rule.rounding);
+    }
+    return [];
+  }
+  // chia tiền lẻ về phần lớn nhất → Σ phần = amount tuyệt đối
+  function largestRemainder(parts,total,mode){
+    if(!parts.length)return parts;
+    let r=parts.map(p=>({...p,amount:round(p.amount)}));
+    let diff=round(total)-r.reduce((s,p)=>s+p.amount,0);
+    if(diff!==0&&(mode==='largest_remainder'||!mode)){
+      let i=r.reduce((mx,p,idx,a)=>p.amount>a[mx].amount?idx:mx,0);
+      r[i].amount+=diff;
+    }
+    return r;
+  }
+
+  // ---- DERIVED FIELDS ----
+  function applyDerived(rec,cfg){
+    (cfg.derived_fields||[]).forEach(d=>{
+      if(d.when && !safeCond(d.when,rec))return;
+      rec[d.key]=evalFormula(d.formula,rec);
+    });
+    return rec;
+  }
+  // formula chỉ + - * / và field — cố tình giới hạn
+  function evalFormula(f,rec){
+    const expr=f.replace(/[a-zA-Z_][a-zA-Z0-9_]*/g,m=>{
+      return (rec[m]!==undefined)?rec[m]:m;
+    });
+    if(!/^[\d\s+\-*/.()]+$/.test(expr))return 0;
+    try{return Function('"use strict";return('+expr+')')();}catch(e){return 0;}
+  }
+  function safeCond(c,rec){
+    const expr=c.replace(/record\.([a-zA-Z0-9_]+)/g,(_,k)=>JSON.stringify(rec[k]));
+    if(!/^[\s\w."'=!<>true|false&]+$/.test(expr.replace(/===|==|!=|<=|>=|&&|\|\|/g,' ')))return false;
+    try{return Function('"use strict";return('+expr.replace(/(?<![=!<>])=(?![=])/g,'==')+')')();}catch(e){return false;}
+  }
+
+  // ---- MAP + BALANCE: sinh bút toán ----
+  function buildJournal(records,cfg){
+    const lines=[]; // {mapId,label,dim,debit,credit,amount}
+    records.forEach(rec0=>{
+      const rec=applyDerived({...rec0},cfg);
+      cfg.account_mapping.forEach(m=>{
+        if(m.condition && !safeCond(m.condition,rec))return;
+        if(m.amount==='allocated'){
+          // chia field cấu phần (m.component, mặc định = rule.amount_field) theo allocation_rule
+          const ruleForComp={...cfg.allocation_rule, amount_field:(m.component||cfg.allocation_rule.amount_field)};
+          const alloc=allocate(rec,ruleForComp);
+          alloc.forEach(a=>{
+            if(Math.abs(a.amount)<0.5)return;
+            lines.push({mapId:m.id,label:m.label,dim:m.carry_dimension?a.dim:'—',
+              debit:m.debit,credit:m.credit,amount:a.amount});
+          });
+        }else{
+          const v=rec[m.amount]||0; if(Math.abs(v)<0.5)return;
+          lines.push({mapId:m.id,label:m.label,dim:'—',debit:m.debit,credit:m.credit,amount:v});
+        }
+      });
+    });
+    // balance check
+    const drTot=lines.reduce((s,l)=>s+l.amount,0);
+    const crTot=drTot; // mỗi line là cặp Dr=Cr cân nhau theo thiết kế
+    return {lines,drTot,crTot,balanced:Math.abs(drTot-crTot)<1};
+  }
+
+  return {allocate,buildJournal,applyDerived};
+})();
+
+/* ============================================================
+   CONFIG — phần RIÊNG của khách. Lõi không biết những giá trị này.
+   2 case NutriNest: F6 (driver_weighted) + Lương (fixed_pct)
+   ============================================================ */
+const CONFIGS={
+  "NutriNest · F6 — Phí giao hàng (driver_weighted)":{
+    meta:{client:"NutriNest",process_code:"F6",process_name:"Phí giao hàng",currency:"VND"},
+    source_schema:{record_label:"Chuyến giao hàng",fields:[
+      {key:"vendor",label:"Nhà cung cấp"},{key:"trip_date",label:"Ngày giao"},
+      {key:"amount",label:"Phí (chưa VAT)"},{key:"has_vat",label:"Có VAT"},
+      {key:"drops",label:"Điểm giao (NPP)"}
+    ]},
+    allocation_rule:{pattern:"driver_weighted",split_over:"drops",weight_by:"revenue",
+      amount_field:"amount",dimension_key:"npp",rounding:"largest_remainder"},
+    derived_fields:[{key:"vat",formula:"amount * 0.08",when:"record.has_vat === true"}],
+    account_mapping:[
+      {id:"ship_cost",label:"Phí giao hàng",amount:"allocated",debit:"641701",credit:"331",carry_dimension:true},
+      {id:"ship_vat",label:"VAT đầu vào",amount:"vat",debit:"1331",credit:"331",condition:"record.has_vat === true"}
+    ],
+    approval_chain:[{step:1,role:"Logistics Manager",action:"review"},{step:2,role:"Kế toán",action:"post"}],
+    export_format:{target:"MISA",layout:"two_block",file_type:"xlsx"},
+    records:[
+      {vendor:"NCC Giao Nhanh",trip_date:"2026-02-03",amount:4500000,has_vat:true,
+        drops:[{npp:"NPP Cần Thơ",revenue:120000000},{npp:"NPP An Giang",revenue:80000000},{npp:"NPP Kiên Giang",revenue:40000000}]},
+      {vendor:"NCC Miền Tây",trip_date:"2026-02-07",amount:2800000,has_vat:true,
+        drops:[{npp:"NPP Tiền Giang",revenue:60000000},{npp:"NPP Vĩnh Long",revenue:30000000}]},
+      {vendor:"NCC Giao Nhanh",trip_date:"2026-02-12",amount:1900000,has_vat:false,
+        drops:[{npp:"NPP Cần Thơ",revenue:90000000},{npp:"NPP Sóc Trăng",revenue:30000000}]}
+    ]
+  },
+  "NutriNest · F1 — Lương kênh GT (manual_table · dữ liệu thật T2/2026)":{
+    meta:{client:"NutriNest",process_code:"F1",process_name:"Lương kênh GT",currency:"VND"},
+    source_schema:{record_label:"Nhân sự GT",fields:[
+      {key:"code",label:"Mã NV"},{key:"name",label:"Họ tên"},{key:"position",label:"Chức vụ"},
+      {key:"luong",label:"Lương"},{key:"bhxh_cty",label:"BHXH 17.5%"},{key:"bhyt_cty",label:"BHYT 3%"},
+      {key:"bhtn_cty",label:"BHTN 1%"},{key:"kpcd",label:"KPCĐ 2%"},{key:"phanbo",label:"Bảng phân bổ NPP (số lần)"}
+    ]},
+    allocation_rule:{pattern:"manual_table",table_field:"phanbo",weight_field:"so_lan",
+      dimension_key:"npp",amount_field:"luong",rounding:"largest_remainder"},
+    derived_fields:[],
+    account_mapping:[
+      {id:"luong",   label:"Lương nhân viên",  amount:"allocated",component:"luong",   debit:"641101",credit:"334101",carry_dimension:true},
+      {id:"bhxh",    label:"BHXH (Cty 17.5%)",  amount:"allocated",component:"bhxh_cty",debit:"641101",credit:"338301",carry_dimension:true},
+      {id:"bhyt",    label:"BHYT (Cty 3%)",     amount:"allocated",component:"bhyt_cty",debit:"641101",credit:"338401",carry_dimension:true},
+      {id:"bhtn",    label:"BHTN (Cty 1%)",     amount:"allocated",component:"bhtn_cty",debit:"641101",credit:"338601",carry_dimension:true},
+      {id:"kpcd",    label:"KPCĐ (Cty 2%)",     amount:"allocated",component:"kpcd",    debit:"641101",credit:"338201",carry_dimension:true}
+    ],
+    approval_chain:[{step:1,role:"HR",action:"review"},{step:2,role:"Kế toán",action:"post"}],
+    export_format:{target:"MISA",layout:"two_block",file_type:"xlsx",dimension_label:"NPP / Customer",cost_center:"D06"},
+    records:[
+      {code:"NN-002",name:"Võ Hùng Tiềm",position:"ASM_GT",luong:20158161,bhxh_cty:1402450,bhyt_cty:240420,bhtn_cty:80140,kpcd:160280,
+        phanbo:[{npp:"NPP Lager Bình",so_lan:2},{npp:"NPP Phú Mỹ",so_lan:2},{npp:"NPP Ngọc Anh",so_lan:1}]},
+      {code:"NN-007",name:"Phan Thanh Phiên",position:"ASM_GT",luong:13495384,bhxh_cty:1858500,bhyt_cty:318600,bhtn_cty:106200,kpcd:212400,
+        phanbo:[{npp:"NPP Trần Oanh",so_lan:6},{npp:"NPP Quang Khải",so_lan:4},{npp:"NPP Thiên Phương",so_lan:3}]},
+      {code:"NN-027",name:"Nguyễn Thị Thủy",position:"ASM_GT",luong:11555846,bhxh_cty:948500,bhyt_cty:162600,bhtn_cty:54200,kpcd:108400,
+        phanbo:[{npp:"NPP Phú An",so_lan:5},{npp:"NPP Vân Trang",so_lan:4}]}
+    ]
+  },
+  "NutriNest · F1b — Lương kênh GT (fixed_pct, đối chứng)":{
+    meta:{client:"NutriNest",process_code:"F1b",process_name:"Lương GT (đối chứng % cố định)",currency:"VND"},
+    source_schema:{record_label:"Nhân sự",fields:[
+      {key:"name",label:"Nhân sự"},{key:"company_cost",label:"Chi phí công ty"}
+    ]},
+    allocation_rule:{pattern:"fixed_pct",amount_field:"company_cost",dimension_key:"channel",
+      weights:{"NPP miền Tây":60,"NPP miền Đông":40},rounding:"largest_remainder"},
+    derived_fields:[],
+    account_mapping:[
+      {id:"gt_salary",label:"Lương kênh GT",amount:"allocated",debit:"641101",credit:"334",carry_dimension:true}
+    ],
+    approval_chain:[{step:1,role:"HR",action:"review"},{step:2,role:"Kế toán",action:"post"}],
+    export_format:{target:"MISA",layout:"two_block",file_type:"xlsx"},
+    records:[
+      {name:"NV GT 01",company_cost:18000000},{name:"NV GT 02",company_cost:15500000},
+      {name:"NV GT 03",company_cost:22000000},{name:"GT Manager",company_cost:41000000}
+    ]
+  }
+};
+
+let RAW=false;
+function fmt(n){return n.toLocaleString('vi-VN');}
+function curCfg(){return CONFIGS[document.getElementById('cfgSel').value];}
+
+function initSel(){
+  const s=document.getElementById('cfgSel');
+  Object.keys(CONFIGS).forEach(k=>{const o=document.createElement('option');o.textContent=k;s.appendChild(o);});
+}
+
+function run(){
+  const cfg=curCfg();
+  renderSource(cfg);
+  renderRule(cfg);
+  const J=Engine.buildJournal(cfg.records,cfg);
+  renderJE(J,cfg);
+  renderBal(J);
+  renderNote(cfg,J);
+  document.getElementById('footBox').textContent=
+    `${cfg.meta.client} · ${cfg.meta.process_code} ${cfg.meta.process_name} · ${cfg.records.length} bản ghi · pattern: ${cfg.allocation_rule.pattern} · engine không đổi giữa 2 case`;
+}
+
+function renderSource(cfg){
+  document.getElementById('srcTitle').textContent=cfg.source_schema.record_label+' ('+cfg.records.length+')';
+  const t=document.getElementById('srcTbl');
+  const r0=cfg.records[0];
+  const cols=Object.keys(r0).filter(k=>typeof r0[k]!=='object'||Array.isArray(r0[k]));
+  let h='<thead><tr>'+cols.map((c,i)=>`<th class="${i===0?'l':''}">${c}</th>`).join('')+'</tr></thead><tbody>';
+  cfg.records.forEach(rec=>{
+    h+='<tr>'+cols.map((c,i)=>{
+      let v=rec[c];
+      if(Array.isArray(v))v=v.map(x=>x.npp||x.dim||JSON.stringify(x)).join(', ');
+      else if(typeof v==='number')v=fmt(v);
+      else if(typeof v==='boolean')v=v?'✓':'—';
+      return `<td class="${i===0?'l':''}">${v}</td>`;
+    }).join('')+'</tr>';
+  });
+  t.innerHTML=h+'</tbody>';
+}
+
+function renderRule(cfg){
+  const el=document.getElementById('ruleView');
+  if(RAW){el.textContent=JSON.stringify(cfg,(k,v)=>k==='records'?`[${v.length} bản ghi — ẩn]`:v,2);return;}
+  const r=cfg.allocation_rule;
+  let s='';
+  s+=`<span class="k">pattern</span>     : <span class="s">${r.pattern}</span>\n`;
+  s+=`<span class="k">amount_field</span>: ${r.amount_field}\n`;
+  if(r.split_over)s+=`<span class="k">split_over</span>  : ${r.split_over}\n`;
+  if(r.table_field)s+=`<span class="k">table_field</span> : ${r.table_field}\n`;
+  if(r.weight_by)s+=`<span class="k">weight_by</span>   : ${r.weight_by}\n`;
+  if(r.weight_field)s+=`<span class="k">weight_field</span>: ${r.weight_field}\n`;
+  if(r.weights)s+=`<span class="k">weights</span>     : ${JSON.stringify(r.weights)}\n`;
+  s+=`<span class="k">dimension</span>   : ${r.dimension_key}\n`;
+  s+=`\n<span class="k">account_mapping</span>:\n`;
+  cfg.account_mapping.forEach(m=>{
+    s+=`  • ${m.label}\n    Dr <span class="n">${m.debit}</span> / Cr <span class="n">${m.credit}</span>`;
+    s+=m.condition?`  [if ${m.condition.replace('record.','')}]`:'';
+    s+='\n';
+  });
+  if(cfg.derived_fields.length){
+    s+=`\n<span class="k">derived</span>:\n`;
+    cfg.derived_fields.forEach(d=>s+=`  ${d.key} = ${d.formula}\n`);
+  }
+  el.innerHTML=s;
+}
+
+function renderJE(J,cfg){
+  const t=document.getElementById('jeTbl');
+  let h='<thead><tr><th class="l">Bút toán</th><th class="l">Đối tượng</th><th>Nợ</th><th>Có</th><th>Số tiền</th></tr></thead><tbody>';
+  // group by mapId
+  const groups={};
+  J.lines.forEach(l=>{(groups[l.mapId]=groups[l.mapId]||[]).push(l);});
+  Object.keys(groups).forEach(gid=>{
+    const g=groups[gid];
+    const sub=g.reduce((s,l)=>s+l.amount,0);
+    h+=`<tr class="grp"><td class="l" colspan="4">${g[0].label}</td><td>${fmt(round(sub))}</td></tr>`;
+    g.forEach(l=>{
+      h+=`<tr><td class="l dim">${l.label}</td><td class="l">${l.dim}</td>`+
+         `<td class="dr">${l.debit}</td><td class="cr">${l.credit}</td>`+
+         `<td>${fmt(round(l.amount))}</td></tr>`;
+    });
+  });
+  h+=`<tr class="grp"><td class="l" colspan="4">TỔNG PHÁT SINH</td><td>${fmt(round(J.drTot))}</td></tr>`;
+  t.innerHTML=h+'</tbody>';
+}
+function round(n){return Math.round(n);}
+
+function renderBal(J){
+  const b=document.getElementById('balBox');
+  if(J.balanced){
+    b.className='bal ok';
+    b.innerHTML=`<span>✓ Cân Nợ/Có</span><span>ΣNợ = ΣCó = ${fmt(round(J.drTot))} đ</span>`;
+  }else{
+    b.className='bal bad';
+    b.innerHTML=`<span>✗ Lệch</span><span>ΣNợ ${fmt(round(J.drTot))} ≠ ΣCó ${fmt(round(J.crTot))}</span>`;
+  }
+}
+
+function renderNote(cfg,J){
+  const n=document.getElementById('noteBox');
+  const p=cfg.allocation_rule.pattern;
+  const msg={
+    driver_weighted:`Engine chia phí mỗi chuyến cho các NPP <b>theo tỷ trọng doanh số</b> — tiền lẻ dồn về NPP lớn nhất nên tổng khớp tuyệt đối. VAT chỉ sinh bút toán khi <b>has_vat = true</b> (xem chuyến thứ 3 không có dòng VAT).`,
+    manual_table:`<b>Dữ liệu thật T2/2026.</b> Engine rải lương + 4 cấu phần bảo hiểm của mỗi nhân viên xuống từng NPP <b>theo "số lần phân bổ"</b> trong sheet Phân bổ NPP — đúng cơ chế hiện tại của NutriNest. Mỗi nhân viên × mỗi NPP × mỗi cấu phần = một dòng bút toán, map vào GL 641101 đối ứng 334101/338xxx. Đây là pattern chủ lực của các quy trình lương.`,
+    fixed_pct:`Cùng engine, nhưng giờ chia lương <b>theo % cố định</b> giữa hai vùng NPP — không một dòng code nào thay đổi so với case manual_table, chỉ đổi config. Đây chính là cơ chế <code>alloc{}</code> trong Staff Cost Simulator.`
+  }[p]||'';
+  n.innerHTML=`<b>${cfg.meta.process_code} · ${p}:</b> ${msg}`;
+}
+
+function toggleRaw(){RAW=!RAW;renderRule(curCfg());}
+
+function exportXlsx(){
+  if(typeof XLSX==='undefined'){alert('Thư viện Excel chưa load.');return;}
+  const cfg=curCfg();const J=Engine.buildJournal(cfg.records,cfg);
+  const data=[[`${cfg.meta.client} — ${cfg.meta.process_name} — JOURNAL ENTRY`],
+    [`Pattern: ${cfg.allocation_rule.pattern} · ${cfg.records.length} bản ghi`],[],
+    ['Bút toán','Đối tượng','Nợ','Có','Số tiền']];
+  J.lines.forEach(l=>data.push([l.label,l.dim,l.debit,l.credit,round(l.amount)]));
+  data.push(['TỔNG','','','',round(J.drTot)]);
+  data.push([],[`Cân Nợ/Có: ${J.balanced?'BALANCED ✓':'LỆCH'}`]);
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=[{wch:26},{wch:20},{wch:9},{wch:9},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,ws,'Journal Entry');
+  XLSX.writeFile(wb,`JE_${cfg.meta.client}_${cfg.meta.process_code}.xlsx`);
+}
+
+initSel();run();
+</script>
+</body>
+</html>
