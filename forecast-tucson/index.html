@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tucson 2026 — Mô Hình Dự Báo Phân Khúc C-SUV</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root{
+  --ink:#0D1B2A; --navy:#1A2E4A; --steel:#2C4A6E; --platinum:#C8A96E;
+  --platinum-dim:#9a8254; --text:#E8EDF4; --text-dim:#8FA3BC;
+  --green:#3ECf8E; --red:#E5614F; --blue:#4A90D9; --line:rgba(200,169,110,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(44,74,110,.35), transparent 55%),
+    radial-gradient(ellipse at 100% 100%, rgba(200,169,110,.07), transparent 50%),
+    var(--ink);
+  color:var(--text); font-family:'Outfit',sans-serif; min-height:100vh;
+  padding:32px 24px 80px; line-height:1.5;
+}
+.wrap{max-width:1240px;margin:0 auto}
+header{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:28px}
+.eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--platinum);margin-bottom:10px}
+h1{font-family:'DM Serif Display',serif;font-size:38px;font-weight:400;letter-spacing:-.01em;line-height:1.08}
+h1 em{font-style:italic;color:var(--platinum)}
+.sub{color:var(--text-dim);font-size:14px;margin-top:10px;max-width:680px}
+
+.grid{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start}
+@media(max-width:920px){.grid{grid-template-columns:1fr}}
+
+.panel{background:linear-gradient(160deg,rgba(26,46,74,.55),rgba(13,27,42,.35));border:1px solid var(--line);border-radius:14px;padding:22px}
+.panel h2{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--platinum);margin-bottom:18px;font-weight:500}
+
+.ctrl{margin-bottom:20px}
+.ctrl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.ctrl-label{font-size:13px;color:var(--text)}
+.ctrl-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--platinum);font-weight:500}
+.ctrl-note{font-size:11px;color:var(--text-dim);margin-top:4px;line-height:1.35}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--steel);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--platinum);cursor:pointer;border:2px solid var(--ink);box-shadow:0 0 0 1px var(--platinum)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--platinum);cursor:pointer;border:2px solid var(--ink)}
+
+.divider{height:1px;background:var(--line);margin:22px 0}
+.scenario-row{display:flex;gap:8px;margin-bottom:18px}
+.sc-btn{flex:1;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.05em;padding:9px 6px;background:transparent;border:1px solid var(--line);border-radius:8px;color:var(--text-dim);cursor:pointer;transition:.2s;text-transform:uppercase}
+.sc-btn:hover{border-color:var(--platinum-dim);color:var(--text)}
+.sc-btn.active{background:var(--platinum);color:var(--ink);border-color:var(--platinum);font-weight:500}
+
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.kpi{background:linear-gradient(160deg,rgba(26,46,74,.5),rgba(13,27,42,.3));border:1px solid var(--line);border-radius:12px;padding:18px}
+.kpi-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px}
+.kpi-val{font-family:'DM Serif Display',serif;font-size:30px;color:var(--text);line-height:1}
+.kpi-val .unit{font-family:'Outfit';font-size:13px;color:var(--text-dim);margin-left:4px}
+.kpi-delta{font-family:'DM Mono',monospace;font-size:11px;margin-top:7px}
+.up{color:var(--green)}.down{color:var(--red)}
+
+.chart-card{background:linear-gradient(160deg,rgba(26,46,74,.5),rgba(13,27,42,.3));border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:22px}
+.chart-card h3{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--platinum);margin-bottom:4px;font-weight:500}
+.chart-card .ch-sub{font-size:12px;color:var(--text-dim);margin-bottom:18px}
+.chart-box{position:relative;height:300px}
+.chart-box.tall{height:340px}
+
+.note{background:rgba(200,169,110,.07);border-left:2px solid var(--platinum);border-radius:0 8px 8px 0;padding:14px 16px;font-size:13px;color:var(--text-dim);line-height:1.55;margin-top:18px}
+.note b{color:var(--text);font-weight:600}
+.footer-note{margin-top:28px;font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;line-height:1.6;border-top:1px solid var(--line);padding-top:18px}
+
+/* methodology panel */
+.method{margin-top:28px;background:linear-gradient(160deg,rgba(26,46,74,.45),rgba(13,27,42,.3));border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.method-head{padding:18px 22px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.method-head h3{font-family:'DM Serif Display',serif;font-size:20px;font-weight:400;color:var(--text)}
+.method-head .chev{font-family:'DM Mono';color:var(--platinum);font-size:13px;transition:.3s}
+.method.open .chev{transform:rotate(180deg)}
+.method-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.method.open .method-body{max-height:4000px}
+.method-inner{padding:0 22px 26px}
+.eq{background:rgba(13,27,42,.5);border:1px solid var(--line);border-radius:10px;padding:16px 18px;font-family:'DM Mono',monospace;font-size:13px;color:var(--text);margin:14px 0;line-height:1.7}
+.eq .op{color:var(--platinum)}
+.eq .cm{color:var(--text-dim);font-size:11px}
+.method h4{font-family:'DM Mono';font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--platinum);margin:24px 0 10px;font-weight:500}
+.mtable{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}
+.mtable th{text-align:left;font-family:'DM Mono';font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);padding:8px 10px;border-bottom:1px solid var(--line);font-weight:500}
+.mtable td{padding:9px 10px;border-bottom:1px solid rgba(200,169,110,.08);color:var(--text);vertical-align:top}
+.mtable td.w{font-family:'DM Mono';color:var(--platinum);white-space:nowrap}
+.mtable .ctrl-y{color:var(--green)}.mtable .ctrl-n{color:var(--red)}.mtable .ctrl-p{color:var(--blue)}
+.mp{font-size:13px;color:var(--text-dim);line-height:1.6;margin:10px 0}
+.mp b{color:var(--text)}
+.warn-box{background:rgba(229,97,79,.08);border-left:2px solid var(--red);border-radius:0 8px 8px 0;padding:14px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.55;margin-top:18px}
+.warn-box b{color:#F0A99C}
+.data-list{list-style:none;margin:10px 0}
+.data-list li{padding:9px 0 9px 26px;position:relative;font-size:12.5px;color:var(--text-dim);line-height:1.5;border-bottom:1px solid rgba(200,169,110,.06)}
+.data-list li:before{content:'';position:absolute;left:6px;top:14px;width:6px;height:6px;border-radius:50%}
+.data-list li.have:before{background:var(--green)}
+.data-list li.gap:before{background:var(--red)}
+.data-list li b{color:var(--text)}
+.data-list li .lbl{font-family:'DM Mono';font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:1px 7px;border-radius:4px;margin-left:6px}
+.lbl-have{background:rgba(62,207,142,.13);color:var(--green)}
+.lbl-gap{background:rgba(229,97,79,.13);color:#F0A99C}
+.tag{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:5px;margin-right:6px}
+.tag-ev{background:rgba(62,207,142,.13);color:var(--green)}
+.tag-price{background:rgba(74,144,217,.13);color:var(--blue)}
+.tag-own{background:rgba(200,169,110,.13);color:var(--platinum)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">HTV · Forecasting Lab · Horizon 12 tháng</div>
+  <h1>Mô hình dự báo <em>Tucson 2026</em></h1>
+  <div class="sub">Bottom-up theo phân khúc C-SUV. Sản lượng Tucson = Dung lượng phân khúc × Thị phần, với thị phần chịu ba lực: cạnh tranh giá (xăng), dịch chuyển EV (VF 7), và đòn bẩy nội tại HTV. Chỉnh các biến để xem dự báo thay đổi.</div>
+</header>
+
+<div class="grid">
+  <!-- CONTROL PANEL -->
+  <div class="panel">
+    <h2>Bảng điều khiển kịch bản</h2>
+    <div class="scenario-row">
+      <button class="sc-btn active" data-sc="base">Cơ sở</button>
+      <button class="sc-btn" data-sc="ev">EV tăng tốc</button>
+      <button class="sc-btn" data-sc="fight">HTV phản công</button>
+    </div>
+
+    <div class="ctrl">
+      <div class="ctrl-head"><span class="ctrl-label"><span class="tag tag-ev">EV</span> Tốc độ dịch chuyển sang EV</span><span class="ctrl-val" id="v-ev">+18%</span></div>
+      <input type="range" id="ev" min="0" max="60" value="18">
+      <div class="ctrl-note">% khách C-SUV chuyển ưu tiên cân nhắc EV (VF 7) trong năm. Lực mạnh nhất bào mòn xe xăng — Tucson không kiểm soát.</div>
+    </div>
+
+    <div class="ctrl">
+      <div class="ctrl-head"><span class="ctrl-label"><span class="tag tag-price">Giá</span> Chênh giá lăn bánh vs CX-5</span><span class="ctrl-val" id="v-px">+20 tr</span></div>
+      <input type="range" id="px" min="-60" max="80" value="20">
+      <div class="ctrl-note">Tucson đắt hơn CX-5 (số dương) → mất khách. CX-5 đang xả còn ~709tr bản đáy, áp lực giá thực.</div>
+    </div>
+
+    <div class="ctrl">
+      <div class="ctrl-head"><span class="ctrl-label"><span class="tag tag-own">HTV</span> Ưu đãi Tucson (triệu/xe)</span><span class="ctrl-val" id="v-pro">58 tr</span></div>
+      <input type="range" id="pro" min="0" max="120" value="58">
+      <div class="ctrl-note">Đòn bẩy HTV kiểm soát. Hiện ~58tr. Mỗi +20tr kéo lại một phần thị phần nhưng ăn vào biên.</div>
+    </div>
+
+    <div class="ctrl">
+      <div class="ctrl-head"><span class="ctrl-label"><span class="tag tag-own">HTV</span> Vị trí chu kỳ đời xe</span><span class="ctrl-val" id="v-life">Giữa đời</span></div>
+      <input type="range" id="life" min="0" max="2" value="1" step="1">
+      <div class="ctrl-note">Đầu đời (facelift mới) → cầu vọt. Cuối đời → cầu rơi. Tucson hiện giữa đời.</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="ctrl">
+      <div class="ctrl-head"><span class="ctrl-label">Tăng trưởng dung lượng phân khúc</span><span class="ctrl-val" id="v-seg">+8%</span></div>
+      <input type="range" id="seg" min="-15" max="30" value="8">
+      <div class="ctrl-note">Phân khúc C-SUV nở/co cả năm. Q1/2026 đang hồi phục theo xu hướng chung.</div>
+    </div>
+
+    <div class="ctrl">
+      <div class="ctrl-head"><span class="ctrl-label">Lãi suất vay mua xe</span><span class="ctrl-val" id="v-rate">Trung bình</span></div>
+      <input type="range" id="rate" min="0" max="2" value="1" step="1">
+      <div class="ctrl-note">Tucson đa số mua trả góp → nhạy lãi suất. Cao → cầu chững toàn phân khúc.</div>
+    </div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div>
+    <div class="kpis">
+      <div class="kpi">
+        <div class="kpi-label">Sản lượng Tucson 2026F</div>
+        <div class="kpi-val" id="k-total">—<span class="unit">xe</span></div>
+        <div class="kpi-delta" id="k-total-d"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Thị phần TB trong phân khúc</div>
+        <div class="kpi-val" id="k-share">—<span class="unit">%</span></div>
+        <div class="kpi-delta" id="k-share-d"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Hạng dự kiến / phân khúc</div>
+        <div class="kpi-val" id="k-rank">—</div>
+        <div class="kpi-delta" id="k-rank-d"></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Dự báo sản lượng Tucson theo tháng</h3>
+      <div class="ch-sub">Đường nền + dải kịch bản. Mùa vụ: trũng Tết (T1–T2, tháng Ngâu T8), dồn cầu cuối năm.</div>
+      <div class="chart-box tall"><canvas id="chMonth"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Tucson vs đối thủ phân khúc — sản lượng năm 2026F</h3>
+      <div class="ch-sub">Bối cảnh cạnh tranh. VF 7 là biến cấu trúc, không phải cặp so giá thường.</div>
+      <div class="chart-box"><canvas id="chCompete"></canvas></div>
+    </div>
+
+    <div class="note" id="insight"></div>
+  </div>
+</div>
+
+<div class="method" id="method">
+  <div class="method-head" onclick="document.getElementById('method').classList.toggle('open')">
+    <h3>Phương pháp luận &amp; công thức</h3>
+    <span class="chev">▼ MỞ RỘNG</span>
+  </div>
+  <div class="method-body"><div class="method-inner">
+
+    <p class="mp">Triết lý: tách <b>dung lượng phân khúc</b> (Tucson không kiểm soát) khỏi <b>thị phần</b> (Tucson ảnh hưởng được một phần). Cam kết độ chính xác đặt vào lớp thị phần — không phải con số tổng.</p>
+
+    <h4>Phương trình tổng</h4>
+    <div class="eq">Sản lượng Tucson năm <span class="op">=</span> Dung lượng phân khúc <span class="op">×</span> Thị phần Tucson<br><span class="cm">→ rải 12 tháng theo hệ số mùa vụ</span></div>
+
+    <h4>Lớp 1 — Dung lượng phân khúc (xe/năm)</h4>
+    <div class="eq">Phân khúc <span class="op">=</span> 58.000 <span class="op">×</span> (1 + g) <span class="op">×</span> hệ_số_lãi_suất<br><span class="cm">g = tăng trưởng phân khúc · lãi suất: thấp ×1,05 | TB ×1,00 | cao ×0,93</span></div>
+
+    <h4>Lớp 2 — Thị phần Tucson (trái tim mô hình)</h4>
+    <p class="mp">Bắt đầu từ share nền <b>10,5%</b>, áp từng lực:</p>
+    <table class="mtable">
+      <thead><tr><th>Factor</th><th>Công thức</th><th>Trọng số</th><th>K.soát</th></tr></thead>
+      <tbody>
+        <tr><td><b>Lực EV (VF 7)</b></td><td>− max(0, EV%−15) × 0,0011</td><td class="w">0,11 đ%/1% EV</td><td class="ctrl-n">Không</td></tr>
+        <tr><td><b>Giá vs CX-5</b></td><td>− ΔGiá × 0,0004</td><td class="w">0,04 đ%/triệu</td><td class="ctrl-p">Một phần</td></tr>
+        <tr><td><b>Ưu đãi (tăng)</b></td><td>+ max(0, Ưu đãi−58) × 0,00035</td><td class="w">0,035 đ%/triệu</td><td class="ctrl-y">Có</td></tr>
+        <tr><td><b>Ưu đãi (cắt)</b></td><td>− max(0, 58−Ưu đãi) × 0,0005</td><td class="w">0,05 đ%/triệu</td><td class="ctrl-y">Có</td></tr>
+        <tr><td><b>Chu kỳ đời xe</b></td><td>+ (Life−1) × 0,022</td><td class="w">±2,2 đ%</td><td class="ctrl-y">Có</td></tr>
+      </tbody>
+    </table>
+    <p class="mp" style="font-size:12px">Share bị chặn trong [3%, 20%]. <b>Ba lựa chọn thiết kế có chủ đích:</b> (1) EV mạnh nhất — gấp ~2,75× lực giá, vì Tucson là mẫu xăng yếu nhất nhóm dẫn đầu nên hứng dịch chuyển EV nặng hơn trung bình; (2) cắt ưu đãi đau hơn bơm (0,0005 &gt; 0,00035) — hiệu ứng mất mát tâm lý; (3) ưu đãi chỉ tính phần trên mốc 58tr → hiệu suất biên giảm dần, đúng cảnh báo contribution margin.</p>
+
+    <h4>Lớp 3 — Rải theo tháng &amp; dải kịch bản</h4>
+    <div class="eq">SL tháng <span class="op">=</span> (Tucson năm ÷ 12) <span class="op">×</span> (mùa_vụ[t] ÷ mùa_vụ_TB)<br>Dải <span class="op">=</span> dự báo <span class="op">×</span> (1 ± [0,07 + t × 0,006])<br><span class="cm">Mùa vụ: trũng Tết T1–T2, tháng Ngâu T8, dồn cầu T11–T12. Sai số nới rộng về cuối năm.</span></div>
+
+    <div class="warn-box"><b>⚠ Các trọng số trên là giá trị DEMO minh họa cơ chế</b> — đúng về dấu và tương quan độ lớn (EV &gt; giá &gt; ưu đãi), nhưng con số tuyệt đối chưa fit từ data thật. Không dùng nguyên si để chốt PO. Phải hồi quy trên data nội bộ HTV rồi backtest đo MAPE.</div>
+
+    <h4>Data cần để calibrate trọng số</h4>
+    <ul class="data-list">
+      <li class="have"><b>Sản lượng Tucson theo tháng, ≥24–36 tháng</b> — biến phụ thuộc Y, lý tưởng tách theo phiên bản.<span class="lbl lbl-have">HTV có sẵn</span></li>
+      <li class="gap"><b>Giá lăn bánh thực sau ưu đãi của CX-5/Sportage theo tháng</b> — không phải niêm yết. Sales biết qua khách mặc cả nhưng chưa thành data.<span class="lbl lbl-gap">Khoảng trống</span></li>
+      <li class="gap"><b>Lost reason — khách bỏ Tucson chuyển sang đâu</b> — nuôi trực tiếp lực EV. Quyết định cả ngưỡng 15% lẫn hệ số 0,0011.<span class="lbl lbl-gap">Khoảng trống</span></li>
+      <li class="have"><b>Lịch sử ưu đãi Tucson theo tháng</b> — fit hệ số ưu đãi + kiểm chứng giả thiết "cắt đau hơn bơm".<span class="lbl lbl-have">HTV có sẵn</span></li>
+      <li class="have"><b>Tỷ lệ EV trong phân khúc theo tháng</b> — từ VAMA + công bố VinFast.<span class="lbl lbl-have">Có sẵn ngoài</span></li>
+      <li class="have"><b>Lịch ra mắt/facelift Tucson &amp; đối thủ</b> — fit chu kỳ đời xe.<span class="lbl lbl-have">Theo dõi được</span></li>
+      <li class="have"><b>Lãi suất vay mua xe TB theo tháng</b> — tác động toàn phân khúc.<span class="lbl lbl-have">Có sẵn ngoài</span></li>
+    </ul>
+
+    <div class="warn-box" style="border-color:var(--platinum);background:rgba(200,169,110,.07)"><b style="color:var(--platinum)">Lưu ý phương pháp:</b> 24 tháng data ≈ 24 quan sát cho 5–6 biến — mẫu nhỏ, khoảng tin cậy rộng. Mục tiêu fit là <b style="color:var(--text)">xác định đúng dấu &amp; bậc độ lớn</b> của từng lực, không phải con số 4 chữ số thập phân. Độ chính xác đến từ vòng lặp <b style="color:var(--text)">rolling cập nhật hàng tháng</b>, không từ một lần fit hoàn hảo đầu năm. Ưu tiên build cơ chế ghi <b style="color:var(--text)">giá thực đối thủ + lost reason</b> — hai biến vắng mặt nhưng nuôi đúng hai lực mạnh nhất.</div>
+
+  </div></div>
+</div>
+
+<div class="footer-note">
+  NGUỒN DỮ LIỆU NỀN · Q1/2026: Tucson 2.519 xe/quý · VF 7 lũy kế 4T ~4.662 · CX-5 ~5.820 · giá Tucson 769–989tr NY, ~877tr–1,12 tỷ lăn bánh, ưu đãi ~58tr.<br>
+  ⚠ MÔ HÌNH MINH HỌA CƠ CHẾ — hệ số co giãn là giả định để demo logic. Cần calibrate bằng data bán hàng nội bộ HTV ≥24 tháng + bảng theo dõi ưu đãi đối thủ hàng tháng trước khi dùng cho PO thực tế. Cập nhật rolling mỗi tháng.
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString('vi-VN');
+
+// baseline phân khúc & competitors (xe/năm, neo từ Q1/2026 annualized)
+const SEG_BASE=58000;            // dung lượng C-SUV/năm ~ baseline
+const TUCSON_BASE_SHARE=0.105;   // ~10.5% (Q1: 2519/~14500 phân khúc quý)
+const seasonality=[0.62,0.55,0.88,1.0,1.02,1.05,1.04,0.82,1.12,1.18,1.25,1.47]; // T1..T12, normalized ~ trung bình 1
+const compName=['Mazda CX-5','VinFast VF 7','Mitsubishi Destinator','Ford Territory','Hyundai Tucson','Kia Sportage'];
+const compBaseAnnual=[17000,15500,9500,8200,6100,3200]; // 2026F annualized baseline khi Tucson ở base
+
+const lifeLabels=['Cuối đời','Giữa đời','Đầu đời (mới)'];
+const rateLabels=['Thấp','Trung bình','Cao'];
+
+const scenarios={
+  base:{ev:18,px:20,pro:58,life:1,seg:8,rate:1},
+  ev:  {ev:42,px:25,pro:58,life:1,seg:12,rate:1},
+  fight:{ev:22,px:-15,pro:95,life:2,seg:10,rate:0}
+};
+
+function compute(){
+  const ev=+$('ev').value, px=+$('px').value, pro=+$('pro').value;
+  const life=+$('life').value, seg=+$('seg').value, rate=+$('rate').value;
+
+  // labels
+  $('v-ev').textContent='+'+ev+'%';
+  $('v-px').textContent=(px>=0?'+':'')+px+' tr';
+  $('v-pro').textContent=pro+' tr';
+  $('v-life').textContent=lifeLabels[life];
+  $('v-seg').textContent=(seg>=0?'+':'')+seg+'%';
+  $('v-rate').textContent=rateLabels[rate];
+
+  // --- share model: bắt đầu từ base share, áp các lực ---
+  let share=TUCSON_BASE_SHARE;
+  // Lực EV: mỗi % dịch chuyển EV trên ngưỡng 15% bào mòn share xăng; Tucson là xe xăng yếu nhất nhóm nên hứng nặng
+  share-= Math.max(0,(ev-15))*0.0011;
+  // Lực giá vs CX-5: đắt hơn -> mất; rẻ hơn -> được. ~0.04%/triệu
+  share-= px*0.0004;
+  // Đòn bẩy ưu đãi HTV: trên mốc 58tr mới tạo thêm lực kéo, giảm dần biên
+  share+= Math.max(0,(pro-58))*0.00035;
+  share-= Math.max(0,(58-pro))*0.0005; // cắt ưu đãi -> mất nhanh hơn
+  // Chu kỳ đời xe
+  share+= (life-1)*0.022;
+  // clamp
+  share=Math.max(0.03,Math.min(0.20,share));
+
+  // dung lượng phân khúc năm
+  let segTotal=SEG_BASE*(1+seg/100);
+  // lãi suất ảnh hưởng toàn phân khúc
+  segTotal*= (rate===2?0.93:rate===0?1.05:1.0);
+
+  const tucsonAnnual=segTotal*share;
+
+  // phân bổ theo tháng
+  const sAvg=seasonality.reduce((a,b)=>a+b)/12;
+  const monthly=seasonality.map(s=>tucsonAnnual*(s/sAvg)/12);
+  // dải kịch bản ±MAPE giả định, rộng hơn về cuối năm (bất định cạnh tranh)
+  const hi=monthly.map((m,i)=>m*(1+0.07+i*0.006));
+  const lo=monthly.map((m,i)=>m*(1-0.07-i*0.006));
+
+  // competitors phản ứng: VF 7 hưởng lợi từ EV shift, CX-5 từ giá
+  const comp=compBaseAnnual.slice();
+  comp[1]=compBaseAnnual[1]*(1+Math.max(0,(ev-15))*0.012);       // VF 7 lên theo EV
+  comp[0]=compBaseAnnual[0]*(1+ (px>0? px*0.003:0));             // CX-5 lên khi Tucson đắt hơn
+  comp[4]=tucsonAnnual;                                          // Tucson = output
+  comp[0]*=(1+seg/100);comp[1]*=(1+seg/100);comp[2]*=(1+seg/100);comp[3]*=(1+seg/100);comp[5]*=(1+seg/100);
+
+  return {tucsonAnnual,share,monthly,hi,lo,comp,ev,px,pro,life,seg,rate};
+}
+
+let chM,chC;
+function render(){
+  const r=compute();
+  const baseRef=58000*0.105; // base scenario annual ~ for delta
+  $('k-total').innerHTML=fmt(r.tucsonAnnual)+'<span class="unit">xe</span>';
+  const dPct=((r.tucsonAnnual-baseRef)/baseRef*100);
+  $('k-total-d').innerHTML=(dPct>=0?'▲ +':'▼ ')+dPct.toFixed(1)+'% vs nền'; 
+  $('k-total-d').className='kpi-delta '+(dPct>=0?'up':'down');
+
+  $('k-share').innerHTML=(r.share*100).toFixed(1)+'<span class="unit">%</span>';
+  $('k-share-d').innerHTML='phân khúc C-SUV';
+  $('k-share-d').className='kpi-delta';
+
+  // rank
+  const sorted=[...r.comp].map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v);
+  const rank=sorted.findIndex(o=>o.i===4)+1;
+  $('k-rank').textContent='#'+rank;
+  $('k-rank-d').innerHTML='trên 6 mẫu chính';
+  $('k-rank-d').className='kpi-delta '+(rank<=3?'up':'down');
+
+  const months=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+
+  if(!chM){
+    chM=new Chart($('chMonth'),{type:'line',data:{labels:months,datasets:[
+      {label:'Cao',data:r.hi,borderColor:'transparent',backgroundColor:'rgba(200,169,110,.10)',fill:'+1',pointRadius:0,tension:.4},
+      {label:'Dự báo',data:r.monthly,borderColor:'#C8A96E',backgroundColor:'transparent',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#C8A96E',tension:.4,fill:false},
+      {label:'Thấp',data:r.lo,borderColor:'transparent',backgroundColor:'transparent',pointRadius:0,tension:.4}
+    ]},options:lineOpts(' xe')});
+  }else{chM.data.datasets[0].data=r.hi;chM.data.datasets[1].data=r.monthly;chM.data.datasets[2].data=r.lo;chM.update('none');}
+
+  if(!chC){
+    chC=new Chart($('chCompete'),{type:'bar',data:{labels:compName,datasets:[{
+      data:r.comp,
+      backgroundColor:r.comp.map((_,i)=>i===4?'#C8A96E':i===1?'rgba(62,207,142,.7)':'rgba(74,144,217,.45)'),
+      borderRadius:5,borderSkipped:false
+    }]},options:barOpts()});
+  }else{
+    chC.data.datasets[0].data=r.comp;
+    chC.data.datasets[0].backgroundColor=r.comp.map((_,i)=>i===4?'#C8A96E':i===1?'rgba(62,207,142,.7)':'rgba(74,144,217,.45)');
+    chC.update('none');
+  }
+
+  // insight text
+  let msg='';
+  if(r.ev>=35){msg='<b>Cảnh báo dịch chuyển EV.</b> Ở tốc độ EV +'+r.ev+'%, VF 7 hút phần lớn tăng trưởng phân khúc; Tucson rơi về nhóm cuối dù HTV tăng ưu đãi. Đây là lực Tucson không tự gỡ được bằng giá — cần phản ứng ở cấp sản phẩm/định vị, không chỉ chiết khấu.';}
+  else if(r.pro>=85 && r.px<0){msg='<b>Kịch bản phản công bằng giá.</b> Hạ giá xuống dưới CX-5 + ưu đãi sâu kéo được thị phần, nhưng kiểm tra biên: mỗi +20tr ưu đãi × sản lượng = chi phí thật, dễ thắng volume mà thua contribution margin. Đúng bài học VFX — đừng để rebate/chiết khấu che lực CM yếu.';}
+  else{msg='<b>Đọc kết quả:</b> ở kịch bản hiện tại Tucson đạt ~'+fmt(r.tucsonAnnual)+' xe, thị phần '+(r.share*100).toFixed(1)+'%, hạng #'+rank+'. Lực bào mòn lớn nhất là EV (VF 7); đòn bẩy HTV kiểm soát được là ưu đãi + chu kỳ sản phẩm. Sai số dải rộng dần về cuối năm phản ánh bất định cạnh tranh — lý do cần cập nhật rolling hàng tháng thay vì chốt cứng đầu năm.';}
+  $('insight').innerHTML=msg;
+}
+
+function lineOpts(suffix){return{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)+suffix}}},scales:{x:{grid:{color:'rgba(200,169,110,.06)'},ticks:{color:'#8FA3BC',font:{family:'DM Mono',size:11}}},y:{grid:{color:'rgba(200,169,110,.06)'},ticks:{color:'#8FA3BC',font:{family:'DM Mono',size:11},callback:v=>fmt(v)}}}};}
+function barOpts(){return{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.parsed.x)+' xe'}}},scales:{x:{grid:{color:'rgba(200,169,110,.06)'},ticks:{color:'#8FA3BC',font:{family:'DM Mono',size:11},callback:v=>fmt(v)}},y:{grid:{display:false},ticks:{color:'#E8EDF4',font:{family:'Outfit',size:12,weight:'500'}}}}};}
+
+// events
+['ev','px','pro','life','seg','rate'].forEach(id=>$(id).addEventListener('input',()=>{document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));render();}));
+document.querySelectorAll('.sc-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  const s=scenarios[btn.dataset.sc];Object.keys(s).forEach(k=>$(k).value=s[k]);render();
+}));
+render();
+</script>
+</body>
+</html>
