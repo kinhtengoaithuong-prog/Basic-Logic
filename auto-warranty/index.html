@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mô hình Quyết định — Chính sách Bảo hành Mở rộng</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0a1628; --bg2:#0f2038; --panel:#13294b; --panel2:#1a3358;
+    --line:#27406b; --teal:#3dd6c4; --teal-dim:#2a9d8f; --gold:#d4af37;
+    --gold-soft:#e8c860; --text:#e8eef7; --muted:#8aa2c4; --muted2:#5d769c;
+    --green:#34d399; --red:#f87171; --amber:#fbbf24;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Segoe UI',-apple-system,sans-serif;
+    background:radial-gradient(ellipse at top,#11254a 0%,var(--bg) 55%);
+    color:var(--text); line-height:1.5; padding:28px 20px; min-height:100vh;
+  }
+  .wrap{max-width:1240px;margin:0 auto}
+  .head{margin-bottom:24px;border-bottom:1px solid var(--line);padding-bottom:18px}
+  .kicker{color:var(--gold);font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:600}
+  h1{font-size:26px;font-weight:700;margin:6px 0 8px;letter-spacing:-.3px}
+  .sub{color:var(--muted);font-size:14px;max-width:780px}
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:20px;margin-top:22px}
+  @media(max-width:920px){.grid{grid-template-columns:1fr}}
+  .card{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card h2{font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal);margin-bottom:16px;font-weight:600}
+  .card h2 .num{color:var(--gold);margin-right:7px}
+  .ctrl{margin-bottom:18px}
+  .ctrl label{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:7px}
+  .ctrl label b{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+  input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;background:var(--line);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--bg);box-shadow:0 0 8px rgba(212,175,55,.5)}
+  input[type=range].teal::-webkit-slider-thumb{background:var(--teal);box-shadow:0 0 8px rgba(61,214,196,.5)}
+  .numgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .field{display:flex;flex-direction:column}
+  .field span{font-size:11px;color:var(--muted2);margin-bottom:4px}
+  .field input{background:var(--bg);border:1px solid var(--line);color:var(--text);padding:7px 9px;border-radius:7px;font-size:13px;width:100%;font-variant-numeric:tabular-nums}
+  .field input:focus{outline:none;border-color:var(--teal)}
+  .divider{height:1px;background:var(--line);margin:16px 0}
+  .hint{font-size:11px;color:var(--muted2);margin-top:5px;line-height:1.45}
+  /* result */
+  .verdict{border-radius:14px;padding:22px;margin-bottom:18px;border:1px solid;text-align:center}
+  .verdict.go{background:linear-gradient(160deg,rgba(52,211,153,.13),rgba(52,211,153,.04));border-color:rgba(52,211,153,.4)}
+  .verdict.no{background:linear-gradient(160deg,rgba(248,113,113,.13),rgba(248,113,113,.04));border-color:rgba(248,113,113,.4)}
+  .verdict .vlabel{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+  .verdict .vbig{font-size:30px;font-weight:700;margin:6px 0}
+  .verdict.go .vbig{color:var(--green)}
+  .verdict.no .vbig{color:var(--red)}
+  .verdict .vsub{font-size:13px;color:var(--muted)}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+  .kpi{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:14px}
+  .kpi .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .kpi .v{font-size:21px;font-weight:700;font-variant-numeric:tabular-nums}
+  .kpi .vu{font-size:12px;color:var(--muted2);font-weight:400}
+  .chartbox{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:16px;margin-bottom:16px}
+  .chartbox h3{font-size:12px;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+  .chartbox .cnote{font-size:11px;color:var(--muted2);margin-bottom:12px}
+  .chartwrap{position:relative;height:260px}
+  .chartwrap.tall{height:300px}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:680px){.split{grid-template-columns:1fr}.kpis{grid-template-columns:1fr}}
+  .tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(212,175,55,.15);color:var(--gold-soft);border:1px solid rgba(212,175,55,.3);margin-left:6px;letter-spacing:.5px}
+  .tag.low{background:rgba(248,113,113,.13);color:var(--red);border-color:rgba(248,113,113,.3)}
+  .foot{margin-top:20px;padding:16px;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.2);border-radius:11px;font-size:12px;color:var(--muted);line-height:1.6}
+  .foot b{color:var(--gold-soft)}
+  table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+  th,td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+  td.pos{color:var(--green)} td.neg{color:var(--red)}
+  .seg{display:flex;gap:0;margin-bottom:16px;background:var(--bg);border-radius:9px;padding:3px;border:1px solid var(--line)}
+  .seg button{flex:1;background:none;border:none;color:var(--muted);padding:8px;font-size:12px;border-radius:7px;cursor:pointer;font-weight:600;letter-spacing:.3px}
+  .seg button.active{background:var(--panel2);color:var(--teal)}
+  /* toolbar */
+  .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px;padding:14px 16px;background:var(--panel2);border:1px solid var(--line);border-radius:12px}
+  .toolbar .pname{flex:1;min-width:180px;display:flex;flex-direction:column}
+  .toolbar .pname span{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+  .toolbar .pname input{background:var(--bg);border:1px solid var(--line);color:var(--text);padding:8px 11px;border-radius:8px;font-size:14px;font-weight:600}
+  .toolbar .pname input:focus{outline:none;border-color:var(--teal)}
+  .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--bg);color:var(--text);padding:9px 14px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;letter-spacing:.3px;transition:all .15s}
+  .btn:hover{border-color:var(--teal);color:var(--teal)}
+  .btn.gold{border-color:rgba(212,175,55,.4);color:var(--gold-soft)}
+  .btn.gold:hover{background:rgba(212,175,55,.1);border-color:var(--gold)}
+  .btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+  .savestate{font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:6px}
+  .savestate .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);transition:background .3s}
+  .savestate .dot.saved{background:var(--green)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--panel);border:1px solid var(--teal);color:var(--text);padding:12px 20px;border-radius:10px;font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.4);opacity:0;transition:all .35s;z-index:100}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  .toast.err{border-color:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div class="kicker">Mô hình hỗ trợ quyết định · Dịch vụ sau bán hàng</div>
+    <h1>Chính sách Bảo hành Mở rộng — Có nên triển khai?</h1>
+    <p class="sub">Mô hình không trả lời "lãi bao nhiêu" (vì retention sau chính sách là ẩn số không ai biết trước). Thay vào đó nó trả lời câu hỏi mạnh hơn: <b style="color:var(--text)">retention cần tăng tối thiểu bao nhiêu để chính sách hòa vốn?</b> — một ngưỡng kiểm chứng được.</p>
+    <div class="toolbar">
+      <div class="pname"><span>Tên dự án / kịch bản</span><input id="projName" type="text" value="Kịch bản cơ sở — Hyundai"></div>
+      <div class="savestate"><span class="dot" id="saveDot"></span><span id="saveTxt">Chưa lưu</span></div>
+      <button class="btn gold" id="btnExportJson" title="Lưu toàn bộ dự án ra file .json để mở lại sau">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>Lưu dự án (.json)</button>
+      <button class="btn" id="btnImportJson" title="Mở lại file dự án .json đã lưu">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>Mở dự án (.json)</button>
+      <button class="btn" id="btnExportCsv" title="Xuất tham số + kết quả ra CSV cho Excel/báo cáo">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h2M8 17h2M14 13h2M14 17h2"/></svg>Xuất CSV</button>
+      <input type="file" id="fileJson" accept=".json" style="display:none">
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- ============ CONTROLS ============ -->
+    <div>
+      <div class="card">
+        <h2><span class="num">01</span>Biến trung tâm</h2>
+        <div class="ctrl">
+          <label>Retention uplift sau hết bảo hành <b id="upliftV">+15 điểm %</b></label>
+          <input type="range" id="uplift" class="gold" min="0" max="50" value="15" step="1">
+          <div class="hint">Chính sách mở rộng kỳ vọng kéo tỷ lệ quay lại (sau khi hết bảo hành gốc) tăng thêm bao nhiêu điểm %. <span class="tag low">Độ tin cậy THẤP — đây là giả định</span></div>
+        </div>
+        <div class="ctrl">
+          <label>Mức hài lòng dịch vụ đại lý <b id="satV">4.0 / 5</b></label>
+          <input type="range" id="sat" class="teal" min="2" max="5" value="4" step="0.1">
+          <div class="hint">Neo tại <b style="color:var(--text)">4.0</b>. Mỗi điểm lệch khỏi neo → ±2 điểm % retention/kỳ (sau bảo hành). Tác động lên <i>cả hai</i> đường nền — không làm méo delta riêng của chính sách. <span class="tag">Đòn bẩy độc lập với chính sách</span></div>
+        </div>
+        <div class="divider"></div>
+        <h2 style="margin-bottom:14px"><span class="num">02</span>Cohort & retention nền</h2>
+        <div class="numgrid">
+          <div class="field"><span>Số xe / cohort</span><input id="fleet" type="number" value="1000"></div>
+          <div class="field"><span>Số kỳ vòng đời (6th/kỳ)</span><input id="periods" type="number" value="14"></div>
+          <div class="field"><span>Retention kỳ đầu (%)</span><input id="ret0" type="number" value="85"></div>
+          <div class="field"><span>Kỳ hết bảo hành gốc</span><input id="warrEnd" type="number" value="6"></div>
+          <div class="field"><span>Rơi/kỳ trong BH (%)</span><input id="dropIn" type="number" value="3"></div>
+          <div class="field"><span>Rơi/kỳ sau BH (%)</span><input id="dropOut" type="number" value="11"></div>
+        </div>
+        <div class="hint">"Rơi sau BH" cao phản ánh đúng painpoint: hết bảo hành → chảy máu ra gara ngoài.</div>
+        <div class="divider"></div>
+        <h2 style="margin-bottom:14px"><span class="num">03</span>Kinh tế mỗi lần dịch vụ</h2>
+        <div class="numgrid">
+          <div class="field"><span>Doanh thu công / lần (k₫)</span><input id="revLabor" type="number" value="800"></div>
+          <div class="field"><span>Doanh thu phụ tùng / lần (k₫)</span><input id="revParts" type="number" value="1500"></div>
+          <div class="field"><span>CM% công</span><input id="cmLabor" type="number" value="65"></div>
+          <div class="field"><span>CM% phụ tùng</span><input id="cmParts" type="number" value="30"></div>
+          <div class="field"><span>DV khác/phụ kiện / lần (k₫)</span><input id="revExtra" type="number" value="400"></div>
+          <div class="field"><span>CM% DV khác/phụ kiện</span><input id="cmExtra" type="number" value="45"></div>
+        </div>
+        <div class="hint">Tách công vs. phụ tùng vì biên rất khác. Đại lý ăn công + markup phụ tùng + dịch vụ khác/phụ kiện (rửa xe, phim cách nhiệt, đồ chơi); hãng ăn biên phụ tùng bán sỉ.</div>
+        <div class="divider"></div>
+        <h2 style="margin-bottom:14px"><span class="num">04</span>Chi phí tăng thêm của chính sách</h2>
+        <div class="numgrid">
+          <div class="field"><span>Dự phòng BH thêm / xe (k₫)</span><input id="costWarr" type="number" value="900"></div>
+          <div class="field"><span>Ưu đãi/CRM / lần quay lại (k₫)</span><input id="costPromo" type="number" value="120"></div>
+        </div>
+        <div class="hint">Vế chi phí mà bộ phận bảo hành lo — mô hình phải có để công bằng.</div>
+      </div>
+      <div class="foot">
+        <b>Cách đọc:</b> Chỉnh slider 01 để xem tại mức uplift đó chính sách lãi hay lỗ. Nhưng giá trị thật nằm ở <b>ngưỡng hòa vốn</b> bên phải — con số mà bạn mang ra hỏi: "liệu mô hình 3+7 có làm nổi điều này không?"
+      </div>
+    </div>
+
+    <!-- ============ RESULTS ============ -->
+    <div>
+      <div class="verdict" id="verdict">
+        <div class="vlabel">Tại mức uplift hiện tại</div>
+        <div class="vbig" id="verdictBig">—</div>
+        <div class="vsub" id="verdictSub">—</div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="k">Δ Lợi nhuận tổng</div><div class="v" id="kpiDelta">—</div><div class="vu">triệu ₫ / cohort</div></div>
+        <div class="kpi"><div class="k">Ngưỡng hòa vốn</div><div class="v" id="kpiBE" style="color:var(--gold-soft)">—</div><div class="vu">điểm % uplift tối thiểu</div></div>
+        <div class="kpi"><div class="k">Lần dịch vụ tăng thêm</div><div class="v" id="kpiVisits">—</div><div class="vu">lượt / cohort</div></div>
+      </div>
+
+      <div class="chartbox">
+        <h3>Đường cong Retention qua vòng đời xe</h3>
+        <div class="cnote">Khoảng cách giữa hai đường (sau kỳ hết bảo hành) chính là toàn bộ giá trị chính sách tạo ra.</div>
+        <div class="chartwrap"><canvas id="retChart"></canvas></div>
+      </div>
+
+      <div class="chartbox">
+        <h3>Đường Hòa vốn — Δ Lợi nhuận theo mức Retention uplift</h3>
+        <div class="cnote">Điểm đường cắt trục 0 = ngưỡng uplift tối thiểu để chính sách có lãi. Vùng xanh = lãi, vùng đỏ = lỗ.</div>
+        <div class="chartwrap tall"><canvas id="beChart"></canvas></div>
+      </div>
+
+      <div class="chartbox">
+        <h3>Phân rã P&L — Ai được, ai mất?</h3>
+        <div class="seg">
+          <button data-view="both" class="active">Tổng hợp</button>
+          <button data-view="oem">Góc nhìn Hãng</button>
+          <button data-view="dealer">Góc nhìn Đại lý</button>
+        </div>
+        <table id="pnlTable">
+          <thead><tr><th>Khoản mục</th><th>Baseline</th><th>Mở rộng</th><th>Δ</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="hint" style="margin-top:10px" id="pnlNote"></div>
+      </div>
+
+      <div class="foot">
+        <b>Giới hạn mô hình (đọc trước khi dùng để quyết):</b> Biến yếu nhất là <b>retention uplift</b> — một giả định, không phải số đo. Mô hình cố tình KHÔNG định lượng giá trị bán xe lần 2 (repurchase) và hiệu ứng referral — đây là <b>upside mềm chưa tính</b>, nghĩa là kết quả thật có xu hướng tốt hơn con số hiển thị. Trước khi trình lãnh đạo: thay 6 ô input ở khối 02–03 bằng số thật từ data hành vi theo VIN.
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);
+let pnlView='both';
+let retChart,beChart;
+
+function readInputs(){
+  return {
+    uplift:+$('uplift').value,
+    sat:+$('sat').value,
+    fleet:+$('fleet').value, periods:+$('periods').value,
+    ret0:+$('ret0').value/100, warrEnd:+$('warrEnd').value,
+    dropIn:+$('dropIn').value/100, dropOut:+$('dropOut').value/100,
+    revLabor:+$('revLabor').value, revParts:+$('revParts').value,
+    revExtra:+$('revExtra').value,
+    cmLabor:+$('cmLabor').value/100, cmParts:+$('cmParts').value/100,
+    cmExtra:+$('cmExtra').value/100,
+    costWarr:+$('costWarr').value, costPromo:+$('costPromo').value/100*100 // k₫
+  };
+}
+
+// build retention curve. uplift applies to post-warranty periods, reducing the post-warranty drop.
+// satisfaction adjusts BOTH curves equally (post-warranty only): each point off anchor 4.0 => ±2pts/period.
+function retentionCurve(p, upliftPts){
+  const base=[], ext=[];
+  let rb=p.ret0, re=p.ret0;
+  const satAdj=(p.sat-4)*2/100; // points off anchor * 2% , as fraction; positive = retention saved
+  for(let k=1;k<=p.periods;k++){
+    base.push(rb); ext.push(re);
+    if(k<p.warrEnd){ rb*=(1-p.dropIn); re*=(1-p.dropIn); }
+    else {
+      // satisfaction softens (or worsens) the post-warranty drop on BOTH curves
+      const baseDrop=Math.max(0, p.dropOut - satAdj);
+      rb*=(1-baseDrop);
+      const effDrop=Math.max(0, p.dropOut - upliftPts/100 - satAdj);
+      re*=(1-effDrop);
+    }
+  }
+  return {base,ext};
+}
+
+// CM per service visit (k₫), split for OEM vs dealer
+function visitCM(p){
+  // dealer keeps: labor CM + half parts margin + full extra-services/accessories CM
+  const dealerCM = p.revLabor*p.cmLabor + p.revParts*p.cmParts*0.5 + p.revExtra*p.cmExtra;
+  const oemCM = p.revParts*p.cmParts*0.5; // OEM earns wholesale parts margin (other half)
+  return {dealer:dealerCM, oem:oemCM, total:dealerCM+oemCM};
+}
+
+function simulate(p, upliftPts){
+  const {base,ext}=retentionCurve(p,upliftPts);
+  const cm=visitCM(p);
+  let visitsBase=0, visitsExt=0;
+  for(let k=0;k<p.periods;k++){ visitsBase+=base[k]; visitsExt+=ext[k]; }
+  visitsBase*=p.fleet; visitsExt*=p.fleet;
+  const dVisits=visitsExt-visitsBase;
+
+  // revenue & CM (k₫ -> we keep k₫, convert later)
+  const cmBase={oem:visitsBase*cm.oem, dealer:visitsBase*cm.dealer};
+  const cmExt={oem:visitsExt*cm.oem, dealer:visitsExt*cm.dealer};
+
+  // added costs
+  const warrCost=p.fleet*p.costWarr;              // OEM bears warranty reserve
+  const promoCost=visitsExt*(p.costPromo);        // dealer bears promo/CRM per visit
+  // split warranty reserve mostly OEM
+  const addCostOEM=warrCost;
+  const addCostDealer=promoCost;
+
+  const deltaOEM = (cmExt.oem-cmBase.oem) - addCostOEM;
+  const deltaDealer = (cmExt.dealer-cmBase.dealer) - addCostDealer;
+  const deltaTotal = deltaOEM+deltaDealer;
+
+  return {base,ext,dVisits,cmBase,cmExt,addCostOEM,addCostDealer,deltaOEM,deltaDealer,deltaTotal,cm};
+}
+
+function breakeven(p){
+  // find min uplift (0..50) where deltaTotal>=0
+  for(let u=0;u<=50;u+=0.5){
+    if(simulate(p,u).deltaTotal>=0) return u;
+  }
+  return null;
+}
+
+const fmtM=v=>(v/1000).toLocaleString('vi-VN',{maximumFractionDigits:1}); // k₫ -> triệu (÷1000)... note k₫*1000=₫, /1e6=triệu => /1000
+function render(){
+  const p=readInputs();
+  $('upliftV').textContent=(p.uplift>0?'+':'')+p.uplift+' điểm %';
+  $('satV').textContent=p.sat.toFixed(1)+' / 5';
+  const r=simulate(p,p.uplift);
+  const be=breakeven(p);
+
+  // verdict
+  const v=$('verdict'), vb=$('verdictBig'), vs=$('verdictSub');
+  if(r.deltaTotal>=0){
+    v.className='verdict go'; vb.textContent='CÓ LÃI';
+    vs.textContent=`Δ lợi nhuận +${fmtM(r.deltaTotal)} triệu ₫ / cohort ${p.fleet} xe`;
+  } else {
+    v.className='verdict no'; vb.textContent='CHƯA HÒA VỐN';
+    vs.textContent=`Δ lợi nhuận ${fmtM(r.deltaTotal)} triệu ₫ — cần uplift cao hơn`;
+  }
+
+  $('kpiDelta').innerHTML=(r.deltaTotal>=0?'+':'')+fmtM(r.deltaTotal);
+  $('kpiDelta').style.color=r.deltaTotal>=0?'var(--green)':'var(--red)';
+  $('kpiBE').textContent=be===null?'>50':('+'+be);
+  $('kpiVisits').textContent='+'+Math.round(r.dVisits).toLocaleString('vi-VN');
+
+  // retention chart
+  const labels=Array.from({length:p.periods},(_,i)=>'K'+(i+1));
+  const retDataB=r.base.map(x=>+(x*100).toFixed(1));
+  const retDataE=r.ext.map(x=>+(x*100).toFixed(1));
+  if(!retChart){
+    retChart=new Chart($('retChart'),{type:'line',
+      data:{labels,datasets:[
+        {label:'Baseline (chính sách chặt)',data:retDataB,borderColor:'#f87171',backgroundColor:'rgba(248,113,113,.08)',borderWidth:2,tension:.3,fill:false,pointRadius:0},
+        {label:'Mở rộng (kiểu 3+7)',data:retDataE,borderColor:'#3dd6c4',backgroundColor:'rgba(61,214,196,.12)',borderWidth:2.5,tension:.3,fill:'-1',pointRadius:0}
+      ]},
+      options:chartOpts('% xe quay lại','Kỳ bảo dưỡng (mỗi 6 tháng)',p.warrEnd)
+    });
+  } else {
+    retChart.data.labels=labels;
+    retChart.data.datasets[0].data=retDataB;
+    retChart.data.datasets[1].data=retDataE;
+    retChart.options.plugins.annotation&&0;
+    retChart.update('none');
+  }
+
+  // breakeven chart
+  const beLabels=[],beData=[];
+  for(let u=0;u<=50;u+=2){ beLabels.push(u); beData.push(+(simulate(p,u).deltaTotal/1000).toFixed(1)); }
+  const segColor=ctx=>{const y=ctx.p1.parsed.y;return y>=0?'#34d399':'#f87171';};
+  if(!beChart){
+    beChart=new Chart($('beChart'),{type:'line',
+      data:{labels:beLabels,datasets:[{label:'Δ Lợi nhuận (triệu ₫)',data:beData,borderColor:'#d4af37',borderWidth:2.5,tension:.25,pointRadius:0,
+        segment:{borderColor:segColor},fill:{target:{value:0},above:'rgba(52,211,153,.10)',below:'rgba(248,113,113,.10)'}}]},
+      options:chartOpts('Δ Lợi nhuận (triệu ₫)','Retention uplift (điểm %)',null,true)
+    });
+  } else {
+    beChart.data.labels=beLabels; beChart.data.datasets[0].data=beData; beChart.update('none');
+  }
+
+  renderPnl(p,r);
+}
+
+function renderPnl(p,r){
+  const tb=$('pnlTable').querySelector('tbody');
+  const cmBaseO=r.cmBase.oem, cmExtO=r.cmExt.oem, cmBaseD=r.cmBase.dealer, cmExtD=r.cmExt.dealer;
+  let rows=[];
+  const row=(name,b,e,cost)=>{const dd=(e-b)-(cost||0);return {name,b,e:e,d:dd,cost};};
+  if(pnlView==='both'){
+    rows=[
+      ['CM dịch vụ (hãng+đại lý)', cmBaseO+cmBaseD, cmExtO+cmExtD],
+      ['(−) Dự phòng bảo hành thêm', 0, 0, r.addCostOEM],
+      ['(−) Ưu đãi/CRM thêm', 0, 0, r.addCostDealer],
+    ];
+    $('pnlNote').innerHTML='<b style="color:var(--gold-soft)">Tổng hợp:</b> gộp cả hai bên. Δ dương = chính sách tạo giá trị cho hệ sinh thái — nhưng phải xem ai gánh chi phí, ai hưởng lợi ở hai tab kia.';
+  } else if(pnlView==='oem'){
+    rows=[
+      ['CM phụ tùng bán sỉ (hãng)', cmBaseO, cmExtO],
+      ['(−) Dự phòng bảo hành thêm', 0, 0, r.addCostOEM],
+    ];
+    $('pnlNote').innerHTML='<b style="color:var(--gold-soft)">Hãng:</b> gánh gần như toàn bộ chi phí dự phòng bảo hành mở rộng, nhưng chỉ hưởng biên phụ tùng bán sỉ. Đây là bên dễ thấy "thiệt" trước — lý do bộ phận bảo hành phản đối.';
+  } else {
+    rows=[
+      ['CM công + markup phụ tùng (đại lý)', cmBaseD, cmExtD],
+      ['(−) Ưu đãi/CRM thêm', 0, 0, r.addCostDealer],
+    ];
+    $('pnlNote').innerHTML='<b style="color:var(--gold-soft)">Đại lý:</b> hưởng phần lớn upside (công + markup) với chi phí thêm thấp. Bên được lợi nhiều nhất → nên là bên đồng tài trợ chi phí bảo hành mở rộng.';
+  }
+  let html='';
+  let totD=0;
+  rows.forEach(rw=>{
+    const name=rw[0], b=rw[1], e=rw[2], cost=rw[3]||0;
+    const d=(e-b)-cost; totD+=d;
+    const dCls=d>=0?'pos':'neg';
+    html+=`<tr><td>${name}</td><td>${cost?'—':fmtM(b)}</td><td>${cost?'('+fmtM(cost)+')':fmtM(e)}</td><td class="${dCls}">${d>=0?'+':''}${fmtM(d)}</td></tr>`;
+  });
+  html+=`<tr style="border-top:2px solid var(--gold)"><td><b>Δ Lợi nhuận ròng</b></td><td></td><td></td><td class="${totD>=0?'pos':'neg'}"><b>${totD>=0?'+':''}${fmtM(totD)}</b></td></tr>`;
+  tb.innerHTML=html;
+}
+
+function chartOpts(yTitle,xTitle,warrLine,isBE){
+  return {
+    responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{labels:{color:'#8aa2c4',font:{size:11},usePointStyle:true,pointStyleWidth:8}},
+      tooltip:{backgroundColor:'#0a1628',borderColor:'#27406b',borderWidth:1,titleColor:'#e8eef7',bodyColor:'#8aa2c4',padding:10,
+        callbacks:isBE?{title:i=>'Uplift +'+i[0].label+' điểm %',label:c=>'Δ '+c.parsed.y.toLocaleString('vi-VN')+' triệu ₫'}:{label:c=>c.dataset.label+': '+c.parsed.y+'%'}}
+    },
+    scales:{
+      x:{title:{display:true,text:xTitle,color:'#5d769c',font:{size:11}},grid:{color:'rgba(39,64,107,.4)'},ticks:{color:'#5d769c',font:{size:10}}},
+      y:{title:{display:true,text:yTitle,color:'#5d769c',font:{size:11}},grid:{color:'rgba(39,64,107,.4)'},ticks:{color:'#5d769c',font:{size:10}}}
+    }
+  };
+}
+
+document.querySelectorAll('.seg button').forEach(b=>{
+  b.onclick=()=>{document.querySelectorAll('.seg button').forEach(x=>x.classList.remove('active'));b.classList.add('active');pnlView=b.dataset.view;render();};
+});
+
+// ===== Project save / load / CSV =====
+const FIELDS=['uplift','sat','fleet','periods','ret0','warrEnd','dropIn','dropOut',
+  'revLabor','revParts','revExtra','cmLabor','cmParts','cmExtra','costWarr','costPromo'];
+let dirty=false;
+
+function markDirty(){dirty=true;$('saveDot').classList.remove('saved');$('saveTxt').textContent='Có thay đổi chưa lưu';}
+function markSaved(){dirty=false;$('saveDot').classList.add('saved');$('saveTxt').textContent='Đã lưu file · '+new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});}
+
+function toast(msg,isErr){const t=$('toast');t.textContent=msg;t.className='toast show'+(isErr?' err':'');setTimeout(()=>t.className='toast'+(isErr?' err':''),2600);}
+
+function collectState(){
+  const s={_meta:{app:'warranty-extension-simulator',version:1,name:$('projName').value,savedAt:new Date().toISOString()},inputs:{},view:pnlView};
+  FIELDS.forEach(f=>s.inputs[f]=$(f).value);
+  return s;
+}
+function applyState(s){
+  if(!s||!s.inputs){toast('File không hợp lệ',true);return;}
+  FIELDS.forEach(f=>{if(s.inputs[f]!==undefined)$(f).value=s.inputs[f];});
+  if(s._meta&&s._meta.name)$('projName').value=s._meta.name;
+  if(s.view){pnlView=s.view;document.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('active',x.dataset.view===s.view));}
+  render();
+}
+function download(filename,text,mime){
+  const blob=new Blob([text],{type:mime||'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download=filename;document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+function safeName(){return ($('projName').value||'du-an').replace(/[^\w\u00C0-\u1EF9 -]/g,'').replace(/\s+/g,'-').toLowerCase();}
+
+$('btnExportJson').onclick=()=>{
+  download(safeName()+'.json',JSON.stringify(collectState(),null,2),'application/json');
+  markSaved();toast('Đã lưu dự án ra file .json');
+};
+$('btnImportJson').onclick=()=>$('fileJson').click();
+$('fileJson').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{applyState(JSON.parse(r.result));markSaved();toast('Đã mở dự án: '+($('projName').value));}
+    catch(err){toast('Không đọc được file JSON',true);}};
+  r.readAsText(f);e.target.value='';
+};
+
+// CSV: parameters + computed results, sectioned
+function buildCSV(){
+  const p=readInputs();const r=simulate(p,p.uplift);const be=breakeven(p);
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const L=[];
+  L.push('Mô hình Chính sách Bảo hành Mở rộng — Hyundai');
+  L.push('Dự án,'+q($('projName').value));
+  L.push('Xuất lúc,'+q(new Date().toLocaleString('vi-VN')));
+  L.push('');
+  // --- params
+  const labels={uplift:'Retention uplift (điểm %)',sat:'Mức hài lòng (/5)',fleet:'Số xe/cohort',periods:'Số kỳ vòng đời',
+    ret0:'Retention kỳ đầu (%)',warrEnd:'Kỳ hết bảo hành gốc',dropIn:'Rơi/kỳ trong BH (%)',dropOut:'Rơi/kỳ sau BH (%)',
+    revLabor:'DT công/lần (k₫)',revParts:'DT phụ tùng/lần (k₫)',revExtra:'DT khác·phụ kiện/lần (k₫)',
+    cmLabor:'CM% công',cmParts:'CM% phụ tùng',cmExtra:'CM% khác·phụ kiện',costWarr:'Dự phòng BH thêm/xe (k₫)',costPromo:'Ưu đãi·CRM/lần (k₫)'};
+  L.push('[THAM SỐ ĐẦU VÀO]');L.push('Tên,Giá trị');
+  FIELDS.forEach(f=>L.push(q(labels[f])+','+$(f).value));
+  L.push('');
+  // --- KPI
+  L.push('[KẾT QUẢ CHÍNH]');L.push('Chỉ tiêu,Giá trị,Đơn vị');
+  L.push(q('Δ Lợi nhuận tổng')+','+(r.deltaTotal/1000).toFixed(1)+',triệu ₫/cohort');
+  L.push(q('Δ Lợi nhuận — Hãng')+','+(r.deltaOEM/1000).toFixed(1)+',triệu ₫/cohort');
+  L.push(q('Δ Lợi nhuận — Đại lý')+','+(r.deltaDealer/1000).toFixed(1)+',triệu ₫/cohort');
+  L.push(q('Ngưỡng hòa vốn')+','+(be===null?'>50':be)+',điểm % uplift tối thiểu');
+  L.push(q('Lượt dịch vụ tăng thêm')+','+Math.round(r.dVisits)+',lượt/cohort');
+  L.push('');
+  // --- retention curve
+  L.push('[ĐƯỜNG CONG RETENTION THEO KỲ]');
+  L.push('Kỳ,Baseline %,Mở rộng %,Δ điểm %,Xe quay lại (baseline),Xe quay lại (mở rộng)');
+  for(let k=0;k<p.periods;k++){
+    const b=r.base[k]*100,e=r.ext[k]*100;
+    L.push((k+1)+','+b.toFixed(1)+','+e.toFixed(1)+','+(e-b).toFixed(1)+','+Math.round(r.base[k]*p.fleet)+','+Math.round(r.ext[k]*p.fleet));
+  }
+  L.push('');
+  // --- breakeven sweep
+  L.push('[ĐƯỜNG HÒA VỐN — Δ LỢI NHUẬN THEO UPLIFT]');
+  L.push('Uplift (điểm %),Δ Lợi nhuận tổng (triệu ₫),Δ Hãng (triệu ₫),Δ Đại lý (triệu ₫)');
+  for(let u=0;u<=50;u+=2){const s=simulate(p,u);
+    L.push(u+','+(s.deltaTotal/1000).toFixed(1)+','+(s.deltaOEM/1000).toFixed(1)+','+(s.deltaDealer/1000).toFixed(1));}
+  return '\uFEFF'+L.join('\r\n'); // BOM for Excel UTF-8
+}
+$('btnExportCsv').onclick=()=>{download(safeName()+'.csv',buildCSV(),'text/csv;charset=utf-8');toast('Đã xuất CSV (tham số + kết quả)');};
+
+// mark dirty on any change
+document.querySelectorAll('input').forEach(el=>el.addEventListener('input',()=>{markDirty();render();}));
+$('projName').addEventListener('input',markDirty);
+// warn before leaving with unsaved changes
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
+
+render();
+</script>
+</body>
+</html>
