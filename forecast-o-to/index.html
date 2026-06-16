@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mô Hình Dự Báo Nhu Cầu Phân Khúc — Thị Trường Ô Tô VN 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap');
+:root{--ink:#0D1B2A;--navy:#1A2E4A;--steel:#2C4A6E;--platinum:#C8A96E;--platinum-dim:#9a8254;--text:#E8EDF4;--text-dim:#8FA3BC;--green:#3ECf8E;--red:#E5614F;--blue:#4A90D9;--amber:#E0A458;--line:rgba(200,169,110,.18)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(ellipse at 12% 0%,rgba(44,74,110,.35),transparent 55%),radial-gradient(ellipse at 100% 100%,rgba(200,169,110,.07),transparent 50%),var(--ink);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;line-height:1.5;padding:32px 24px 80px}
+.wrap{max-width:1280px;margin:0 auto}
+header{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:26px}
+.eyebrow{font-family:'DM Mono';font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--platinum);margin-bottom:10px}
+h1{font-family:'DM Serif Display',serif;font-size:38px;font-weight:400;letter-spacing:-.01em;line-height:1.08}
+h1 em{font-style:italic;color:var(--platinum)}
+.sub{color:var(--text-dim);font-size:14px;margin-top:10px;max-width:760px}
+
+/* tier diagram */
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:26px}
+@media(max-width:880px){.tiers{grid-template-columns:1fr}}
+.tier{background:linear-gradient(160deg,rgba(26,46,74,.5),rgba(13,27,42,.3));border:1px solid var(--line);border-radius:13px;padding:20px;position:relative}
+.tier .tnum{font-family:'DM Serif Display';font-size:13px;color:var(--ink);background:var(--platinum);width:26px;height:26px;line-height:26px;text-align:center;border-radius:50%;margin-bottom:12px}
+.tier h3{font-family:'DM Mono';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--platinum);margin-bottom:8px}
+.tier .desc{font-size:12.5px;color:var(--text-dim);line-height:1.5}
+.tier .badge{display:inline-block;font-family:'DM Mono';font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:5px;margin-top:10px}
+.b-stable{background:rgba(62,207,142,.13);color:var(--green)}
+.b-trend{background:rgba(74,144,217,.13);color:var(--blue)}
+.b-noise{background:rgba(229,97,79,.13);color:#F0A99C}
+
+.layout{display:grid;grid-template-columns:330px 1fr;gap:24px;align-items:start}
+@media(max-width:980px){.layout{grid-template-columns:1fr}}
+.panel{background:linear-gradient(160deg,rgba(26,46,74,.55),rgba(13,27,42,.35));border:1px solid var(--line);border-radius:14px;padding:22px}
+.panel h2{font-family:'DM Mono';font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--platinum);margin-bottom:6px;font-weight:500}
+.panel .ph{font-size:11px;color:var(--text-dim);margin-bottom:18px}
+.ctrl{margin-bottom:17px}
+.ctrl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.ctrl-label{font-size:12.5px;color:var(--text)}
+.ctrl-val{font-family:'DM Mono';font-size:12px;color:var(--platinum);font-weight:500}
+.ctrl-note{font-size:10.5px;color:var(--text-dim);margin-top:3px;line-height:1.35}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--steel);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--platinum);cursor:pointer;border:2px solid var(--ink);box-shadow:0 0 0 1px var(--platinum)}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--platinum);cursor:pointer;border:2px solid var(--ink)}
+.divider{height:1px;background:var(--line);margin:18px 0}
+.scenario-row{display:flex;gap:7px;margin-bottom:16px}
+.sc-btn{flex:1;font-family:'DM Mono';font-size:9.5px;letter-spacing:.04em;padding:9px 4px;background:transparent;border:1px solid var(--line);border-radius:8px;color:var(--text-dim);cursor:pointer;transition:.2s;text-transform:uppercase}
+.sc-btn:hover{border-color:var(--platinum-dim);color:var(--text)}
+.sc-btn.active{background:var(--platinum);color:var(--ink);border-color:var(--platinum);font-weight:500}
+
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-bottom:22px}
+.kpi{background:linear-gradient(160deg,rgba(26,46,74,.5),rgba(13,27,42,.3));border:1px solid var(--line);border-radius:12px;padding:16px}
+.kpi-label{font-family:'DM Mono';font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:7px}
+.kpi-val{font-family:'DM Serif Display';font-size:26px;color:var(--text);line-height:1}
+.kpi-val .unit{font-family:'Outfit';font-size:12px;color:var(--text-dim);margin-left:3px}
+.kpi-delta{font-family:'DM Mono';font-size:10.5px;margin-top:6px}
+.up{color:var(--green)}.down{color:var(--red)}
+
+.card{background:linear-gradient(160deg,rgba(26,46,74,.5),rgba(13,27,42,.3));border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:20px}
+.card h3{font-family:'DM Mono';font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--platinum);margin-bottom:4px;font-weight:500}
+.card .ch-sub{font-size:12px;color:var(--text-dim);margin-bottom:16px}
+.chart-box{position:relative;height:320px}
+
+table.seg{width:100%;border-collapse:collapse;font-size:12.5px}
+table.seg th{text-align:right;font-family:'DM Mono';font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);padding:8px 10px;border-bottom:1px solid var(--line);font-weight:500}
+table.seg th:first-child{text-align:left}
+table.seg td{padding:9px 10px;border-bottom:1px solid rgba(200,169,110,.07);text-align:right}
+table.seg td:first-child{text-align:left;color:var(--text)}
+table.seg td.num{font-family:'DM Mono';color:var(--text)}
+.expo{display:inline-block;font-family:'DM Mono';font-size:9px;padding:1px 7px;border-radius:4px}
+.e-hi{background:rgba(229,97,79,.15);color:#F0A99C}
+.e-md{background:rgba(224,164,88,.15);color:var(--amber)}
+.e-lo{background:rgba(62,207,142,.13);color:var(--green)}
+.seg-trend-up{color:var(--green)}.seg-trend-dn{color:var(--red)}
+
+/* methodology */
+.method{margin-top:26px;background:linear-gradient(160deg,rgba(26,46,74,.45),rgba(13,27,42,.3));border:1px solid var(--line);border-radius:14px;padding:28px}
+.method h2{font-family:'DM Serif Display';font-size:26px;font-weight:400;margin-bottom:8px}
+.method h2 em{font-style:italic;color:var(--platinum)}
+.method .lead{font-size:13.5px;color:var(--text-dim);line-height:1.6;margin-bottom:20px;max-width:760px}
+.method h4{font-family:'DM Mono';font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--platinum);margin:26px 0 12px;font-weight:500}
+.eq{background:rgba(13,27,42,.5);border:1px solid var(--line);border-radius:10px;padding:16px 18px;font-family:'DM Mono';font-size:12.5px;color:var(--text);margin:12px 0;line-height:1.7}
+.eq .op{color:var(--platinum)}.eq .cm{color:var(--text-dim);font-size:11px}
+.eq .sc{color:var(--amber)}
+.mtable{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}
+.mtable th{text-align:left;font-family:'DM Mono';font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);padding:8px 10px;border-bottom:1px solid var(--line);font-weight:500}
+.mtable td{padding:9px 10px;border-bottom:1px solid rgba(200,169,110,.07);color:var(--text-dim);vertical-align:top}
+.mtable td b{color:var(--text)}
+.mtable td.w{font-family:'DM Mono';color:var(--platinum);white-space:nowrap;text-align:center}
+.mp{font-size:13px;color:var(--text-dim);line-height:1.62;margin:10px 0}
+.mp b{color:var(--text)}
+.warn{background:rgba(229,97,79,.07);border-left:2px solid var(--red);border-radius:0 8px 8px 0;padding:14px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.55;margin-top:16px}
+.warn b{color:#F0A99C}
+.gold{background:rgba(200,169,110,.07);border-left:2px solid var(--platinum);border-radius:0 8px 8px 0;padding:14px 16px;font-size:12.5px;color:var(--text-dim);line-height:1.55;margin-top:16px}
+.gold b{color:var(--platinum)}
+.footer-note{margin-top:26px;font-size:11px;color:var(--text-dim);font-family:'DM Mono';line-height:1.6;border-top:1px solid var(--line);padding-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">HTV · Market Demand Model · Phân khúc chuẩn ngành · 2026F</div>
+  <h1>Dự báo nhu cầu <em>theo phân khúc</em></h1>
+  <div class="sub">Kiến trúc 3 tầng: Tổng cầu VN × Phân bổ phân khúc × <b>thế giằng co ICE ↔ EV</b>. Thị phần ICE/EV trong mỗi phân khúc là kết quả của <b>hai lực đối đầu</b> — sức kéo EV (chi phí vận hành, ưu đãi trước bạ) vs sức phản công ICE (giá, sản phẩm mới, mạng lưới) — không phải EV đơn phương quyết định. Chỉnh cả hai lực để xem phân khúc phản ứng.</div>
+</header>
+
+<!-- TIER DIAGRAM -->
+<div class="tiers">
+  <div class="tier"><div class="tnum">1</div><h3>Tổng cầu ô tô VN</h3><div class="desc">Cái bánh to lên hay nhỏ đi. Driver macro: GDP/người, tín dụng tiêu dùng, lãi suất. Biến chậm, có quy luật.</div><span class="badge b-stable">● Dự báo được — ổn định</span></div>
+  <div class="tier"><div class="tnum">2</div><h3>Phân bổ ICE giữa phân khúc</h3><div class="desc">Miếng bánh ICE chia thế nào. Sedan co, SUV nở. Xu hướng cấu trúc + điểm gãy. Ràng buộc tổng tỷ trọng = 100%.</div><span class="badge b-trend">● Dự báo được — xu hướng</span></div>
+  <div class="tier"><div class="tnum">3</div><h3>Giằng co ICE ↔ EV</h3><div class="desc">Trong mỗi phân khúc, EV kéo và ICE phản công. Thị phần là kết quả tương quan hai lực, không phải EV một chiều. Cộng dòng khách mới chọn thẳng EV (không lấy từ ICE).</div><span class="badge b-noise">● Hai lực đối đầu — scenario</span></div>
+</div>
+
+<div class="layout">
+  <!-- CONTROLS -->
+  <div class="panel">
+    <h2>Bảng tham số &amp; trọng số</h2>
+    <div class="ph">Chỉnh được cả tham số kịch bản lẫn trọng số mô hình</div>
+    <div class="scenario-row">
+      <button class="sc-btn active" data-sc="base">Cơ sở</button>
+      <button class="sc-btn" data-sc="evfast">EV nhanh</button>
+      <button class="sc-btn" data-sc="evslow">EV chậm</button>
+    </div>
+
+    <h2 style="font-size:10px;margin-bottom:12px">— Tham số kịch bản —</h2>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">Tăng trưởng tổng cầu VN</span><span class="ctrl-val" id="v-grow">+10%</span></div><input type="range" id="grow" min="-10" max="30" value="10"><div class="ctrl-note">Tầng 1. 2025 thị trường +22%. Driver macro.</div></div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">Tốc độ dịch chuyển EV (cuối năm)</span><span class="ctrl-val" id="v-ev">28%</span></div><input type="range" id="ev" min="0" max="60" value="28"><div class="ctrl-note">Tầng 3. Mức thâm nhập EV toàn thị trường đạt vào T12. Biến scenario then chốt.</div></div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">Tốc độ tăng EV trong năm</span><span class="ctrl-val" id="v-ramp">Tăng dần</span></div><input type="range" id="ramp" min="0" max="2" value="1" step="1"><div class="ctrl-note">Phơi nhiễm EV cố định / tăng dần / tăng tốc theo tháng.</div></div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">Khách mới chọn thẳng EV</span><span class="ctrl-val" id="v-new">22%</span></div><input type="range" id="new" min="0" max="50" value="22"><div class="ctrl-note">% cầu EV đến từ khách mua lần đầu, KHÔNG lấy từ ICE — nên không trừ vào ICE.</div></div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">Lãi suất vay mua xe</span><span class="ctrl-val" id="v-rate">Trung bình</span></div><input type="range" id="rate" min="0" max="2" value="1" step="1"><div class="ctrl-note">Tác động toàn thị trường (Tầng 1).</div></div>
+
+    <div class="divider"></div>
+    <h2 style="font-size:10px;margin-bottom:6px">— Trọng số: sức KÉO của EV theo phân khúc —</h2>
+    <div class="ph">Sức hấp dẫn EV trong phân khúc. Cao = EV có mẫu mạnh/đúng nhu cầu.</div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">A-segment</span><span class="ctrl-val" id="v-eA">0,55</span></div><input type="range" id="eA" min="0" max="100" value="55"></div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">B-sedan</span><span class="ctrl-val" id="v-eBs">0,45</span></div><input type="range" id="eBs" min="0" max="100" value="45"></div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">B-SUV</span><span class="ctrl-val" id="v-eBu">0,50</span></div><input type="range" id="eBu" min="0" max="100" value="50"></div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">C-SUV</span><span class="ctrl-val" id="v-eC">0,70</span></div><input type="range" id="eC" min="0" max="100" value="70"><div class="ctrl-note">Cao nhất — VF7 đang dẫn phân khúc.</div></div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">D-SUV</span><span class="ctrl-val" id="v-eD">0,30</span></div><input type="range" id="eD" min="0" max="100" value="30"></div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">MPV</span><span class="ctrl-val" id="v-eM">0,40</span></div><input type="range" id="eM" min="0" max="100" value="40"><div class="ctrl-note">Limo Green rút khách MPV.</div></div>
+
+    <div class="divider"></div>
+    <h2 style="font-size:10px;margin-bottom:6px">— Trọng số: sức PHẢN CÔNG của ICE —</h2>
+    <div class="ph">Xăng kéo lại bằng giá / sản phẩm mới / mạng lưới. Cao = ICE phản công mạnh → giữ khách. Đây là đòn bẩy HTV &amp; các hãng xăng chủ động.</div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">A-segment</span><span class="ctrl-val" id="v-cA">0,40</span></div><input type="range" id="cA" min="0" max="100" value="40"></div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">B-sedan</span><span class="ctrl-val" id="v-cBs">0,35</span></div><input type="range" id="cBs" min="0" max="100" value="35"></div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">B-SUV</span><span class="ctrl-val" id="v-cBu">0,55</span></div><input type="range" id="cBu" min="0" max="100" value="55"></div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">C-SUV</span><span class="ctrl-val" id="v-cC">0,60</span></div><input type="range" id="cC" min="0" max="100" value="60"><div class="ctrl-note">CX-5 hạ giá &lt;700tr, Tucson ưu đãi 58tr — xăng phản công dữ ở đây.</div></div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">D-SUV</span><span class="ctrl-val" id="v-cD">0,65</span></div><input type="range" id="cD" min="0" max="100" value="65"><div class="ctrl-note">Santa Fe xả sâu, ICE còn mạnh vì chưa có EV cỡ D.</div></div>
+    <div class="ctrl"><div class="ctrl-head"><span class="ctrl-label">MPV</span><span class="ctrl-val" id="v-cM">0,45</span></div><input type="range" id="cM" min="0" max="100" value="45"></div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div>
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-label">Tổng cầu ICE phân khúc HTV</div><div class="kpi-val" id="k-ice">—<span class="unit">xe</span></div><div class="kpi-delta" id="k-ice-d"></div></div>
+      <div class="kpi"><div class="kpi-label">Khách mất vào EV</div><div class="kpi-val" id="k-lost">—<span class="unit">xe</span></div><div class="kpi-delta" id="k-lost-d"></div></div>
+      <div class="kpi"><div class="kpi-label">Phân khúc rủi ro nhất</div><div class="kpi-val" id="k-risk" style="font-size:20px">—</div><div class="kpi-delta" id="k-risk-d"></div></div>
+    </div>
+
+    <div class="card">
+      <h3>Nhu cầu ICE theo phân khúc — trước vs sau lực EV</h3>
+      <div class="ch-sub">Cột mờ = nếu không có EV. Cột đậm = sau khi EV rút khách. Khoảng cách = thiệt hại EV theo phân khúc.</div>
+      <div class="chart-box"><canvas id="chSeg"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>Bảng phân khúc × kịch bản EV</h3>
+      <div class="ch-sub">Phân khúc nào an toàn, phân khúc nào đang bị đe dọa — insight chiến lược dồn lực / phòng thủ.</div>
+      <table class="seg" id="segTable">
+        <thead><tr><th>Phân khúc</th><th>Xu hướng ICE</th><th>Thế giằng co</th><th>Cầu ICE (xe)</th><th>Mất vào EV</th><th>% thiệt hại</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- METHODOLOGY -->
+<div class="method">
+  <div class="eyebrow">Phương pháp luận</div>
+  <h2>Kiến trúc <em>3 tầng cô lập noise</em></h2>
+  <p class="lead">Nguyên tắc trung tâm: <b style="color:var(--text)">tách biến hỗn loạn nhất (EV) ra một lực riêng</b>, thay vì để nó vùi trong từng mô hình phân khúc và làm bẩn tất cả. Hai tầng đầu dự báo bằng số trên phần ICE có quy luật; tầng EV chỉ scenario hóa. Cách này khoanh vùng bất định thay vì để nó lan ra toàn mô hình.</p>
+
+  <h4>Phương trình từng phân khúc</h4>
+  <div class="eq">Thị phần EV[i] <span class="op">=</span> <span class="sc">[ sức kéo EV[i] ÷ (sức kéo EV[i] + sức phản công ICE[i]) ]</span> <span class="op">×</span> tốc độ EV kịch bản<br>Mất vào EV (từ ICE) <span class="op">=</span> Cầu[i] × Thị phần EV[i] × (1 − % khách mới)<br>Cầu ICE[i] <span class="op">=</span> Cầu[i] − Mất vào EV<br><span class="cm">Phần vàng = giằng co hai lực. Thị phần EV KHÔNG do EV đơn phương quyết định — là tương quan giữa sức kéo EV và sức phản công của xăng. Khách mới chọn thẳng EV không trừ vào ICE.</span></div>
+
+  <p class="mp"><b>Sửa lỗi so với phiên bản một chiều:</b> mô hình ban đầu coi ICE là phần dư bị động — EV lấy bao nhiêu, ICE nhận phần thừa. Sai, vì xăng đang phản công quyết liệt (CX-5 ra bản dưới 700tr, Santa Fe xả dưới 900tr, cả phân khúc đua giảm giá). Phiên bản này mô hình hóa <b>ba dòng chảy</b>: (1) ICE→EV, (2) sức ICE kéo lại / giữ khách, (3) khách mới chọn thẳng EV. Thị phần là kết quả của thế cân bằng, cho HTV một <b>đòn bẩy chủ động</b> thay vì chịu trận.</p>
+
+  <h4>Các phân khúc ảnh hưởng — cách ảnh hưởng &amp; công bố trọng số</h4>
+  <p class="mp">Mỗi phân khúc có <b>hai trọng số đối đầu</b>: sức kéo EV (EV có mẫu mạnh/đúng nhu cầu đến đâu) và sức phản công ICE (xăng giữ khách bằng giá/sản phẩm/mạng lưới). Thế cân bằng giữa hai cái quyết định thị phần. Bảng công bố giá trị nền để demo, kèm lý do:</p>
+  <table class="mtable">
+    <thead><tr><th>Phân khúc</th><th>Xu hướng ICE nền</th><th>Kéo EV</th><th>Phản công ICE</th><th>Rationale</th></tr></thead>
+    <tbody>
+      <tr><td><b>A-segment</b><br><span style="font-size:11px">Grand i10</span></td><td>Co (−)</td><td class="w">0,55</td><td class="w">0,40</td><td>VF3/VF5 giá rẻ tấn công nhóm nhạy giá. ICE phản công yếu vì biên mỏng. EV nhỉnh hơn.</td></tr>
+      <tr><td><b>B-sedan</b><br><span style="font-size:11px">Accent, Elantra</span></td><td>Co mạnh (−−)</td><td class="w">0,45</td><td class="w">0,35</td><td>Sedan bị SUV ăn sẵn, ICE phản công yếu nhất. Nhưng EV chưa có sedan mạnh nên kéo cũng vừa.</td></tr>
+      <tr><td><b>B-SUV</b><br><span style="font-size:11px">Creta, Venue</span></td><td>Nở (+)</td><td class="w">0,50</td><td class="w">0,55</td><td>Phân khúc nóng, ICE còn nhiều mẫu mạnh phản công tốt. Thế cân bằng — ICE hơi giữ được.</td></tr>
+      <tr><td><b>C-SUV</b><br><span style="font-size:11px">Tucson</span></td><td>Nở/bị đánh (+/−)</td><td class="w" style="color:#F0A99C">0,70</td><td class="w">0,60</td><td><b>Mặt trận nóng nhất.</b> VF7 kéo mạnh nhất, nhưng CX-5/Tucson phản công dữ (hạ giá, ưu đãi). EV thắng sít sao.</td></tr>
+      <tr><td><b>D-SUV</b><br><span style="font-size:11px">Santa Fe</span></td><td>Biến động</td><td class="w" style="color:var(--green)">0,30</td><td class="w" style="color:var(--green)">0,65</td><td><b>ICE giữ vững.</b> Chưa có EV cỡ D mạnh trực tiếp, xăng phản công khỏe (Santa Fe xả sâu). EV kéo yếu nhất.</td></tr>
+      <tr><td><b>MPV</b><br><span style="font-size:11px">Stargazer, Custin</span></td><td>Biến động</td><td class="w">0,40</td><td class="w">0,45</td><td>Limo Green rút mạnh MPV dịch vụ; MPV tư nhân ICE giữ được. Bình quân cân bằng.</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Tham số tầng 1 &amp; 2 — công bố</h4>
+  <table class="mtable">
+    <thead><tr><th>Tham số</th><th>Giá trị nền</th><th>Bản chất</th></tr></thead>
+    <tbody>
+      <tr><td><b>Tổng cầu VN baseline</b></td><td class="w">~280.000 xe (phân khúc HTV phủ)</td><td>Tầng 1 — neo từ thị trường, dự báo macro</td></tr>
+      <tr><td><b>Tăng trưởng tổng cầu</b></td><td class="w">+10% (chỉnh −10..+30)</td><td>Tầng 1 — regression macro + đồng thuận VAMA</td></tr>
+      <tr><td><b>Tỷ trọng phân khúc</b></td><td class="w">Xu hướng lịch sử + điểm gãy</td><td>Tầng 2 — ràng buộc Σ=100%</td></tr>
+      <tr><td><b>Tốc độ EV cuối năm</b></td><td class="w">28% (chỉnh 0..60)</td><td>Tầng 3 — biến scenario, KHÔNG dự báo</td></tr>
+    </tbody>
+  </table>
+
+  <div class="warn"><b>⚠ Hai trọng số kéo/phản công là tử huyệt dữ liệu.</b> Cả mô hình đứng/sụp ở đây và không có sẵn trong data nào. Sức kéo EV ước từ thị phần EV nở trong phân khúc theo tháng; sức phản công ICE ước từ phản ứng giá/sản phẩm của xăng + tỷ lệ giữ khách. Cốt lõi vẫn là <b>lost-reason data</b> (khách rời đi đâu, vì sao) — nó tách được cả ba dòng chảy. Giá trị nền là phán đoán có cơ sở để demo, phải calibrate trước khi dùng thật.</div>
+  <div class="warn"><b>⚠ Định nghĩa phân khúc phải khóa từ đầu.</b> Santa Fe là C hay D-SUV? Custin là MPV hay crossover? VAMA/VinFast/báo chí xếp khác nhau. Nếu Tầng 2 và data thực dùng định nghĩa khác → độ lệch top-down/bottom-up đầy nhiễu kỹ thuật, che tín hiệu thật. Cần một bảng ánh xạ "mẫu → phân khúc" dùng nhất quán mọi nơi.</div>
+  <div class="gold"><b>Cách dùng đúng:</b> Đây là đường <b>top-down</b>. Dựng song song một đường <b>bottom-up</b> (mỗi phân khúc dự báo độc lập từ driver riêng) rồi <b>đọc độ lệch giữa hai đường</b> — phân khúc lệch nhiều nhất là phân khúc vận động bất thường nhất. ĐỪNG lấy trung bình hai đường: trung bình của một số đúng và một số sai là số sai khó truy vết hơn. Quyết định tin đường nào ở từng phân khúc dựa trên việc giải thích được độ lệch.</div>
+</div>
+
+<div class="footer-note">
+  KIẾN TRÚC 3 TẦNG · Tầng 1 ổn định (cam kết chính xác cao) · Tầng 2 xu hướng · Tầng 3 EV scenario (cô lập noise).<br>
+  ⚠ MÔ HÌNH MINH HỌA CƠ CHẾ — tham số &amp; trọng số là giá trị nền để demo logic. Calibrate hệ số phơi nhiễm EV bằng lost-reason data + quan sát thị phần EV theo phân khúc theo tháng. Cập nhật rolling. Đối chiếu bottom-up để đọc độ méo.
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString('vi-VN');
+const TOTAL_BASE=280000; // tổng cầu phân khúc HTV phủ
+// phân khúc: tên, tỷ trọng ICE nền, xu hướng (đổi tỷ trọng), id phơi nhiễm
+const SEGS=[
+  {name:'A-segment',share:0.13,trend:-0.02,trendLbl:'Co',cls:'dn',e:'eA'},
+  {name:'B-sedan',share:0.18,trend:-0.04,trendLbl:'Co mạnh',cls:'dn',e:'eBs'},
+  {name:'B-SUV',share:0.24,trend:+0.03,trendLbl:'Nở',cls:'up',e:'eBu'},
+  {name:'C-SUV',share:0.17,trend:+0.02,trendLbl:'Nở/bị đánh',cls:'up',e:'eC'},
+  {name:'D-SUV',share:0.12,trend:0,trendLbl:'Biến động',cls:'',e:'eD'},
+  {name:'MPV',share:0.16,trend:+0.01,trendLbl:'Biến động',cls:'',e:'eM'}
+];
+const rampLbl=['Cố định','Tăng dần','Tăng tốc'];
+const rateLbl=['Thấp','Trung bình','Cao'];
+const scenarios={
+  base:{grow:10,ev:28,ramp:1,new:22,rate:1,eA:55,eBs:45,eBu:50,eC:70,eD:30,eM:40,cA:40,cBs:35,cBu:55,cC:60,cD:65,cM:45},
+  evfast:{grow:12,ev:48,ramp:2,new:18,rate:1,eA:70,eBs:55,eBu:62,eC:82,eD:42,eM:55,cA:35,cBs:30,cBu:48,cC:50,cD:58,cM:40},
+  evslow:{grow:9,ev:14,ramp:0,new:28,rate:1,eA:38,eBs:32,eBu:35,eC:50,eD:20,eM:28,cA:50,cBs:45,cBu:62,cC:70,cD:72,cM:55}
+};
+
+function compute(){
+  const grow=+$('grow').value,ev=+$('ev').value,ramp=+$('ramp').value,rate=+$('rate').value;
+  $('v-grow').textContent=(grow>=0?'+':'')+grow+'%';
+  $('v-ev').textContent=ev+'%';
+  $('v-ramp').textContent=rampLbl[ramp];
+  $('v-rate').textContent=rateLbl[rate];
+  ['eA','eBs','eBu','eC','eD','eM'].forEach(id=>{$('v-'+id).textContent=(+$(id).value/100).toFixed(2).replace('.',',');});
+
+  // tổng cầu (tầng 1)
+  let total=TOTAL_BASE*(1+grow/100)*(rate===2?0.93:rate===0?1.05:1.0);
+  // ICE share toàn thị trường = 1 - ev nền (đơn giản hoá: ev% là mức thâm nhập)
+  // ramp factor điều biến mức EV hiệu dụng bình quân năm
+  const rampMul=ramp===0?1.0:ramp===1?0.85:0.75; // tăng dần => bình quân năm thấp hơn mức cuối năm
+  const evEff=(ev/100)*rampMul;
+
+  const rows=SEGS.map(s=>{
+    const shareAdj=Math.max(0.02,s.share+s.trend); // tầng 2: xu hướng đổi tỷ trọng
+    return {...s,shareAdj};
+  });
+  // chuẩn hoá tỷ trọng về 100% (ràng buộc tầng 2)
+  const sumShare=rows.reduce((a,r)=>a+r.shareAdj,0);
+  rows.forEach(r=>r.shareNorm=r.shareAdj/sumShare);
+
+  let totICE=0,totLost=0,totNewEV=0;
+  rows.forEach(r=>{
+    const evPull=+$(r.e).value/100;          // sức kéo EV
+    const icePush=+$('c'+r.e.slice(1)).value/100; // sức phản công ICE (cA from eA etc.)
+    const segTotal=total*r.shareNorm;        // cầu phân khúc
+
+    // thị phần EV trong phân khúc = kết quả giằng co hai lực, điều biến bởi tốc độ EV scenario
+    // tỷ lệ tương quan: evPull / (evPull + icePush), nhân với mức thâm nhập EV hiệu dụng
+    const tug = evPull/(evPull+icePush+0.0001);
+    const evShareSeg = tug * evEff;          // % phân khúc thành EV
+    // tách: phần lấy từ ICE vs phần khách mới
+    const evTotalSeg = segTotal*evShareSeg/(1-evShareSeg+0.0001); // quy mô EV tương ứng
+    const newShare=+$('new').value/100;
+    const lost = segTotal*evShareSeg*(1-newShare);  // chỉ phần từ ICE mới trừ
+    const newEV = segTotal*evShareSeg*newShare;      // khách mới — không trừ ICE
+    const ice = segTotal - lost;
+
+    r.segTotal=segTotal;r.lost=lost;r.ice=ice;r.evPull=evPull;r.icePush=icePush;
+    r.tug=tug;r.newEV=newEV;
+    r.dmgPct=segTotal>0?lost/segTotal*100:0;
+    totICE+=ice;totLost+=lost;totNewEV+=newEV;
+  });
+  return {rows,totICE,totLost,totNewEV,total};
+}
+
+let chSeg;
+function render(){
+  const r=compute();
+  $('k-ice').innerHTML=fmt(r.totICE)+'<span class="unit">xe</span>';
+  const baseICE=216000;
+  const d=((r.totICE-baseICE)/baseICE*100);
+  $('k-ice-d').innerHTML=(d>=0?'▲ +':'▼ ')+d.toFixed(1)+'% vs nền';$('k-ice-d').className='kpi-delta '+(d>=0?'up':'down');
+  $('k-lost').innerHTML=fmt(r.totLost)+'<span class="unit">xe</span>';
+  $('k-lost-d').innerHTML='ICE mất · +'+fmt(r.totNewEV)+' khách mới sang EV';$('k-lost-d').className='kpi-delta down';
+
+  const risk=[...r.rows].sort((a,b)=>b.dmgPct-a.dmgPct)[0];
+  $('k-risk').textContent=risk.name;
+  $('k-risk-d').innerHTML='−'+risk.dmgPct.toFixed(0)+'% ròng vào EV';$('k-risk-d').className='kpi-delta down';
+
+  const labels=r.rows.map(x=>x.name);
+  const before=r.rows.map(x=>x.segTotal);
+  const after=r.rows.map(x=>x.ice);
+  if(!chSeg){
+    chSeg=new Chart($('chSeg'),{type:'bar',data:{labels,datasets:[
+      {label:'Cầu phân khúc (gồm khách mới)',data:before,backgroundColor:'rgba(143,163,188,.25)',borderRadius:4,borderSkipped:false},
+      {label:'ICE còn lại sau giằng co',data:after,backgroundColor:'#C8A96E',borderRadius:4,borderSkipped:false}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8FA3BC',font:{family:'DM Mono',size:11}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)+' xe'}}},scales:{x:{grid:{display:false},ticks:{color:'#E8EDF4',font:{family:'Outfit',size:12}}},y:{grid:{color:'rgba(200,169,110,.06)'},ticks:{color:'#8FA3BC',font:{family:'DM Mono',size:11},callback:v=>fmt(v)}}}}});
+  }else{chSeg.data.datasets[0].data=before;chSeg.data.datasets[1].data=after;chSeg.update('none');}
+
+  const tb=$('segTable').querySelector('tbody');tb.innerHTML='';
+  r.rows.forEach(x=>{
+    const dmg=x.dmgPct;
+    const ecls=dmg>=35?'e-hi':dmg>=20?'e-md':'e-lo';
+    const tcls=x.cls==='up'?'seg-trend-up':x.cls==='dn'?'seg-trend-dn':'';
+    const balance=x.icePush>=x.evPull?'<span style="color:var(--green)">ICE giữ</span>':'<span style="color:#F0A99C">EV thắng</span>';
+    tb.innerHTML+=`<tr><td>${x.name}</td><td class="${tcls}" style="text-align:right">${x.trendLbl}</td><td style="text-align:right">${balance}</td><td class="num">${fmt(x.ice)}</td><td class="num" style="color:#F0A99C">${fmt(x.lost)}</td><td class="num" style="color:#F0A99C">−${dmg.toFixed(0)}%</td></tr>`;
+  });
+}
+
+['grow','ev','ramp','new','rate','eA','eBs','eBu','eC','eD','eM','cA','cBs','cBu','cC','cD','cM'].forEach(id=>$(id).addEventListener('input',()=>{document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));render();}));
+document.querySelectorAll('.sc-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  const s=scenarios[btn.dataset.sc];Object.keys(s).forEach(k=>{if($(k))$(k).value=s[k];});render();
+}));
+render();
+</script>
+</body>
+</html>
