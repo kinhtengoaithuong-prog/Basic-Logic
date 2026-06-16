@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HKD → DN Conversion Simulator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
+:root{
+  --bg:#0A0E1A;
+  --surface:#10172A;
+  --card:#151D33;
+  --card-hi:#1B2440;
+  --gold:#D4B16A;
+  --gold-dim:rgba(212,177,106,.16);
+  --platinum:#E8E3D8;
+  --text:#E9EDF5;
+  --muted:#8A94AB;
+  --faint:#5A6480;
+  --green:#5BBF8A;
+  --red:#E0697A;
+  --blue:#6A9BD4;
+  --line:rgba(212,177,106,.14);
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'Be Vietnam Pro',-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono','SF Mono',Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;line-height:1.55;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(1100px 500px at 80% -10%,rgba(212,177,106,.06),transparent 60%),radial-gradient(800px 400px at 0% 110%,rgba(106,155,212,.05),transparent 60%);pointer-events:none;z-index:0}
+.wrap{max-width:1280px;margin:0 auto;padding:36px 28px 80px;position:relative;z-index:1}
+
+/* HEADER */
+.masthead{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:26px;flex-wrap:wrap;gap:14px}
+.masthead h1{font-family:var(--serif);font-size:30px;font-weight:400;letter-spacing:.3px}
+.masthead h1 em{color:var(--gold);font-style:italic}
+.masthead .sub{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:5px}
+.badge-legal{font-family:var(--mono);font-size:10px;color:var(--gold);border:1px solid var(--line);padding:6px 12px;border-radius:3px;letter-spacing:1px;background:var(--gold-dim)}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:28px;border-bottom:1px solid var(--line)}
+.tab{font-family:var(--mono);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);background:none;border:none;padding:12px 20px 14px;cursor:pointer;position:relative;transition:color .2s}
+.tab:hover{color:var(--platinum)}
+.tab.active{color:var(--gold)}
+.tab.active::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--gold)}
+.panel{display:none}
+.panel.active{display:block;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* LAYOUT TAB 1 */
+.sim-grid{display:grid;grid-template-columns:400px 1fr;gap:24px;align-items:start}
+@media(max-width:980px){.sim-grid{grid-template-columns:1fr}}
+
+/* PRESETS */
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.preset{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:7px 13px;border-radius:3px;cursor:pointer;transition:all .2s;letter-spacing:.5px}
+.preset:hover{color:var(--gold);border-color:var(--gold)}
+.preset.on{color:var(--bg);background:var(--gold);border-color:var(--gold);font-weight:500}
+
+/* INPUT CARDS */
+.icard{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:20px 22px;margin-bottom:16px}
+.icard h3{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.icard h3::after{content:'';flex:1;height:1px;background:var(--line)}
+.field{margin-bottom:15px}
+.field:last-child{margin-bottom:2px}
+.flabel{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.flabel label{font-size:13px;color:var(--text);font-weight:400}
+.flabel .val{font-family:var(--mono);font-size:13px;color:var(--gold)}
+.flabel .hint{font-size:11px;color:var(--muted);font-weight:300}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:3px;background:linear-gradient(to right,var(--gold) var(--p,50%),#2A3450 var(--p,50%));border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);box-shadow:0 0 0 1px var(--gold);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);cursor:pointer}
+select,input[type=number]{width:100%;background:var(--surface);border:1px solid var(--line);color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 10px;border-radius:4px;outline:none}
+select:focus,input[type=number]:focus{border-color:var(--gold)}
+select option{background:var(--surface)}
+.toggle-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid rgba(255,255,255,.04)}
+.toggle-row:first-of-type{border-top:none}
+.toggle-row .tl{font-size:13px}
+.toggle-row .tl small{display:block;font-size:11px;color:var(--muted)}
+.switch{position:relative;width:38px;height:20px;flex-shrink:0;margin-left:12px}
+.switch input{opacity:0;width:0;height:0}
+.sl{position:absolute;cursor:pointer;inset:0;background:#2A3450;border-radius:20px;transition:.25s}
+.sl::before{content:'';position:absolute;height:14px;width:14px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:.25s}
+.switch input:checked + .sl{background:var(--gold)}
+.switch input:checked + .sl::before{transform:translateX(18px);background:var(--bg)}
+
+/* RESULTS */
+.verdict{background:linear-gradient(135deg,var(--card-hi),var(--card));border:1px solid var(--line);border-radius:6px;padding:26px 28px;margin-bottom:18px;display:grid;grid-template-columns:190px 1fr;gap:26px;align-items:center}
+@media(max-width:640px){.verdict{grid-template-columns:1fr}}
+.gauge{position:relative;width:190px;height:110px;margin:0 auto}
+.gauge svg{width:100%;height:auto;overflow:visible}
+.gauge .score-num{position:absolute;left:0;right:0;bottom:-4px;text-align:center;font-family:var(--serif);font-size:42px;color:var(--platinum);line-height:1}
+.gauge .score-cap{position:absolute;left:0;right:0;bottom:-22px;text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.verdict-body .v-tag{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:5px 12px;border-radius:3px;display:inline-block;margin-bottom:10px}
+.v-go{background:rgba(91,191,138,.14);color:var(--green);border:1px solid rgba(91,191,138,.35)}
+.v-mid{background:rgba(212,177,106,.14);color:var(--gold);border:1px solid rgba(212,177,106,.35)}
+.v-no{background:rgba(224,105,122,.12);color:var(--red);border:1px solid rgba(224,105,122,.35)}
+.verdict-body h2{font-family:var(--serif);font-size:24px;font-weight:400;margin-bottom:8px}
+.verdict-body p{font-size:13px;color:var(--muted)}
+.drivers{margin-top:12px}
+.drivers li{font-size:13px;color:var(--text);list-style:none;padding-left:18px;position:relative;margin-bottom:5px}
+.drivers li::before{content:'›';position:absolute;left:2px;color:var(--gold)}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+@media(max-width:780px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 18px}
+.kpi .k-label{font-family:var(--mono);font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.kpi .k-val{font-family:var(--serif);font-size:25px;color:var(--platinum);line-height:1.1}
+.kpi .k-val.pos{color:var(--green)}
+.kpi .k-val.neg{color:var(--red)}
+.kpi .k-sub{font-size:11px;color:var(--muted);margin-top:5px}
+
+.rcard{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:22px 24px;margin-bottom:18px}
+.rcard h3{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
+.rcard h3 small{color:var(--muted);text-transform:none;letter-spacing:.3px;font-size:11px;margin-left:8px}
+
+/* STACKED BARS */
+.bar-row{margin-bottom:16px}
+.bar-row .b-head{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
+.bar-row .b-head .b-name{font-family:var(--mono);letter-spacing:1px;color:var(--platinum)}
+.bar-row .b-head .b-total{font-family:var(--mono);color:var(--gold)}
+.stack{display:flex;height:26px;border-radius:4px;overflow:hidden;background:#0D1322}
+.seg{height:100%;min-width:0;transition:width .4s ease;position:relative}
+.seg.s-tax{background:#B98A3E}
+.seg.s-vat{background:#7E6FB8}
+.seg.s-acct{background:#4A7FB5}
+.seg.s-bhxh{background:#3E8F6C}
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px}
+.legend .lg{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);font-family:var(--mono)}
+.legend .sw{width:10px;height:10px;border-radius:2px}
+
+/* 5-YEAR CHART */
+.yr-chart{display:flex;align-items:flex-end;gap:0;height:200px;border-bottom:1px solid var(--line);padding:0 6px}
+.yr-group{flex:1;display:flex;align-items:flex-end;justify-content:center;gap:7px;height:100%;position:relative}
+.yr-bar{width:26px;border-radius:3px 3px 0 0;transition:height .4s ease;position:relative;min-height:2px}
+.yr-bar.hkd{background:linear-gradient(to top,#6E5526,#B98A3E)}
+.yr-bar.dn{background:linear-gradient(to top,#2C5A45,#5BBF8A)}
+.yr-bar .tip{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9.5px;color:var(--muted);white-space:nowrap}
+.yr-labels{display:flex;padding:8px 6px 0}
+.yr-labels span{flex:1;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+/* DETAIL TABLE */
+table.detail{width:100%;border-collapse:collapse;font-size:12.5px}
+table.detail th{font-family:var(--mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);font-weight:400}
+table.detail th:first-child{text-align:left}
+table.detail td{padding:8px 10px;text-align:right;font-family:var(--mono);color:var(--text);border-bottom:1px solid rgba(255,255,255,.04)}
+table.detail td:first-child{text-align:left;font-family:var(--sans);color:var(--muted)}
+table.detail tr.hl td{color:var(--gold);border-top:1px solid var(--line)}
+.pos-t{color:var(--green)!important}
+.neg-t{color:var(--red)!important}
+
+.note-box{background:var(--surface);border-left:2px solid var(--gold);padding:14px 18px;border-radius:0 4px 4px 0;font-size:12.5px;color:var(--muted);margin-top:16px}
+.note-box strong{color:var(--platinum);font-weight:500}
+
+/* TAB 2 — COMPARISON */
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px}
+.cmp-table th{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:14px 16px;text-align:left;border-bottom:1px solid var(--gold);font-weight:500}
+.cmp-table th.col-hkd{color:var(--blue)}
+.cmp-table th.col-dn{color:var(--green)}
+.cmp-table th.col-c{color:var(--muted);width:190px}
+.cmp-table td{padding:14px 16px;vertical-align:top;border-bottom:1px solid rgba(255,255,255,.05)}
+.cmp-table td.crit{font-family:var(--mono);font-size:11.5px;color:var(--gold);letter-spacing:.5px}
+.cmp-table tr:hover td{background:rgba(255,255,255,.015)}
+.cmp-table td small{display:block;color:var(--muted);font-size:11.5px;margin-top:3px}
+.pill{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:3px;letter-spacing:.5px}
+.pill.adv{background:rgba(91,191,138,.12);color:var(--green)}
+.pill.dis{background:rgba(224,105,122,.1);color:var(--red)}
+.pill.neu{background:rgba(138,148,171,.12);color:var(--muted)}
+
+/* TAB 3 — FLOWCHART */
+.flow-wrap{max-width:760px;margin:0 auto}
+.flow-step{display:grid;grid-template-columns:64px 1fr;gap:0;position:relative}
+.flow-node{display:flex;flex-direction:column;align-items:center}
+.flow-dot{width:44px;height:44px;border-radius:50%;background:var(--card-hi);border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:18px;color:var(--gold);flex-shrink:0;z-index:1}
+.flow-line{width:1.5px;flex:1;background:linear-gradient(to bottom,var(--gold),rgba(212,177,106,.25));min-height:24px}
+.flow-step:last-child .flow-line{display:none}
+.flow-card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px 22px;margin:0 0 22px 4px}
+.flow-card h4{font-family:var(--serif);font-size:18px;font-weight:400;margin-bottom:6px;color:var(--platinum)}
+.flow-card h4 .when{font-family:var(--mono);font-size:10px;color:var(--gold);background:var(--gold-dim);padding:3px 9px;border-radius:3px;letter-spacing:1px;margin-left:10px;vertical-align:2px}
+.flow-card p{font-size:13px;color:var(--muted)}
+.flow-card ul{margin-top:8px}
+.flow-card li{font-size:13px;color:var(--text);list-style:none;padding-left:18px;position:relative;margin-bottom:4px}
+.flow-card li::before{content:'—';position:absolute;left:0;color:var(--gold)}
+.flow-card .free-tag{font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:1px}
+.branch{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+@media(max-width:560px){.branch{grid-template-columns:1fr}}
+.branch .opt{background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:12px 15px}
+.branch .opt b{display:block;font-size:13px;font-weight:500;color:var(--platinum);margin-bottom:3px}
+.branch .opt span{font-size:11.5px;color:var(--muted)}
+.branch .opt.rec{border-color:var(--gold)}
+.branch .opt.rec b::after{content:'PHỔ BIẾN NHẤT';font-family:var(--mono);font-size:8.5px;color:var(--gold);margin-left:8px;letter-spacing:1px}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin-top:10px}
+@media(max-width:560px){.check-grid{grid-template-columns:1fr}}
+.check-grid li{font-size:13px;list-style:none;padding-left:22px;position:relative;color:var(--text)}
+.check-grid li::before{content:'☐';position:absolute;left:0;color:var(--gold)}
+
+/* TAB 4 — PERSONAS */
+.pa-intro{font-size:13.5px;color:var(--muted);max-width:760px;margin-bottom:22px}
+.pa-intro strong{color:var(--platinum);font-weight:500}
+.scatter-card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:22px 24px;margin-bottom:22px}
+.scatter-card h3{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.scatter-card h3 small{color:var(--muted);text-transform:none;letter-spacing:.3px;margin-left:8px}
+.p-card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:20px 22px;margin-bottom:14px;display:grid;grid-template-columns:54px 1fr 230px;gap:20px;align-items:start;transition:border-color .2s}
+.p-card:hover{border-color:rgba(212,177,106,.4)}
+.p-card.top{border-color:var(--gold);background:linear-gradient(135deg,var(--card-hi),var(--card))}
+@media(max-width:860px){.p-card{grid-template-columns:54px 1fr}.p-side{grid-column:1/-1;border-left:none!important;border-top:1px solid var(--line);padding:14px 0 0!important;margin-left:0!important}}
+.p-rank{text-align:center}
+.p-rank .rk{font-family:var(--serif);font-size:26px;color:var(--muted);line-height:1}
+.p-card.top .p-rank .rk{color:var(--gold)}
+.p-rank .sc{font-family:var(--mono);font-size:11px;margin-top:6px;padding:3px 0;border-radius:3px}
+.sc.go{background:rgba(91,191,138,.14);color:var(--green)}
+.sc.mid{background:rgba(212,177,106,.14);color:var(--gold)}
+.sc.no{background:rgba(224,105,122,.12);color:var(--red)}
+.p-main h4{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--platinum);margin-bottom:2px}
+.p-main .p-meta{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.5px;margin-bottom:10px}
+.p-main .p-driver{font-size:13px;color:var(--text);margin-bottom:8px}
+.p-main .p-driver b{color:var(--gold);font-weight:500}
+.p-id{font-size:12px;color:var(--muted)}
+.p-id span{color:var(--platinum)}
+.scorebar{height:4px;background:#222B45;border-radius:2px;margin:10px 0 0;overflow:hidden}
+.scorebar i{display:block;height:100%;border-radius:2px}
+.p-side{border-left:1px solid var(--line);padding-left:20px;margin-left:0}
+.p-side .ps-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:7px}
+.p-side .ps-row .l{color:var(--muted)}
+.p-side .ps-row .v{font-family:var(--mono);color:var(--text)}
+.p-side .ps-row .v.pos{color:var(--green)}
+.p-side .ps-row .v.neg{color:var(--red)}
+.p-pack{font-size:11.5px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--line);border-radius:4px;padding:7px 10px;margin:10px 0;line-height:1.45}
+.p-load{font-family:var(--mono);font-size:10.5px;letter-spacing:1px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:3px;padding:7px 12px;cursor:pointer;width:100%;transition:all .2s;text-transform:uppercase}
+.p-load:hover{color:var(--gold);border-color:var(--gold)}
+
+/* TAB 4 — PERSONA */
+.pa-intro{font-size:13.5px;color:var(--muted);max-width:880px;margin-bottom:22px;line-height:1.65}
+.pa-intro strong{color:var(--platinum);font-weight:500}
+.scatter-card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:22px 24px;margin-bottom:20px}
+.scatter-card h3{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
+.scatter-card h3 small{color:var(--muted);text-transform:none;letter-spacing:.3px;font-size:11px;margin-left:8px}
+#scatter{position:relative;height:360px;background:#0D1322;border:1px solid rgba(255,255,255,.05);border-radius:5px;overflow:hidden}
+.sc-mid-x{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(212,177,106,.12)}
+.sc-mid-y{position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(212,177,106,.12)}
+.sc-quad{position:absolute;font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:#414C6B;text-transform:uppercase;pointer-events:none}
+.sc-axis{position:absolute;font-family:var(--mono);font-size:9px;color:#4A5570;letter-spacing:1px;pointer-events:none}
+.sc-dot{position:absolute;border-radius:50%;transform:translate(-50%,50%);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9.5px;color:var(--bg);font-weight:500;cursor:pointer;border:1.5px solid rgba(255,255,255,.3);transition:filter .2s}
+.sc-dot:hover{filter:brightness(1.15)}
+.sc-dot .sc-name{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:9.5px;color:var(--muted);font-weight:400;font-family:var(--sans)}
+#plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(370px,1fr));gap:16px;margin-bottom:18px}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:20px 22px;display:flex;flex-direction:column;gap:12px;position:relative}
+.pcard .rank{position:absolute;top:14px;right:18px;font-family:var(--serif);font-size:32px;color:rgba(212,177,106,.22);line-height:1}
+.pcard h4{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--platinum);padding-right:48px;line-height:1.25}
+.pcard .ptag{font-size:12px;color:var(--muted);font-style:italic;margin-top:-7px}
+.pchips{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{font-family:var(--mono);font-size:10px;color:var(--muted);background:var(--surface);border:1px solid rgba(255,255,255,.07);padding:3px 9px;border-radius:3px}
+.pscore-row{display:flex;align-items:center;gap:12px}
+.pscore-row .pscore{font-family:var(--serif);font-size:26px;min-width:42px;line-height:1}
+.pscore-row .ptier{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase}
+.pbar{flex:1;height:5px;background:#0D1322;border-radius:3px;overflow:hidden}
+.pbar i{display:block;height:100%;border-radius:3px;transition:width .4s}
+.plabel{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:5px}
+.psec{font-size:12.5px;color:var(--text)}
+.psec ul li{list-style:none;padding-left:14px;position:relative;color:var(--muted);font-size:12.5px;margin-bottom:3px}
+.psec ul li::before{content:'·';position:absolute;left:2px;color:var(--gold)}
+.psec .pdong{color:var(--text);font-size:12.5px}
+.pgoi{font-size:12px;padding:9px 13px;border-radius:4px;border:1px dashed var(--line);line-height:1.5}
+.pgoi.w1{border-color:rgba(91,191,138,.45);color:var(--green)}
+.pgoi.w2{border-color:rgba(212,177,106,.45);color:var(--gold)}
+.pgoi.w3{border-color:rgba(138,148,171,.35);color:var(--muted)}
+.pbtn{font-family:var(--mono);font-size:11px;letter-spacing:1px;background:none;border:1px solid var(--gold);color:var(--gold);padding:8px 14px;border-radius:4px;cursor:pointer;transition:.2s;align-self:flex-start;margin-top:auto}
+.pbtn:hover{background:var(--gold);color:var(--bg)}
+
+.footer{margin-top:48px;border-top:1px solid var(--line);padding-top:18px;font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.5px;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <h1>HKD <em>→</em> Doanh Nghiệp <em>Conversion Simulator</em></h1>
+      <div class="sub">Mô phỏng tài chính quyết định chuyển đổi · Khung pháp lý 2026</div>
+    </div>
+    <div class="badge-legal">NQ 198/2025/QH15 · NĐ 168/2025 · Luật Thuế TNDN 2025 · TT 40/2021</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="t1">01 · Simulator</button>
+    <button class="tab" data-tab="t2">02 · So sánh nghĩa vụ</button>
+    <button class="tab" data-tab="t3">03 · Lưu đồ thủ tục</button>
+    <button class="tab" data-tab="t4">04 · Persona Analysis</button>
+  </div>
+
+  <!-- ============ TAB 1 : SIMULATOR ============ -->
+  <div class="panel active" id="t1">
+
+    <div class="presets" id="presets"></div>
+
+    <div class="sim-grid">
+      <!-- INPUTS -->
+      <div>
+        <div class="icard">
+          <h3>Quy mô & ngành</h3>
+          <div class="field">
+            <div class="flabel"><label>Doanh thu năm</label><span class="val" id="v_rev"></span></div>
+            <input type="range" id="i_rev" min="200" max="60000" step="100" value="3000">
+          </div>
+          <div class="field">
+            <div class="flabel"><label>Nhóm ngành (thuế suất HKD theo TT 40/2021)</label></div>
+            <select id="i_nganh">
+              <option value="pp">Phân phối, cung cấp hàng hóa — 1.5% DT</option>
+              <option value="sx" selected>SX, vận tải, ăn uống, DV có gắn hàng hóa — 4.5% DT</option>
+              <option value="dv">Dịch vụ, xây dựng không bao thầu NVL — 7% DT</option>
+              <option value="khac">Hoạt động kinh doanh khác — 3% DT</option>
+              <option value="thue">Cho thuê tài sản — 10% DT</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="flabel"><label>Tăng trưởng doanh thu</label><span class="val" id="v_growth"></span></div>
+            <input type="range" id="i_growth" min="0" max="60" step="1" value="12">
+          </div>
+          <div class="field">
+            <div class="flabel"><label>Số giao dịch / tháng</label><span class="val" id="v_tx"></span></div>
+            <input type="range" id="i_tx" min="10" max="5000" step="10" value="600">
+          </div>
+        </div>
+
+        <div class="icard">
+          <h3>Cấu trúc lợi nhuận</h3>
+          <div class="field">
+            <div class="flabel"><label>Biên lợi nhuận gộp</label><span class="val" id="v_margin"></span></div>
+            <input type="range" id="i_margin" min="3" max="95" step="1" value="35">
+          </div>
+          <div class="field">
+            <div class="flabel"><label>Chi phí vận hành khác <span class="hint">(% DT, chưa gồm kế toán & BHXH)</span></label><span class="val" id="v_opex"></span></div>
+            <input type="range" id="i_opex" min="0" max="70" step="1" value="18">
+          </div>
+          <div class="field">
+            <div class="flabel"><label>Tỷ lệ chi phí có hóa đơn hợp lệ <span class="hint">(được trừ thuế + khấu trừ VAT)</span></label><span class="val" id="v_inv"></span></div>
+            <input type="range" id="i_inv" min="0" max="100" step="5" value="60">
+          </div>
+        </div>
+
+        <div class="icard">
+          <h3>Chi phí tuân thủ & chuyển đổi</h3>
+          <div class="field">
+            <div class="flabel"><label>Chi phí kế toán/thuế hiện tại (HKD)</label><span class="val" id="v_acctH"></span></div>
+            <input type="range" id="i_acctH" min="0" max="120" step="2" value="18">
+          </div>
+          <div class="field">
+            <div class="flabel"><label>Chi phí kế toán/thuế khi lên DN</label><span class="val" id="v_acctD"></span></div>
+            <input type="range" id="i_acctD" min="0" max="300" step="5" value="60">
+          </div>
+          <div class="field">
+            <div class="flabel"><label>Chi phí chuyển đổi một lần <span class="hint">(dấu, CKS, HĐĐT, setup)</span></label><span class="val" id="v_conv"></span></div>
+            <input type="range" id="i_conv" min="0" max="100" step="2" value="20">
+          </div>
+          <div class="field">
+            <div class="flabel"><label>Quỹ lương chính thức hóa thêm / tháng <span class="hint">(BHXH chủ DN ~21.5%)</span></label><span class="val" id="v_payroll"></span></div>
+            <input type="range" id="i_payroll" min="0" max="200" step="5" value="25">
+          </div>
+        </div>
+
+        <div class="icard">
+          <h3>Yếu tố chiến lược & giả định</h3>
+          <div class="field">
+            <div class="flabel"><label>Tỷ trọng khách cần hóa đơn VAT (B2B)</label><span class="val" id="v_b2b"></span></div>
+            <input type="range" id="i_b2b" min="0" max="100" step="5" value="20">
+          </div>
+          <div class="field">
+            <div class="flabel"><label>Thuế suất VAT đầu ra của ngành</label></div>
+            <select id="i_vat">
+              <option value="8" selected>8%</option>
+              <option value="10">10%</option>
+              <option value="5">5%</option>
+            </select>
+          </div>
+          <div class="toggle-row">
+            <div class="tl">Miễn TNDN 2 năm đầu<small>NQ 198 + Luật Thuế TNDN 2025, DT ≤ 50 tỷ</small></div>
+            <label class="switch"><input type="checkbox" id="i_exempt" checked><span class="sl"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="tl">Hỗ trợ chi phí kế toán 2 năm<small>Giả định nhà nước hỗ trợ 50% — cơ chế cấp tỉnh</small></div>
+            <label class="switch"><input type="checkbox" id="i_support"><span class="sl"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div>
+        <div class="verdict">
+          <div class="gauge">
+            <svg viewBox="0 0 200 110">
+              <path d="M 14 100 A 86 86 0 0 1 186 100" fill="none" stroke="#222B45" stroke-width="11" stroke-linecap="round"/>
+              <path id="g_arc" d="M 14 100 A 86 86 0 0 1 186 100" fill="none" stroke="#D4B16A" stroke-width="11" stroke-linecap="round" stroke-dasharray="270" stroke-dashoffset="270"/>
+            </svg>
+            <div class="score-num" id="g_num">—</div>
+            <div class="score-cap">Conversion Score / 100</div>
+          </div>
+          <div class="verdict-body">
+            <span class="v-tag v-mid" id="v_tag">ĐANG TÍNH</span>
+            <h2 id="v_title">—</h2>
+            <p id="v_desc">—</p>
+            <ul class="drivers" id="v_drivers"></ul>
+          </div>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="k-label">Tổng chi phí HKD · năm 1</div>
+            <div class="k-val" id="k_hkd1">—</div>
+            <div class="k-sub">thuế + tuân thủ</div>
+          </div>
+          <div class="kpi">
+            <div class="k-label">Tổng chi phí DN · năm 1</div>
+            <div class="k-val" id="k_dn1">—</div>
+            <div class="k-sub" id="k_dn1sub">đã gồm miễn TNDN</div>
+          </div>
+          <div class="kpi">
+            <div class="k-label">Tiết kiệm 5 năm (ròng)</div>
+            <div class="k-val" id="k_save5">—</div>
+            <div class="k-sub">đã trừ chi phí chuyển đổi</div>
+          </div>
+          <div class="kpi">
+            <div class="k-label">Hoàn vốn chuyển đổi</div>
+            <div class="k-val" id="k_payback">—</div>
+            <div class="k-sub" id="k_paysub">tích lũy chênh lệch</div>
+          </div>
+        </div>
+
+        <div class="rcard">
+          <h3>Cơ cấu chi phí so sánh <small id="bar_note">— Năm 1 & Năm 3 (sau hết miễn thuế)</small></h3>
+          <div id="bars"></div>
+          <div class="legend">
+            <div class="lg"><span class="sw" style="background:#B98A3E"></span>Thuế (HKD: trên DT · DN: TNDN)</div>
+            <div class="lg"><span class="sw" style="background:#7E6FB8"></span>VAT ròng hấp thụ (B2C)</div>
+            <div class="lg"><span class="sw" style="background:#4A7FB5"></span>Kế toán & tuân thủ</div>
+            <div class="lg"><span class="sw" style="background:#3E8F6C"></span>BHXH chính thức hóa</div>
+          </div>
+        </div>
+
+        <div class="rcard">
+          <h3>Tổng chi phí thuế & tuân thủ · 5 năm</h3>
+          <div class="yr-chart" id="yrchart"></div>
+          <div class="yr-labels" id="yrlabels"></div>
+          <div class="legend" style="margin-top:14px">
+            <div class="lg"><span class="sw" style="background:#B98A3E"></span>Ở lại HKD</div>
+            <div class="lg"><span class="sw" style="background:#5BBF8A"></span>Chuyển lên DN</div>
+          </div>
+        </div>
+
+        <div class="rcard">
+          <h3>Bảng chi tiết theo năm <small>— đơn vị: triệu đồng</small></h3>
+          <div style="overflow-x:auto">
+            <table class="detail" id="dtable"></table>
+          </div>
+          <div class="note-box" id="model_note">
+            <strong>Giả định mô hình:</strong> HKD nộp thuế GTGT + TNCN theo % doanh thu (TT 40/2021), miễn nếu DT ≤ 200tr/năm. DN nộp TNDN 15% (DT ≤ 3 tỷ) / 17% (3–50 tỷ) trên lợi nhuận tính thuế — <strong>chi phí không có hóa đơn không được trừ</strong>. VAT ròng DN = VAT đầu ra hấp thụ trên doanh thu B2C (giá bán lẻ khó tăng) trừ VAT đầu vào khấu trừ được. Lệ phí môn bài đã bãi bỏ cho cả hai từ 01/01/2026. Lợi nhuận TNHH MTV (cá nhân) rút về không chịu thêm TNCN theo quy định hiện hành.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 2 : COMPARISON ============ -->
+  <div class="panel" id="t2">
+    <div class="rcard">
+      <h3>Nghĩa vụ thuế & tuân thủ · HKD (kê khai 2026) vs DN siêu nhỏ</h3>
+      <div style="overflow-x:auto">
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th class="col-c">Tiêu chí</th>
+            <th class="col-hkd">Hộ kinh doanh (từ 2026)</th>
+            <th class="col-dn">Doanh nghiệp siêu nhỏ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="crit">Căn cứ tính thuế</td>
+            <td>% trực tiếp trên <b>doanh thu</b> — không trừ chi phí <span class="pill dis">bất lợi khi biên mỏng</span></td>
+            <td>Thuế TNDN trên <b>lợi nhuận</b> — chi phí hợp lệ được trừ <span class="pill adv">lỗ = không nộp</span></td>
+          </tr>
+          <tr>
+            <td class="crit">Thuế suất chính</td>
+            <td>GTGT + TNCN gộp theo ngành: phân phối HH 1.5% · SX/ăn uống 4.5% · dịch vụ 7% · cho thuê TS 10%<small>Thông tư 40/2021/TT-BTC</small></td>
+            <td>15% nếu DT ≤ 3 tỷ/năm · 17% nếu 3–50 tỷ · 20% chuẩn<small>Luật Thuế TNDN 2025, áp dụng từ kỳ thuế 2025</small></td>
+          </tr>
+          <tr>
+            <td class="crit">Ngưỡng miễn</td>
+            <td>DT ≤ <b>200 triệu/năm</b>: miễn GTGT + TNCN (nâng từ 100tr, hiệu lực 01/01/2026)</td>
+            <td><b>Miễn TNDN 2 năm</b> liên tục kể từ khi có thu nhập chịu thuế — áp dụng cho DN chuyển đổi từ HKD, DT ≤ 50 tỷ; điều kiện: HKD hoạt động liên tục ≥ 1 năm trước chuyển đổi</td>
+          </tr>
+          <tr>
+            <td class="crit">Phương pháp khoán</td>
+            <td><b>Chấm dứt từ 01/01/2026</b> — toàn bộ HKD chuyển sang kê khai theo doanh thu thực <span class="pill neu">NQ 198 Điều 10</span></td>
+            <td>Kê khai từ đầu — không thay đổi</td>
+          </tr>
+          <tr>
+            <td class="crit">Thuế GTGT</td>
+            <td>Phương pháp trực tiếp trên doanh thu — <b>không khấu trừ</b> VAT đầu vào, không xuất hóa đơn VAT khấu trừ cho khách</td>
+            <td>Phương pháp khấu trừ: VAT phải nộp = đầu ra − đầu vào. Xuất được hóa đơn VAT → <b>điều kiện vào chuỗi cung ứng B2B</b> <span class="pill adv">lợi thế bán hàng</span></td>
+          </tr>
+          <tr>
+            <td class="crit">Lệ phí môn bài</td>
+            <td colspan="2" style="text-align:center;color:var(--green);font-family:var(--mono);font-size:12px">ĐÃ BÃI BỎ CHO CẢ HAI TỪ 01/01/2026 — NQ 198/2025/QH15</td>
+          </tr>
+          <tr>
+            <td class="crit">Hóa đơn điện tử</td>
+            <td>Bắt buộc HĐĐT từ máy tính tiền nếu DT > 1 tỷ/năm với nhóm bán lẻ trực tiếp người tiêu dùng<small>NĐ 70/2025/NĐ-CP</small></td>
+            <td>Bắt buộc HĐĐT cho toàn bộ giao dịch bán ra</td>
+          </tr>
+          <tr>
+            <td class="crit">Chế độ kế toán</td>
+            <td>Sổ sách đơn giản theo TT 88/2021 (ghi doanh thu, chi phí cơ bản)</td>
+            <td>DN siêu nhỏ: TT 132/2018 (rất gọn — có thể không cần lập BCTC đầy đủ nếu nộp thuế theo tỷ lệ) · DNNVV: TT 133/2016</td>
+          </tr>
+          <tr>
+            <td class="crit">Kỳ kê khai</td>
+            <td>Theo tháng/quý tùy quy mô; quyết toán TNCN năm</td>
+            <td>VAT + TNCN theo quý/tháng; tạm nộp TNDN quý; quyết toán TNDN + BCTC năm</td>
+          </tr>
+          <tr>
+            <td class="crit">BHXH</td>
+            <td>Chủ HKD có đăng ký thuộc diện BHXH bắt buộc từ 01/07/2025 (Luật BHXH 2024); lao động có HĐLĐ phải đóng</td>
+            <td>Bắt buộc với mọi lao động có HĐLĐ từ đủ 1 tháng — chi phí DN ~21.5% quỹ lương; <b>được tính chi phí trừ thuế</b></td>
+          </tr>
+          <tr>
+            <td class="crit">Trách nhiệm pháp lý</td>
+            <td>Chủ hộ chịu trách nhiệm <b>vô hạn</b> bằng toàn bộ tài sản cá nhân <span class="pill dis">rủi ro</span></td>
+            <td>TNHH: hữu hạn trong phạm vi vốn điều lệ <span class="pill adv">tách bạch tài sản</span><small>Riêng DNTN vẫn vô hạn</small></td>
+          </tr>
+          <tr>
+            <td class="crit">Rút lợi nhuận về chủ</td>
+            <td>Tự do — thuế đã nộp gộp trên doanh thu</td>
+            <td>TNHH MTV do cá nhân làm chủ: lợi nhuận sau thuế chia về chủ <b>không chịu thêm TNCN</b> (quy định hiện hành)<small>Lưu ý: lương chủ sở hữu TNHH MTV không được tính chi phí trừ</small></td>
+          </tr>
+          <tr>
+            <td class="crit">Huy động vốn & vay</td>
+            <td>Hạn chế — khó vay theo pháp nhân, không gọi vốn góp</td>
+            <td>Vay theo pháp nhân, BCTC làm hồ sơ tín dụng, nhận vốn góp/chuyển nhượng phần vốn</td>
+          </tr>
+          <tr>
+            <td class="crit">Ưu đãi riêng khi chuyển đổi</td>
+            <td>—</td>
+            <td>Miễn lệ phí ĐKDN + phí công bố lần đầu · Hỗ trợ chi phí <b>dịch vụ kế toán & nền tảng số tối đa 2 năm</b> · Tư vấn pháp lý, đào tạo quản trị miễn phí<small>NQ 198 + Luật Hỗ trợ DNNVV</small></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="note-box">
+        <strong>Đọc nhanh:</strong> sự khác biệt bản chất là <strong>thuế trên doanh thu vs thuế trên lợi nhuận</strong>. HKD có biên lợi nhuận mỏng hoặc đang lỗ vẫn phải nộp thuế; DN chỉ nộp khi có lãi và được trừ chi phí — nhưng đổi lại phải có hóa đơn đầu vào đầy đủ và chịu kỷ luật sổ sách. Điểm gãy thường nằm ở: tỷ lệ chi phí có hóa đơn, và khả năng cộng VAT vào giá bán cho khách lẻ.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 3 : FLOWCHART ============ -->
+  <div class="panel" id="t3">
+    <div class="flow-wrap">
+
+      <div class="flow-step">
+        <div class="flow-node"><div class="flow-dot">0</div><div class="flow-line"></div></div>
+        <div class="flow-card">
+          <h4>Kiểm tra điều kiện hưởng ưu đãi <span class="when">TRƯỚC KHI BẮT ĐẦU</span></h4>
+          <p>Để được miễn TNDN 2 năm và các hỗ trợ chuyển đổi:</p>
+          <ul>
+            <li>HKD hoạt động sản xuất, kinh doanh <b>liên tục tối thiểu 1 năm</b> tính đến ngày được cấp GCN ĐKDN lần đầu</li>
+            <li>Còn GCN đăng ký hộ kinh doanh hợp lệ, không nợ thuế treo chưa xử lý</li>
+            <li>Doanh thu dự kiến sau chuyển đổi ≤ 50 tỷ/năm (điều kiện miễn TNDN)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-node"><div class="flow-dot">1</div><div class="flow-line"></div></div>
+        <div class="flow-card">
+          <h4>Chọn loại hình doanh nghiệp <span class="when">1–2 NGÀY</span></h4>
+          <p>Quyết định quan trọng nhất — ảnh hưởng trách nhiệm pháp lý và cách rút lợi nhuận:</p>
+          <div class="branch">
+            <div class="opt rec"><b>TNHH một thành viên</b><span>Trách nhiệm hữu hạn theo vốn điều lệ · lợi nhuận rút về chủ không chịu thêm TNCN · phù hợp đại đa số HKD</span></div>
+            <div class="opt"><b>Doanh nghiệp tư nhân</b><span>Đơn giản nhất nhưng chủ vẫn chịu trách nhiệm vô hạn — gần như không cải thiện so với HKD</span></div>
+          </div>
+          <p style="margin-top:10px">Đồng thời: chọn tên DN (tra trùng trên Cổng ĐKDN quốc gia), xác định vốn điều lệ và ngành nghề kinh doanh.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-node"><div class="flow-dot">2</div><div class="flow-line"></div></div>
+        <div class="flow-card">
+          <h4>Chuẩn bị hồ sơ <span class="when">2–3 NGÀY</span></h4>
+          <ul>
+            <li>Giấy đề nghị đăng ký doanh nghiệp (theo mẫu loại hình đã chọn)</li>
+            <li>Điều lệ công ty (với TNHH)</li>
+            <li>Bản sao công chứng CCCD/hộ chiếu của chủ sở hữu</li>
+            <li><b>Bản sao Giấy chứng nhận đăng ký hộ kinh doanh</b> — đây là điểm đánh dấu hồ sơ "chuyển đổi từ HKD" theo Điều 27 NĐ 168/2025</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-node"><div class="flow-dot">3</div><div class="flow-line"></div></div>
+        <div class="flow-card">
+          <h4>Nộp hồ sơ đăng ký <span class="when">TRONG NGÀY</span></h4>
+          <p>Nộp tại <b>Cơ quan đăng ký kinh doanh cấp tỉnh</b> nơi đặt trụ sở chính, hoặc nộp online tại <span style="font-family:var(--mono);color:var(--gold)">dangkykinhdoanh.gov.vn</span>.</p>
+          <p style="margin-top:6px" class="free-tag">✓ MIỄN LỆ PHÍ ĐĂNG KÝ DN + PHÍ CÔNG BỐ LẦN ĐẦU (DN chuyển đổi từ HKD)</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-node"><div class="flow-dot">4</div><div class="flow-line"></div></div>
+        <div class="flow-card">
+          <h4>Nhận Giấy chứng nhận ĐKDN <span class="when">~3 NGÀY LÀM VIỆC</span></h4>
+          <p>Nếu hồ sơ hợp lệ, được cấp GCN ĐKDN kèm mã số doanh nghiệp (đồng thời là mã số thuế). Từ thời điểm này, hoạt động kinh doanh chịu điều chỉnh của Luật Doanh nghiệp và Luật Thuế TNDN.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-node"><div class="flow-dot">5</div><div class="flow-line"></div></div>
+        <div class="flow-card">
+          <h4>Chấm dứt hộ kinh doanh cũ <span class="when">SONG SONG</span></h4>
+          <ul>
+            <li>Nộp hồ sơ chấm dứt hiệu lực mã số thuế của HKD tại cơ quan thuế quản lý</li>
+            <li>Quyết toán nghĩa vụ thuế còn tồn của HKD đến ngày chuyển đổi</li>
+            <li>Trả GCN đăng ký hộ kinh doanh — không tồn tại song song HKD và DN trên cùng hoạt động</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-node"><div class="flow-dot">6</div></div>
+        <div class="flow-card">
+          <h4>Vận hành 30 ngày đầu <span class="when">CHECKLIST</span></h4>
+          <ul class="check-grid">
+            <li>Khắc dấu doanh nghiệp</li>
+            <li>Mở tài khoản ngân hàng pháp nhân</li>
+            <li>Mua chữ ký số (token)</li>
+            <li>Đăng ký & phát hành hóa đơn điện tử</li>
+            <li>Đăng ký chế độ kế toán (TT 132 — siêu nhỏ)</li>
+            <li>Kê khai thuế ban đầu, chọn kỳ khai VAT</li>
+            <li>Đăng ký BHXH cho lao động có HĐLĐ</li>
+            <li>Ký lại hợp đồng thuê mặt bằng, NCC sang pháp nhân mới</li>
+            <li>Treo biển tên DN tại trụ sở</li>
+            <li>Đăng ký hỗ trợ chi phí kế toán/nền tảng số (kênh tỉnh)</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ TAB 4 : PERSONA ANALYSIS ============ -->
+  <div class="panel" id="t4">
+    <p class="pa-intro">9 persona điển hình của tệp HKD Việt Nam, chấm điểm bằng <strong>chính engine tài chính của Tab 01</strong> — thay đổi giả định mô hình thì ranking tự cập nhật. Dùng cột "Tiêu chí nhận diện" để map 50 khách hàng hiện hữu vào từng nhóm, sau đó bấm <strong>"Mở trong Simulator"</strong> để tinh chỉnh theo số liệu thật của từng khách.</p>
+
+    <div class="scatter-card">
+      <h3>Ma trận ưu tiên <small>— trục dọc: lợi ích tài chính 5 năm (% doanh thu) · trục ngang: độ sẵn sàng vận hành · kích thước: quy mô doanh thu</small></h3>
+      <div id="scatter"></div>
+    </div>
+
+    <div id="plist"></div>
+
+    <div class="note-box" style="margin-top:6px">
+      <strong>Cách đọc cho việc thiết kế gói dịch vụ:</strong> nhóm điểm cao là khách của gói <strong>Chuyển đổi trọn gói</strong> (thủ tục + kế toán DN năm đầu — nhà nước hỗ trợ chi phí kế toán tối đa 2 năm chính là trợ giá cho gói này). Nhóm giữa là pipeline của gói <strong>Chuẩn hóa 6 tháng</strong>: dựng kỷ luật hóa đơn đầu vào trước, chuyển đổi sau để không lãng phí 2 năm miễn TNDN. Nhóm thấp giữ ở gói <strong>Kê khai HKD 2026</strong> — vẫn là doanh thu dịch vụ, và là nguồn chuyển đổi tương lai khi quy mô hoặc tỷ trọng B2B tăng.
+    </div>
+  </div>
+
+  <div class="footer">
+    CÔNG CỤ MÔ PHỎNG NỘI BỘ — OMNIKEY ACCOUNTING SERVICES · Số liệu mang tính ước lượng phục vụ sàng lọc nhóm khách hàng, không thay thế tư vấn thuế cho từng trường hợp cụ thể.<br>
+    Căn cứ: NQ 68-NQ/TW · NQ 198/2025/QH15 · Luật Thuế TNDN 2025 · NĐ 168/2025/NĐ-CP (Điều 24, 27) · TT 40/2021/TT-BTC · TT 132/2018/TT-BTC · NĐ 70/2025/NĐ-CP · Cập nhật 06/2026.
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ============ CONSTANTS ============ */
+const NGANH = {
+  pp:  {label:'Phân phối hàng hóa', rate:1.5},
+  sx:  {label:'SX / ăn uống / vận tải', rate:4.5},
+  dv:  {label:'Dịch vụ', rate:7.0},
+  khac:{label:'KD khác', rate:3.0},
+  thue:{label:'Cho thuê tài sản', rate:10.0}
+};
+const BHXH_RATE = 0.215;   // phần DN đóng
+const YEARS = 5;
+
+const PRESETS = [
+  {name:'Tạp hóa 900tr', v:{rev:900, nganh:'pp', growth:5, tx:1500, margin:12, opex:6, inv:40, acctH:8, acctD:42, conv:15, payroll:0, b2b:0, vat:8}},
+  {name:'Quán ăn 2.4 tỷ', v:{rev:2400, nganh:'sx', growth:10, tx:3000, margin:62, opex:38, inv:35, acctH:15, acctD:55, conv:20, payroll:30, b2b:5, vat:8}},
+  {name:'Bán buôn VLXD 12 tỷ', v:{rev:12000, nganh:'pp', growth:15, tx:300, margin:9, opex:4, inv:85, acctH:30, acctD:80, conv:25, payroll:40, b2b:80, vat:10}},
+  {name:'Tư vấn DV 1.8 tỷ', v:{rev:1800, nganh:'dv', growth:20, tx:40, margin:88, opex:30, inv:55, acctH:12, acctD:50, conv:18, payroll:35, b2b:70, vat:8}},
+  {name:'Online seller 5 tỷ', v:{rev:5000, nganh:'pp', growth:30, tx:4500, margin:24, opex:13, inv:70, acctH:24, acctD:70, conv:22, payroll:20, b2b:10, vat:8}},
+  {name:'Spa 3.5 tỷ', v:{rev:3500, nganh:'dv', growth:12, tx:900, margin:75, opex:45, inv:45, acctH:18, acctD:60, conv:20, payroll:50, b2b:5, vat:8}}
+];
+
+/* ============ HELPERS ============ */
+const $ = id => document.getElementById(id);
+const fmt = n => {
+  const v = Math.round(n);
+  if (Math.abs(v) >= 1000) return (v/1000).toLocaleString('vi-VN',{maximumFractionDigits:2}) + ' tỷ';
+  return v.toLocaleString('vi-VN') + ' tr';
+};
+const fmtT = n => Math.round(n).toLocaleString('vi-VN');
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+
+function sliderPaint(el){
+  const p = (el.value - el.min) / (el.max - el.min) * 100;
+  el.style.setProperty('--p', p + '%');
+}
+
+/* ============ INPUT WIRING ============ */
+const sliders = ['rev','growth','tx','margin','opex','inv','acctH','acctD','conv','payroll','b2b'];
+const labels = {
+  rev: v => v >= 1000 ? (v/1000).toLocaleString('vi-VN',{maximumFractionDigits:1})+' tỷ' : v+' tr',
+  growth: v => v+'%/năm',
+  tx: v => fmtT(v)+' GD',
+  margin: v => v+'%',
+  opex: v => v+'% DT',
+  inv: v => v+'%',
+  acctH: v => v+' tr/năm',
+  acctD: v => v+' tr/năm',
+  conv: v => v+' tr',
+  payroll: v => v+' tr/th',
+  b2b: v => v+'%'
+};
+sliders.forEach(k => {
+  const el = $('i_'+k);
+  el.addEventListener('input', () => { sliderPaint(el); $('v_'+k).textContent = labels[k](+el.value); calc(); });
+  sliderPaint(el);
+  $('v_'+k).textContent = labels[k](+el.value);
+});
+['i_nganh','i_vat','i_exempt','i_support'].forEach(id => $(id).addEventListener('change', calc));
+
+/* shared param loader */
+function applyParams(v){
+  Object.entries(v).forEach(([k,val]) => {
+    const el = $('i_'+k); if(!el) return;
+    el.value = val;
+    if (el.type === 'range'){ sliderPaint(el); $('v_'+k).textContent = labels[k](val); }
+  });
+}
+
+/* presets */
+const presetsEl = $('presets');
+PRESETS.forEach((p,i) => {
+  const b = document.createElement('button');
+  b.className = 'preset'; b.textContent = p.name;
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.preset').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    applyParams(p.v);
+    calc();
+  });
+  presetsEl.appendChild(b);
+});
+
+/* tabs */
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === id));
+  document.querySelectorAll('.panel').forEach(x => x.classList.toggle('active', x.id === id));
+}
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+/* ============ MODEL ============ */
+function getInputs(){
+  return {
+    rev: +$('i_rev').value,
+    nganh: $('i_nganh').value,
+    growth: +$('i_growth').value / 100,
+    tx: +$('i_tx').value,
+    margin: +$('i_margin').value / 100,
+    opex: +$('i_opex').value / 100,
+    inv: +$('i_inv').value / 100,
+    acctH: +$('i_acctH').value,
+    acctD: +$('i_acctD').value,
+    conv: +$('i_conv').value,
+    payroll: +$('i_payroll').value,
+    b2b: +$('i_b2b').value / 100,
+    vat: +$('i_vat').value / 100,
+    exempt: $('i_exempt').checked,
+    support: $('i_support').checked
+  };
+}
+
+function calcYear(inp, t){ // t = 1..5
+  const R = inp.rev * Math.pow(1 + inp.growth, t - 1);
+
+  /* --- HKD --- */
+  const hkdRate = NGANH[inp.nganh].rate / 100;
+  const hkdTax = R <= 200 ? 0 : R * hkdRate;
+  const hkdAcct = inp.acctH;
+  const hkdTotal = hkdTax + hkdAcct;
+
+  /* --- DN --- */
+  const cogs = R * (1 - inp.margin);
+  const opex = R * inp.opex;
+  const bhxh = inp.payroll * 12 * BHXH_RATE;
+  const acctD = inp.acctD * ((inp.support && t <= 2) ? 0.5 : 1);
+
+  const deductible = (cogs + opex) * inp.inv + bhxh + acctD;
+  const taxableProfit = Math.max(0, R - deductible);
+  let tndnRate = R <= 3000 ? 0.15 : (R <= 50000 ? 0.17 : 0.20);
+  let tndn = taxableProfit * tndnRate;
+  const exemptYear = inp.exempt && t <= 2 && R <= 50000;
+  if (exemptYear) tndn = 0;
+
+  /* VAT ròng: đầu ra hấp thụ trên phần B2C (giá khó tăng) − đầu vào khấu trừ */
+  const absorbed = R * (1 - inp.b2b) * inp.vat / (1 + inp.vat);
+  const inputVAT = (cogs + opex) * inp.inv * inp.vat;
+  const netVAT = Math.max(0, absorbed - inputVAT);
+
+  const dnTotal = tndn + netVAT + acctD + bhxh;
+
+  return {t, R, hkdTax, hkdAcct, hkdTotal, tndn, tndnRate, exemptYear, netVAT, acctD, bhxh, dnTotal,
+          diff: hkdTotal - dnTotal, taxableProfit};
+}
+
+function buildScore(inp, years){
+  const save5 = years.reduce((s,y) => s + y.diff, 0) - inp.conv;
+  const rev5 = years.reduce((s,y) => s + y.R, 0);
+  const ratio = rev5 > 0 ? save5 / rev5 : 0;
+  const fin = clamp(25 + ratio / 0.03 * 25, 0, 50);
+  const strat = inp.b2b * 15
+    + clamp(inp.growth / 0.30, 0, 1) * 10
+    + (inp.rev >= 3000 ? 5 : (inp.rev >= 1000 ? 3 : 0));
+  const ready = inp.inv * 10 + clamp(inp.tx / 1000, 0, 1) * 10;
+  return {score: Math.round(clamp(fin + strat + ready, 0, 100)), save5, fin, strat, ready};
+}
+
+function buildDrivers(inp, years, sc){
+  const d = [];
+  const y3 = years[2];
+  const hkdRate = NGANH[inp.nganh].rate;
+  const preTaxMarginPct = (inp.margin - inp.opex) * 100;
+
+  if (y3.diff > 0 && preTaxMarginPct < hkdRate * 2.5)
+    d.push(`Biên lợi nhuận trước thuế ~${preTaxMarginPct.toFixed(0)}% nhưng đang nộp ${hkdRate}% trên doanh thu — thuế trên doanh thu đang "ăn" phần lớn lợi nhuận thật.`);
+  if (y3.netVAT > y3.tndn && y3.netVAT > 0.005 * y3.R)
+    d.push(`Rào cản lớn nhất là VAT đầu ra B2C: ~${fmt(y3.netVAT)}/năm bị hấp thụ vào margin vì giá bán lẻ khó tăng ${(inp.vat*100).toFixed(0)}%.`);
+  if (inp.inv < 0.5)
+    d.push(`Chỉ ${(inp.inv*100).toFixed(0)}% chi phí có hóa đơn — phần không có hóa đơn không được trừ, đẩy thuế TNDN lên. Chuẩn hóa đầu vào trước khi chuyển đổi.`);
+  if (inp.b2b >= 0.4)
+    d.push(`${(inp.b2b*100).toFixed(0)}% khách hàng cần hóa đơn VAT — lên DN mở khóa doanh thu B2B, lợi ích ngoài mô hình thuế.`);
+  if (inp.exempt && years[0].diff + years[1].diff > inp.conv)
+    d.push(`Riêng 2 năm miễn TNDN đã đủ hoàn vốn chi phí chuyển đổi (${fmt(inp.conv)}).`);
+  if (inp.rev > 1000 && inp.tx > 1000)
+    d.push(`Với ${fmtT(inp.tx)} GD/tháng và DT > 1 tỷ, HKD vẫn phải dùng HĐĐT máy tính tiền + kê khai từ 2026 — gánh nặng tuân thủ HKD đang tiệm cận DN.`);
+  if (y3.taxableProfit === 0)
+    d.push(`Mô hình cho thấy lợi nhuận tính thuế ≈ 0 — DN gần như không phát sinh TNDN trong khi HKD vẫn nộp ${fmt(y3.hkdTax)}/năm.`);
+  return d.slice(0, 4);
+}
+
+/* ============ RENDER ============ */
+function calc(){
+  const inp = getInputs();
+  const years = [];
+  for (let t = 1; t <= YEARS; t++) years.push(calcYear(inp, t));
+  const sc = buildScore(inp, years);
+
+  /* gauge */
+  const off = 270 - 270 * sc.score / 100;
+  const arc = $('g_arc');
+  arc.style.transition = 'stroke-dashoffset .5s ease, stroke .3s';
+  arc.setAttribute('stroke-dashoffset', off);
+  arc.setAttribute('stroke', sc.score >= 70 ? '#5BBF8A' : sc.score >= 45 ? '#D4B16A' : '#E0697A');
+  $('g_num').textContent = sc.score;
+
+  /* verdict */
+  const tag = $('v_tag'), title = $('v_title'), desc = $('v_desc');
+  tag.className = 'v-tag ' + (sc.score >= 70 ? 'v-go' : sc.score >= 45 ? 'v-mid' : 'v-no');
+  if (sc.score >= 70){
+    tag.textContent = 'ƯU TIÊN CHUYỂN ĐỔI';
+    title.textContent = 'Nhóm nên chuyển ngay trong 2026';
+    desc.textContent = 'Lợi ích tài chính và chiến lược đều rõ. Đưa vào danh sách tư vấn chuyển đổi đợt đầu — tận dụng trọn 2 năm miễn TNDN.';
+  } else if (sc.score >= 45){
+    tag.textContent = 'CÂN NHẮC 6–12 THÁNG';
+    title.textContent = 'Nhóm cần chuẩn bị trước khi chuyển';
+    desc.textContent = 'Bài toán chưa nghiêng hẳn. Việc cần làm trước: chuẩn hóa hóa đơn đầu vào, đánh giá khả năng cộng VAT vào giá, rồi mô phỏng lại.';
+  } else {
+    tag.textContent = 'CHƯA NÊN CHUYỂN';
+    title.textContent = 'Giữ mô hình HKD, tối ưu kê khai';
+    desc.textContent = 'Chi phí chuyển đổi vượt lợi ích ở quy mô hiện tại. Phục vụ bằng gói kê khai HKD 2026, theo dõi lại khi doanh thu hoặc tỷ trọng B2B tăng.';
+  }
+  $('v_drivers').innerHTML = buildDrivers(inp, years, sc).map(x => `<li>${x}</li>`).join('');
+
+  /* KPIs */
+  const y1 = years[0];
+  $('k_hkd1').textContent = fmt(y1.hkdTotal);
+  $('k_dn1').textContent = fmt(y1.dnTotal);
+  $('k_dn1sub').textContent = y1.exemptYear ? 'đã gồm miễn TNDN năm 1–2' : 'không áp dụng miễn TNDN';
+  const s5 = $('k_save5');
+  s5.textContent = (sc.save5 >= 0 ? '+' : '−') + fmt(Math.abs(sc.save5));
+  s5.className = 'k-val ' + (sc.save5 >= 0 ? 'pos' : 'neg');
+
+  let cum = -inp.conv, payback = null;
+  years.forEach(y => { cum += y.diff; if (payback === null && cum >= 0) payback = y.t; });
+  $('k_payback').textContent = payback === null ? 'Không đạt' : 'Năm ' + payback;
+  $('k_payback').className = 'k-val ' + (payback === null ? 'neg' : (payback <= 2 ? 'pos' : ''));
+  $('k_paysub').textContent = payback === null ? 'trong 5 năm mô phỏng' : 'tích lũy chênh lệch dương';
+
+  /* stacked bars: year 1 & year 3 */
+  const barsEl = $('bars');
+  barsEl.innerHTML = '';
+  [years[0], years[2]].forEach(y => {
+    const maxT = Math.max(y.hkdTotal, y.dnTotal, 1);
+    const mkSeg = (val, cls) => val > 0 ? `<div class="seg ${cls}" style="width:${val / maxT * 100}%" title="${fmt(val)}"></div>` : '';
+    barsEl.insertAdjacentHTML('beforeend', `
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--muted);margin:${y.t>1?'18px':'0'} 0 10px">NĂM ${y.t} · DT ${fmt(y.R)}${y.exemptYear ? ' · miễn TNDN' : ''}</div>
+      <div class="bar-row">
+        <div class="b-head"><span class="b-name">Ở LẠI HKD</span><span class="b-total">${fmt(y.hkdTotal)}</span></div>
+        <div class="stack">${mkSeg(y.hkdTax,'s-tax')}${mkSeg(y.hkdAcct,'s-acct')}</div>
+      </div>
+      <div class="bar-row">
+        <div class="b-head"><span class="b-name">LÊN DN</span><span class="b-total">${fmt(y.dnTotal)}</span></div>
+        <div class="stack">${mkSeg(y.tndn,'s-tax')}${mkSeg(y.netVAT,'s-vat')}${mkSeg(y.acctD,'s-acct')}${mkSeg(y.bhxh,'s-bhxh')}</div>
+      </div>`);
+  });
+
+  /* 5-year chart */
+  const maxY = Math.max(...years.map(y => Math.max(y.hkdTotal, y.dnTotal)), 1);
+  $('yrchart').innerHTML = years.map(y => `
+    <div class="yr-group">
+      <div class="yr-bar hkd" style="height:${y.hkdTotal / maxY * 100}%"><span class="tip">${fmtT(y.hkdTotal)}</span></div>
+      <div class="yr-bar dn" style="height:${y.dnTotal / maxY * 100}%"><span class="tip">${fmtT(y.dnTotal)}</span></div>
+    </div>`).join('');
+  $('yrlabels').innerHTML = years.map(y => `<span>Năm ${y.t}${y.exemptYear ? ' ✦' : ''}</span>`).join('');
+
+  /* detail table */
+  let rows = `<tr><th>Khoản mục</th>${years.map(y => `<th>Năm ${y.t}</th>`).join('')}</tr>`;
+  const line = (name, get, cls) => `<tr${cls ? ` class="${cls}"` : ''}><td>${name}</td>${years.map(y => `<td>${fmtT(get(y))}</td>`).join('')}</tr>`;
+  rows += line('Doanh thu', y => y.R);
+  rows += line('HKD · Thuế GTGT + TNCN trên DT', y => y.hkdTax);
+  rows += line('HKD · Kế toán & tuân thủ', y => y.hkdAcct);
+  rows += line('HKD · Tổng', y => y.hkdTotal, 'hl');
+  rows += line('DN · Thuế TNDN' + (inp.exempt ? ' (miễn N1–2)' : ''), y => y.tndn);
+  rows += line('DN · VAT ròng hấp thụ B2C', y => y.netVAT);
+  rows += line('DN · Kế toán & tuân thủ', y => y.acctD);
+  rows += line('DN · BHXH chính thức hóa', y => y.bhxh);
+  rows += line('DN · Tổng', y => y.dnTotal, 'hl');
+  rows += `<tr class="hl"><td>Chênh lệch (HKD − DN)</td>${years.map(y =>
+    `<td class="${y.diff >= 0 ? 'pos-t' : 'neg-t'}">${y.diff >= 0 ? '+' : '−'}${fmtT(Math.abs(y.diff))}</td>`).join('')}</tr>`;
+  $('dtable').innerHTML = rows;
+}
+
+/* ============ PERSONA ENGINE (TAB 4) ============ */
+const PERSONAS = [
+  {code:'P1', name:'Xưởng sản xuất / gia công B2B', tag:'Lãi mỏng nhưng nộp thuế trên doanh thu — đầu vào từ NCC pháp nhân',
+   params:{rev:6000, nganh:'sx', growth:18, tx:200, margin:16, opex:8, inv:100, acctH:25, acctD:70, conv:22, payroll:25, b2b:70, vat:10},
+   nhandien:['Gia công, sản xuất nhỏ; biên trước thuế < 10%','NCC là pháp nhân — gần như 100% chi phí có hóa đơn','Khách hàng chủ yếu là DN, đòi hóa đơn VAT'],
+   dongluc:'Thuế 4.5% doanh thu đang lớn hơn cả lợi nhuận thật của nhiều xưởng. Lên DN: chỉ nộp trên lãi, khấu trừ trọn VAT đầu vào, giữ được khách B2B.'},
+  {code:'P2', name:'Nhà buôn / phân phối B2B', tag:'Thuế HKD 1.5% vốn đã rẻ — chuyển vì khách hàng, không phải vì thuế',
+   params:{rev:12000, nganh:'pp', growth:15, tx:300, margin:9, opex:4, inv:100, acctH:30, acctD:85, conv:25, payroll:15, b2b:85, vat:10},
+   nhandien:['Bán buôn, đại lý cấp 1–2; doanh thu 8–20 tỷ','Khách mua là DN/chuỗi, yêu cầu hóa đơn VAT để khấu trừ','Hàng nhập từ hãng/NPP chính ngạch, hóa đơn đầy đủ'],
+   dongluc:'Về thuế gần như hòa. Động lực thật: chuỗi cung ứng đang loại dần NCC không xuất được hóa đơn VAT — không chuyển là mất khách lớn. Cộng thêm vay vốn pháp nhân để xoay kho.'},
+  {code:'P3', name:'Agency / dịch vụ có đội ngũ', tag:'Marketing, đào tạo, thiết kế — chi phí lớn nhất là lương người',
+   params:{rev:2800, nganh:'dv', growth:25, tx:80, margin:90, opex:60, inv:85, acctH:15, acctD:60, conv:20, payroll:40, b2b:65, vat:8},
+   nhandien:['5–15 nhân sự, trả lương ngoài sổ là chính','Thuế HKD nhóm dịch vụ 7% doanh thu — nặng nhất bảng','Khách DN chiếm quá nửa, hay vướng khâu hóa đơn'],
+   dongluc:'Chính thức hóa quỹ lương biến chi phí lớn nhất thành chi phí được trừ (thể hiện ở tỷ lệ hóa đơn cao). Nếu giữ lương ngoài sổ thì lên DN lại lỗ thuế — nhóm này chuyển được hay không nằm ở quyết định minh bạch lương.'},
+  {code:'P4', name:'Online seller đa sàn', tag:'Shopee, TikTok Shop, Lazada — sàn đang khấu trừ và đối soát tận gốc',
+   params:{rev:6000, nganh:'pp', growth:35, tx:4500, margin:22, opex:12, inv:70, acctH:25, acctD:75, conv:22, payroll:15, b2b:10, vat:8},
+   nhandien:['Doanh thu lớn, tăng nhanh, hàng nghìn đơn/tháng','Nguồn hàng trôi nổi, 25–40% chi phí không hóa đơn','Dữ liệu doanh thu nằm trên sàn — cơ quan thuế nhìn thấy hết'],
+   dongluc:'Mô hình thuế nói "chưa" — nhưng rủi ro thật là truy thu: sàn đã nộp dữ liệu và khấu trừ tại nguồn. Lộ trình đúng: chuẩn hóa nguồn hàng 6–12 tháng trước, rồi chuyển khi tỷ lệ hóa đơn ≥ 90%.'},
+  {code:'P5', name:'F&B nhiều điểm bán', tag:'Quán ăn, cafe 2–3 chi nhánh — kẹt giữa VAT đầu ra và chợ đầu mối',
+   params:{rev:4000, nganh:'sx', growth:10, tx:3500, margin:62, opex:40, inv:40, acctH:18, acctD:65, conv:25, payroll:45, b2b:5, vat:8},
+   nhandien:['Khách 100% lẻ, giá menu không cộng thêm VAT được','Nguyên liệu mua chợ/hộ nông dân — hóa đơn dưới 50%','Đông giao dịch, đã phải dùng máy tính tiền HĐĐT'],
+   dongluc:'Hai gọng kìm: VAT đầu ra ăn vào margin + đầu vào không có hóa đơn để trừ. Chỉ nên chuyển khi mở chuỗi cần pháp nhân gọi vốn/nhượng quyền — và phải chuyển NCC sang đầu mối xuất được hóa đơn trước.'},
+  {code:'P6', name:'Tạp hóa / bán lẻ truyền thống', tag:'Cửa hàng gia đình, doanh thu ổn định quanh 1 tỷ',
+   params:{rev:1200, nganh:'pp', growth:5, tx:1800, margin:13, opex:7, inv:45, acctH:8, acctD:45, conv:15, payroll:0, b2b:0, vat:8},
+   nhandien:['Quy mô nhỏ, không thuê ngoài gia đình','Thuế hiện tại 1.5% doanh thu — gánh nhẹ','Không có nhu cầu hóa đơn VAT từ người mua'],
+   dongluc:'Chi phí vận hành DN (kế toán, BCTC, BHXH) vượt xa mọi lợi ích. Giữ HKD, làm đúng kê khai 2026 là đủ. Trigger xem lại: doanh thu vượt 3–4 tỷ hoặc bắt đầu bỏ sỉ cho DN.'},
+  {code:'P7', name:'Cho thuê mặt bằng / tài sản', tag:'Thuế 10% doanh thu nghe đắt — nhưng lên DN chưa chắc rẻ hơn',
+   params:{rev:1800, nganh:'thue', growth:5, tx:12, margin:97, opex:12, inv:70, acctH:8, acctD:50, conv:15, payroll:0, b2b:60, vat:10},
+   nhandien:['Cho thuê nhà phố, kho, mặt bằng kinh doanh','Gần như không có chi phí — biên lợi nhuận > 80%','Bên thuê là DN, muốn có hóa đơn để hạch toán'],
+   dongluc:'Phản trực giác: 10% trên doanh thu vẫn rẻ hơn 15–17% trên lợi nhuận khi biên > 80% và không có gì để khấu trừ. Trừ khi cần pháp nhân để vay thế chấp hoặc bên thuê ép hóa đơn — còn lại giữ HKD.'},
+  {code:'P8', name:'Tư vấn / chuyên môn solo', tag:'Một người, biên lợi nhuận rất cao — khách DN đòi hóa đơn',
+   params:{rev:1500, nganh:'dv', growth:15, tx:30, margin:95, opex:20, inv:50, acctH:10, acctD:48, conv:18, payroll:0, b2b:80, vat:8},
+   nhandien:['Tư vấn, đào tạo, thiết kế tự do; chi phí gần như bằng 0','Nộp 7% doanh thu nhưng biên thật 70%+','Khách hàng DN cần chứng từ để đưa vào chi phí'],
+   dongluc:'Về thuế, HKD 7% rẻ hơn hẳn 15–17% trên biên dày. Lưu ý: HKD kê khai vẫn xuất được hóa đơn bán hàng cho khách DN đưa vào chi phí — chỉ thiếu phần khấu trừ VAT. Cân lại nếu khách lớn yêu cầu đích danh hóa đơn VAT.'},
+  {code:'P9', name:'Thầu thi công / lắp đặt nhỏ', tag:'Xây dựng bao thầu NVL — chủ đầu tư chỉ ký với pháp nhân',
+   params:{rev:9000, nganh:'sx', growth:20, tx:60, margin:22, opex:10, inv:95, acctH:22, acctD:75, conv:25, payroll:50, b2b:95, vat:10},
+   nhandien:['Nhận thầu phụ, thi công M&E, nội thất công trình','Vật tư mua từ đại lý lớn — hóa đơn 90%+','Hợp đồng thầu yêu cầu tư cách pháp nhân & bảo lãnh'],
+   dongluc:'Kép: thuế trên doanh thu nặng so với biên thi công, và không có pháp nhân thì không đấu được thầu chính thức. Miễn TNDN 2 năm rơi đúng giai đoạn nhận công trình lớn đầu tiên.'}
+];
+
+function personaInputs(p){
+  const v = p.params;
+  return {rev:v.rev, nganh:v.nganh, growth:v.growth/100, tx:v.tx, margin:v.margin/100,
+          opex:v.opex/100, inv:v.inv/100, acctH:v.acctH, acctD:v.acctD, conv:v.conv,
+          payroll:v.payroll, b2b:v.b2b/100, vat:v.vat/100, exempt:true, support:false};
+}
+const tierColor = s => s >= 70 ? '#5BBF8A' : s >= 45 ? '#D4B16A' : '#E0697A';
+const tierName  = s => s >= 70 ? 'Ưu tiên chuyển' : s >= 45 ? 'Cân nhắc 6–12 tháng' : 'Chưa nên chuyển';
+
+function loadPersona(i){
+  const p = PERSONAS[i];
+  document.querySelectorAll('.preset').forEach(x => x.classList.remove('on'));
+  applyParams(p.params);
+  calc();
+  switchTab('t1');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function renderPersonas(){
+  const results = PERSONAS.map((p,i) => {
+    const inp = personaInputs(p);
+    const years = [];
+    for (let t = 1; t <= YEARS; t++) years.push(calcYear(inp, t));
+    const sc = buildScore(inp, years);
+    const rev5 = years.reduce((s,y) => s + y.R, 0);
+    return {p, i, sc, ratio: sc.save5 / rev5};
+  }).sort((a,b) => b.sc.score - a.sc.score);
+
+  /* scatter: x = độ sẵn sàng (ready/20) · y = lợi ích tài chính 5 năm (% DT, thang −3%..+3%) */
+  let sHtml = `<div class="sc-mid-x"></div><div class="sc-mid-y"></div>
+    <div class="sc-quad" style="top:10px;right:14px">Chuyển ngay</div>
+    <div class="sc-quad" style="top:10px;left:14px">Lợi nhưng chưa sẵn sàng</div>
+    <div class="sc-quad" style="bottom:24px;right:14px">Động lực phi thuế</div>
+    <div class="sc-quad" style="bottom:24px;left:14px">Giữ HKD</div>
+    <div class="sc-axis" style="bottom:6px;left:50%;transform:translateX(-50%)">ĐỘ SẴN SÀNG VẬN HÀNH →</div>`;
+  results.forEach(r => {
+    const x = clamp(r.sc.ready / 20, 0.05, 0.95) * 100;
+    const yv = clamp((r.ratio + 0.03) / 0.06, 0.07, 0.92) * 100;
+    const d = Math.round(16 + Math.sqrt(r.p.params.rev) * 0.22);
+    sHtml += `<div class="sc-dot" style="left:${x}%;bottom:${yv}%;width:${d}px;height:${d}px;background:${tierColor(r.sc.score)}" onclick="loadPersona(${r.i})" title="${r.p.name} — Score ${r.sc.score}">${r.p.code}<span class="sc-name">${r.p.name.split(' /')[0].split(' đa ')[0]}</span></div>`;
+  });
+  $('scatter').innerHTML = sHtml;
+
+  /* cards, xếp theo score */
+  $('plist').innerHTML = results.map((r, rank) => {
+    const col = tierColor(r.sc.score);
+    const wave = r.sc.score >= 70 ? 1 : r.sc.score >= 45 ? 2 : 3;
+    const goiText = wave === 1
+      ? '<b>Wave 1 · Gói Chuyển đổi trọn gói 2026</b> — thủ tục + setup + kế toán DN, ăn trọn 2 năm miễn TNDN & hỗ trợ chi phí kế toán'
+      : wave === 2
+      ? '<b>Wave 2 · Gói Chuẩn hóa 6 tháng</b> — kỷ luật hóa đơn đầu vào, cấu trúc lại chi phí, mô phỏng lại rồi mới chuyển'
+      : '<b>Wave 3 · Gói Kê khai HKD 2026</b> — giữ HKD, tuân thủ kê khai mới, theo dõi trigger chuyển đổi';
+    const v = r.p.params;
+    return `<div class="pcard">
+      <div class="rank">#${rank + 1}</div>
+      <h4>${r.p.code} · ${r.p.name}</h4>
+      <div class="ptag">${r.p.tag}</div>
+      <div class="pchips">
+        <span class="pchip">DT ${v.rev >= 1000 ? (v.rev/1000).toLocaleString('vi-VN',{maximumFractionDigits:1})+' tỷ' : v.rev+' tr'}</span>
+        <span class="pchip">HKD ${NGANH[v.nganh].rate}% DT</span>
+        <span class="pchip">B2B ${v.b2b}%</span>
+        <span class="pchip">Hóa đơn ${v.inv}%</span>
+        <span class="pchip">5 năm ${r.sc.save5 >= 0 ? '+' : '−'}${fmt(Math.abs(r.sc.save5))}</span>
+      </div>
+      <div class="pscore-row">
+        <span class="pscore" style="color:${col}">${r.sc.score}</span>
+        <div class="pbar"><i style="width:${r.sc.score}%;background:${col}"></i></div>
+        <span class="ptier" style="color:${col}">${tierName(r.sc.score)}</span>
+      </div>
+      <div class="psec"><span class="plabel">Tiêu chí nhận diện</span>
+        <ul>${r.p.nhandien.map(x => `<li>${x}</li>`).join('')}</ul></div>
+      <div class="psec"><span class="plabel">Động lực & lưu ý thật</span>
+        <div class="pdong">${r.p.dongluc}</div></div>
+      <div class="pgoi w${wave}">${goiText}</div>
+      <button class="pbtn" onclick="loadPersona(${r.i})">Mở trong Simulator →</button>
+    </div>`;
+  }).join('');
+}
+
+calc();
+renderPersonas();
+</script>
+</body>
+</html>
