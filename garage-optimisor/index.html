@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VFX Garage Simulator v07</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+:root {
+  --bg:#F0F4FA; --surface:#FFFFFF; --surface2:#F7F9FC; --border:#DDE3EE; --border2:#E8EDF5;
+  --ink:#0D1B33; --dim:#4A5876; --muted:#7E8FA8; --faint:#C5CFDF;
+  --blue:#1A56E8; --blue-light:#EBF0FD; --blue-mid:#B8C9F8;
+  --green:#0D9E5E; --green-light:#E6F7F0; --green-mid:#A7E3CA;
+  --amber:#D97706; --amber-light:#FEF3C7; --amber-mid:#FCD97A;
+  --red:#C0392B; --red-light:#FEE8E6; --red-mid:#F5A79F;
+  --purple:#7C3AED; --purple-light:#F0EBFE;
+  --shadow-sm: 0 1px 4px rgba(13,27,51,.06);
+  --shadow-md: 0 4px 16px rgba(13,27,51,.08);
+  --shadow-lg: 0 12px 40px rgba(13,27,51,.10);
+  --r: 12px; --r-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--ink); font-size: 13px; line-height: 1.5; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ── HEADER ── */
+.header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm); }
+.header-logo { font-size: 17px; font-weight: 900; letter-spacing: -.04em; color: var(--ink); }
+.header-logo span { color: var(--blue); }
+.header-ver { font-size: 10px; font-weight: 700; color: var(--blue); background: var(--blue-light); padding: 3px 8px; border-radius: 99px; letter-spacing: .06em; text-transform: uppercase; }
+.header-sub { font-size: 12px; color: var(--muted); flex: 1; }
+.header-save { font-size: 11px; color: var(--muted); margin-left: auto; font-weight: 600; white-space: nowrap; }
+
+/* ── TOOLBAR ── */
+.toolbar { display: flex; gap: 6px; align-items: center; padding: 10px 20px; background: var(--surface2); border-bottom: 1px solid var(--border2); flex-wrap: wrap; }
+.tab-btn { border: 1px solid var(--border); background: var(--surface); color: var(--dim); padding: 7px 14px; border-radius: var(--r-sm); font-size: 12px; font-weight: 700; cursor: pointer; transition: all .15s; }
+.tab-btn:hover { border-color: var(--blue); color: var(--blue); }
+.tab-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.tool-btn { border: 1px solid var(--border); background: var(--surface); color: var(--dim); padding: 6px 12px; border-radius: var(--r-sm); font-size: 11px; font-weight: 700; cursor: pointer; }
+.tool-btn:hover { border-color: var(--blue); color: var(--blue); }
+.tool-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+/* ── CONTROLS BAR ── */
+.controls-bar { background: var(--surface); border-bottom: 1px solid var(--border2); padding: 12px 20px; display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+.ctrl-field { display: flex; flex-direction: column; gap: 4px; min-width: 130px; }
+.ctrl-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+select, input[type="number"] {
+  border: 1px solid var(--border); background: var(--surface2); color: var(--ink);
+  border-radius: var(--r-sm); padding: 7px 10px; font-family: inherit; font-size: 12px; font-weight: 700;
+  outline: none; transition: border-color .15s;
+}
+select:focus, input[type="number"]:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,86,232,.10); }
+.cap-display { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--ink); background: var(--blue-light); border: 1px solid var(--blue-mid); padding: 7px 12px; border-radius: var(--r-sm); }
+.util-wrap { display: flex; flex-direction: column; gap: 4px; min-width: 180px; }
+.util-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--dim); font-weight: 600; }
+input[type="range"] { width: 100%; accent-color: var(--blue); }
+
+/* ── VIEW PANELS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── COL HIGHLIGHT ── */
+table.calc thead th.col-active { background: var(--ink) !important; color: #fff !important; }
+table.calc tbody td.col-active { background: rgba(26,86,232,.07); color: var(--ink) !important; font-weight: 700; }
+table.calc tr.seg-header td.col-active { background: var(--ink) !important; }
+table.calc tr.subtotal td.col-active { background: var(--blue-light) !important; color: var(--blue) !important; }
+.kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 13px 14px; box-shadow: var(--shadow-sm); }
+.kpi-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+.kpi-val { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; margin-top: 5px; color: var(--ink); letter-spacing: -.04em; }
+.kpi-delta { font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-top: 3px; }
+.kpi-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+.kpi-card.highlight { background: var(--blue-light); border-color: var(--blue-mid); }
+.kpi-card.highlight .kpi-val { color: var(--blue); }
+.up { color: var(--green); }
+.down { color: var(--red); }
+.flat { color: var(--muted); }
+.warn { color: var(--amber); }
+
+/* ── DASHBOARD LAYOUT ── */
+.dash-grid { display: grid; grid-template-columns: 1fr 320px; gap: 14px; padding: 0 20px 20px; }
+.dash-main { display: flex; flex-direction: column; gap: 14px; }
+.dash-side { display: flex; flex-direction: column; gap: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow-sm); overflow: hidden; }
+.panel-head { padding: 12px 16px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; justify-content: space-between; }
+.panel-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); }
+.panel-hint { font-size: 11px; color: var(--muted); }
+.panel-body { padding: 14px 16px; }
+
+/* ── P&L TABLE ── */
+.pnl-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.pnl-table th { background: var(--surface2); color: var(--muted); font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em; padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; font-weight: 700; }
+.pnl-table th:first-child { text-align: left; }
+.pnl-table td { padding: 10px 10px; border-bottom: 1px solid var(--border2); text-align: right; white-space: nowrap; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.pnl-table td:first-child { text-align: left; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; white-space: normal; }
+.pnl-table tr.seg-row td { color: var(--dim); }
+.pnl-table tr.total-row td { background: var(--surface2); font-weight: 700; border-top: 2px solid var(--border); color: var(--ink); }
+.pnl-table tr.profit-row td { background: var(--green-light); color: var(--green); font-weight: 800; border-top: 1px solid var(--green-mid); }
+.pnl-table tr.loss-row td { background: var(--red-light); color: var(--red); font-weight: 800; border-top: 1px solid var(--red-mid); }
+.pnl-table tr.fixed-row td { color: var(--dim); }
+.lost-cell { color: var(--red) !important; }
+.good-cell { color: var(--green) !important; }
+
+/* ── GARAGE COMPARE CARDS ── */
+.garage-cards { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.garage-card { border: 1px solid var(--border); border-radius: var(--r-sm); padding: 11px 13px; background: var(--surface2); }
+.garage-card h4 { font-size: 12px; font-weight: 800; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.garage-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--dim); padding: 3px 0; border-bottom: 1px dashed var(--border2); }
+.garage-row:last-child { border-bottom: none; }
+.garage-row b { font-family: 'JetBrains Mono', monospace; color: var(--ink); font-size: 11px; }
+.util-bar-wrap { height: 6px; background: var(--border2); border-radius: 99px; overflow: hidden; margin-top: 6px; }
+.util-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--green), var(--blue)); max-width: 100%; }
+
+/* ── PERF TABS ── */
+.perf-tabs { display: flex; gap: 5px; flex-wrap: wrap; }
+.perf-tab { border: 1px solid var(--border); background: var(--surface); color: var(--dim); padding: 5px 10px; border-radius: 99px; font-size: 10px; font-weight: 800; cursor: pointer; letter-spacing: .03em; }
+.perf-tab.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* ── SIMULATOR LAYOUT ── */
+.sim-layout { display: grid; grid-template-columns: 340px 1fr 300px; gap: 0; height: calc(100vh - 168px); min-height: 640px; }
+.sim-left { border-right: 1px solid var(--border2); overflow-y: auto; scrollbar-width: thin; background: var(--surface); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.sim-center { overflow: hidden; display: flex; flex-direction: column; background: var(--surface2); }
+.sim-right { border-left: 1px solid var(--border2); overflow-y: auto; scrollbar-width: thin; background: var(--surface); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+/* ── SERVICE CARDS (left panel) ── */
+.svc-card { border: 1px solid var(--border); border-radius: var(--r); background: var(--surface); padding: 11px; }
+.svc-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.svc-name { font-size: 12px; font-weight: 800; line-height: 1.3; }
+.seg-tag { display: inline-flex; font-size: 9px; padding: 3px 7px; border-radius: 99px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.tag-bh { background: var(--blue-light); color: var(--blue); }
+.tag-vl { background: var(--green-light); color: var(--green); }
+.tag-gs { background: var(--purple-light); color: var(--purple); }
+.tag-tn { background: var(--amber-light); color: var(--amber); }
+.tag-cc { background: var(--border2); color: var(--dim); }
+.svc-note { font-size: 10px; color: var(--amber); margin-bottom: 6px; display: none; }
+.svc-note.show { display: block; }
+.slider-block { margin: 6px 0; }
+.slider-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--dim); font-weight: 700; margin-bottom: 3px; }
+.slider-val { color: var(--ink); font-family: 'JetBrains Mono', monospace; }
+.slider-row { display: grid; grid-template-columns: 1fr 70px; gap: 6px; align-items: center; }
+.slider-row input[type="range"] { accent-color: var(--blue); }
+.slider-row input[type="number"] { padding: 4px 6px; border-radius: 6px; font-size: 11px; font-family: 'JetBrains Mono', monospace; width: 100%; }
+.assumption-inp { background: rgba(217,119,6,.08) !important; border-color: var(--amber-mid) !important; }
+
+/* ── CALC TABLE ── */
+.table-sort-bar { padding: 8px 14px; border-bottom: 1px solid var(--border2); display: flex; gap: 5px; align-items: center; flex-wrap: wrap; background: var(--surface); }
+.sort-chip { border: 1px solid var(--border); background: var(--surface2); color: var(--dim); padding: 4px 9px; border-radius: 99px; font-size: 10px; font-weight: 800; cursor: pointer; }
+.sort-chip.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.table-scroll { flex: 1; overflow: auto; scrollbar-width: thin; }
+table.calc { width: 100%; border-collapse: collapse; font-size: 11.5px; min-width: 1300px; }
+table.calc thead th { position: sticky; top: 0; z-index: 5; background: var(--surface2); color: var(--muted); font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em; padding: 8px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; font-weight: 700; }
+table.calc thead th:first-child, table.calc thead th:nth-child(2) { text-align: left; }
+table.calc tbody td { padding: 8px 8px; border-bottom: 1px solid var(--border2); text-align: right; white-space: nowrap; font-family: 'JetBrains Mono', monospace; color: var(--dim); }
+table.calc tbody td:first-child, table.calc tbody td:nth-child(2) { text-align: left; font-family: 'Inter', sans-serif; color: var(--ink); }
+table.calc tbody tr:hover td { background: var(--blue-light); }
+table.calc tr.seg-header td { background: var(--ink) !important; color: #fff !important; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 11px; padding: 7px 10px; }
+table.calc tr.subtotal td { background: var(--surface2) !important; font-weight: 700; color: var(--ink); border-bottom: 2px solid var(--border); }
+table.calc tr.cut-row td { opacity: .5; }
+.rank-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; padding: 3px 6px; border-radius: 99px; font-size: 10px; font-weight: 800; background: var(--green-light); color: var(--green); font-family: 'Inter', sans-serif; }
+.cut-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; color: var(--red); font-family: 'Inter', sans-serif; }
+.ok-badge { color: var(--green); font-size: 10px; font-weight: 700; font-family: 'Inter', sans-serif; }
+.class-pill { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; font-weight: 800; font-size: 11px; font-family: 'Inter', sans-serif; }
+.cls-A { background: rgba(13,158,94,.15); color: var(--green); }
+.cls-B { background: var(--blue-light); color: var(--blue); }
+.cls-C { background: var(--amber-light); color: var(--amber); }
+.cls-D { background: var(--border2); color: var(--muted); }
+.sticky-note { background: var(--amber-light); border-top: 1px solid var(--amber-mid); padding: 8px 14px; font-size: 11px; color: var(--amber); line-height: 1.45; flex-shrink: 0; }
+
+/* ── RIGHT PANEL KPIs ── */
+.r-kpi { border: 1px solid var(--border); border-radius: var(--r-sm); padding: 11px 12px; background: var(--surface2); }
+.r-kpi .label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+.r-kpi .val { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; margin-top: 4px; }
+.r-kpi .sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+.r-kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.r-kpi.wide { grid-column: span 2; }
+.cap-bar { height: 8px; background: var(--border2); border-radius: 99px; overflow: hidden; margin-top: 8px; }
+.cap-bar-fill { height: 100%; border-radius: 99px; max-width: 100%; transition: width .3s; }
+.insight-box { border: 1px solid var(--border); border-radius: var(--r-sm); padding: 11px 12px; background: linear-gradient(135deg, var(--blue-light), var(--surface)); }
+.insight-box h4 { font-size: 11px; font-weight: 800; margin-bottom: 7px; color: var(--ink); }
+.insight-box p { font-size: 11px; color: var(--dim); line-height: 1.5; margin-top: 5px; }
+
+/* ── RIPPLE PANEL (Simulator right col) ── */
+.ripple-panel { border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; }
+.ripple-panel-head { padding: 9px 12px; background: var(--ink); color: #fff; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.rg-hdr { font-size: 9px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 800; padding: 6px 10px; background: var(--surface2); border-bottom: 1px solid var(--border2); }
+.rg-label { font-family: 'Inter', sans-serif; color: var(--ink); font-weight: 600; font-size: 11px; padding: 6px 10px; border-bottom: 1px solid var(--border2); }
+.rg-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--border2); color: var(--dim); }
+/* ── RIPPLE PANEL (Dashboard) ── */
+.ripple-grid { display: grid; grid-template-columns: 1fr auto auto auto; font-size: 11.5px; }
+.ripple-grid > div { padding: 6px 10px; border-bottom: 1px solid var(--border2); }
+.ripple-grid .rh { font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-family: 'Inter', sans-serif; font-weight: 800; padding: 7px 10px; background: var(--surface2); }
+.ripple-grid .rl { font-family: 'Inter', sans-serif; color: var(--ink); font-weight: 600; }
+.ripple-grid .rv { font-family: 'JetBrains Mono', monospace; text-align: right; color: var(--dim); }
+.ripple-note { font-size: 11px; color: var(--dim); line-height: 1.55; padding: 10px 14px; border-top: 1px solid var(--border2); }
+
+/* ── WARNING PANEL ── */
+.warn-panel { background: var(--amber-light); border: 1px solid var(--amber-mid); border-radius: var(--r); padding: 12px 16px; font-size: 11.5px; color: var(--amber); line-height: 1.6; margin: 0 20px 14px; }
+.warn-panel b { font-weight: 800; }
+
+@media (max-width: 1400px) { }
+@media (max-width: 1200px) { .sim-layout { grid-template-columns: 280px 1fr 260px; } }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">VFX Garage <span>Simulator</span></div>
+  <div class="header-ver">v07</div>
+  <div class="header-sub">Tối ưu theo <b>Contribution Margin / Bottleneck Hour</b> · 3 xưởng · T01–T05</div>
+  <div class="header-save" id="saveLabel">Ready</div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <button class="tab-btn active" data-tab="dashboard" id="btn-dashboard">Dashboard XDV</button>
+  <button class="tab-btn" data-tab="simulator" id="btn-simulator">Simulator</button>
+  <div class="tool-sep"></div>
+  <button class="tool-btn" id="exportCsvBtn">↓ CSV</button>
+  <button class="tool-btn" id="exportJsonBtn">↓ JSON</button>
+  <button class="tool-btn" id="importJsonBtn">↑ Import</button>
+  <button class="tool-btn" id="resetBtn">↺ Reset</button>
+  <input type="file" id="importFile" accept=".json" style="display:none">
+</div>
+
+<!-- CONTROLS BAR -->
+<div class="controls-bar">
+  <div class="ctrl-field">
+    <span class="ctrl-label">Xưởng</span>
+    <select id="garageSelect"></select>
+  </div>
+  <div class="ctrl-field">
+    <span class="ctrl-label">Tháng</span>
+    <select id="monthSelect"></select>
+  </div>
+  <div class="ctrl-field">
+    <span class="ctrl-label">Fixed cost (tr/tháng)</span>
+    <input type="number" id="fixedCostInput" value="0" step="10" min="0" style="width:120px">
+  </div>
+  <div class="util-wrap">
+    <div class="util-row"><span class="ctrl-label" style="font-size:10px">Hệ số sử dụng</span><span id="utilLabel" style="color:var(--blue);font-weight:800;font-size:12px">80%</span></div>
+    <input type="range" id="utilRange" min="50" max="100" step="5" value="80">
+    <div class="util-row"><span style="color:var(--muted);font-size:10px">50% thận trọng</span><span style="color:var(--muted);font-size:10px">100% lý thuyết</span></div>
+  </div>
+  <div class="ctrl-field">
+    <span class="ctrl-label">Capacity</span>
+    <div class="cap-display mono" id="capDisplay">—</div>
+  </div>
+  <div class="ctrl-field" style="min-width:200px">
+    <span class="ctrl-label">Công thức</span>
+    <div style="font-size:11px; color:var(--dim); font-family:'JetBrains Mono',monospace;" id="capFormula">—</div>
+  </div>
+</div>
+
+
+<!-- ── DASHBOARD VIEW ── -->
+<div class="view active" id="view-dashboard">
+  <div class="dash-grid">
+    <div class="dash-main">
+      <!-- P&L Table -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">P&L theo Segment</span>
+          <span class="panel-hint" id="pnlSubtitle">—</span>
+        </div>
+        <div style="overflow:auto">
+          <table class="pnl-table">
+            <thead>
+              <tr>
+                <th style="min-width:150px">Segment</th>
+                <th>Xe</th>
+                <th>Doanh thu (tr)</th>
+                <th>CM (tr)</th>
+                <th>CM%</th>
+                <th>CM/giờ (tr)</th>
+                <th>Tổng số giờ</th>
+                <th>Lost CM (tr)</th>
+              </tr>
+            </thead>
+            <tbody id="pnlBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="dash-side">
+      <!-- Garage compare -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">3 Xưởng — baseline tháng này</span>
+        </div>
+        <div class="panel-body">
+          <div class="garage-cards" id="garageCards"></div>
+        </div>
+      </div>
+
+      <!-- Performance tabs -->
+      <div class="panel">
+        <div class="panel-head" style="flex-direction:column; gap:8px; align-items:flex-start;">
+          <span class="panel-title">So sánh hiệu suất</span>
+          <div class="perf-tabs" id="perfTabs">
+            <button class="perf-tab active" data-perf="financial">Tài chính</button>
+            <button class="perf-tab" data-perf="operational">Vận hành</button>
+            <button class="perf-tab" data-perf="ranking">Xếp hạng CM/giờ</button>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0">
+          <div id="perfBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SIMULATOR VIEW ── -->
+<div class="view" id="view-simulator">
+  <div class="sim-layout">
+    <!-- LEFT: Service sliders -->
+    <div class="sim-left" id="simLeft"></div>
+
+    <!-- CENTER: Calc table -->
+    <div class="sim-center">
+      <div class="table-sort-bar">
+        <span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-right:4px">Sắp xếp:</span>
+        <button class="sort-chip active" data-sort="cmPerHour">CM/giờ</button>
+        <button class="sort-chip" data-sort="cars">Số xe</button>
+        <button class="sort-chip" data-sort="contribution">Tổng CM</button>
+        <button class="sort-chip" data-sort="demandHours">Tổng số giờ</button>
+        <button class="sort-chip" data-sort="lostContribution">Lost CM</button>
+        <button id="sortDirBtn" class="sort-chip" style="margin-left:4px">DESC</button>
+      </div>
+      <div class="table-scroll">
+        <table class="calc">
+          <thead>
+            <tr>
+              <th style="text-align:left">Segment</th>
+              <th style="text-align:left">Dịch vụ</th>
+              <th>Xe gốc</th>
+              <th>Xe SC</th>
+              <th>Rev/xe (tr)</th>
+              <th>CM%</th>
+              <th>LN/xe (tr)</th>
+              <th>Giờ/xe</th>
+              <th>Tổng số giờ</th>
+              <th>DT (tr)</th>
+              <th>CM (tr)</th>
+              <th>CM/giờ (tr)</th>
+              <th>Rank</th>
+              <th>Nhận xe</th>
+              <th>CM nhận (tr)</th>
+              <th>Lost CM (tr)</th>
+              <th>Ưu tiên</th>
+            </tr>
+          </thead>
+          <tbody id="calcBody"></tbody>
+        </table>
+      </div>
+      <div class="sticky-note" id="stickyNote"></div>
+    </div>
+
+    <!-- RIGHT: KPIs + Insight -->
+    <div class="sim-right">
+      <div class="r-kpi-grid" id="rightKpis"></div>
+      <div class="ripple-panel" id="ripplePanel"></div>
+      <div class="insight-box" id="insightBox"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════
+const MONTHS = ['T01','T02','T03','T04','T05'];
+
+// Capacity config từ XDV_ThongTin_CoSoVatChat
+// Capacity = SCC_slots × h/ca × số_ca × workdays × utilFactor
+// VD: 7h/ca × 3ca × 20slot × 30d = 12,600
+// (ĐS dùng khoang riêng — bottleneck hiện tại: SCC slots)
+const CFG = {
+  'Thủ Đức':  { scc:9,  hpc:7, shifts:2, ktv_scc:12, ktv_ds:8,  note:'2 ca 8h–21h · 9 SCC slots · 8 KTV ĐS' },
+  'Tân An':   { scc:5,  hpc:7, shifts:1, ktv_scc:9,  ktv_ds:0,  note:'1 ca 8h–18h · 5 SCC slots · Không ĐS' },
+  'Bến Lức':  { scc:7,  hpc:7, shifts:1, ktv_scc:10, ktv_ds:8,  note:'1 ca 8h–18h · 7 SCC slots (cầu bụng hư 1 từ T03)' }
+};
+// Bến Lức T01-T02: cầu nâng bụng còn 2 → 8 slots; T03+ → 7 slots
+const BL_SCC_OVERRIDE = { 'T01':8, 'T02':8 };
+
+const WORKDAYS = { T01:30, T02:19, T03:31, T04:28, T05:30 };
+
+// BASE DATA từ XDV_PhanTich_BienLoiNhuan_v4_2
+// [garage, month, segment, service, marginPct, hoursPerCar, baseCars, baseRevenue, note]
+// hoursPerCar=0 → LN-only (không ăn capacity)
+// BL T05 BH VF: GIỮ NGUYÊN số gốc 331.069.313 (chưa xác nhận sửa)
+const BASE = [
+// ── THỦ ĐỨC ──
+["Thủ Đức","T01","Khách BH VF","(1) Bảo hành VF",0.08,4,259,1215494872,""],
+["Thủ Đức","T01","Khách Bảo hiểm","(2) Đồng sơn BH TT",0.15,20,50,319859147,""],
+["Thủ Đức","T01","Khách Vãng lai","(2) ĐS tự thanh toán",0.28,20,38,126010902,""],
+["Thủ Đức","T01","Khách Vãng lai","(3) BD-SC tự trả",0.30,2.5,279,382031189,""],
+["Thủ Đức","T01","GSM","(1) BH GSM",0.08,4,12,54870000,""],
+["Thủ Đức","T01","GSM","(2) ĐS GSM",0.12,20,9,22476443,""],
+["Thủ Đức","T01","GSM","(3) BD-SC GSM",0.18,2.5,21,11382683,""],
+["Thủ Đức","T01","Xe gặp vấn đề","(4) Cứu hộ",0.38,0,0,0,"LN-only · thiếu data xe T01"],
+["Thủ Đức","T02","Khách BH VF","(1) Bảo hành VF",0.08,4,252,862817140,""],
+["Thủ Đức","T02","Khách Bảo hiểm","(2) Đồng sơn BH TT",0.15,20,43,173239264,""],
+["Thủ Đức","T02","Khách Vãng lai","(2) ĐS tự thanh toán",0.28,20,23,73625351,""],
+["Thủ Đức","T02","Khách Vãng lai","(3) BD-SC tự trả",0.30,2.5,275,471921284,""],
+["Thủ Đức","T02","GSM","(1) BH GSM",0.08,4,0,55717500,"⚠ Xe=0 T02: thiếu data"],
+["Thủ Đức","T02","GSM","(2) ĐS GSM",0.12,20,7,15847704,""],
+["Thủ Đức","T02","GSM","(3) BD-SC GSM",0.18,2.5,16,12155184,""],
+["Thủ Đức","T02","Xe gặp vấn đề","(4) Cứu hộ",0.38,0,0,0,"LN-only · thiếu data xe T02"],
+["Thủ Đức","T02","Vật tư & Carcare","(5) Carcare/GT",0.35,0,0,115740740,"LN-only · không ăn capacity"],
+["Thủ Đức","T03","Khách BH VF","(1) Bảo hành VF",0.08,4,106,429669984,""],
+["Thủ Đức","T03","Khách Bảo hiểm","(2) Đồng sơn BH TT",0.15,20,62,406836923,""],
+["Thủ Đức","T03","Khách Vãng lai","(2) ĐS tự thanh toán",0.28,20,23,163161064,""],
+["Thủ Đức","T03","Khách Vãng lai","(3) BD-SC tự trả",0.30,2.5,402,453162828,""],
+["Thủ Đức","T03","GSM","(1) BH GSM",0.08,4,8,180642658,"⚠ DT/xe outlier T03"],
+["Thủ Đức","T03","GSM","(2) ĐS GSM",0.12,20,15,62713162,""],
+["Thủ Đức","T03","GSM","(3) BD-SC GSM",0.18,2.5,16,13201252,""],
+["Thủ Đức","T03","Xe gặp vấn đề","(4) Cứu hộ",0.38,0,0,46923499,"LN-only · thiếu data xe"],
+["Thủ Đức","T04","Khách BH VF","(1) Bảo hành VF",0.08,4,153,685607604,""],
+["Thủ Đức","T04","Khách Bảo hiểm","(2) Đồng sơn BH TT",0.15,20,89,630674422,""],
+["Thủ Đức","T04","Khách Vãng lai","(2) ĐS tự thanh toán",0.28,20,11,41505642,""],
+["Thủ Đức","T04","Khách Vãng lai","(3) BD-SC tự trả",0.30,2.5,566,437372662,""],
+["Thủ Đức","T04","GSM","(1) BH GSM",0.08,4,8,30477645,""],
+["Thủ Đức","T04","GSM","(2) ĐS GSM",0.12,20,13,37282721,""],
+["Thủ Đức","T04","GSM","(3) BD-SC GSM",0.18,2.5,21,8974601,""],
+["Thủ Đức","T04","Xe gặp vấn đề","(4) Cứu hộ",0.38,0,0,35135000,"LN-only · thiếu data xe"],
+["Thủ Đức","T05","Khách BH VF","(1) Bảo hành VF",0.08,4,311,775065783,""],
+["Thủ Đức","T05","Khách Bảo hiểm","(2) Đồng sơn BH TT",0.15,20,75,746512727,""],
+["Thủ Đức","T05","Khách Vãng lai","(2) ĐS tự thanh toán",0.28,20,12,64730684,""],
+["Thủ Đức","T05","Khách Vãng lai","(3) BD-SC tự trả",0.30,2.5,424,393117755,""],
+["Thủ Đức","T05","GSM","(1) BH GSM",0.08,4,7,47147909,""],
+["Thủ Đức","T05","GSM","(2) ĐS GSM",0.12,20,11,65758628,""],
+["Thủ Đức","T05","GSM","(3) BD-SC GSM",0.18,2.5,5,3064768,""],
+["Thủ Đức","T05","Xe gặp vấn đề","(4) Cứu hộ",0.38,0,0,37192982,"LN-only · thiếu data xe"],
+// ── BẾN LỨC ──
+["Bến Lức","T01","Khách BH VF","(1) Bảo hành",0.08,4,197,734868145,""],
+["Bến Lức","T01","Khách Vãng lai","(3) BD-SC",0.30,2.5,328,392722498,""],
+["Bến Lức","T01","Khách Bảo hiểm","(2) Đồng sơn",0.15,20,67,676182518,""],
+["Bến Lức","T02","Khách BH VF","(1) Bảo hành",0.08,4,100,555400824,""],
+["Bến Lức","T02","Khách Vãng lai","(3) BD-SC",0.30,2.5,269,199839938,""],
+["Bến Lức","T02","Khách Bảo hiểm","(2) Đồng sơn",0.15,20,41,525916170,""],
+["Bến Lức","T03","Khách BH VF","(1) Bảo hành",0.08,4,111,383101919,""],
+["Bến Lức","T03","Khách Vãng lai","(3) BD-SC",0.30,2.5,338,611851732,""],
+["Bến Lức","T03","Khách Bảo hiểm","(2) Đồng sơn",0.15,20,98,870124961,""],
+["Bến Lức","T04","Khách BH VF","(1) Bảo hành",0.08,4,160,720646617,""],
+["Bến Lức","T04","Khách Vãng lai","(3) BD-SC",0.30,2.5,248,292367740,""],
+["Bến Lức","T04","Khách Bảo hiểm","(2) Đồng sơn",0.15,20,55,729674667,""],
+["Bến Lức","T05","Khách BH VF","(1) Bảo hành",0.08,4,197,331069313,"⚠ Số liệu gốc — nghi nhập nhầm (xem CONTEXT)"],
+["Bến Lức","T05","Khách Vãng lai","(3) BD-SC",0.30,2.5,304,395783041,""],
+["Bến Lức","T05","Khách Bảo hiểm","(2) Đồng sơn",0.15,20,77,794590578,""],
+// ── TÂN AN ──
+["Tân An","T01","Khách BH VF","(1) Bảo hành",0.08,4,117,681055716,""],
+["Tân An","T01","Khách Vãng lai","(3) BD-SC",0.30,2.5,305,427588871,""],
+["Tân An","T01","Xe gặp vấn đề","(4) Cứu hộ",0.38,0,0,31275000,"LN-only · xe gộp BD-SC"],
+["Tân An","T02","Khách BH VF","(1) Bảo hành",0.08,4,74,380055739,""],
+["Tân An","T02","Khách Vãng lai","(3) BD-SC",0.30,2.5,150,233694158,""],
+["Tân An","T02","Xe gặp vấn đề","(4) Cứu hộ",0.38,0,0,37887148,"LN-only · xe gộp BD-SC"],
+["Tân An","T03","Khách BH VF","(1) Bảo hành",0.08,4,109,222185146,""],
+["Tân An","T03","Khách Vãng lai","(3) BD-SC",0.30,2.5,429,471137892,""],
+["Tân An","T03","Xe gặp vấn đề","(4) Cứu hộ",0.38,0,0,49810402,"LN-only · xe gộp BD-SC"],
+["Tân An","T04","Khách BH VF","(1) Bảo hành",0.08,4,133,523713691,""],
+["Tân An","T04","Khách Vãng lai","(3) BD-SC",0.30,2.5,269,372875730,""],
+["Tân An","T04","Xe gặp vấn đề","(4) Cứu hộ",0.38,0,0,78953850,"LN-only · xe gộp BD-SC"],
+["Tân An","T05","Khách BH VF","(1) Bảo hành",0.08,4,197,462655971,""],
+["Tân An","T05","Khách Vãng lai","(3) BD-SC",0.30,2.5,291,374744473,""],
+["Tân An","T05","Xe gặp vấn đề","(4) Cứu hộ",0.38,0,0,19030000,"LN-only · xe gộp BD-SC"],
+];
+
+// Parse BASE → objects
+const baseData = BASE.map(r => ({
+  garage:r[0], month:r[1], segment:r[2], service:r[3],
+  marginPct:r[4], hoursPerCar:r[5], baseCars:r[6], baseRevenue:r[7], note:r[8],
+  isLNOnly: r[5] === 0
+}));
+
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+const SK = 'vfx_sim_v07';
+function mkState() {
+  return {
+    garage: 'Tân An', month: 'T05',
+    util: 80, fixedCost: 0,
+    assumptions: {},
+    sortMetric: 'cmPerHour', sortDir: 'desc',
+    activeTab: 'dashboard', perfTab: 'financial'
+  };
+}
+let state = (() => { try { const r = localStorage.getItem(SK); return r ? JSON.parse(r) : mkState(); } catch(e) { return mkState(); } })();
+let _lastRows = [];
+
+function save() {
+  localStorage.setItem(SK, JSON.stringify(state));
+  document.getElementById('saveLabel').textContent = 'Saved · ' + new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+// ══════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════
+function rowKey(r) { return [r.garage,r.month,r.segment,r.service].join('||'); }
+function N(v,d=2) { return isFinite(v)?Number(v).toLocaleString('vi-VN',{maximumFractionDigits:d,minimumFractionDigits:d}):v==Infinity?'∞':'0'; }
+function M(v,d=1) { return N((Number(v)||0)/1e6,d); }
+function P(v,d=1) { return N((Number(v)||0)*100,d)+'%'; }
+function esc(s) { return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function getSccSlots(garage, month) {
+  const cfg = CFG[garage];
+  if(!cfg) return 0;
+  if(garage === 'Bến Lức' && BL_SCC_OVERRIDE[month]) return BL_SCC_OVERRIDE[month];
+  return cfg.scc;
+}
+function capacity() {
+  const slots = getSccSlots(state.garage, state.month);
+  const cfg = CFG[state.garage]||{hpc:7,shifts:1};
+  const wd = WORKDAYS[state.month]||30;
+  return slots * cfg.hpc * cfg.shifts * wd * (state.util/100);
+}
+
+function baseRows() { return baseData.filter(r=>r.garage===state.garage&&r.month===state.month); }
+
+function ensureA(r) {
+  const k = rowKey(r);
+  if(!state.assumptions[k]) {
+    const rpc = r.baseCars>0 ? r.baseRevenue/r.baseCars : r.baseRevenue;
+    state.assumptions[k] = { cars:r.baseCars, revPerCar:rpc, margin:r.marginPct, hpc:r.hoursPerCar };
+  }
+  return state.assumptions[k];
+}
+
+// ══════════════════════════════════════
+//  COMPUTE
+// ══════════════════════════════════════
+function computeRows() {
+  const rows = baseRows().map(r => {
+    const a = ensureA(r);
+    const cars = Number(a.cars)||0;
+    const rpc = Number(a.revPerCar)||0;
+    const mg = Number(a.margin)||0;
+    const hpc = Number(a.hpc)||0;
+    const rev = cars*rpc, cm = rev*mg, hours = cars*hpc;
+    const cmph = hpc>0 ? cm/hours : (cm>0?Infinity:0);
+    return { ...r, a, cars, rpc, mg, hpc, rev, cm, hours, cmph,
+             acceptedCars:0, acceptedCM:0, lostCM:0, optRank:null, cut:false };
+  });
+  const cap = capacity();
+  let rem = cap;
+  const sorted = [...rows].filter(x=>x.hours>0).sort((a,b)=>(b.cmph||0)-(a.cmph||0));
+  sorted.forEach((r,i)=>{ r.optRank=i+1; });
+  // rank LN-only last
+  rows.filter(x=>x.hours<=0).forEach((r,i)=>{ r.optRank=sorted.length+i+1; });
+  sorted.forEach(r=>{
+    if(rem>=r.hours){ r.acceptedCars=r.cars; r.acceptedCM=r.cm; rem-=r.hours; }
+    else { const ratio=Math.max(0,rem)/r.hours; r.acceptedCars=r.cars*ratio; r.acceptedCM=r.cm*ratio; r.cut=ratio<.999; rem=0; }
+    r.lostCM=Math.max(0,r.cm-r.acceptedCM);
+  });
+  rows.filter(x=>x.isLNOnly).forEach(r=>{ r.acceptedCars=r.cars; r.acceptedCM=r.cm; r.lostCM=0; });
+  _lastRows = rows;
+  return rows;
+}
+
+function sumR(rows) {
+  return rows.reduce((a,r)=>({
+    cars:a.cars+(r.cars||0), rev:a.rev+(r.rev||0), cm:a.cm+(r.cm||0),
+    hours:a.hours+(r.hours||0), acceptedCars:a.acceptedCars+(r.acceptedCars||0),
+    acceptedCM:a.acceptedCM+(r.acceptedCM||0), lostCM:a.lostCM+(r.lostCM||0)
+  }), {cars:0,rev:0,cm:0,hours:0,acceptedCars:0,acceptedCM:0,lostCM:0});
+}
+
+function garageStats(month) {
+  return Object.keys(CFG).map(g=>{
+    const rs = baseData.filter(r=>r.garage===g&&r.month===month);
+    const rev=rs.reduce((s,r)=>s+r.baseRevenue,0);
+    const cm=rs.reduce((s,r)=>s+r.baseRevenue*r.marginPct,0);
+    const hrs=rs.reduce((s,r)=>s+r.baseCars*r.hoursPerCar,0);
+    const cap = (() => { const cfg=CFG[g]; const slots=g==='Bến Lức'&&BL_SCC_OVERRIDE[month]?BL_SCC_OVERRIDE[month]:cfg.scc; return slots*cfg.hpc*cfg.shifts*(WORKDAYS[month]||30)*(state.util/100); })();
+    return { garage:g, rev, cm, hrs, cap, util:cap>0?hrs/cap:0, cmph:hrs>0?cm/hrs:0, cars:rs.reduce((s,r)=>s+r.baseCars,0) };
+  });
+}
+
+// ══════════════════════════════════════
+//  PRIORITY / CLASS
+// ══════════════════════════════════════
+function getClass(r, rows) {
+  const finite = rows.filter(x=>x.cmph>0&&isFinite(x.cmph));
+  const avgCM = finite.length ? finite.reduce((s,x)=>s+x.cmph,0)/finite.length : 0;
+  const maxCars = Math.max(...rows.map(x=>x.cars),1);
+  const hiCM = r.cmph >= avgCM*1.15;
+  const hiVol = r.cars >= maxCars*0.35;
+  if(hiCM&&hiVol) return 'A'; if(hiCM) return 'B'; if(hiVol) return 'C'; return 'D';
+}
+function getPriority(r, rows) {
+  const finite = rows.filter(x=>x.cmph>0&&isFinite(x.cmph));
+  const avg = finite.length ? finite.reduce((s,x)=>s+x.cmph,0)/finite.length : 0;
+  if(r.cmph>=avg*1.25&&r.cars>0) return '<span style="color:var(--green);font-weight:800">↑ Ưu tiên kéo volume</span>';
+  if(r.cmph<avg*.65&&r.hours>0) return '<span style="color:var(--red);font-weight:800">↓ Cần tăng giá/giảm giờ</span>';
+  if(r.lostCM>0) return '<span style="color:var(--amber);font-weight:800">⚡ Bị cắt — thiếu capacity</span>';
+  return '<span style="color:var(--muted)">Theo dõi</span>';
+}
+function segColor(seg) {
+  if(seg.includes('BH VF')||seg.includes('Bảo hành')) return 'tag-bh';
+  if(seg.includes('Bảo hiểm')) return 'tag-bh';
+  if(seg.includes('Vãng lai')) return 'tag-vl';
+  if(seg==='GSM') return 'tag-gs';
+  if(seg.includes('gặp vấn đề')||seg.includes('Tai nạn')||seg.includes('Nạn')) return 'tag-tn';
+  return 'tag-cc';
+}
+
+// ══════════════════════════════════════
+//  RENDER KPI STRIP
+// ══════════════════════════════════════
+function renderKpis(rows) { /* removed — KPIs now live in Dashboard P&L and Simulator right col */ }
+
+// ══════════════════════════════════════
+//  RENDER DASHBOARD
+// ══════════════════════════════════════
+function renderDashboard(rows) {
+  const cap = capacity();
+  const tot = sumR(rows);
+  const usedH = Math.min(tot.hours, cap);
+  const util = cap>0?usedH/cap:0;
+  const cmph = usedH>0?tot.acceptedCM/usedH:0;
+  const fixed = (Number(state.fixedCost)||0)*1e6;
+  const profit = tot.acceptedCM - fixed;
+
+  document.getElementById('pnlSubtitle').textContent = `${state.garage} · ${state.month} · Scenario hiện tại`;
+
+  // P&L table by segment
+  const segs = [...new Set(rows.map(r=>r.segment))];
+  const tbody = document.getElementById('pnlBody');
+  let html = segs.map(seg=>{
+    const sr = rows.filter(r=>r.segment===seg);
+    const st = sumR(sr);
+    const rev = st.rev, cm = st.acceptedCM, hrs = sr.reduce((s,r)=>s+r.acceptedCars*r.hpc,0);
+    return `<tr class="seg-row">
+      <td><span class="seg-tag ${segColor(seg)}">${esc(seg)}</span></td>
+      <td>${N(st.cars,0)}</td>
+      <td>${M(rev)}</td>
+      <td><b>${M(cm)}</b></td>
+      <td>${P(rev>0?cm/rev:0)}</td>
+      <td>${M(hrs>0?cm/hrs:0)}</td>
+      <td>${N(st.hours,0)}</td>
+      <td class="${st.lostCM>0?'lost-cell':''}">${M(st.lostCM)}</td>
+    </tr>`;
+  }).join('');
+  html += `<tr class="total-row">
+    <td>Total</td><td>${N(tot.cars,0)}</td><td>${M(tot.rev)}</td>
+    <td>${M(tot.acceptedCM)}</td><td>${P(tot.rev>0?tot.acceptedCM/tot.rev:0)}</td>
+    <td>${M(cmph)}</td><td>${N(usedH,0)}</td>
+    <td class="${tot.lostCM>0?'lost-cell':''}">${M(tot.lostCM)}</td>
+  </tr>`;
+  if(fixed>0) html += `<tr class="fixed-row"><td>Fixed cost</td><td>—</td><td>—</td><td>(${M(fixed)})</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>`;
+  html += `<tr class="${profit>=0?'profit-row':'loss-row'}">
+    <td>Lợi nhuận / Profit</td><td>—</td><td>—</td>
+    <td>${M(profit)}</td><td>${P(tot.rev>0?profit/tot.rev:0)}</td>
+    <td>—</td><td>—</td><td>—</td>
+  </tr>`;
+  tbody.innerHTML = html;
+
+  // Ripple moved to Simulator right col — không render ở Dashboard
+
+  // Garage cards
+  const stats = garageStats(state.month);
+  document.getElementById('garageCards').innerHTML = stats.map(x=>`
+    <div class="garage-card">
+      <h4>${esc(x.garage)} <span style="font-size:10px;color:var(--muted);font-weight:600">${N(x.cars,0)} xe</span></h4>
+      <div class="garage-row"><span>Doanh thu</span><b>${M(x.rev)} tr</b></div>
+      <div class="garage-row"><span>CM</span><b>${M(x.cm)} tr</b></div>
+      <div class="garage-row"><span>CM/giờ</span><b>${M(x.cmph)} tr</b></div>
+      <div class="garage-row"><span>Utilization</span><b>${P(x.util)}</b></div>
+      <div class="util-bar-wrap"><div class="util-bar-fill" style="width:${Math.min(100,x.util*100)}%"></div></div>
+    </div>`).join('');
+
+  renderPerf(stats);
+}
+
+function renderPerf(stats) {
+  document.querySelectorAll('.perf-tab').forEach(b=>b.classList.toggle('active',b.dataset.perf===state.perfTab));
+  const body = document.getElementById('perfBody');
+  const tab = state.perfTab;
+  if(tab==='financial') {
+    body.innerHTML=`<table class="pnl-table" style="font-size:11px"><thead><tr><th>Xưởng</th><th>DT (tr)</th><th>CM (tr)</th><th>CM%</th><th>CM/giờ (tr)</th></tr></thead><tbody>${stats.map(x=>`<tr><td><b>${esc(x.garage)}</b></td><td>${M(x.rev)}</td><td><b>${M(x.cm)}</b></td><td>${P(x.rev>0?x.cm/x.rev:0)}</td><td>${M(x.cmph)}</td></tr>`).join('')}</tbody></table>`;
+  } else if(tab==='operational') {
+    body.innerHTML=`<table class="pnl-table" style="font-size:11px"><thead><tr><th>Xưởng</th><th>Xe</th><th>Tổng số giờ</th><th>Capacity</th><th>Util.</th></tr></thead><tbody>${stats.map(x=>`<tr><td><b>${esc(x.garage)}</b></td><td>${N(x.cars,0)}</td><td>${N(x.hrs,0)}</td><td>${N(x.cap,0)}</td><td><span class="${x.util>1?'down':x.util>.85?'warn':'up'}">${P(x.util)}</span></td></tr>`).join('')}</tbody></table>`;
+  } else {
+    const sorted=[...stats].sort((a,b)=>b.cmph-a.cmph);
+    const max=Math.max(1,...sorted.map(x=>x.cmph));
+    body.innerHTML=`<table class="pnl-table" style="font-size:11px"><thead><tr><th>Rank</th><th>Xưởng</th><th>CM/giờ</th><th>Util.</th></tr></thead><tbody>${sorted.map((x,i)=>`<tr><td>#${i+1}</td><td><b>${esc(x.garage)}</b></td><td>${M(x.cmph)}</td><td>${P(x.util)}</td></tr>`).join('')}</tbody></table>`;
+  }
+}
+
+// ══════════════════════════════════════
+//  RENDER SIMULATOR
+// ══════════════════════════════════════
+function renderSimLeft(rows) {
+  const segs = [...new Set(rows.map(r=>r.segment))];
+  const left = document.getElementById('simLeft');
+  left.innerHTML = segs.map(seg=>{
+    const sr = rows.filter(r=>r.segment===seg);
+    return sr.map(r=>{
+      const a = r.a; const k = rowKey(r);
+      const rpcM = (a.revPerCar/1e6).toFixed(2);
+      const mgPct = (a.margin*100).toFixed(1);
+      const sl = (field,label,min,max,step,val,disp,isAssumption=false)=>`
+        <div class="slider-block">
+          <div class="slider-label"><span>${label}</span><span class="slider-val">${disp}</span></div>
+          <div class="slider-row">
+            <input type="range" min="${min}" max="${max}" step="${step}" value="${val}" data-k="${esc(k)}" data-f="${field}">
+            <input type="number" min="${min}" step="${step}" value="${val}" data-k="${esc(k)}" data-f="${field}" ${isAssumption?'class="assumption-inp"':''}>
+          </div>
+        </div>`;
+      return `<div class="svc-card">
+        <div class="svc-head">
+          <span class="svc-name">${esc(r.service)}</span>
+          <span class="seg-tag ${segColor(seg)}">${esc(seg)}</span>
+        </div>
+        ${r.note?`<div class="svc-note show">${esc(r.note)}</div>`:''}
+        ${r.isLNOnly?'<div style="font-size:10px;color:var(--muted);margin-bottom:4px">LN-only · không ăn capacity</div>':''}
+        ${sl('cars','Số xe (chiếc)',0,Math.max(r.baseCars*3,200,a.cars*2),1,a.cars,N(a.cars,0)+'xe')}
+        ${sl('revPerCar','Rev/xe (tr VND)',0,50,.1,rpcM,rpcM+' tr')}
+        ${sl('margin','Biên LN%',1,60,.5,mgPct,mgPct+'%',true)}
+        ${r.isLNOnly?'':''+sl('hpc','Giờ/xe',0.5,40,.5,a.hpc,a.hpc+' h',true)}
+      </div>`;
+    }).join('');
+  }).join('');
+
+  // events
+  left.querySelectorAll('input').forEach(inp=>{
+    inp.oninput = e => {
+      const k=e.target.dataset.k, f=e.target.dataset.f;
+      if(!state.assumptions[k]) return;
+      let v = parseFloat(e.target.value)||0;
+      if(f==='revPerCar') v *= 1e6;
+      if(f==='margin') v /= 100;
+      state.assumptions[k][f] = v;
+      // sync pair
+      const card=e.target.closest('.svc-card');
+      card.querySelectorAll(`input[data-k][data-f="${f}"]`).forEach(x=>{ if(x!==e.target){ x.value=e.target.value; } });
+      save(); renderAll(false);
+    };
+  });
+}
+
+function renderTable(rows) {
+  const tbody = document.getElementById('calcBody');
+  const segs = [...new Set(rows.map(r=>r.segment))];
+  const dir = state.sortDir==='asc'?1:-1;
+  const metric = state.sortMetric;
+  let html = '';
+  segs.forEach(seg=>{
+    const sr = rows.filter(r=>r.segment===seg);
+    const st = sumR(sr);
+    html += `<tr class="seg-header"><td colspan="17">${esc(seg)} · ${sr.length} dịch vụ</td></tr>`;
+    const sorted = [...sr].sort((a,b)=>dir*((a[metric]||0)-(b[metric]||0)));
+    sorted.forEach(r=>{
+      const cls = r.isLNOnly ? '—' : getClass(r,rows);
+      const priority = getPriority(r,rows);
+      html += `<tr class="${r.cut?'cut-row':''}">
+        <td><span class="seg-tag ${segColor(seg)}">${esc(seg)}</span></td>
+        <td>${esc(r.service)}</td>
+        <td>${N(r.baseCars,0)}</td>
+        <td><b>${N(r.cars,0)}</b></td>
+        <td>${M(r.rpc,2)}</td>
+        <td>${P(r.mg)}</td>
+        <td>${M(r.rpc*r.mg,3)}</td>
+        <td>${r.isLNOnly?'—':N(r.hpc,1)}</td>
+        <td>${r.isLNOnly?'—':N(r.hours,0)}</td>
+        <td>${M(r.rev)}</td>
+        <td><b>${M(r.cm)}</b></td>
+        <td class="${r.cmph>0?'good-cell':''}">${r.isLNOnly?'—':isFinite(r.cmph)?M(r.cmph,3):'∞'}</td>
+        <td>${r.optRank?`<span class="rank-pill">#${r.optRank}</span>`:'—'}</td>
+        <td>${N(r.acceptedCars,1)}</td>
+        <td class="good-cell">${M(r.acceptedCM)}</td>
+        <td class="${r.lostCM>0?'lost-cell':''}">${r.lostCM>1000?`<span class="cut-badge">▼${M(r.lostCM)}</span>`:M(r.lostCM)}</td>
+        <td>${priority}</td>
+      </tr>`;
+    });
+    html += `<tr class="subtotal">
+      <td>${esc(seg)}</td><td>Subtotal</td>
+      <td>${N(st.cars,0)}</td><td>${N(st.cars,0)}</td><td>—</td><td>—</td><td>—</td><td>—</td>
+      <td>${N(st.hours,0)}</td><td>${M(st.rev)}</td><td><b>${M(st.cm)}</b></td>
+      <td>${st.hours>0?M(st.cm/st.hours,3):'—'}</td><td>—</td>
+      <td>${N(st.acceptedCars,1)}</td><td>${M(st.acceptedCM)}</td>
+      <td class="${st.lostCM>0?'lost-cell':''}">${M(st.lostCM)}</td><td>—</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function renderRightKpis(rows) {
+  const cap = capacity();
+  const tot = sumR(rows);
+  const usedH = Math.min(tot.hours,cap);
+  const util = cap>0?usedH/cap:0;
+  const cmph = usedH>0?tot.acceptedCM/usedH:0;
+  const fixed = (Number(state.fixedCost)||0)*1e6;
+  const ebitda = tot.acceptedCM - fixed;
+  const bkH = cmph>0?fixed/cmph:0;
+  const bkU = cap>0?bkH/cap:0;
+  const barColor = util>1?'var(--red)':util>.85?'var(--amber)':'var(--green)';
+  const best = [...rows].filter(r=>r.cmph>0&&isFinite(r.cmph)).sort((a,b)=>b.cmph-a.cmph)[0];
+  const heavy = [...rows].filter(r=>r.hours>0).sort((a,b)=>b.hours-a.hours)[0];
+
+  const rk = (l,v,s,cls='')=>`<div class="r-kpi ${cls}"><div class="label">${l}</div><div class="val ${cls.includes('highlight')?'':'flat'}">${v}</div><div class="sub">${s}</div></div>`;
+  document.getElementById('rightKpis').innerHTML =
+    rk('Xe Demand',N(tot.cars,0),'Tổng scenario') +
+    rk('Xe Accepted',N(tot.acceptedCars,1),tot.lostCM>0?'Bị giới hạn':'Nhận đủ') +
+    rk('Capacity',N(cap,0)+' h',`${(CFG[state.garage]||{hpc:7}).hpc}h/ca × ${(CFG[state.garage]||{shifts:1}).shifts}ca × ${getSccSlots(state.garage,state.month)}slot × ${WORKDAYS[state.month]}d`) +
+    rk('Utilization',`<span class="${util>1?'down':util>.85?'warn':'up'}">${P(util)}</span>`,`Used ${N(usedH,0)} / ${N(cap,0)} h`) +
+    rk('CM/giờ',M(cmph)+' tr','Contribution / bottleneck h','highlight') +
+    rk('EBITDA',`<span class="${ebitda>=0?'up':'down'}">${M(ebitda)} tr</span>`,`Fixed: ${M(fixed)} tr`) +
+    rk('Lost CM',M(tot.lostCM)+' tr',tot.lostCM>0?'Capacity bị vượt':'Không mất CM') +
+    `<div class="r-kpi wide"><div class="label">Utilization</div><div class="cap-bar"><div class="cap-bar-fill" style="width:${Math.min(100,util*100)}%;background:${barColor}"></div></div><div class="sub">Break-even: ${P(bkU)} · ${N(bkH,0)} h</div></div>`;
+
+  document.getElementById('insightBox').innerHTML = `
+    <h4>Insight nhanh</h4>
+    <p><b>CM/giờ cao nhất:</b> ${best?esc(best.service)+' — '+M(best.cmph)+' tr/giờ':'N/A'}</p>
+    <p><b>Ngốn nhiều giờ nhất:</b> ${heavy?esc(heavy.service)+' — '+N(heavy.hours,0)+' giờ':'N/A'}</p>
+    <p>${util<.75?'Utilization thấp (<75%) → lấp đầy thêm xe trước khi lọc mix.':util>1?'Vượt capacity → cần mở thêm ca/khoang hoặc lọc bỏ dịch vụ CM/giờ thấp.':'Gần chạm capacity → ưu tiên dịch vụ CM/giờ cao nhất.'}</p>`;
+
+  document.getElementById('stickyNote').innerHTML = `⚠ <b>CM% là giả định</b> — chưa tính từ giá vốn phụ tùng thật. Các ô vàng cần xác nhận với GĐ Dịch vụ. <b>Fixed cost = ${M(fixed)} tr</b> (mặc định 0 → EBITDA = Total CM). Hệ số sử dụng <b>${state.util}%</b> chưa được xác nhận thực tế.`;
+}
+
+// ══════════════════════════════════════
+//  CONTROLS & CAPACITY
+// ══════════════════════════════════════
+function updateCapDisplay() {
+  const cap = capacity();
+  const slots = getSccSlots(state.garage,state.month);
+  const wd = WORKDAYS[state.month]||30;
+  document.getElementById('capDisplay').textContent = N(cap,0)+' giờ';
+  const cfg = CFG[state.garage]||{hpc:7,shifts:1};
+  document.getElementById('capFormula').textContent = `${cfg.hpc}h/ca × ${cfg.shifts}ca × ${slots}slot × ${wd}d × ${state.util}%`;
+}
+
+function initControls() {
+  const garages = Object.keys(CFG);
+  const gs = document.getElementById('garageSelect');
+  gs.innerHTML = garages.map(g=>`<option>${g}</option>`).join('');
+  gs.value = state.garage;
+  gs.onchange = e=>{ state.garage=e.target.value; save(); initControls(); renderAll(); };
+
+  const ms = document.getElementById('monthSelect');
+  ms.innerHTML = MONTHS.map(m=>`<option>${m}</option>`).join('');
+  ms.value = state.month;
+  ms.onchange = e=>{ state.month=e.target.value; save(); initControls(); renderAll(); };
+
+  document.getElementById('fixedCostInput').value = (Number(state.fixedCost)||0);
+  document.getElementById('fixedCostInput').oninput = e=>{ state.fixedCost=Number(e.target.value)||0; save(); renderAll(false); };
+
+  document.getElementById('utilRange').value = state.util;
+  document.getElementById('utilLabel').textContent = state.util+'%';
+  document.getElementById('utilRange').oninput = e=>{ state.util=+e.target.value; document.getElementById('utilLabel').textContent=state.util+'%'; save(); renderAll(false); };
+
+  // tabs
+  document.querySelectorAll('.tab-btn').forEach(b=>b.onclick=()=>{ state.activeTab=b.dataset.tab; save(); renderAll(false); });
+  document.querySelectorAll('.perf-tab').forEach(b=>b.onclick=()=>{ state.perfTab=b.dataset.perf; save(); renderPerf(garageStats(state.month)); });
+
+  // sort
+  document.querySelectorAll('.sort-chip[data-sort]').forEach(b=>b.onclick=()=>{ state.sortMetric=b.dataset.sort; save(); renderAll(false); });
+  document.getElementById('sortDirBtn').onclick=()=>{ state.sortDir=state.sortDir==='desc'?'asc':'desc'; document.getElementById('sortDirBtn').textContent=state.sortDir.toUpperCase(); save(); renderAll(false); };
+
+  // export/import/reset
+  document.getElementById('exportCsvBtn').onclick=()=>exportCsv();
+  document.getElementById('exportJsonBtn').onclick=()=>exportJson();
+  document.getElementById('importJsonBtn').onclick=()=>document.getElementById('importFile').click();
+  document.getElementById('importFile').onchange=e=>importJson(e);
+  document.getElementById('resetBtn').onclick=()=>{ state.assumptions={}; baseRows().forEach(r=>ensureA(r)); save(); renderAll(); };
+
+  updateCapDisplay();
+}
+
+
+const COL_MAP = {"cars": 4, "cmPerHour": 12, "contribution": 11, "demandHours": 9, "lostContribution": 16};
+
+function applyColHighlight() {
+  const col = COL_MAP[state.sortMetric];
+  // reset
+  document.querySelectorAll('table.calc th, table.calc td').forEach(el => el.classList.remove('col-active'));
+  if(!col) return;
+  // header
+  const ths = document.querySelectorAll('table.calc thead th');
+  if(ths[col-1]) ths[col-1].classList.add('col-active');
+  // body cells
+  document.querySelectorAll('table.calc tbody tr').forEach(tr => {
+    const tds = tr.querySelectorAll('td');
+    if(tds[col-1]) tds[col-1].classList.add('col-active');
+  });
+}
+
+function renderRipplePanel(rows) {
+  const cap = capacity();
+  const tot = sumR(rows);
+  const usedH = Math.min(tot.hours, cap);
+  const util = cap>0?usedH/cap:0;
+  const cmph = usedH>0?tot.acceptedCM/usedH:0;
+  const fixed = (Number(state.fixedCost)||0)*1e6;
+  const ebitda = tot.acceptedCM - fixed;
+
+  const baseRs = baseRows();
+  const baseTot = baseRs.reduce((a,r)=>({
+    cars:a.cars+r.baseCars, rev:a.rev+r.baseRevenue,
+    hours:a.hours+r.baseCars*r.hoursPerCar,
+    cm:a.cm+r.baseRevenue*r.marginPct
+  }),{cars:0,rev:0,hours:0,cm:0});
+  const baseCap = capacity();
+  const baseUtil = baseCap>0?Math.min(baseTot.hours,baseCap)/baseCap:0;
+  const baseEBITDA = baseTot.cm - fixed;
+
+  const fmt = (v,unit) => {
+    if(unit==='%') return N(v*100,1)+'%';
+    if(unit==='h') return N(v,0)+' h';
+    return M(v)+' tr';
+  };
+  const delta = (b,s,unit,inv=false) => {
+    const d=s-b;
+    const cl = Math.abs(d)<.001?'flat':((d>0)!==!!inv?'up':'down');
+    return `<span class="${cl}">${d>0?'+':''}${fmt(d,unit)}</span>`;
+  };
+  const row = (lbl,bv,sv,unit,inv=false) =>
+    `<div class="rg-label">${lbl}</div><div class="rg-val">${fmt(bv,unit)}</div><div class="rg-val">${fmt(sv,unit)}</div><div class="rg-val">${delta(bv,sv,unit,inv)}</div>`;
+
+  let note = tot.hours>cap
+    ? `Cầu <b>${N(tot.hours,0)}h</b> vượt cap <b>${N(cap,0)}h</b> → cắt dịch vụ CM/giờ thấp. Còn mất <b>${M(tot.lostCM)} tr</b> CM.`
+    : `Còn dư <b>${N(cap-tot.hours,0)}h</b> — chưa chạm bottleneck. Tiếp tục lấp đầy.`;
+
+  const panel = document.getElementById('ripplePanel');
+  if(!panel) return;
+  panel.innerHTML = `
+    <div class="ripple-panel-head">Ripple — Baseline → Scenario → Δ</div>
+    <div style="display:grid;grid-template-columns:1fr auto auto auto;font-size:11px;">
+      <div class="rg-hdr">Mắt xích</div><div class="rg-hdr" style="text-align:right">Baseline</div><div class="rg-hdr" style="text-align:right">Scenario</div><div class="rg-hdr" style="text-align:right">Δ</div>
+      ${row('Số xe',baseTot.cars,tot.cars,'')}
+      ${row('Tổng số giờ',baseTot.hours,tot.hours,'h')}
+      ${row('Capacity',baseCap,cap,'h')}
+      ${row('Utilization',baseUtil,util,'%')}
+      ${row('Total CM',baseTot.cm,tot.acceptedCM,'tr')}
+      ${row('Lost CM',0,tot.lostCM,'tr',true)}
+      ${row('EBITDA',baseEBITDA,ebitda,'tr')}
+    </div>
+    <div style="padding:8px 10px;font-size:10.5px;color:var(--dim);border-top:1px solid var(--border2);line-height:1.5">${note}</div>`;
+}
+function renderAll(full=true) {
+  updateCapDisplay();
+  const rows = computeRows();
+  renderKpis(rows);
+  // views
+  const tab = state.activeTab||'dashboard';
+  ['dashboard','simulator'].forEach(t=>{
+    document.getElementById('view-'+t).classList.toggle('active',t===tab);
+    document.getElementById('btn-'+t).classList.toggle('active',t===tab);
+  });
+  if(tab==='dashboard') renderDashboard(rows);
+  if(tab==='simulator') { if(full) renderSimLeft(rows); renderTable(rows); renderRipplePanel(rows); renderRightKpis(rows); applyColHighlight(); }
+  document.querySelectorAll('.sort-chip[data-sort]').forEach(b=>b.classList.toggle('active',b.dataset.sort===state.sortMetric));
+}
+
+// ══════════════════════════════════════
+//  EXPORT / IMPORT
+// ══════════════════════════════════════
+function exportCsv() {
+  const rows = computeRows();
+  const hdr = ['garage','month','segment','service','base_cars','scenario_cars','rev_per_car_mvnd','margin_pct','hours_per_car','demand_hours','revenue_mvnd','cm_mvnd','cm_per_hour_mvnd','opt_rank','accepted_cars','accepted_cm_mvnd','lost_cm_mvnd'];
+  const csv = [hdr.join(',')].concat(rows.map(r=>[
+    r.garage,r.month,r.segment,r.service,r.baseCars,r.cars,
+    (r.rpc/1e6).toFixed(3),r.mg.toFixed(4),r.hpc,r.hours.toFixed(1),
+    (r.rev/1e6).toFixed(2),(r.cm/1e6).toFixed(2),isFinite(r.cmph)?(r.cmph/1e6).toFixed(4):'Infinity',
+    r.optRank||'',(r.acceptedCars).toFixed(1),(r.acceptedCM/1e6).toFixed(2),(r.lostCM/1e6).toFixed(2)
+  ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))).join('\n');
+  dl(csv,'VFX_Garage_Scenario_v07.csv','text/csv;charset=utf-8;');
+}
+function exportJson() {
+  dl(JSON.stringify({version:'v07',exportedAt:new Date().toISOString(),state,rows:computeRows()},null,2),'VFX_Garage_v07_snapshot.json','application/json');
+}
+function importJson(e) {
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader(); rd.onload=()=>{try{const p=JSON.parse(rd.result);if(p.state)state=p.state;save();initControls();renderAll();}catch(er){alert('Lỗi JSON: '+er.message);}};rd.readAsText(f);
+}
+function dl(text,fn,type) {
+  const b=new Blob([text],{type}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);
+}
+
+// ══════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════
+initControls();
+baseRows().forEach(r=>ensureA(r));
+renderAll();
+save();
+</script>
+</body>
+</html>
