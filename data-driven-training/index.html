@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centralcons | Data-Driven Construction Management Training</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;--panel:#ffffff;--ink:#172033;--muted:#64748b;--line:#dbe3ef;
+      --blue:#1356d8;--blue2:#e8f0ff;--cyan:#0f9ec7;--green:#16a34a;--yellow:#eab308;--red:#dc2626;--purple:#7c3aed;
+      --shadow:0 16px 40px rgba(15,23,42,.10);--radius:20px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(135deg,#eef4ff 0%,#f8fafc 45%,#eefdf8 100%);color:var(--ink)}
+    .app{display:grid;grid-template-columns:310px 1fr;min-height:100vh}
+    aside{position:sticky;top:0;height:100vh;overflow:auto;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-right:1px solid var(--line);padding:24px 18px;z-index:5}
+    main{padding:28px;max-width:1440px;width:100%}
+    .brand{display:flex;gap:12px;align-items:center;margin-bottom:18px}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:grid;place-items:center;color:white;font-weight:900}.brand h1{font-size:16px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px;line-height:1.35}
+    .navgroup{margin:18px 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;font-weight:800}.tabbtn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;border:0;background:transparent;border-radius:14px;padding:10px 12px;color:#334155;text-align:left;font-weight:700;cursor:pointer;margin:3px 0}.tabbtn:hover{background:#f1f5f9}.tabbtn.active{background:var(--blue2);color:var(--blue);box-shadow:inset 0 0 0 1px #c8dbff}.tabbtn small{font-weight:800;color:#94a3b8}.active small{color:var(--blue)}
+    .hero{background:linear-gradient(135deg,#0f3f9e 0%,#1367d8 55%,#0e9fbf 100%);color:#fff;border-radius:28px;padding:30px;box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:before{content:"";position:absolute;inset:-40px -60px auto auto;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.12)}.hero h2{font-size:36px;line-height:1.08;margin:0 0 12px}.hero p{max-width:920px;margin:0;color:#e8f2ff;line-height:1.65}.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);padding:7px 10px;border-radius:999px;font-size:12px;font-weight:800}
+    section.tab{display:none;animation:fade .22s ease}.tab.active{display:block}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .grid{display:grid;gap:18px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.card{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:0 10px 25px rgba(15,23,42,.06)}.card h3{margin:0 0 12px;font-size:20px}.card h4{margin:0 0 8px;font-size:15px}.card p,.card li{line-height:1.55;color:#475569}.muted{color:var(--muted)}.small{font-size:12px}.kpi{font-size:28px;font-weight:900;color:var(--blue);line-height:1}.kpi-label{font-size:12px;color:var(--muted);font-weight:800;margin-top:6px}.section-title{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:26px 0 14px}.section-title h2{font-size:28px;margin:0}.pill{display:inline-flex;gap:6px;align-items:center;border-radius:999px;padding:7px 10px;background:#ecfeff;color:#0e7490;font-size:12px;font-weight:900}.pill.blue{background:#e8f0ff;color:var(--blue)}.pill.green{background:#dcfce7;color:#166534}.pill.yellow{background:#fef9c3;color:#854d0e}.pill.red{background:#fee2e2;color:#991b1b}.pill.purple{background:#f3e8ff;color:#6b21a8}
+    .timeline{position:relative;padding-left:24px}.timeline:before{content:"";position:absolute;left:8px;top:3px;bottom:3px;width:2px;background:#cbd5e1}.step{position:relative;margin:0 0 14px}.step:before{content:"";position:absolute;left:-21px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px #dbeafe}.step h4{margin:0 0 4px}.step p{margin:0;color:#64748b;font-size:14px}.quote{border-left:5px solid var(--blue);background:#f8fbff;padding:14px 16px;border-radius:12px;color:#334155;font-weight:700;line-height:1.5}
+    .block{border-left:5px solid #dbeafe;padding:14px 16px;margin:10px 0;background:#fff;border-radius:14px}.block b{color:#0f3f9e}.tag{display:inline-block;border:1px solid #cbd5e1;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800;color:#475569;background:#fff;margin:2px}.demo-tag{background:#fff7ed;color:#c2410c;border-color:#fed7aa}.table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}.table th{background:#f1f5f9;color:#334155;font-size:12px;text-transform:uppercase;letter-spacing:.04em;text-align:left}.table th,.table td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}.table tr:last-child td{border-bottom:0}.table td{color:#475569;line-height:1.45}
+    input[type=number],input[type=range],select{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;color:#0f172a}label{display:block;font-weight:800;color:#334155;font-size:12px;margin:10px 0 6px}.calcbox{background:#f8fafc;border:1px solid var(--line);border-radius:16px;padding:14px}.result{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.result .r{background:white;border:1px solid var(--line);border-radius:14px;padding:12px}.r strong{font-size:22px;color:var(--blue);display:block}.status{font-size:12px;font-weight:900;border-radius:999px;padding:6px 10px;display:inline-block;margin-top:6px}.ok{background:#dcfce7;color:#166534}.warn{background:#fef9c3;color:#854d0e}.bad{background:#fee2e2;color:#991b1b}
+    .demo-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.mini-tab{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 10px;cursor:pointer;font-weight:800;color:#475569}.mini-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}.mini-panel{display:none}.mini-panel.active{display:block}.bar{height:12px;background:#e2e8f0;border-radius:999px;overflow:hidden}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:999px}.war-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.project{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px;cursor:pointer}.project:hover{box-shadow:0 10px 20px rgba(15,23,42,.08)}.dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px}.dot.green{background:var(--green)}.dot.yellow{background:var(--yellow)}.dot.red{background:var(--red)}.spark{height:70px;border-radius:14px;background:linear-gradient(180deg,#eff6ff,#fff);border:1px dashed #bfdbfe;position:relative;overflow:hidden}.spark svg{width:100%;height:100%}.alert{border:1px solid #fecaca;background:#fff1f2;border-radius:14px;padding:12px;color:#991b1b;font-weight:800}.svgwrap{display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}.foot{margin:24px 0 4px;color:#94a3b8;font-size:12px;text-align:center}
+    @media (max-width:1050px){.app{grid-template-columns:1fr}aside{position:relative;height:auto}.g2,.g3,.g4,.war-grid,.result{grid-template-columns:1fr}main{padding:16px}.hero h2{font-size:27px}}
+    @media print{aside{display:none}.app{display:block}main{padding:0}.tab{display:block!important;page-break-after:always}.hero,.card{box-shadow:none}.tabbtn{display:none}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand"><div class="logo">CC</div><div><h1>Centralcons Training</h1><p>Data-driven construction management</p></div></div>
+    <div class="navgroup">Chương trình</div>
+    <button class="tabbtn active" data-tab="overview">Tổng quan <small>0</small></button>
+    <button class="tabbtn" data-tab="agenda">Agenda trước-trong-sau <small>A</small></button>
+    <div class="navgroup">4 phần Day 1</div>
+    <button class="tabbtn" data-tab="part1">Phần 1: Nhận thức <small>80'</small></button>
+    <button class="tabbtn" data-tab="part2">Phần 2: Biến dữ liệu thành vàng <small>150'</small></button>
+    <button class="tabbtn" data-tab="part3">Phần 3: Điều kiện cần & đủ <small>75'</small></button>
+    <button class="tabbtn" data-tab="part4">Phần 4: BI + AI <small>60'</small></button>
+    <div class="navgroup">Demo Tool Lab</div>
+    <button class="tabbtn" data-tab="demo1">Demo 1: Bài toán 2.5%</button>
+    <button class="tabbtn" data-tab="demo2">Demo 2: DIKW Explorer</button>
+    <button class="tabbtn" data-tab="demo3">Demo 3: Project War Room</button>
+    <button class="tabbtn" data-tab="demo4">Demo 4: DSO Optimizer</button>
+    <button class="tabbtn" data-tab="demo5">Demo 5: Phân tích 4 tầng</button>
+    <button class="tabbtn" data-tab="demo6">Demo 6: AI Early Warning</button>
+    <button class="tabbtn" data-tab="demo7">Demo 7: DX Failure Diagnosis</button>
+    <div class="navgroup">Output</div>
+    <button class="tabbtn" data-tab="outputs">Kết quả kỳ vọng</button>
+  </aside>
+  <main>
+    <section id="overview" class="tab active">
+      <div class="hero">
+        <h2>Khai thác dữ liệu phục vụ tối ưu kinh doanh trong tập đoàn xây dựng</h2>
+        <p>Bản trình bày full HTML cho chương trình đào tạo Centralcons: từ nhận thức dữ liệu, quy đổi dữ liệu thành giá trị kinh doanh, điều kiện triển khai thành công, đến vai trò của BI và AI. Mỗi phần là một tab riêng; các demo được tách thành tab riêng để dùng linh hoạt trong lớp.</p>
+        <div class="chips"><span class="chip">Centralcons context</span><span class="chip">Construction data</span><span class="chip">BI / AI</span><span class="chip">Interactive demo tools</span><span class="chip">Day 1 + Day 2 agenda</span></div>
+      </div>
+      <div class="section-title"><h2>Logic chương trình</h2><span class="pill blue">Data → Money → Operating Model → BI/AI</span></div>
+      <div class="grid g4">
+        <div class="card"><div class="kpi">P1</div><h3>Nhận thức về dữ liệu</h3><p>Người học nhận ra Central không thiếu dữ liệu; vấn đề là dữ liệu đang phân tán, không đáng tin, đến muộn hoặc chưa thành quyết định.</p><span class="tag demo-tag">Demo 2</span> <span class="tag demo-tag">Demo 5 rút gọn</span></div>
+        <div class="card"><div class="kpi">P2</div><h3>Biến dữ liệu thành vàng</h3><p>Dữ liệu tạo tiền qua giảm rework, giảm thất thoát, tối ưu nghiệm thu/DSO, bid chính xác hơn và tạo lợi thế chiến lược.</p><span class="tag demo-tag">Demo 1</span> <span class="tag demo-tag">Demo 4</span></div>
+        <div class="card"><div class="kpi">P3</div><h3>Điều kiện cần & đủ</h3><p>4 khâu đường ống dữ liệu: tạo sinh, lưu trữ/chuẩn hóa, phân tích, khai thác. Chuỗi chỉ mạnh bằng mắt xích yếu nhất.</p><span class="tag demo-tag">Mini diagnostic</span></div>
+        <div class="card"><div class="kpi">P4</div><h3>BI + AI = Game Changer</h3><p>BI giúp nhìn thấy hiện tại, AI giúp dự báo và đề xuất hành động. Thứ tự đúng: Data Pipeline → BI → AI.</p><span class="tag demo-tag">Demo 3</span> <span class="tag demo-tag">Demo 6</span></div>
+      </div>
+      <div class="section-title"><h2>Core demo set đề xuất</h2><span class="pill green">Nên dùng trong Day 1</span></div>
+      <div class="grid g3">
+        <div class="card"><h3>Data → Decision</h3><p><b>DIKW Explorer</b> dùng bài toán thép 450 tấn để người học đi từ raw data đến decision tree.</p></div>
+        <div class="card"><h3>Data → Money</h3><p><b>Bài toán 2.5%</b> và <b>DSO Optimizer</b> giúp quy đổi rework và nghiệm thu thành tiền cụ thể.</p></div>
+        <div class="card"><h3>BI/AI Experience</h3><p><b>Project War Room</b> và <b>AI Early Warning</b> giúp thấy khác biệt giữa báo cáo, BI và predictive AI.</p></div>
+      </div>
+    </section>
+
+    <section id="agenda" class="tab">
+      <div class="section-title"><h2>Agenda tổng thể: trước - trong - sau đào tạo</h2><span class="pill blue">Training journey</span></div>
+      <div class="grid g3">
+        <div class="card"><h3>Trước đào tạo</h3><div class="timeline">
+          <div class="step"><h4>Alignment với sponsor</h4><p>HR/Training, Transformation/IT, BIM, PMO, Finance, Procurement, Project/Site thống nhất mục tiêu, nhóm học viên, kỳ vọng đầu ra.</p></div>
+          <div class="step"><h4>Pre-class survey</h4><p>Gửi khảo sát online trước lớp 5-7 ngày, 10-15 phút/người, thu thập pain point, maturity, use case ưu tiên, readiness BI/AI.</p></div>
+          <div class="step"><h4>Thu thập mẫu dữ liệu không nhạy cảm</h4><p>Project value/margin giả định, timeline nghiệm thu, dashboard mẫu, KPI dự án, flow BIM/ERP/site data.</p></div>
+          <div class="step"><h4>Central Data Pain Point Map</h4><p>Tổng hợp kết quả khảo sát để mở đầu lớp học và chọn 3-5 bài toán thật làm ví dụ xuyên suốt.</p></div>
+        </div></div>
+        <div class="card"><h3>Trong đào tạo</h3><div class="timeline">
+          <div class="step"><h4>Day 1 — Framework + demo</h4><p>4 phần: Nhận thức; Biến dữ liệu thành vàng; Điều kiện cần & đủ; BI + AI là game changer.</p></div>
+          <div class="step"><h4>Demo là công cụ học tập</h4><p>Mỗi demo trả lời một câu hỏi sư phạm, không trình diễn công nghệ thuần túy.</p></div>
+          <div class="step"><h4>Day 2 — Workshop bài toán thật</h4><p>Ưu tiên use case theo giá trị kinh doanh, độ sẵn sàng dữ liệu, độ khó triển khai, owner và thời gian tạo kết quả.</p></div>
+          <div class="step"><h4>Roadmap 30-60-90 ngày</h4><p>Chốt dữ liệu cần có, owner, workflow, dashboard/alert, success metric và next step cho use case đầu tiên.</p></div>
+        </div></div>
+        <div class="card"><h3>Sau đào tạo</h3><div class="timeline">
+          <div class="step"><h4>Post-training pack</h4><p>Gửi Central Data Pain Point Map, Data Pipeline Diagnostic Map, danh sách use case ưu tiên và roadmap đề xuất.</p></div>
+          <div class="step"><h4>Follow-up sponsor session</h4><p>Buổi 60-90 phút với nhóm sponsor để chọn pilot và thống nhất scope triển khai thử nghiệm.</p></div>
+          <div class="step"><h4>Prototype nếu cần</h4><p>Phát triển mockup dashboard/demo thành prototype dùng dữ liệu thật ở mức phù hợp bảo mật.</p></div>
+        </div></div>
+      </div>
+      <div class="section-title"><h2>Khảo sát trước lớp</h2></div>
+      <div class="grid g5"></div>
+      <div class="card"><table class="table"><tr><th>Nhóm câu hỏi</th><th>Mục đích</th><th>Ví dụ nội dung</th></tr>
+        <tr><td>Mức độ trưởng thành dữ liệu</td><td>Biết Central đang ở đâu</td><td>Excel/report rời rạc, dashboard, BI, data warehouse, AI use case, mức độ sử dụng thực tế.</td></tr>
+        <tr><td>Pain point theo phòng ban</td><td>Thu thập vấn đề thật</td><td>PM, QS/Cost Control, Finance, Procurement, BIM/Technical, Site team, HSE, HR, IT/Transformation.</td></tr>
+        <tr><td>Data flow hiện tại</td><td>Xác định đường đi dữ liệu</td><td>Data phát sinh ở đâu, ai nhập, ai sở hữu, ai dùng, update bao lâu, có source of truth chưa.</td></tr>
+        <tr><td>Use case ưu tiên</td><td>Chọn bài toán cho Day 2</td><td>Rework, vật tư, nghiệm thu/DSO, cashflow, cost-to-complete, đấu thầu, HSE, BIM/as-built, GenAI.</td></tr>
+        <tr><td>Readiness BI/AI</td><td>Kiểm tra nền tảng</td><td>ERP, BIM, site data, dashboard, KPI definition, data ownership, adoption, leader usage.</td></tr>
+      </table></div>
+    </section>
+
+    <section id="part1" class="tab">
+      <div class="section-title"><h2>Phần 1 — Nhận thức về dữ liệu</h2><span class="pill blue">~80 phút</span></div>
+      <div class="card"><p><b>Mục tiêu sư phạm:</b> Giúp người học nhận ra dữ liệu không phải việc của IT, mà là hệ thần kinh vận hành của dự án xây dựng. Central không thiếu dữ liệu; vấn đề là dữ liệu đang phân tán, không đáng tin, đến muộn và chưa đi đủ xa để thành quyết định.</p><div class="quote">Nguyên tắc: pain point trước, framework sau. Người học tự nhận ra mình trong tình huống trước khi giảng viên gọi tên vấn đề.</div></div>
+      <div class="grid g2">
+        <div class="card"><h3>Cấu trúc block</h3>
+          <div class="block"><b>Block 0 — Phá băng:</b> “Anh/chị có đang gặp vấn đề với data không?” 5 tình huống: không tìm được số; không tin được số; số đến quá muộn; xử lý thủ công; mua hệ thống rồi vẫn quay lại Excel.</div>
+          <div class="block"><b>Block 1A — Buổi sáng hôm nay:</b> mỗi người viết 5 việc đã làm, đối chiếu với data phát sinh theo phòng ban.</div>
+          <div class="block"><b>Block 1B — Bản đồ bể dữ liệu:</b> nhóm cross-functional mapping data theo Thiết kế/Kỹ thuật, Văn phòng/Quản trị, Công trường.</div>
+          <div class="block"><b>Block 1C — 3 trạng thái + DIKW:</b> dữ liệu có cấu trúc, phân tán, trong đầu người; đi từ raw number đến quyết định.</div>
+          <div class="block"><b>Block 1D — Bridge:</b> data đáng bao nhiêu tiền và vì sao biết vậy vẫn không làm được?</div>
+        </div>
+        <div class="card"><h3>Demo chèn vào Phần 1</h3>
+          <div class="block"><b>Demo 2 — DIKW Explorer:</b> đặt sau tình huống thép 450 tấn. Người học đi qua 4 tầng: Data → Information → Knowledge → Wisdom.</div>
+          <div class="block"><b>Demo 5 — Phân tích 4 tầng tiến độ:</b> dùng bản rút gọn cuối Phần 1 hoặc đầu Phần 2 để bridge sang business impact.</div>
+          <h4>Output của Phần 1</h4><p>Người học hiểu mình đang tạo ra data mỗi ngày, data đang nằm ở đâu, và data bị kẹt ở tầng nào trước khi trở thành quyết định.</p>
+        </div>
+      </div>
+      <div class="section-title"><h2>Mapping hoạt động buổi sáng theo phòng ban</h2></div>
+      <div class="card"><table class="table"><tr><th>Nhóm</th><th>Việc buổi sáng</th><th>Data phát sinh</th></tr>
+        <tr><td>Ban điều hành</td><td>Xem tiến độ, backlog, dòng tiền, rủi ro</td><td>Project status, revenue forecast, cash forecast</td></tr>
+        <tr><td>Project Manager</td><td>Check tiến độ, nhân lực, vật tư, thầu phụ</td><td>Daily progress, issue log, resource usage</td></tr>
+        <tr><td>QS/Cost Control</td><td>So sánh BOQ, phát sinh, nghiệm thu</td><td>BOQ, variation, cost-to-complete</td></tr>
+        <tr><td>Procurement</td><td>Check PR/PO, giá vật tư, giao hàng</td><td>PR, PO, vendor price, lead time</td></tr>
+        <tr><td>Finance</td><td>Công nợ, thanh toán, dòng tiền</td><td>AR/AP, payment, retention, advance</td></tr>
+        <tr><td>BIM/Technical</td><td>Bản vẽ, clash, revision, RFI</td><td>Model, drawing version, issue log</td></tr>
+      </table></div>
+    </section>
+
+    <section id="part2" class="tab">
+      <div class="section-title"><h2>Phần 2 — Biến dữ liệu thành vàng</h2><span class="pill yellow">~150 phút</span></div>
+      <div class="card"><p><b>Mục tiêu sư phạm:</b> Chứng minh data tạo giá trị kinh doanh theo 3 hướng: giảm chi phí, tăng tốc dòng tiền/doanh thu, và tạo lợi thế chiến lược. Phần này không chỉ show case study, mà dùng phép tính tiền gần với thực tế Central.</p><div class="quote">Câu hỏi trung tâm: Điều kiện nào biến data thành tiền, và vì sao nhiều nơi có đủ tiền mua hệ thống vẫn không làm được?</div></div>
+      <div class="grid g2">
+        <div class="card"><h3>Cấu trúc block</h3>
+          <div class="block"><b>Bridge:</b> Central đang ngồi trên bể dữ liệu, nhưng data chỉ tạo giá trị khi đủ điều kiện.</div>
+          <div class="block"><b>Block 2.0 — Vì sao thất bại:</b> Garbage in/out; không biết hỏi câu hỏi đúng; đúng data nhưng sai người/sai lúc; sai thứ tự triển khai.</div>
+          <div class="block"><b>Block 2A — Giảm chi phí:</b> rework, thất thoát vật tư, delay, chờ đợi và chi phí ẩn do data đến muộn.</div>
+          <div class="block"><b>Block 2B — Tăng tiền về:</b> nghiệm thu nhanh hơn, DSO thấp hơn, đấu thầu chính xác hơn nhờ historical database.</div>
+          <div class="block"><b>Block 2C — Lợi thế chiến lược:</b> ESG/HSE như bằng chứng năng lực; BIM/as-built như data moat.</div>
+        </div>
+        <div class="card"><h3>Demo chèn vào Phần 2</h3>
+          <div class="block"><b>Demo 1 — Bài toán 2.5%:</b> đặt ngay mở đầu Block 2A. Người học tự nhập project value, margin, rework/thất thoát để thấy lợi nhuận bị ăn mòn.</div>
+          <div class="block"><b>Demo 4 — DSO Optimizer:</b> đặt trong Block 2B sau timeline nghiệm thu. Người học nhập số dự án, giá trị nghiệm thu, số ngày rút ngắn và lãi suất để tính tiền về sớm hơn.</div>
+          <h4>Output của Phần 2</h4><p>Người học thấy data có thể quy đổi thành tiền qua chi phí tránh được, tiền về sớm hơn, bid chính xác hơn và bằng chứng năng lực khi đấu thầu.</p>
+        </div>
+      </div>
+      <div class="section-title"><h2>3 hướng tạo giá trị</h2></div>
+      <div class="grid g3"><div class="card"><h3>Giảm chi phí</h3><p>Rework, thất thoát vật tư, delay, chờ đợi, chi phí tăng tốc muộn.</p></div><div class="card"><h3>Tăng tiền về</h3><p>Nghiệm thu nhanh hơn, approval mobile, giảm DSO, cải thiện dòng tiền.</p></div><div class="card"><h3>Lợi thế chiến lược</h3><p>ESG/HSE live evidence, BIM/as-built database, data moat khi đấu thầu.</p></div></div>
+    </section>
+
+    <section id="part3" class="tab">
+      <div class="section-title"><h2>Phần 3 — Điều kiện cần & đủ: Đường ống dữ liệu</h2><span class="pill green">~75 phút</span></div>
+      <div class="card"><p><b>Mục tiêu sư phạm:</b> Trả lời vì sao nhiều doanh nghiệp biết data quan trọng, đã mua hệ thống, đã có dashboard nhưng vẫn chưa khai thác được. Mô hình cốt lõi là đường ống dữ liệu: tạo sinh → lưu trữ/chuẩn hóa → sàng lọc/phân tích → khai thác/ra quyết định.</p><div class="quote">Dashboard đẹp chỉ là “vòi”. Nếu đường ống phía sau vỡ, người dùng vẫn không có nước sạch.</div></div>
+      <div class="grid g4">
+        <div class="card"><h3>1. Tạo sinh</h3><p><b>Câu hỏi:</b> Người tạo data có lý do để tạo data tốt không?</p><p><b>Điều kiện:</b> Mobile-first, tối giản thao tác, feedback loop, người tạo data hưởng lợi đầu tiên.</p></div>
+        <div class="card"><h3>2. Chuẩn hóa</h3><p><b>Câu hỏi:</b> Data có cùng định nghĩa và source of truth không?</p><p><b>Điều kiện:</b> KPI dictionary, SSOT, data owner, update frequency.</p></div>
+        <div class="card"><h3>3. Phân tích</h3><p><b>Câu hỏi:</b> Data trả lời quyết định nào?</p><p><b>Điều kiện:</b> Backward from decision, management by exception, dashboard theo vai trò.</p></div>
+        <div class="card"><h3>4. Khai thác</h3><p><b>Câu hỏi:</b> Người dùng có tin và hành động theo data không?</p><p><b>Điều kiện:</b> Quick win, leader adoption, data champion.</p></div>
+      </div>
+      <div class="section-title"><h2>Mini diagnostic cuối Phần 3</h2><span class="pill purple">Lấy ý tưởng từ Demo 7</span></div>
+      <div class="card"><table class="table"><tr><th>Khâu</th><th>Câu hỏi chẩn đoán</th><th>Điểm 1-5</th></tr>
+        <tr><td>Tạo sinh</td><td>Người tạo data có thấy lợi ích trực tiếp không?</td><td>___</td></tr>
+        <tr><td>Lưu trữ & chuẩn hóa</td><td>Các chỉ tiêu chính có định nghĩa thống nhất và source of truth không?</td><td>___</td></tr>
+        <tr><td>Sàng lọc & phân tích</td><td>Dashboard/report có bắt đầu từ quyết định cần ra không?</td><td>___</td></tr>
+        <tr><td>Khai thác & quyết định</td><td>Người dùng có tin và hành động theo data không?</td><td>___</td></tr>
+      </table><p class="muted">Thông điệp: nếu một trong bốn khâu này thấp điểm, đừng vội mua AI. Hãy sửa đường ống trước.</p></div>
+    </section>
+
+    <section id="part4" class="tab">
+      <div class="section-title"><h2>Phần 4 — BI + AI = Game Changer</h2><span class="pill purple">~60 phút</span></div>
+      <div class="card"><p><b>Mục tiêu sư phạm:</b> Phân biệt BI và AI như hai tầng nối tiếp. BI giúp tổ chức nhìn thấy hiện tại; AI giúp dự báo rủi ro và đề xuất hành động. Cả hai chỉ hoạt động tốt khi data pipeline ở Phần 3 đủ ổn định.</p><div class="quote">AI không thay thế BI. AI đứng trên BI. Nếu tổ chức chưa nhìn thấy hiện tại đáng tin, tổ chức chưa thể dự báo tương lai đáng tin.</div></div>
+      <div class="grid g2">
+        <div class="card"><h3>Cấu trúc block</h3>
+          <div class="block"><b>Block 4.1 — BI là đôi mắt:</b> báo cáo truyền thống vs BI; dashboard exception; role-based view.</div>
+          <div class="block"><b>Block 4.2 — AI là bộ não dự báo:</b> AI scheduling, clash/rework, HSE risk, cost estimation, GenAI nội bộ.</div>
+          <div class="block"><b>Block 4.3 — Hiệu ứng nhân:</b> Data Pipeline → BI layer → AI layer → quyết định tốt hơn.</div>
+          <div class="block"><b>Block 4.4 — Central context:</b> Central có BIM, ERP và site data; câu hỏi là use case nào làm trước.</div>
+        </div>
+        <div class="card"><h3>Demo chèn vào Phần 4</h3>
+          <div class="block"><b>Demo 3 — Project War Room:</b> đặt sau Management by Exception. Dashboard 6-8 dự án, status xanh/vàng/đỏ, chế độ “Sếp” chỉ còn exception.</div>
+          <div class="block"><b>Demo 6 — AI Early Warning:</b> đặt trong AI use cases. So sánh traditional mode với AI mode để thấy thời gian phản ứng khác nhau.</div>
+          <h4>Output của Phần 4</h4><p>Người học hiểu thứ tự Data Pipeline → BI → AI, và thấy được hình ảnh tầng tiếp theo của quản trị dự án dựa trên dữ liệu.</p>
+        </div>
+      </div>
+      <div class="section-title"><h2>BI vs AI</h2></div>
+      <div class="grid g2"><div class="card"><h3>BI: Tôi đang ở đâu?</h3><p>Real-time dashboard, management by exception, drill-down, role-based view. BI là radar giúp thấy hiện tại.</p></div><div class="card"><h3>AI: Tôi sẽ ở đâu?</h3><p>Predictive analytics, automated alerts, recommended actions. AI là cảnh báo sớm giúp xử lý trước khi damage xảy ra.</p></div></div>
+    </section>
+
+    <section id="demo1" class="tab demo">
+      <div class="section-title"><h2>Demo 1 — Bài toán 2.5%</h2><span class="pill yellow">Interactive Calculator</span></div>
+      <div class="grid g2"><div class="card"><h3>Mục đích sư phạm</h3><p>Thay vì nghe giảng viên tính trên bảng, người học tự nhập số dự án thật/giả định của mình để thấy rework hoặc thất thoát nhỏ có thể ăn mòn toàn bộ lợi nhuận.</p><p><b>Đặt ở:</b> Phần 2 — Block 2A, ngay sau phép tính dự án 500 tỷ, margin 2.5%.</p><div class="quote">Thông điệp: Với ngành có margin mỏng, 1–5% thất thoát không hề nhỏ.</div></div>
+      <div class="card calcbox"><h3>Calculator</h3><label>Giá trị dự án (tỷ đồng)</label><input id="d1_value" type="number" value="500" min="1"><label>Biên lợi nhuận ước tính (%)</label><input id="d1_margin" type="number" value="2.5" step="0.1"><label>Tỷ lệ rework/thất thoát (%)</label><input id="d1_loss" type="range" min="0" max="10" value="5" step="0.1"><div class="muted small">Rework/thất thoát: <b id="d1_loss_label">5%</b></div><div class="result"><div class="r"><span class="small muted">Lợi nhuận</span><strong id="d1_profit">12.5</strong><span class="small">tỷ đồng</span></div><div class="r"><span class="small muted">Thất thoát</span><strong id="d1_loss_amt">25.0</strong><span class="small">tỷ đồng</span></div><div class="r"><span class="small muted">Ăn mòn LN</span><strong id="d1_erosion">200%</strong><span id="d1_status" class="status bad">Đỏ</span></div></div></div></div>
+    </section>
+
+    <section id="demo2" class="tab demo">
+      <div class="section-title"><h2>Demo 2 — DIKW Explorer: Bài toán thép</h2><span class="pill blue">Guided Walkthrough</span></div>
+      <div class="card"><p><b>Đặt ở:</b> Phần 1 — Block 1C. Dùng sau tình huống “dự án tháng này dùng 450 tấn thép”.</p></div>
+      <div class="grid g2"><div class="card"><div class="demo-tabs"><button class="mini-tab active" data-mini="dikw1">1 Data</button><button class="mini-tab" data-mini="dikw2">2 Information</button><button class="mini-tab" data-mini="dikw3">3 Knowledge</button><button class="mini-tab" data-mini="dikw4">4 Wisdom</button></div>
+        <div id="dikw1" class="mini-panel active"><h3>Data</h3><div class="kpi">450 tấn thép</div><p>Con số thô, chưa có context. Câu hỏi: “Con số này nói gì với bạn?”</p></div>
+        <div id="dikw2" class="mini-panel"><h3>Information</h3><p>Dự toán 400T, thực tế 450T → vượt 12.5%.</p><div class="bar"><span style="width:88%"></span></div><p class="small muted">Data bắt đầu có ý nghĩa khi được so sánh với plan/budget.</p></div>
+        <div id="dikw3" class="mini-panel"><h3>Knowledge</h3><p>Drill-down nguyên nhân: 30T do thay đổi thiết kế hợp lệ; 20T hao hụt bất thường.</p><div class="grid g2"><div class="calcbox"><b>30T</b><br>Thiết kế thay đổi</div><div class="calcbox"><b>20T</b><br>Hao hụt bất thường</div></div></div>
+        <div id="dikw4" class="mini-panel"><h3>Wisdom</h3><p>Nếu tiếp tục 8 tháng, rủi ro ước tính 1.2 tỷ. Quyết định: đổi phương pháp, kiểm soát nhà thầu phụ, cập nhật forecast margin.</p><div class="alert">Action: owner + deadline + follow-up alert</div></div>
+      </div><div class="card"><h3>Thông điệp</h3><p>Cùng một con số 450 tấn, nếu chỉ dừng ở data thì vô dụng. Khi có context, nguyên nhân và lựa chọn hành động, nó mới trở thành quyết định quản trị.</p></div></div>
+    </section>
+
+    <section id="demo3" class="tab demo">
+      <div class="section-title"><h2>Demo 3 — Project War Room</h2><span class="pill green">Exception Dashboard</span></div>
+      <div class="grid g2"><div class="card"><h3>Mục đích</h3><p>Minh họa BI và Management by Exception: lãnh đạo không cần xem nhiều hơn; cần xem ít hơn nhưng đúng hơn.</p><p><b>Đặt ở:</b> Phần 4 — Block 4.1, sau khi giải thích BI.</p><button class="mini-tab" id="bossMode">Bật Chế độ Sếp: chỉ xem đèn đỏ/vàng</button></div><div class="card"><h3>Drill-down</h3><div id="projectDetail" class="quote">Click vào một dự án để xem KPI bị vỡ và action cần xử lý.</div></div></div>
+      <div class="card"><div id="warGrid" class="war-grid"></div></div>
+    </section>
+
+    <section id="demo4" class="tab demo">
+      <div class="section-title"><h2>Demo 4 — DSO Optimizer</h2><span class="pill yellow">Calculator + Timeline</span></div>
+      <div class="grid g2"><div class="card"><h3>Mục đích</h3><p>Chứng minh tăng doanh thu trong xây dựng không chỉ là trúng thêm thầu, mà còn là thu tiền nhanh hơn từ phần đã làm xong.</p><p><b>Đặt ở:</b> Phần 2 — Block 2B, sau timeline nghiệm thu.</p></div>
+      <div class="card calcbox"><label>Số dự án đang chạy song song</label><input id="d4_projects" type="number" value="20"><label>Giá trị nghiệm thu trung bình/đợt (tỷ đồng)</label><input id="d4_value" type="number" value="5"><label>Số đợt nghiệm thu/tháng/dự án</label><input id="d4_batches" type="number" value="2"><label>Ngày quy trình hiện tại</label><input id="d4_current" type="number" value="8"><label>Ngày sau mobile workflow</label><input id="d4_new" type="number" value="2"><label>Lãi suất vay (%/năm)</label><input id="d4_rate" type="number" value="9" step="0.1"><div class="result"><div class="r"><span class="small muted">Rút ngắn</span><strong id="d4_days">6</strong><span class="small">ngày/đợt</span></div><div class="r"><span class="small muted">Tiền luân chuyển sớm</span><strong id="d4_cash">200</strong><span class="small">tỷ/tháng</span></div><div class="r"><span class="small muted">Tiết kiệm lãi vay</span><strong id="d4_saving">2.96</strong><span class="small">tỷ/năm</span></div></div></div></div>
+    </section>
+
+    <section id="demo5" class="tab demo">
+      <div class="section-title"><h2>Demo 5 — Phân tích 4 tầng: Bài toán tiến độ</h2><span class="pill blue">Guided Walkthrough</span></div>
+      <div class="card"><p><b>Đặt ở:</b> cuối Phần 1 hoặc đầu Phần 2, làm bridge. Mục tiêu là cho thấy framework phân tích không chỉ áp dụng cho thép, mà áp dụng cho tiến độ, chi phí, an toàn.</p></div>
+      <div class="card"><div class="demo-tabs"><button class="mini-tab active" data-mini="pdesc">Mô tả</button><button class="mini-tab" data-mini="pdiag">Chẩn đoán</button><button class="mini-tab" data-mini="pforecast">Dự báo</button><button class="mini-tab" data-mini="paction">Đề xuất</button></div>
+        <div id="pdesc" class="mini-panel active"><h3>Mô tả</h3><p>Tháng này đạt 72%, kế hoạch 80% → trễ 8 điểm %.</p><div class="bar"><span style="width:72%"></span></div></div>
+        <div id="pdiag" class="mini-panel"><h3>Chẩn đoán</h3><p>Waterfall nguyên nhân: 3% do thời tiết; 5% do thầu phụ MEP trễ thiết bị.</p></div>
+        <div id="pforecast" class="mini-panel"><h3>Dự báo</h3><p>Nếu không xử lý, tháng sau có thể trễ 3 tuần, kéo theo chi phí tăng tốc và nguy cơ phạt tiến độ.</p></div>
+        <div id="paction" class="mini-panel"><h3>Đề xuất</h3><p>Action table: đổi sequencing, tăng ca có kiểm soát, ép hồ sơ thầu phụ, cập nhật procurement timeline, owner + deadline.</p></div>
+      </div>
+    </section>
+
+    <section id="demo6" class="tab demo">
+      <div class="section-title"><h2>Demo 6 — AI Cost Alert / Early Warning</h2><span class="pill red">AI Simulation</span></div>
+      <div class="grid g2"><div class="card"><h3>Mục đích</h3><p>Visualize khác biệt giữa traditional mode và AI mode: biết vấn đề khi damage đã xảy ra vs phát hiện trend bất thường và xử lý sớm.</p><p><b>Đặt ở:</b> Phần 4 — Block 4.2.</p><label>Tháng trong timeline dự án</label><input id="d6_month" type="range" min="1" max="6" value="3"><p class="muted">Tháng: <b id="d6_month_label">3</b></p></div><div class="card"><h3>So sánh mode</h3><div id="d6_text" class="quote"></div></div></div>
+      <div class="grid g2"><div class="card"><h3>Traditional mode</h3><div class="spark" id="sparkTraditional"></div></div><div class="card"><h3>AI mode</h3><div class="spark" id="sparkAI"></div><div class="alert" id="aiAlert">AI Alert: trend chi phí bất thường được phát hiện ở tuần 2 tháng 3.</div></div></div>
+      <div class="card"><h3>Điều kiện để AI hoạt động</h3><p>AI chỉ hoạt động nếu 4 khâu data pipeline đủ ổn định: field data nhập đúng, source of truth rõ, KPI định nghĩa đúng, có người nhận alert và hành động.</p></div>
+    </section>
+
+    <section id="demo7" class="tab demo">
+      <div class="section-title"><h2>Demo 7 — DX Failure Diagnosis</h2><span class="pill purple">Day 2 Quiz + Radar</span></div>
+      <div class="card"><p><b>Khuyến nghị:</b> không đưa full demo này vào Day 1. Dùng trong Day 2/Phần 5 để chẩn đoán failure patterns trước khi xây roadmap.</p><div class="quote">Người học không chỉ nghe về failure patterns, mà đo được hình dạng rủi ro của chính tổ chức mình.</div></div>
+      <div class="grid g2"><div class="card"><h3>Quick quiz mẫu</h3><label><input type="checkbox" class="dx" data-axis="adoption"> Hệ thống mới deploy nhưng người dùng vẫn dùng Excel song song?</label><label><input type="checkbox" class="dx" data-axis="leader"> Dashboard có nhưng leader vẫn quyết từ Word/Excel?</label><label><input type="checkbox" class="dx" data-axis="scale"> Pilot thành công nhưng 12 tháng sau không scale?</label><label><input type="checkbox" class="dx" data-axis="data"> KPI không có định nghĩa thống nhất?</label><label><input type="checkbox" class="dx" data-axis="workflow"> Workflow thật không khớp workflow trên hệ thống?</label><label><input type="checkbox" class="dx" data-axis="owner"> Không rõ ai là data owner?</label></div><div class="card"><h3>Radar chart rủi ro</h3><div class="svgwrap"><svg id="radar" width="340" height="300" viewBox="0 0 340 300"></svg></div></div></div>
+    </section>
+
+    <section id="outputs" class="tab">
+      <div class="section-title"><h2>Output kỳ vọng sau chương trình</h2><span class="pill green">Deliverables</span></div>
+      <div class="grid g2">
+        <div class="card"><h3>1. Central Data Pain Point Map</h3><p>Tổng hợp vấn đề dữ liệu nổi bật theo phòng ban và theo chuỗi dự án: thiết kế, công trường, procurement, finance, nghiệm thu, HSE, BIM.</p></div>
+        <div class="card"><h3>2. Data Pipeline Diagnostic Map</h3><p>Chẩn đoán 4 khâu: tạo sinh, lưu trữ/chuẩn hóa, phân tích, khai thác/ra quyết định. Xác định khâu nào đang yếu nhất.</p></div>
+        <div class="card"><h3>3. Data Value Use Case Shortlist</h3><p>Danh sách 5-7 use case ưu tiên: rework, vật tư, nghiệm thu/DSO, cost-to-complete, đấu thầu, HSE, BIM/as-built, GenAI knowledge base.</p></div>
+        <div class="card"><h3>4. Priority Action Roadmap</h3><p>Roadmap 30-60-90 ngày: use case làm trước, dữ liệu cần có, owner, workflow, dashboard/alert, success metric và next step.</p></div>
+      </div>
+      <div class="section-title"><h2>Nguyên tắc dùng demo trong lớp</h2></div>
+      <div class="card"><ul><li>Demo thay thế một phần lecture, không cộng thêm vào agenda.</li><li>Mỗi demo kéo dài 5-8 phút, trừ khi dùng trong workshop nhóm.</li><li>Trước mỗi demo phải có câu hỏi mở; sau mỗi demo phải có câu chốt sư phạm.</li><li>Không cần dữ liệu nhạy cảm. Có thể dùng dữ liệu giả lập theo quy mô Central hoặc số liệu đã làm tròn/ẩn danh.</li><li>Người học phải nhớ thông điệp quản trị, không chỉ nhớ giao diện tool.</li></ul></div>
+      <p class="foot">Prepared for Centralcons training design discussion</p>
+    </section>
+  </main>
+</div>
+<script>
+  function switchTab(id){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tabbtn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));window.scrollTo(0,0)}
+  document.querySelectorAll('.tabbtn').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+  document.querySelectorAll('.mini-tab[data-mini]').forEach(b=>b.addEventListener('click',()=>{let parent=b.closest('.card')||document; parent.querySelectorAll('.mini-tab[data-mini]').forEach(x=>x.classList.remove('active')); parent.querySelectorAll('.mini-panel').forEach(x=>x.classList.remove('active')); b.classList.add('active'); document.getElementById(b.dataset.mini).classList.add('active')}));
+  function fmt(n,d=1){return Number(n).toLocaleString('vi-VN',{maximumFractionDigits:d,minimumFractionDigits:d})}
+  function calcD1(){let v=+d1_value.value||0,m=+d1_margin.value||0,l=+d1_loss.value||0;let p=v*m/100,loss=v*l/100,erosion=p?loss/p*100:0;d1_loss_label.textContent=fmt(l,1)+'%';d1_profit.textContent=fmt(p,1);d1_loss_amt.textContent=fmt(loss,1);d1_erosion.textContent=fmt(erosion,0)+'%';let st=d1_status;st.className='status '+(erosion<50?'ok':erosion<100?'warn':'bad');st.textContent=erosion<50?'Xanh':erosion<100?'Vàng':'Đỏ'}
+  ['d1_value','d1_margin','d1_loss'].forEach(id=>document.getElementById(id).addEventListener('input',calcD1));calcD1();
+  function calcD4(){let p=+d4_projects.value||0,v=+d4_value.value||0,b=+d4_batches.value||0,c=+d4_current.value||0,n=+d4_new.value||0,r=(+d4_rate.value||0)/100;let days=Math.max(c-n,0);let cash=p*v*b;let saving=cash*days/365*r*12;d4_days.textContent=fmt(days,0);d4_cash.textContent=fmt(cash,0);d4_saving.textContent=fmt(saving,2)}
+  ['d4_projects','d4_value','d4_batches','d4_current','d4_new','d4_rate'].forEach(id=>document.getElementById(id).addEventListener('input',calcD4));calcD4();
+  const projects=[['Emerald River', 'red','Cốt thép vượt 12%; DSO 67 ngày; action: QS + Procurement review trong 48h'],['Metro Tower','yellow','Tiến độ tầng 12 chậm 3 ngày; action: PM cập nhật sequencing'],['Central Plaza','green','Tất cả KPI trong ngưỡng'],['Skyline MEP','red','Thầu phụ MEP chưa nộp hồ sơ T5; action: Commercial gửi escalation'],['Logistics Hub','green','Tất cả KPI trong ngưỡng'],['River Gate','yellow','HSE near-miss tăng; action: Safety audit tuần này'],['Office Park','green','Tất cả KPI trong ngưỡng'],['Data Center','red','Chi phí HVAC forecast vượt 9%; action: value engineering']];
+  let boss=false;function renderWar(){warGrid.innerHTML='';projects.forEach((p,i)=>{if(boss&&p[1]==='green')return;let el=document.createElement('div');el.className='project';el.innerHTML=`<h4><span class="dot ${p[1]}"></span>${p[0]}</h4><p class="small muted">Progress • Cost • DSO • HSE</p><div class="bar"><span style="width:${p[1]==='red'?72:p[1]==='yellow'?84:96}%"></span></div>`;el.onclick=()=>projectDetail.textContent=p[2];warGrid.appendChild(el)})}renderWar();bossMode.onclick=()=>{boss=!boss;bossMode.textContent=boss?'Tắt Chế độ Sếp':'Bật Chế độ Sếp: chỉ xem đèn đỏ/vàng';renderWar()};
+  function svgLine(points,color){let poly=points.map((y,i)=>`${i*20},${70-y}`).join(' ');return `<svg viewBox="0 0 120 70" preserveAspectRatio="none"><polyline points="${poly}" fill="none" stroke="${color}" stroke-width="4"/><line x1="60" y1="0" x2="60" y2="70" stroke="#ef4444" stroke-dasharray="3 3"/><text x="62" y="12" font-size="8" fill="#ef4444">alert</text></svg>`}
+  function renderD6(){let m=+d6_month.value;d6_month_label.textContent=m;let msg=m<3?'Chưa thấy vấn đề rõ trong báo cáo truyền thống. AI bắt đầu theo dõi tín hiệu yếu.':m===3?'Traditional: vấn đề mới hình thành nhưng chưa lên báo cáo tháng. AI: alert tuần 2, có thể xử lý ngay.':m<5?'Traditional: báo cáo lên muộn, quyết định bắt đầu chậm. AI: đã có action và giảm damage.':'Traditional: damage đã xảy ra. AI mode đã hạn chế vùng nguy hiểm từ sớm.';d6_text.textContent=msg;sparkTraditional.innerHTML=svgLine([10,15,20,33,48,65],'#dc2626');sparkAI.innerHTML=svgLine([10,15,22,30,34,38],'#1356d8')}
+  d6_month.addEventListener('input',renderD6);renderD6();
+  function drawRadar(){const axes=['adoption','leader','scale','data','workflow','owner'];const labels=['Adoption','Leader','Scale','Data','Workflow','Owner'];let scores=axes.map(a=>document.querySelectorAll(`.dx[data-axis="${a}"]:checked`).length?1:0.25);let cx=170,cy=145,R=105;let svg='<g>';for(let r=1;r<=4;r++){let pts=axes.map((a,i)=>{let ang=-Math.PI/2+i*2*Math.PI/axes.length;let rr=R*r/4;return `${cx+Math.cos(ang)*rr},${cy+Math.sin(ang)*rr}`}).join(' ');svg+=`<polygon points="${pts}" fill="none" stroke="#e2e8f0"/>`}axes.forEach((a,i)=>{let ang=-Math.PI/2+i*2*Math.PI/axes.length;svg+=`<line x1="${cx}" y1="${cy}" x2="${cx+Math.cos(ang)*R}" y2="${cy+Math.sin(ang)*R}" stroke="#e2e8f0"/><text x="${cx+Math.cos(ang)*(R+28)}" y="${cy+Math.sin(ang)*(R+25)}" font-size="11" text-anchor="middle" fill="#475569">${labels[i]}</text>`});let pts=axes.map((a,i)=>{let ang=-Math.PI/2+i*2*Math.PI/axes.length;let rr=R*scores[i];return `${cx+Math.cos(ang)*rr},${cy+Math.sin(ang)*rr}`}).join(' ');svg+=`<polygon points="${pts}" fill="rgba(19,86,216,.25)" stroke="#1356d8" stroke-width="3"/></g>`;radar.innerHTML=svg}
+  document.querySelectorAll('.dx').forEach(x=>x.addEventListener('change',drawRadar));drawRadar();
+</script>
+</body>
+</html>
