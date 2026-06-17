@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tư duy làm sản phẩm · Impact là một phép nhân</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Serif+Display:ital,wght@0,400;1,400&family=Outfit:wght@300;400;500;600;700&display=swap&subset=latin,latin-ext,vietnamese" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0D1B2A;--navy:#1A2E4A;--steel:#2C4A6E;
+    --platinum:#E6E9EF;--muted:#8FA3BC;
+    --gold:#C9A24B;--gold-soft:#E3C77E;
+    --red:#D9685F;--green:#5BBE8A;--teal:#5AB6C9;--line:rgba(201,162,75,.26);
+    --serif:'Noto Serif Display',Georgia,'Times New Roman',serif;
+    --mono:'DM Mono','Outfit',ui-monospace,'Courier New',monospace;
+    --sans:'Outfit',system-ui,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:var(--sans);background:var(--ink);color:var(--platinum);overflow:hidden}
+  .deck{height:100vh;width:100vw;position:relative}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;
+    padding:5.5vh 7vw 10vh;overflow-y:auto;
+    background:
+      radial-gradient(120% 85% at 85% 6%, rgba(44,74,110,.45) 0%, transparent 55%),
+      radial-gradient(90% 75% at 6% 98%, rgba(26,46,74,.5) 0%, transparent 60%),
+      linear-gradient(160deg,var(--ink) 0%, #0a1622 100%);
+    animation:fade .42s ease}
+  .slide.active{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.slide{animation:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:1rem;display:flex;align-items:center;gap:.85rem}
+  .eyebrow::before{content:"";width:30px;height:1px;background:var(--gold);opacity:.7}
+  h1{font-family:var(--serif);font-weight:400;line-height:1.05;
+     font-size:clamp(2rem,4.8vw,3.6rem);letter-spacing:-.01em;color:#fff;margin-bottom:.6rem}
+  h1 em{font-style:italic;color:var(--gold-soft)}
+  h2{font-family:var(--serif);font-weight:400;line-height:1.12;
+     font-size:clamp(1.6rem,3.4vw,2.6rem);color:#fff;margin-bottom:.3rem}
+  h2 em{font-style:italic;color:var(--gold-soft)}
+  .sub{font-size:clamp(1rem,1.5vw,1.2rem);color:var(--muted);max-width:66ch;line-height:1.55;font-weight:300}
+  .sub strong{color:var(--platinum);font-weight:500}.sub em{font-style:italic;color:var(--gold-soft)}
+
+  .formula{font-family:var(--mono);margin:1.6rem 0 0;padding:1.1rem 1.4rem;
+    border:1px solid var(--line);border-radius:4px;background:rgba(26,46,74,.3);
+    font-size:clamp(.84rem,1.45vw,1.05rem);line-height:1.8;color:var(--platinum);max-width:74ch}
+  .formula b{color:var(--gold-soft)}.formula .x{color:var(--gold);padding:0 .3rem}
+
+  /* interactive */
+  .stage{display:grid;grid-template-columns:1fr 1fr;gap:2.4rem;align-items:center;width:100%;max-width:92ch}
+  @media(max-width:860px){.stage{grid-template-columns:1fr;gap:1.2rem}}
+  .boxwrap{border:1px solid var(--line);border-radius:6px;background:rgba(13,27,42,.5);
+    padding:1.6rem 1.8rem;display:flex;align-items:center;min-height:300px}
+  #bars{width:100%;display:flex;flex-direction:column;gap:1.5rem}
+  .ibar .ibar-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.4rem}
+  .ibar .ibar-name{font-size:.92rem;color:var(--platinum);font-weight:400}
+  .ibar .ibar-val{font-family:var(--mono);font-size:.95rem;color:#fff}
+  .ibar .ibar-track{height:14px;border-radius:7px;background:rgba(143,163,188,.16);overflow:hidden}
+  .ibar .ibar-fill{height:100%;border-radius:7px;transition:width .25s ease}
+  .ibar.b-depth .ibar-fill{background:var(--gold)}
+  .ibar.b-freq .ibar-fill{background:var(--teal)}
+  .ibar.b-reach .ibar-fill{background:var(--green)}
+  .ibar.zero .ibar-fill{background:var(--red)}
+  .impact-lbl{font-family:var(--mono);font-size:.76rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+  .impact-num{font-family:var(--serif);font-size:clamp(2.4rem,6vw,4rem);line-height:1;color:var(--gold-soft);margin:.2rem 0 .3rem;transition:color .2s}
+  .impact-num.zero{color:var(--red)}
+  .mult-line{font-family:var(--mono);font-size:.94rem;color:var(--platinum);margin-bottom:1.3rem}
+  .mult-line .seg{color:#fff}.mult-line .op{color:var(--gold);padding:0 .35rem}.mult-line .seg.z{color:var(--red)}
+  .slider{margin-bottom:1rem}
+  .slider .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.35rem}
+  .slider .name{font-size:.96rem;color:#fff;font-weight:500}.slider .name span{color:var(--muted);font-weight:300;font-size:.82rem}
+  .slider .val{font-family:var(--mono);font-size:.98rem;color:var(--gold-soft)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:rgba(143,163,188,.2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--gold);cursor:pointer;border:3px solid #0D1B2A;box-shadow:0 0 0 1px var(--gold)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--gold);cursor:pointer;border:3px solid #0D1B2A}
+  .s-freq input::-webkit-slider-thumb{background:var(--teal);box-shadow:0 0 0 1px var(--teal)}
+  .s-reach input::-webkit-slider-thumb{background:var(--green);box-shadow:0 0 0 1px var(--green)}
+  .presets{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.4rem;max-width:92ch}
+  .preset{font-family:var(--mono);font-size:.8rem;background:transparent;color:var(--platinum);border:1px solid var(--line);padding:.5rem .9rem;border-radius:3px;cursor:pointer;transition:.18s}
+  .preset:hover{border-color:var(--gold);color:var(--gold-soft)}
+  .preset.active{background:rgba(201,162,75,.12);border-color:var(--gold);color:var(--gold-soft)}
+
+  /* deep-dive factor rows */
+  .axis-chip{font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#0D1B2A;background:var(--gold);padding:.28rem .7rem;border-radius:3px;display:inline-block;margin-bottom:.9rem}
+  .axis-chip.r{background:var(--green)}
+  .axis-chip.f{background:var(--teal)}
+  .scale.f .track{background:linear-gradient(90deg,rgba(143,163,188,.35) 0%, var(--steel) 45%, var(--teal) 100%)}
+  .scale.f .end.deep .tag{color:var(--teal)}
+
+  .sumgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem;width:100%;max-width:92ch}
+  @media(max-width:820px){.sumgrid{grid-template-columns:1fr}}
+  .sumcol{border:1px solid var(--line);border-radius:5px;padding:1.3rem 1.4rem;background:rgba(26,46,74,.28);border-top-width:3px}
+  .sumcol.d{border-top-color:var(--gold)}
+  .sumcol.r{border-top-color:var(--green)}
+  .sumcol.f{border-top-color:var(--teal)}
+  .sumcol .sumhead{font-family:var(--serif);font-size:1.3rem;color:#fff;margin-bottom:.6rem}
+  .sumcol .sumq{font-size:1rem;color:var(--platinum);line-height:1.45;font-weight:400;margin-bottom:.9rem}
+  .sumcol .sumkey{font-size:.86rem;color:var(--muted);font-weight:300;line-height:1.4;margin-bottom:.5rem}
+  .sumcol .sumtrap{font-family:var(--mono);font-size:.78rem;color:var(--red);line-height:1.4}
+  .factor{padding:.85rem 0;border-top:1px solid rgba(201,162,75,.12)}
+  .factor:first-of-type{border-top:none}
+  .factor .fnum{font-family:var(--mono);font-size:.74rem;color:var(--gold)}
+  .factor .fname{font-family:var(--serif);font-weight:400;font-size:1.18rem;color:#fff;margin:.1rem 0}
+  .factor .fess{font-size:.9rem;color:var(--muted);font-weight:300;line-height:1.45;margin-bottom:.7rem}
+  .scale .track{height:7px;border-radius:4px;background:linear-gradient(90deg,rgba(143,163,188,.35) 0%, var(--steel) 45%, var(--gold) 100%)}
+  .scale.r .track{background:linear-gradient(90deg,rgba(143,163,188,.35) 0%, var(--steel) 45%, var(--green) 100%)}
+  .scale .ends{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:.5rem}
+  .scale .end{font-size:.88rem;line-height:1.4;font-weight:300}
+  .scale .end .tag{font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;display:block;margin-bottom:.2rem}
+  .scale .end.shallow{color:var(--muted)}.scale .end.shallow .tag{color:#7C8CA3}
+  .scale .end.deep{color:var(--platinum);text-align:right}.scale .end.deep .tag{color:var(--gold-soft)}
+  .scale.r .end.deep .tag{color:var(--green)}
+  .scale .end b{color:#fff;font-weight:600}
+  @media(max-width:640px){.scale .ends{grid-template-columns:1fr;gap:.5rem}.scale .end.deep{text-align:left}}
+
+  .paradox{font-family:var(--mono);font-size:.98rem;line-height:1.6;color:var(--platinum);background:rgba(201,162,75,.08);border-left:2px solid var(--gold);padding:1.1rem 1.4rem;border-radius:2px;max-width:70ch}
+  .paradox b{color:var(--gold-soft)}
+  .metaphor{font-family:var(--serif);font-size:clamp(1.4rem,2.6vw,2.1rem);line-height:1.3;color:#fff;border-left:2px solid var(--green);padding-left:1.4rem;max-width:34ch;margin-bottom:1.4rem}
+  .metaphor span{color:var(--green);font-style:italic}
+  .close{font-family:var(--serif);font-size:clamp(1.3rem,2.4vw,2rem);line-height:1.3;color:#fff;border-left:2px solid var(--gold);padding-left:1.4rem;max-width:46ch}
+  .close span{color:var(--gold-soft);font-style:italic}
+
+  .nav{position:fixed;bottom:0;left:0;right:0;height:6vh;min-height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 7vw;background:rgba(8,16,28,.82);backdrop-filter:blur(8px);border-top:1px solid var(--line);z-index:30}
+  .nav .meta{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;color:var(--muted)}.nav .meta b{color:var(--gold)}
+  .controls{display:flex;gap:.7rem}
+  button.ctrl{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;background:transparent;color:var(--platinum);border:1px solid var(--line);padding:.5rem 1.05rem;border-radius:2px;cursor:pointer;transition:.18s}
+  button.ctrl:hover{border-color:var(--gold);color:var(--gold-soft)}
+  button.ctrl:disabled{opacity:.3;cursor:default}
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--gold);z-index:40;transition:width .3s}
+</style>
+</head>
+<body>
+<div class="progress" id="bar"></div>
+<div class="deck" id="deck">
+
+  <!-- 1 title + formula -->
+  <section class="slide active">
+    <div class="eyebrow">Rabity · Tư duy làm sản phẩm</div>
+    <h1>Impact không phải phép cộng.<br>Nó là một <em>phép nhân.</em></h1>
+    <p class="sub">Trước khi bỏ công build một sản phẩm, hỏi một câu: <strong>nó tạo ra bao nhiêu impact?</strong> Impact có một công thức rất gọn — và mỗi trục của nó có thể nở ra hay teo lại tuỳ cách mình làm.</p>
+    <div class="formula"><b>IMPACT</b> &nbsp;=&nbsp; Ảnh hưởng mỗi lần <span class="x">×</span> Số lần dùng được <span class="x">×</span> Số người hưởng lợi</div>
+  </section>
+
+  <!-- 2 interactive -->
+  <section class="slide">
+    <div class="eyebrow">Kéo thử · Impact là phép nhân</div>
+    <div class="stage">
+      <div class="boxwrap"><div id="bars"></div></div>
+      <div class="readout">
+        <div class="impact-lbl">Tổng Impact</div>
+        <div class="impact-num" id="impactNum">0</div>
+        <div class="mult-line" id="multLine"></div>
+        <div class="slider s-depth">
+          <div class="top"><div class="name">Ảnh hưởng mỗi lần <span>· độ sâu</span></div><div class="val" id="vDepth"></div></div>
+          <input type="range" id="depth" min="0" max="10" value="8">
+        </div>
+        <div class="slider s-freq">
+          <div class="top"><div class="name">Số lần dùng được <span>· tần suất × vòng đời</span></div><div class="val" id="vFreq"></div></div>
+          <input type="range" id="freq" min="0" max="200" value="60">
+        </div>
+        <div class="slider s-reach">
+          <div class="top"><div class="name">Số người hưởng lợi <span>· độ rộng</span></div><div class="val" id="vReach"></div></div>
+          <input type="range" id="reach" min="0" max="1000" value="12">
+        </div>
+      </div>
+    </div>
+    <div class="presets" id="presets"></div>
+  </section>
+
+  <!-- 3 axis1 intro -->
+  <section class="slide">
+    <span class="axis-chip">Đào sâu · Trục 1 · Độ sâu</span>
+    <h2>Ảnh hưởng mỗi lần — điều gì làm nó <em>sâu</em>?</h2>
+    <p class="sub" style="margin-top:1rem">Độ sâu <strong>không phải là "tool xịn tới đâu"</strong> — mà là một lần dùng chạm vào quyết định lớn cỡ nào. Cùng một thao tác, đặt ở chỗ ra quyết định 5 triệu hay 5 tỷ, độ sâu khác nhau cả nghìn lần. Sáu yếu tố kéo trục này nở ra.</p>
+  </section>
+
+  <!-- 4 axis1 factors 1-3 -->
+  <section class="slide">
+    <span class="axis-chip">Trục 1 · Độ sâu · 1–3</span>
+    <div class="factor"><div class="fnum">01</div><div class="fname">Bậc của quyết định nó gắn vào</div><div class="fess">Phục vụ cấp thừa hành hay cấp chiến lược? Bậc càng cao, độ sâu càng lớn.</div>
+      <div class="scale"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Nông</span>Nhập đúng một dòng dữ liệu vào sổ</div><div class="end deep"><span class="tag">Sâu</span>Chặn quyết định <b>mở showroom Thủ Đức</b> khi cần ~269–346 xe/tháng mới hoà vốn</div></div></div></div>
+    <div class="factor"><div class="fnum">02</div><div class="fname">Tiền trên bàn mỗi lần dùng</div><div class="fess">Một lần dùng động đến bao nhiêu tiền? Cùng công sức build, khác ở dòng tiền đi qua.</div>
+      <div class="scale"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Nông</span>Tool xếp lịch họp nội bộ</div><div class="end deep"><span class="tag">Sâu</span>Đặt <b>giá sàn mỗi deal xe</b> — chặn NVBH tự chiết khấu ăn ~48% nền hoa hồng</div></div></div></div>
+    <div class="factor"><div class="fnum">03</div><div class="fname">Chi phí của một lần làm sai</div><div class="fess">Không có nó, làm tay sai một lần thì mất gì? Độ sâu = giá của lỗi nó ngăn được.</div>
+      <div class="scale"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Nông</span>Gõ lại một ô lệch, 2 phút</div><div class="end deep"><span class="tag">Sâu</span>Sai phân bổ <b>88 nhà phân phối</b> → sai hạch toán cả tháng, kiểm toán bắt</div></div></div></div>
+  </section>
+
+  <!-- 5 axis1 factors 4-6 -->
+  <section class="slide">
+    <span class="axis-chip">Trục 1 · Độ sâu · 4–6</span>
+    <div class="factor"><div class="fnum">04</div><div class="fname">Tính bất khả hồi của thời điểm</div><div class="fess">Có quyết định chỉ có một cửa sổ. Dùng đúng ngay lúc đó đáng giá gấp bội dùng muộn.</div>
+      <div class="scale"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Nông</span>Báo cáo xem lúc nào cũng được</div><div class="end deep"><span class="tag">Sâu</span>Chốt <b>đơn đặt hàng từ hãng (BYD)</b> đúng cửa sổ — sai nhịp là ôm tồn kho cả quý</div></div></div></div>
+    <div class="factor"><div class="fnum">05</div><div class="fname">Hiệu ứng lan xuống hạ nguồn</div><div class="fess">Làm đúng con số gốc thì mọi thứ phía sau đúng theo. Đây là đòn bẩy cấu trúc.</div>
+      <div class="scale"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Nông</span>Sửa vài con số lẻ trong một báo cáo</div><div class="end deep"><span class="tag">Sâu</span>Chuẩn hoá <b>hệ thống tài khoản (COA)</b> một lần → mọi tool kế thừa đúng theo</div></div></div></div>
+    <div class="factor"><div class="fnum">06</div><div class="fname">Độ sâu của insight, không chỉ thao tác</div><div class="fess">Thay thao tác tay thì nông. Làm người ta tin vào một chẩn đoán để hành động thì sâu.</div>
+      <div class="scale"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Nông</span>Tiết kiệm 10 phút copy-paste</div><div class="end deep"><span class="tag">Sâu</span>Bảng <b>bóc lỗ VFX</b> khiến lãnh đạo thấy gốc rễ và tin đủ để hành động</div></div></div></div>
+  </section>
+
+  <!-- 6 axis1 paradox -->
+  <section class="slide">
+    <span class="axis-chip">Trục 1 · Nghịch lý</span>
+    <h2 style="margin-bottom:1.2rem">Cái ai cũng nghĩ tới đầu tiên lại <em>nông nhất.</em></h2>
+    <div class="paradox"><b>Nghịch lý:</b> "tiết kiệm thời gian" là loại độ sâu <b>thấp nhất</b> — dù ai cũng nghĩ tới nó trước. Trục này nở mạnh nhất khi tool <b>chạm vào quyết định lớn</b> hoặc <b>ngăn một sai lầm đắt</b>, không phải khi nó bấm nút nhanh hơn.</div>
+  </section>
+
+  <!-- 7 axis2 intro: cần câu không phải con cá -->
+  <section class="slide">
+    <span class="axis-chip r">Đào sâu · Trục 2 · Độ rộng</span>
+    <div class="metaphor">Build <span>cần câu</span>, đừng build <span>con cá.</span></div>
+    <p class="sub">Con cá giải được cơn đói một bữa — một người, một lần. Cần câu thì ai cầm cũng câu được, câu mãi. Độ rộng là khoảng cách giữa hai thứ đó: <strong>không phải "có bao nhiêu người", mà là "có bao nhiêu rào cản giữa sản phẩm và người tiếp theo".</strong> Mỗi rào cản gỡ được là reach nhân lên.</p>
+  </section>
+
+  <!-- 8 axis2 factors 1-3 -->
+  <section class="slide">
+    <span class="axis-chip r">Trục 2 · Độ rộng · 1–3</span>
+    <div class="factor"><div class="fnum">01</div><div class="fname">Khả năng tái dùng / chuẩn hoá</div><div class="fess">Viết cứng cho một bối cảnh thì phục vụ một nơi. Cấu hình được thì một lõi chạy nhiều khách.</div>
+      <div class="scale r"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Hẹp</span>Viết cứng cho một phòng ban</div><div class="end deep"><span class="tag">Rộng</span><b>Engine config-driven</b> (NutriNest, F5) — thêm khách là đổi cấu hình, không xây lại</div></div></div></div>
+    <div class="factor"><div class="fnum">02</div><div class="fname">Độ phụ thuộc vào người tạo ra nó</div><div class="fess">Chỉ mình bạn chạy được thì reach = 1 mãi. Cắt dây phụ thuộc thì reach mới scale.</div>
+      <div class="scale r"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Hẹp</span>Chỉ tác giả mới vận hành được</div><div class="end deep"><span class="tag">Rộng</span><b>BCQT tự lọc</b>, Simulator xuất Excel — ai cũng tự mở, tự dùng</div></div></div></div>
+    <div class="factor"><div class="fnum">03</div><div class="fname">Tính phổ quát của bài toán</div><div class="fess">Chọn bài toán đã là chọn trần reach. Nỗi đau riêng → trần thấp; nỗi đau ai cũng có → trần cao.</div>
+      <div class="scale r"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Hẹp</span>Xử lý cái quirk của một người</div><div class="end deep"><span class="tag">Rộng</span>Nỗi đau <b>mọi SME đều dính</b>: lương, thuế, tồn kho</div></div></div></div>
+  </section>
+
+  <!-- 9 axis2 factors 4-6 -->
+  <section class="slide">
+    <span class="axis-chip r">Trục 2 · Độ rộng · 4–6</span>
+    <div class="factor"><div class="fnum">04</div><div class="fname">Rào cản kỹ năng để dùng</div><div class="fess">Đòi kỹ năng kỹ thuật thì reach co còn nhúm người. No-code làm trần reach bật lên.</div>
+      <div class="scale r"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Hẹp</span>Cần biết SQL / Power BI mới dùng</div><div class="end deep"><span class="tag">Rộng</span><b>No-code, bấm nút</b> — bài học Demand Planning: nghẽn ở kỹ năng phía khách</div></div></div></div>
+    <div class="factor"><div class="fnum">05</div><div class="fname">Kênh đưa tới tay người dùng</div><div class="fess">Gửi file từng người là reach tuyến tính và mỏi. Nhúng vào nền tảng họ đã dùng thì reach đi theo nền tảng.</div>
+      <div class="scale r"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Hẹp</span>Gửi file qua chat từng người</div><div class="end deep"><span class="tag">Rộng</span>Nhúng vào nền tảng họ vốn dùng mỗi ngày — <b>Lark, ERP, một nền tảng bán hàng phổ biến</b></div></div></div></div>
+    <div class="factor"><div class="fnum">06</div><div class="fname">Chi phí biên cho người tiếp theo</div><div class="fess">Đòn bẩy SaaS thật sự. Mỗi khách phải build lại thì reach tắc; thêm nghìn người ~0 thì reach bay.</div>
+      <div class="scale r"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Hẹp</span>Mỗi khách là một dự án mới</div><div class="end deep"><span class="tag">Rộng</span>Thêm 1.000 khách gần như <b>không tốn thêm gì</b> (biên ~0)</div></div></div></div>
+  </section>
+
+  <!-- 10 axis2 paradox -->
+  <section class="slide">
+    <span class="axis-chip r">Trục 2 · Nghịch lý</span>
+    <h2 style="margin-bottom:1.2rem">Rộng không có nghĩa là <em>đúng người.</em></h2>
+    <div class="paradox"><b>Nghịch lý:</b> reach lớn ≠ reach có ích. Một tool có thể đến tay rất nhiều người nhưng <b>phần lớn là sai đối tượng</b> — họ không có đúng nỗi đau, dùng một lần rồi bỏ. Kéo reach mà nhắm sai phân khúc thì chỉ là <b>đông</b>, không phải <b>rộng có ích</b>. Rộng đúng = nhiều người <b>thật sự ở lại dùng</b>, không phải nhiều người từng mở thử.</div>
+  </section>
+
+  <!-- 11 axis3 intro: độ cao -->
+  <section class="slide">
+    <span class="axis-chip f">Đào sâu · Trục 3 · Độ cao</span>
+    <h2>Số lần dùng được — điều gì làm nó <em>lặp lại mãi</em>?</h2>
+    <p class="sub" style="margin-top:1rem">Đây là trục bị đánh giá thấp nhất, vì nó <strong>vô hình lúc build</strong>. Độ sâu và độ rộng nhìn thấy ngay; còn "dùng được bao nhiêu lần" chỉ lộ ra theo <em>thời gian</em>. Một tool trông sâu và rộng nhưng chỉ dùng một mùa rồi chết thì độ cao = thấp. Sáu yếu tố nuôi trục này.</p>
+  </section>
+
+  <!-- 12 axis3 factors 1-3 -->
+  <section class="slide">
+    <span class="axis-chip f">Trục 3 · Độ cao · 1–3</span>
+    <div class="factor"><div class="fnum">01</div><div class="fname">Nhịp lặp của bài toán</div><div class="fess">Bài toán xảy ra một lần, theo mùa, hằng tháng hay mỗi ngày? Bản chất công việc đặt trần tần suất.</div>
+      <div class="scale f"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Thấp</span>Tool tính thưởng Tết — chạy một lần/năm</div><div class="end deep"><span class="tag">Cao</span>Simulator gắn với <b>mỗi kỳ ngân sách</b> — lặp lại đều</div></div></div></div>
+    <div class="factor"><div class="fnum">02</div><div class="fname">Độ bền trước khi bối cảnh đổi</div><div class="fess">Tool "hết hạn" nhanh không? Đổi cơ cấu lương/sản phẩm là phải đập đi xây lại thì vòng đời ngắn.</div>
+      <div class="scale f"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Thấp</span>Đổi bối cảnh là chết, phải làm mới</div><div class="end deep"><span class="tag">Cao</span><b>Config-driven</b> — bối cảnh đổi thì sửa cấu hình, sống qua nhiều mùa (25 bản)</div></div></div></div>
+    <div class="factor"><div class="fnum">03</div><div class="fname">Có trở thành quy trình không</div><div class="fess">Dùng tuỳ hứng thì tần suất bấp bênh. Nhúng vào quy trình bắt buộc thì tự lặp, ổn định.</div>
+      <div class="scale f"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Thấp</span>Nhớ thì mở ra dùng</div><div class="end deep"><span class="tag">Cao</span>Gắn vào <b>chốt sổ / duyệt đặt hàng</b> — đến kỳ là phải chạy</div></div></div></div>
+  </section>
+
+  <!-- 13 axis3 factors 4-6 -->
+  <section class="slide">
+    <span class="axis-chip f">Trục 3 · Độ cao · 4–6</span>
+    <div class="factor"><div class="fnum">04</div><div class="fname">Chi phí để dùng lại lần sau</div><div class="fess">Mỗi lần dùng lại có phải set up từ đầu không? Phải nhập tay lại toàn bộ thì người ta bỏ.</div>
+      <div class="scale f"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Thấp</span>Mỗi lần dùng như làm mới từ đầu</div><div class="end deep"><span class="tag">Cao</span><b>Nạp lại trạng thái cũ</b> (v17) — mở ra là tiếp tục được ngay</div></div></div></div>
+    <div class="factor"><div class="fnum">05</div><div class="fname">Khả năng tự cập nhật theo dữ liệu mới</div><div class="fess">Đứng yên với số liệu cũ thì mỗi kỳ phải làm tay, dễ chết. Ăn được dữ liệu mới thì sống tiếp.</div>
+      <div class="scale f"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Thấp</span>Số liệu đóng băng ở một kỳ</div><div class="end deep"><span class="tag">Cao</span><b>Import file tháng mới</b> / nối nguồn — đổ data vào là chạy kỳ tiếp</div></div></div></div>
+    <div class="factor"><div class="fnum">06</div><div class="fname">Niềm tin tích luỹ theo thời gian</div><div class="fess">Lần đầu đúng thì dùng lại; sai một lần lớn thì bỏ vĩnh viễn. Tần suất dài hạn nuôi bằng độ tin cậy.</div>
+      <div class="scale f"><div class="track"></div><div class="ends"><div class="end shallow"><span class="tag">Thấp</span>Dùng vài lần rồi mất tin (bug "số đẹp mà sai")</div><div class="end deep"><span class="tag">Cao</span>Đúng đều mỗi kỳ → thành <b>chỗ dựa mặc định</b></div></div></div></div>
+  </section>
+
+  <!-- 14 axis3 paradox -->
+  <section class="slide">
+    <span class="axis-chip f">Trục 3 · Nghịch lý</span>
+    <h2 style="margin-bottom:1.2rem">Trục nhân mạnh nhất, lại được để ý <em>muộn nhất.</em></h2>
+    <div class="paradox"><b>Nghịch lý:</b> người ta build cho <b>lần demo đầu tiên</b> — sâu, rộng để gây ấn tượng — rồi tool chết ở lần thứ hai vì không ai thiết kế cho việc <b>dùng lại</b>. Một tool dùng được 100 lần thắng xa một tool sâu gấp đôi nhưng chỉ dùng một lần. Mà trục này lại <b>rẻ để cải thiện</b> (nạp lại trạng thái, import dữ liệu) — nhân rất mạnh với chi phí rất thấp.</div>
+  </section>
+
+  <!-- 15 summary of 3 axes -->
+  <section class="slide">
+    <span class="axis-chip">Tổng kết · 3 trục</span>
+    <h2 style="margin-bottom:1.3rem">Ba trục, một câu hỏi cho mỗi cái.</h2>
+    <div class="sumgrid">
+      <div class="sumcol d">
+        <div class="sumhead">Độ sâu</div>
+        <div class="sumq">"Một lần dùng chạm vào quyết định lớn cỡ nào?"</div>
+        <div class="sumkey">Nở khi: chạm quyết định lớn · ngăn sai lầm đắt</div>
+        <div class="sumtrap">Bẫy: chỉ nghĩ tới "tiết kiệm thời gian"</div>
+      </div>
+      <div class="sumcol r">
+        <div class="sumhead">Độ rộng</div>
+        <div class="sumq">"Bao nhiêu rào cản giữa nó và người tiếp theo?"</div>
+        <div class="sumkey">Nở khi: tái dùng được · không phụ thuộc tác giả · biên ~0</div>
+        <div class="sumtrap">Bẫy: rộng nhưng sai phân khúc</div>
+      </div>
+      <div class="sumcol f">
+        <div class="sumhead">Độ cao</div>
+        <div class="sumq">"Nó được dùng lại bao nhiêu lần trước khi chết?"</div>
+        <div class="sumkey">Nở khi: gắn quy trình · config-bền · nạp lại được</div>
+        <div class="sumtrap">Bẫy: chỉ build cho lần demo đầu</div>
+      </div>
+    </div>
+    <div class="paradox" style="margin-top:1.6rem">Vì là <b>phép nhân</b>: đừng tối ưu trục đã lớn. Tìm trục đang kéo tích xuống — thường là <b>độ cao</b>, vì nó vô hình lúc build — rồi hỏi: có cách nào làm nó lớn lên không?</div>
+  </section>
+
+  <!-- 16 close -->
+  <section class="slide">
+    <div class="eyebrow">Khép lại</div>
+    <h1>Trước khi build,<br>hỏi: <em>biến nào đang nhỏ?</em></h1>
+    <p class="sub">Một tool đẹp mà reach = 1 thua một tool xấu mà cả công ty dùng mỗi ngày. Impact là phép nhân — tìm trục đang kéo tích xuống, rồi hỏi: <strong>có cách nào làm nó lớn lên không?</strong></p>
+  </section>
+
+</div>
+
+<nav class="nav">
+  <div class="meta">RABITY · IMPACT MINDSET · <b id="cur">01</b> / <span id="tot">11</span></div>
+  <div class="controls">
+    <button class="ctrl" id="prev">← Trước</button>
+    <button class="ctrl" id="next">Tiếp →</button>
+  </div>
+</nav>
+
+<script>
+/* ---------- interactive box ---------- */
+const D=document.getElementById('depth'),F=document.getElementById('freq'),R=document.getElementById('reach');
+const MAX={d:10,f:200,r:1000};
+const elNum=document.getElementById('impactNum'),elMul=document.getElementById('multLine');
+const vD=document.getElementById('vDepth'),vF=document.getElementById('vFreq'),vR=document.getElementById('vReach');
+const PRESETS=[
+ {k:'excel',label:'File Excel dùng một lần',d:4,f:1,r:1},
+ {k:'macro',label:'Macro cho team',d:5,f:20,r:8},
+ {k:'sim',label:'Staff Cost Simulator',d:8,f:60,r:12},
+ {k:'f5',label:'F5 · SaaS',d:7,f:120,r:400},
+ {k:'zero',label:'Sâu nhưng không ai dùng',d:10,f:0,r:1},
+];
+const presetWrap=document.getElementById('presets');
+PRESETS.forEach(p=>{const b=document.createElement('button');b.className='preset';b.textContent=p.label;
+  b.onclick=()=>{D.value=p.d;F.value=p.f;R.value=p.r;mark(p.k);update();};b.dataset.k=p.k;presetWrap.appendChild(b);});
+function mark(k){[...presetWrap.children].forEach(b=>b.classList.toggle('active',b.dataset.k===k));}
+const barsEl=document.getElementById('bars');
+function drawBars(d,f,r){
+  const rows=[
+    {cls:'b-depth',name:'Ảnh hưởng mỗi lần',val:d,max:MAX.d},
+    {cls:'b-freq', name:'Số lần dùng được', val:f,max:MAX.f},
+    {cls:'b-reach',name:'Số người hưởng lợi',val:r,max:MAX.r},
+  ];
+  barsEl.innerHTML=rows.map(o=>{
+    const pct=Math.max(o.val<=0?0:2, o.val/o.max*100); // keep a sliver visible unless exactly 0
+    const zero=o.val===0?' zero':'';
+    return `<div class="ibar ${o.cls}${zero}">
+      <div class="ibar-top"><span class="ibar-name">${o.name}</span><span class="ibar-val">${fmt(o.val)}${o.val===0?' · = 0':''}</span></div>
+      <div class="ibar-track"><div class="ibar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+function fmt(n){return n>=1000?n.toLocaleString('en-US'):String(n);}
+function update(){
+  const d=+D.value,f=+F.value,r=+R.value,impact=d*f*r;
+  vD.textContent=d;vF.textContent=f;vR.textContent=r;
+  elNum.textContent=fmt(impact);elNum.classList.toggle('zero',impact===0);
+  const zc=x=>x===0?' z':'';
+  elMul.innerHTML=`<span class="seg${zc(d)}">${d}</span><span class="op">×</span><span class="seg${zc(f)}">${f}</span><span class="op">×</span><span class="seg${zc(r)}">${r}</span><span class="op">=</span><span class="seg${zc(impact)}">${fmt(impact)}</span>`;
+  drawBars(d,f,r);
+}
+[D,F,R].forEach(el=>el.addEventListener('input',()=>{mark(null);update();}));
+D.value=8;F.value=60;R.value=12;mark('sim');update();
+
+/* ---------- deck nav ---------- */
+const slides=[...document.querySelectorAll('.slide')];
+const tot=slides.length;let i=0;
+const bar=document.getElementById('bar'),curEl=document.getElementById('cur');
+const prev=document.getElementById('prev'),next=document.getElementById('next');
+document.getElementById('tot').textContent=String(tot).padStart(2,'0');
+function show(n){
+  i=Math.max(0,Math.min(tot-1,n));
+  slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+  curEl.textContent=String(i+1).padStart(2,'0');
+  bar.style.width=((i+1)/tot*100)+'%';
+  prev.disabled=i===0;next.disabled=i===tot-1;
+  slides[i].scrollTop=0;
+}
+next.onclick=()=>show(i+1);prev.onclick=()=>show(i-1);
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON')return;
+  if(e.key==='ArrowRight')show(i+1);
+  if(e.key==='ArrowLeft')show(i-1);
+});
+show(0);
+</script>
+</body>
+</html>
