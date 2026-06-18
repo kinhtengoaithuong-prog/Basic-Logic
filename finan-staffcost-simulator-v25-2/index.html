@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finan · Staff Cost Simulator T6/2026 v25</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
+:root{
+  --bg:#080E18;--surface:#0E1826;--card:#131F30;--border:#1E3048;--border2:#243A56;
+  --text:#C8D8E8;--sub:#6A8AAA;--dim:#3A5470;
+  --gold:#E8B84B;--gold2:#F5D07A;--goldfade:rgba(232,184,75,.12);
+  --teal:#29C4B0;--tealfade:rgba(41,196,176,.1);
+  --red:#E05555;--redfade:rgba(224,85,85,.1);
+  --green:#38C870;--greenfade:rgba(56,200,112,.1);
+  --amber:#F09030;--purple:#9B72E8;--blue:#4A9EE8;
+  --fh:'Sora',sans-serif;--fm:'DM Mono',monospace;
+  --bu1:#29C4B0;--bu2:#9B72E8;--bu3:#4A9EE8;--bu4:#E8B84B;--bu5:#E05555;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--fh);font-size:12.5px;line-height:1.5;overflow-x:hidden}
+.hdr{background:linear-gradient(180deg,#0A1220,var(--bg));border-bottom:1px solid var(--border);padding:14px 24px 10px;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.hdr-title{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.3px}
+.hdr-title span{color:var(--gold)}
+.hdr-sub{font-size:10px;color:var(--sub);margin-top:1px;font-family:var(--fm)}
+.hdr-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:4px;font-family:var(--fh);font-size:11px;font-weight:700;cursor:pointer;border:none;transition:all .15s;letter-spacing:.3px}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--sub)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-teal{background:var(--teal);color:#080E18}.btn-teal:hover{opacity:.85}
+.btn-red{background:var(--redfade);border:1px solid rgba(224,85,85,.3);color:var(--red)}.btn-red:hover{background:rgba(224,85,85,.2)}
+.menu-wrap{position:relative;display:inline-block}
+.menu-pop{position:absolute;top:calc(100% + 4px);right:0;background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:5px;min-width:185px;z-index:150;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none}
+.menu-pop.open{display:block}
+.menu-item{display:flex;align-items:center;gap:7px;width:100%;padding:7px 10px;border:none;background:none;color:var(--text);font-family:var(--fh);font-size:11px;font-weight:600;text-align:left;cursor:pointer;border-radius:4px;transition:background .12s}
+.menu-item:hover{background:var(--surface)}
+.menu-item.danger{color:var(--red)}.menu-item.danger:hover{background:var(--redfade)}
+.menu-item .mi-sub{display:block;font-size:9px;color:var(--dim);font-weight:400;font-family:var(--fm);margin-top:1px}
+.menu-divider{height:1px;background:var(--border);margin:4px 6px}
+.tabs-bar{background:var(--surface);border-bottom:2px solid var(--border);padding:0 24px;display:flex;gap:0}
+.tab-btn{padding:9px 18px;font-size:11px;font-weight:700;color:var(--sub);background:none;border:none;cursor:pointer;letter-spacing:.5px;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.strip{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 24px;display:flex;gap:0;overflow-x:auto}
+.kpi{padding:0 16px;border-right:1px solid var(--border);text-align:center;white-space:nowrap;min-width:90px}
+.kpi:first-child{padding-left:0}.kpi:last-child{border-right:none}
+.kpi-lbl{font-size:9px;color:var(--sub);letter-spacing:1.2px;text-transform:uppercase;font-family:var(--fm)}
+.kpi-val{font-family:var(--fm);font-size:13px;font-weight:500;color:var(--gold);margin-top:1px}
+.kpi-val.green{color:var(--green)}.kpi-val.teal{color:var(--teal)}.kpi-val.red{color:var(--red)}.kpi-val.amber{color:var(--amber)}
+.kpi-sub{font-size:9px;color:var(--dim);margin-top:1px}
+.toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:7px 24px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search-box{position:relative;flex:1;min-width:160px;max-width:240px}
+.search-box input{width:100%;background:var(--card);border:1px solid var(--border2);border-radius:4px;padding:5px 9px 5px 26px;color:var(--text);font-family:var(--fm);font-size:11px}
+.search-box input:focus{outline:none;border-color:var(--teal)}
+.search-box::before{content:"⌕";position:absolute;left:7px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:14px;pointer-events:none}
+.filter-sel{background:var(--card);border:1px solid var(--border2);border-radius:4px;padding:5px 7px;color:var(--text);font-family:var(--fm);font-size:11px;cursor:pointer}
+.filter-sel:focus{outline:none;border-color:var(--teal)}
+.alloc-hint{font-size:10px;color:var(--sub);margin-left:auto}
+.alloc-hint strong{color:var(--amber)}
+.page{display:none}.page.active{display:block}
+.tbl-outer{overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 245px)}
+.tbl-outer::-webkit-scrollbar{height:6px;width:6px}
+.tbl-outer::-webkit-scrollbar-track{background:var(--bg)}
+.tbl-outer::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+table.sim{border-collapse:collapse;width:max-content;min-width:100%}
+table.sim th{background:var(--surface);color:var(--sub);font-family:var(--fm);font-size:9px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;padding:7px 9px;border-bottom:2px solid var(--border2);white-space:nowrap;position:sticky;top:0;z-index:10;text-align:right}
+table.sim th.left{text-align:left}
+table.sim th.center{text-align:center}
+table.sim th:nth-child(1),table.sim td:nth-child(1){position:sticky;left:0;z-index:12;background:inherit}
+table.sim th:nth-child(1){background:var(--surface);z-index:20}
+.th-bu1{color:var(--bu1)!important}.th-bu2{color:var(--bu2)!important}.th-bu3{color:var(--bu3)!important}.th-bu4{color:var(--bu4)!important}.th-bu5{color:var(--bu5)!important}
+.th-out1{background:rgba(41,196,176,.05)!important;color:var(--bu1)!important}
+.th-out2{background:rgba(155,114,232,.05)!important;color:var(--bu2)!important}
+.th-out3{background:rgba(74,158,232,.05)!important;color:var(--bu3)!important}
+.th-out4{background:rgba(232,184,75,.05)!important;color:var(--bu4)!important}
+.th-out5{background:rgba(224,85,85,.05)!important;color:var(--bu5)!important}
+.th-sep{border-left:1px solid var(--border2)!important}
+tr.dept-hdr{background:var(--card)}
+tr.dept-hdr td{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px;padding:9px 10px 6px;border-top:2px solid var(--border2);border-bottom:1px solid var(--border)}
+tr.dept-hdr td:first-child{border-left:3px solid var(--gold)}
+tr.person-row{background:var(--bg);transition:background .1s}
+tr.person-row:hover{background:#0C1520}
+tr.person-row.inactive-row{opacity:.4}
+tr.person-row td{border-bottom:1px solid var(--border);padding:5px 9px;vertical-align:middle;text-align:right}
+tr.person-row td.left{text-align:left}
+tr.person-row td.center{text-align:center}
+tr.new-row td{background:rgba(41,196,176,.03);border-bottom:1px solid rgba(41,196,176,.12)}
+tr.out-row td{background:rgba(155,114,232,.03)}
+tr.dept-total{background:var(--card)}
+tr.dept-total td{padding:6px 9px;text-align:right;border-bottom:2px solid var(--border2);font-family:var(--fm);font-size:11px;font-weight:500;color:var(--gold);border-top:1px solid var(--border2)}
+tr.dept-total td:first-child{text-align:left;font-size:10px;letter-spacing:.5px}
+tr.grand-total{background:var(--surface)}
+tr.grand-total td{padding:8px 9px;text-align:right;border-top:2px solid var(--gold);font-family:var(--fm);font-size:12px;font-weight:500;color:var(--gold2);position:sticky;bottom:0;z-index:9}
+tr.grand-total td:first-child{text-align:left;font-size:11px;font-weight:700}
+.inp-adj{width:72px;background:var(--card);border:1px solid var(--border2);border-radius:3px;padding:3px 6px;color:var(--text);font-family:var(--fm);font-size:11px;text-align:right}
+.inp-adj:focus{outline:none;border-color:var(--teal);background:#0E1F30}
+.inp-alloc{width:50px;background:transparent;border:1px solid transparent;border-radius:3px;padding:3px 4px;color:var(--text);font-family:var(--fm);font-size:11px;text-align:center;transition:border .1s}
+.inp-alloc:focus{outline:none;border-color:var(--teal);background:var(--card)}
+.inp-alloc.bu1:focus{border-color:var(--bu1)}.inp-alloc.bu2:focus{border-color:var(--bu2)}.inp-alloc.bu3:focus{border-color:var(--bu3)}.inp-alloc.bu4:focus{border-color:var(--bu4)}.inp-alloc.bu5:focus{border-color:var(--bu5)}
+.inp-alloc.over{background:rgba(224,85,85,.12);border-color:rgba(224,85,85,.4)!important;color:var(--red)!important}
+.inp-alloc.full{background:rgba(56,200,112,.07);border-color:rgba(56,200,112,.25)}
+.inp-alloc.dim-bu{opacity:.22;background:rgba(255,255,255,.01)}
+.alloc-sum{display:inline-block;min-width:28px;text-align:center;font-family:var(--fm);font-size:10px;border-radius:2px;padding:1px 4px}
+.alloc-sum.ok{background:rgba(56,200,112,.15);color:var(--green)}.alloc-sum.over{background:rgba(224,85,85,.15);color:var(--red)}.alloc-sum.zero{color:var(--dim)}
+.status-toggle{cursor:pointer;padding:2px 7px;border-radius:3px;font-family:var(--fm);font-size:10px;font-weight:500;border:none;transition:all .15s;white-space:nowrap}
+.status-toggle.active{background:rgba(56,200,112,.15);color:var(--green);border:1px solid rgba(56,200,112,.3)}
+.status-toggle.inactive{background:rgba(224,85,85,.1);color:var(--red);border:1px solid rgba(224,85,85,.2)}
+.del-btn{background:rgba(224,85,85,.12);border:1px solid rgba(224,85,85,.2);color:var(--red);border-radius:3px;padding:2px 6px;cursor:pointer;font-size:11px;font-family:var(--fm);line-height:1}
+.del-btn:hover{background:rgba(224,85,85,.25)}
+.pl-select{background:var(--card);border:1px solid var(--border2);border-radius:3px;padding:2px 5px;color:var(--sub);font-family:var(--fm);font-size:9px;max-width:185px;cursor:pointer}
+.pl-select:focus{outline:none;border-color:var(--purple);color:var(--text)}
+.name-cell{display:flex;flex-direction:column;min-width:155px}
+.name-main{font-weight:600;color:#fff;font-size:12px}
+.name-pos{font-size:9px;color:var(--sub);margin-top:1px}
+.name-tag{font-size:9px;font-family:var(--fm)}
+.name-tag.new{color:var(--teal)}
+.name-tag.out{color:var(--purple)}
+.name-tag.prb{color:var(--amber)}
+.out-val{font-family:var(--fm);font-size:11px}
+.out-val.has-val{font-weight:500}
+.out-val.bu1{color:var(--bu1)}.out-val.bu2{color:var(--bu2)}.out-val.bu3{color:var(--bu3)}.out-val.bu4{color:var(--bu4)}.out-val.bu5{color:var(--bu5)}
+.summary-wrap{padding:20px 24px;display:flex;flex-direction:column;gap:20px}
+.sec-title{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid rgba(232,184,75,.2);margin-bottom:12px}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.sum-box{background:var(--surface);border:1px solid var(--border2);border-radius:4px;overflow-x:auto}
+.sum-tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.sum-tbl th{background:rgba(232,184,75,.07);font-family:var(--fm);font-size:9px;font-weight:500;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;padding:7px 10px;text-align:right;border-bottom:1px solid var(--border2);white-space:nowrap}
+.sum-tbl th:first-child{text-align:left}
+.sum-tbl td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.03);text-align:right;font-family:var(--fm);white-space:nowrap}
+.sum-tbl td:first-child{text-align:left;color:var(--text);font-weight:600}
+.sum-tbl tr:hover td{background:rgba(255,255,255,.02)}
+.sum-tbl tr.sum-total td{background:rgba(232,184,75,.07);color:var(--gold2);font-weight:700;border-top:2px solid rgba(232,184,75,.25);border-bottom:none}
+.sum-tbl tr.sum-total td:first-child{text-align:left}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:22px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal h2{font-size:14px;font-weight:800;color:var(--gold);margin-bottom:14px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.form-field{display:flex;flex-direction:column;gap:3px}
+.form-field.full{grid-column:1/-1}
+.form-field label{font-size:10px;color:var(--sub);font-family:var(--fm);letter-spacing:.5px;text-transform:uppercase}
+.form-field input,.form-field select{background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:6px 9px;color:var(--text);font-family:var(--fm);font-size:12px}
+.form-field input:focus,.form-field select:focus{outline:none;border-color:var(--teal)}
+.form-field input[readonly]{background:rgba(41,196,176,.05);border-color:rgba(41,196,176,.2);color:var(--teal)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <div class="hdr-title">FINAN · <span>Staff Cost Simulator</span> — T6/2026 <span style="font-size:11px;color:var(--sub);font-family:var(--fm)">v25</span></div>
+      <div class="hdr-sub">Source: Payroll_to_BOD_Jun5th · 123 nhân sự · Base = Company Expense (SHUI incl.) · Journal Entry · Budget compare · Load Payroll · 2 off: Kimberly Smith, Carol Smith</div>
+    </div>
+    <div class="hdr-actions">
+      <button class="btn btn-teal" onclick="triggerLoadPayroll()" title="Load payroll từ Payroll_to_BOD .xlsx (merge giữ state)">🔄 Load Payroll</button>
+      <button class="btn btn-ghost" onclick="triggerLoadBudget()" title="Load budget từ Financial Forecast .xlsx">📥 Load Budget</button>
+      <input type="file" id="payroll-file-input" accept=".xlsx" style="display:none" onchange="loadPayroll(event)">
+      <input type="file" id="budget-file-input" accept=".xlsx" style="display:none" onchange="loadBudget(event)">
+      <select class="filter-sel" id="budget-period" onchange="if(typeof BUDGET!=='undefined'&&BUDGET){buildSummary();}" style="display:none">
+        <option value="T5">vs T5</option><option value="T6" selected>vs T6</option>
+        <option value="T7">vs T7</option><option value="T8">vs T8</option><option value="T9">vs T9</option>
+        <option value="Forecast Total T5-T9">vs Total T5-T9</option>
+      </select>
+      <div style="width:1px;height:20px;background:var(--border);margin:0 2px"></div>
+      <button class="btn btn-ghost" onclick="openModal()">＋ Thêm người</button>
+      <div class="menu-wrap">
+        <button class="btn btn-ghost" onclick="toggleMenu('menu-more',event)">⚙ More ▾</button>
+        <div class="menu-pop" id="menu-more">
+          <button class="menu-item" onclick="closeMenus();activateAll()">✓ Active All<span class="mi-sub">Bật cost tất cả nhân sự</span></button>
+          <button class="menu-item danger" onclick="closeMenus();resetAlloc()">↺ Reset Allocation<span class="mi-sub">Xoá hết % phân bổ về 0</span></button>
+        </div>
+      </div>
+      <div style="width:1px;height:20px;background:var(--border);margin:0 2px"></div>
+      <div class="menu-wrap">
+        <button class="btn btn-ghost" onclick="toggleMenu('menu-export',event)">⬇ Export ▾</button>
+        <div class="menu-pop" id="menu-export">
+          <button class="menu-item" onclick="closeMenus();exportCSV()">⬇ Employee CSV<span class="mi-sub">Chi tiết từng nhân sự + alloc</span></button>
+          <button class="menu-item" onclick="closeMenus();exportSummaryCSV()">⬇ Summary CSV<span class="mi-sub">Roll-up BU / PL / matrix</span></button>
+          <button class="menu-item" onclick="closeMenus();exportJSON()">⬇ JSON<span class="mi-sub">Feed Planning Tool / re-import</span></button>
+          <div class="menu-divider"></div>
+          <button class="menu-item" onclick="closeMenus();exportJournalExcel()">📒 Journal Entry Excel<span class="mi-sub">Bút toán Dr/Cr 3 sheet</span></button>
+        </div>
+      </div>
+      <button class="btn btn-ghost" onclick="triggerImportJSON()" title="Restore state từ JSON export">⬆ Import JSON</button>
+      <input type="file" id="json-file-input" accept=".json" style="display:none" onchange="importJSON(event)">
+      <button class="btn btn-red" onclick="clearSavedState()" title="Xoá saved data, về payroll gốc">🗑 Clear</button>
+      <span id="save-indicator" style="font-size:10px;color:var(--dim);font-family:var(--fm)">—</span>
+    </div>
+  </div>
+</div>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="showTab('simulator',this)">📋 Simulator</button>
+  <button class="tab-btn" onclick="showTab('summary',this)">📊 Summary</button>
+  <button class="tab-btn" onclick="showTab('journal',this)">📒 Journal Entry</button>
+</div>
+
+<div class="strip" id="strip"></div>
+
+<div class="toolbar" id="toolbar">
+  <div class="search-box"><input type="text" id="search" placeholder="Tìm tên, chức danh..." oninput="filterTable()"></div>
+  <select class="filter-sel" id="filter-dept" onchange="filterTable()">
+    <option value="">Tất cả phòng ban</option>
+    <option>MANAGEMENT</option><option>ACCOUNTING &amp; FINANCE</option><option>HR</option>
+    <option>CUSTOMER SERVICE &amp; SUCCESS</option><option>MARKETING</option>
+    <option>PARTNERSHIP</option><option>PRODUCT MANAGEMENT</option><option>PRODUCT OPS</option>
+    <option>SALES &amp; BUSINESS DEVELOPMENT</option><option>SYSTEM &amp; ENGINEERING</option>
+  </select>
+  <select class="filter-sel" id="filter-status" onchange="filterTable()">
+    <option value="">Tất cả status</option>
+    <option value="active">Active</option><option value="inactive">Inactive</option>
+  </select>
+  <select class="filter-sel" id="filter-pl" onchange="filterTable()">
+    <option value="">Tất cả P&amp;L line</option>
+    <option>4.1 Staff cost — Salary</option>
+    <option>6.1 Staff - Customer Operation</option>
+    <option>6.2 Staff - BD &amp; Partnership</option>
+    <option>6.3 Staff - Product Development</option>
+    <option>6.4 Staff - Technology</option>
+    <option>6.5 Staff - Marketing</option>
+    <option>7.1 Staff - Management</option>
+    <option>7.2 Staff - Accounting &amp; Finance</option>
+    <option>7.3 Staff - Human Resource</option>
+  </select>
+  <select class="filter-sel" id="filter-emptype" onchange="filterTable()">
+    <option value="">FTE/PRB/OUT</option>
+    <option value="FTE">FTE</option><option value="PRB">PRB</option><option value="OUT">OUT</option>
+  </select>
+  <div class="alloc-hint">% alloc · bước nhảy 10% · <strong>Tổng = 100%</strong></div>
+</div>
+
+<div class="page active" id="page-simulator">
+  <div class="tbl-outer">
+    <table class="sim">
+      <thead id="sim-thead"></thead>
+      <tbody id="sim-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="page" id="page-summary">
+  <div class="summary-wrap" id="summary-content"></div>
+</div>
+
+<div class="page" id="page-journal">
+  <div style="padding:12px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);background:var(--surface)">
+    <span style="font-size:11px;color:var(--sub);font-family:var(--fm)">Bút toán từ payroll T6 · Block 1 chi tiết PL×BU · Block 2 theo PL line</span>
+    <button class="btn btn-teal" style="margin-left:auto" onclick="exportJournalExcel()">⬇ Export Journal Entry → Excel</button>
+  </div>
+  <div class="summary-wrap" id="journal-content"></div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>＋ Thêm nhân sự mới (T6)</h2>
+    <div class="form-grid">
+      <div class="form-field full">
+        <label>Họ và Tên *</label>
+        <input type="text" id="new-name" placeholder="John Doe">
+      </div>
+      <div class="form-field">
+        <label>Chức danh</label>
+        <input type="text" id="new-position" placeholder="Software Engineer">
+      </div>
+      <div class="form-field">
+        <label>Phòng ban *</label>
+        <select id="new-dept">
+          <option value="MANAGEMENT">Management</option>
+          <option value="ACCOUNTING &amp; FINANCE">Accounting &amp; Finance</option>
+          <option value="HR">HR</option>
+          <option value="CUSTOMER SERVICE &amp; SUCCESS">Customer Service &amp; Success</option>
+          <option value="MARKETING">Marketing</option>
+          <option value="PARTNERSHIP">Partnership</option>
+          <option value="PRODUCT MANAGEMENT">Product Management</option>
+          <option value="PRODUCT OPS">Product OPS</option>
+          <option value="SALES &amp; BUSINESS DEVELOPMENT">Sales &amp; Business Development</option>
+          <option value="SYSTEM &amp; ENGINEERING">System &amp; Engineering</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Gross Salary/tháng (M VND)</label>
+        <input type="number" id="new-gross" placeholder="20" step="0.5" oninput="autoCalcBase()">
+      </div>
+      <div class="form-field">
+        <label>Company Expense Base (M VND) <span style="color:var(--teal);font-size:9px">≈ Gross × 1.30</span></label>
+        <input type="number" id="new-base" placeholder="26" step="0.5" readonly>
+      </div>
+      <div class="form-field">
+        <label>Salary Adjustment (M VND)</label>
+        <input type="number" id="new-adj" placeholder="0" step="0.5">
+      </div>
+      <div class="form-field full">
+        <label>P&amp;L Line</label>
+        <select id="new-pl">
+          <option>4.1 Staff cost — Salary</option>
+          <option>6.1 Staff - Customer Operation</option>
+          <option>6.2 Staff - BD &amp; Partnership</option>
+          <option>6.3 Staff - Product Development</option>
+          <option>6.4 Staff - Technology</option>
+          <option>6.5 Staff - Marketing</option>
+          <option>7.1 Staff - Management</option>
+          <option>7.2 Staff - Accounting &amp; Finance</option>
+          <option>7.3 Staff - Human Resource</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Huỷ</button>
+      <button class="btn btn-teal" onclick="addPerson()">Thêm nhân sự</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PERSONS_RAW=[{"id":1,"emp_no":"00002","name":"Mary Smith","position":"Chief Product Officer","dept":"MANAGEMENT","dept_label":"Management","status":"active","emp_type":"FTE","income":40000000,"base":51090000,"adj":130000000,"pl_line":"7.1 Staff - Management","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":41690000,"cost2":7000000,"cost3":1200000,"cost4":400000,"cost5":800000,"ded1":3200000,"ded2":600000,"ded3":400000,"ded4":200000,"ded5":1530000}},{"id":2,"emp_no":"00001","name":"Robert Smith","position":"CEO","dept":"MANAGEMENT","dept_label":"Management","status":"active","emp_type":"FTE","income":46800000,"base":59488000,"adj":120000000,"pl_line":"7.1 Staff - Management","alloc":{"SBH_own":50,"SBH_partner":0,"HLB":0,"BU3":50,"CSS":0},"_new":false,"comp":{"cost1":48490000,"cost2":8190000,"cost3":1404000,"cost4":468000,"cost5":936000,"ded1":3744000,"ded2":702000,"ded3":468000,"ded4":0,"ded5":1518600}},{"id":3,"emp_no":"00393","name":"George Smith","position":"Chief Marketing Officer","dept":"MANAGEMENT","dept_label":"Management","status":"active","emp_type":"FTE","income":150000000,"base":163882000,"adj":0,"pl_line":"7.1 Staff - Management","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":152290000,"cost2":8190000,"cost3":1404000,"cost4":1062000,"cost5":936000,"ded1":3744000,"ded2":702000,"ded3":1062000,"ded4":234000,"ded5":30857200}},{"id":4,"emp_no":"00432","name":"Ronald Smith","position":"General Manager (FinanOne)","dept":"MANAGEMENT","dept_label":"Management","status":"active","emp_type":"FTE","income":46083333,"base":49441666,"adj":0,"pl_line":"7.1 Staff - Management","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":47466666,"cost2":395000,"cost3":0,"cost4":0,"cost5":1580000,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":2686667}},{"id":5,"emp_no":"00327","name":"Janet Smith","position":"Chief Finance Officer","dept":"MANAGEMENT","dept_label":"Management","status":"active","emp_type":"FTE","income":50000000,"base":63320000,"adj":10000000,"pl_line":"7.1 Staff - Management","alloc":{"SBH_own":80,"SBH_partner":0,"HLB":0,"BU3":20,"CSS":0},"_new":false,"comp":{"cost1":52290000,"cost2":8190000,"cost3":1404000,"cost4":500000,"cost5":936000,"ded1":3744000,"ded2":702000,"ded3":500000,"ded4":234000,"ded5":1275400}},{"id":6,"emp_no":"00201","name":"Douglas Smith","position":"Chief of Staff","dept":"MANAGEMENT","dept_label":"Management","status":"active","emp_type":"FTE","income":50000000,"base":62720000,"adj":0,"pl_line":"7.1 Staff - Management","alloc":{"SBH_own":80,"SBH_partner":0,"HLB":0,"BU3":20,"CSS":0},"_new":false,"comp":{"cost1":51690000,"cost2":8190000,"cost3":1404000,"cost4":500000,"cost5":936000,"ded1":3744000,"ded2":702000,"ded3":500000,"ded4":234000,"ded5":2530800}},{"id":7,"emp_no":"00136","name":"Karen Smith","position":"Chief Accountant","dept":"ACCOUNTING & FINANCE","dept_label":"Accounting & Finance","status":"active","emp_type":"FTE","income":30000000,"base":38740000,"adj":0,"pl_line":"7.2 Staff - Accounting & Finance","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":31690000,"cost2":5250000,"cost3":900000,"cost4":300000,"cost5":600000,"ded1":2400000,"ded2":450000,"ded3":300000,"ded4":0,"ded5":287500}},{"id":8,"emp_no":"00343","name":"Ashley Smith","position":"Service Accounting Lead","dept":"ACCOUNTING & FINANCE","dept_label":"Accounting & Finance","status":"active","emp_type":"OUT","income":4000000,"base":4000000,"adj":0,"pl_line":"7.2 Staff - Accounting & Finance","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":4000000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":400000}},{"id":9,"emp_no":"00319","name":"Nicholas Smith","position":"General Accountant","dept":"ACCOUNTING & FINANCE","dept_label":"Accounting & Finance","status":"active","emp_type":"OUT","income":11675000,"base":11675000,"adj":0,"pl_line":"7.2 Staff - Accounting & Finance","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":11675000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":1167500}},{"id":10,"emp_no":"00413","name":"Heather Smith","position":"Financial Lead","dept":"ACCOUNTING & FINANCE","dept_label":"Accounting & Finance","status":"active","emp_type":"FTE","income":20000000,"base":25990000,"adj":0,"pl_line":"7.2 Staff - Accounting & Finance","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":21290000,"cost2":3500000,"cost3":600000,"cost4":200000,"cost5":400000,"ded1":1600000,"ded2":300000,"ded3":200000,"ded4":100000,"ded5":0}},{"id":11,"emp_no":"00331","name":"Julie Smith","position":"HR Executive","dept":"HR","dept_label":"HR","status":"active","emp_type":"FTE","income":7000000,"base":9794375,"adj":0,"pl_line":"7.3 Staff - Human Resource","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":8149375,"cost2":1225000,"cost3":210000,"cost4":70000,"cost5":140000,"ded1":560000,"ded2":105000,"ded3":70000,"ded4":35000,"ded5":0}},{"id":12,"emp_no":"00066","name":"Peter Smith","position":"HR Lead","dept":"HR","dept_label":"HR","status":"active","emp_type":"FTE","income":20000000,"base":26290000,"adj":0,"pl_line":"7.3 Staff - Human Resource","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":21590000,"cost2":3500000,"cost3":600000,"cost4":200000,"cost5":400000,"ded1":1600000,"ded2":300000,"ded3":200000,"ded4":0,"ded5":0}},{"id":13,"emp_no":"00252","name":"Susan Smith","position":"Customer Support Lead","dept":"CUSTOMER SERVICE & SUCCESS","dept_label":"CS & Success","status":"active","emp_type":"FTE","income":13000000,"base":19215000,"adj":0,"pl_line":"6.1 Staff - Customer Operation","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":15690000,"cost2":2625000,"cost3":450000,"cost4":150000,"cost5":300000,"ded1":1200000,"ded2":225000,"ded3":150000,"ded4":75000,"ded5":0}},{"id":14,"emp_no":"00225","name":"Sarah Smith","position":"Customer Support","dept":"CUSTOMER SERVICE & SUCCESS","dept_label":"CS & Success","status":"active","emp_type":"FTE","income":9791667,"base":16607709,"adj":0,"pl_line":"6.1 Staff - Customer Operation","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":14257709,"cost2":1750000,"cost3":300000,"cost4":100000,"cost5":200000,"ded1":800000,"ded2":150000,"ded3":100000,"ded4":50000,"ded5":0}},{"id":15,"emp_no":"00342","name":"Sandra Smith","position":"Customer Support","dept":"CUSTOMER SERVICE & SUCCESS","dept_label":"CS & Success","status":"active","emp_type":"FTE","income":9000000,"base":12508125,"adj":0,"pl_line":"6.1 Staff - Customer Operation","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":10393125,"cost2":1575000,"cost3":270000,"cost4":90000,"cost5":180000,"ded1":720000,"ded2":135000,"ded3":90000,"ded4":45000,"ded5":0}},{"id":16,"emp_no":"00316","name":"Amanda Smith","position":"Customer Support","dept":"CUSTOMER SERVICE & SUCCESS","dept_label":"CS & Success","status":"active","emp_type":"FTE","income":9000000,"base":14545625,"adj":0,"pl_line":"6.1 Staff - Customer Operation","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":12430625,"cost2":1575000,"cost3":270000,"cost4":90000,"cost5":180000,"ded1":720000,"ded2":135000,"ded3":90000,"ded4":45000,"ded5":0}},{"id":17,"emp_no":"00431","name":"Kathleen Smith","position":"CS & Partnership Mananger","dept":"CUSTOMER SERVICE & SUCCESS","dept_label":"CS & Success","status":"active","emp_type":"PRB","income":48875000,"base":50523333,"adj":0,"pl_line":"6.1 Staff - Customer Operation","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":50523333,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":5014000}},{"id":18,"emp_no":"00328","name":"Shirley Smith","position":"Customer Support","dept":"CUSTOMER SERVICE & SUCCESS","dept_label":"CS & Success","status":"active","emp_type":"FTE","income":9000000,"base":11805000,"adj":0,"pl_line":"6.1 Staff - Customer Operation","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":9690000,"cost2":1575000,"cost3":270000,"cost4":90000,"cost5":180000,"ded1":720000,"ded2":135000,"ded3":90000,"ded4":45000,"ded5":0}},{"id":19,"emp_no":"00295","name":"Frank Smith","position":"Customer Support","dept":"CUSTOMER SERVICE & SUCCESS","dept_label":"CS & Success","status":"active","emp_type":"FTE","income":9000000,"base":15995626,"adj":0,"pl_line":"6.1 Staff - Customer Operation","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":13880626,"cost2":1575000,"cost3":270000,"cost4":90000,"cost5":180000,"ded1":720000,"ded2":135000,"ded3":90000,"ded4":45000,"ded5":0}},{"id":20,"emp_no":"00341","name":"Debra Smith","position":"Customer Support","dept":"CUSTOMER SERVICE & SUCCESS","dept_label":"CS & Success","status":"active","emp_type":"FTE","income":9000000,"base":12859688,"adj":0,"pl_line":"6.1 Staff - Customer Operation","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":10744688,"cost2":1575000,"cost3":270000,"cost4":90000,"cost5":180000,"ded1":720000,"ded2":135000,"ded3":90000,"ded4":45000,"ded5":0}},{"id":21,"emp_no":"00345","name":"Carolyn Smith","position":"Operations Manager","dept":"CUSTOMER SERVICE & SUCCESS","dept_label":"CS & Success","status":"active","emp_type":"FTE","income":3437500,"base":3816667,"adj":0,"pl_line":"6.1 Staff - Customer Operation","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":3816667,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":0}},{"id":22,"emp_no":"00238","name":"Olivia Smith","position":"CS Admin","dept":"CUSTOMER SERVICE & SUCCESS","dept_label":"CS & Success","status":"active","emp_type":"FTE","income":9000000,"base":11805000,"adj":0,"pl_line":"6.1 Staff - Customer Operation","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":9690000,"cost2":1575000,"cost3":270000,"cost4":90000,"cost5":180000,"ded1":720000,"ded2":135000,"ded3":90000,"ded4":45000,"ded5":0}},{"id":23,"emp_no":"00230","name":"Victoria Smith","position":"Customer Support","dept":"CUSTOMER SERVICE & SUCCESS","dept_label":"CS & Success","status":"active","emp_type":"FTE","income":9000000,"base":16562813,"adj":0,"pl_line":"6.1 Staff - Customer Operation","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":14447813,"cost2":1575000,"cost3":270000,"cost4":90000,"cost5":180000,"ded1":720000,"ded2":135000,"ded3":90000,"ded4":45000,"ded5":0}},{"id":24,"emp_no":"00382","name":"Victoria Smith","position":"Customer Support","dept":"CUSTOMER SERVICE & SUCCESS","dept_label":"CS & Success","status":"active","emp_type":"FTE","income":9000000,"base":12930000,"adj":0,"pl_line":"6.1 Staff - Customer Operation","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":10815000,"cost2":1575000,"cost3":270000,"cost4":90000,"cost5":180000,"ded1":720000,"ded2":135000,"ded3":90000,"ded4":45000,"ded5":0}},{"id":25,"emp_no":"00411","name":"Christopher Smith","position":"Product Marketing Manager","dept":"MARKETING","dept_label":"Marketing","status":"active","emp_type":"FTE","income":45000000,"base":59065000,"adj":0,"pl_line":"6.5 Staff - Marketing","alloc":{"SBH_own":80,"SBH_partner":0,"HLB":0,"BU3":20,"CSS":0},"_new":false,"comp":{"cost1":48490000,"cost2":7875000,"cost3":1350000,"cost4":450000,"cost5":900000,"ded1":3600000,"ded2":675000,"ded3":450000,"ded4":149000,"ded5":2217500}},{"id":26,"emp_no":"00416","name":"Emily Smith","position":"Brand & Partnership Executive","dept":"MARKETING","dept_label":"Marketing","status":"active","emp_type":"FTE","income":11000000,"base":14625000,"adj":0,"pl_line":"6.5 Staff - Marketing","alloc":{"SBH_own":80,"SBH_partner":0,"HLB":0,"BU3":20,"CSS":0},"_new":false,"comp":{"cost1":12040000,"cost2":1925000,"cost3":330000,"cost4":110000,"cost5":220000,"ded1":880000,"ded2":165000,"ded3":110000,"ded4":55000,"ded5":0}},{"id":27,"emp_no":"00325","name":"Joshua Smith","position":"Graphic Designer","dept":"MARKETING","dept_label":"Marketing","status":"active","emp_type":"FTE","income":19000000,"base":25936250,"adj":0,"pl_line":"6.5 Staff - Marketing","alloc":{"SBH_own":80,"SBH_partner":0,"HLB":0,"BU3":20,"CSS":0},"_new":false,"comp":{"cost1":21471250,"cost2":3325000,"cost3":570000,"cost4":190000,"cost5":380000,"ded1":1520000,"ded2":285000,"ded3":190000,"ded4":95000,"ded5":75250}},{"id":28,"emp_no":"00375","name":"Dorothy Smith","position":"Digital Marketing Specialist","dept":"MARKETING","dept_label":"Marketing","status":"active","emp_type":"FTE","income":25000000,"base":35665000,"adj":0,"pl_line":"6.5 Staff - Marketing","alloc":{"SBH_own":80,"SBH_partner":0,"HLB":0,"BU3":20,"CSS":0},"_new":false,"comp":{"cost1":29790000,"cost2":4375000,"cost3":750000,"cost4":250000,"cost5":500000,"ded1":2000000,"ded2":375000,"ded3":250000,"ded4":125000,"ded5":597500}},{"id":29,"emp_no":"00219","name":"Cynthia Smith","position":"Assistant Growth Manager","dept":"MARKETING","dept_label":"Marketing","status":"active","emp_type":"FTE","income":33000000,"base":41445000,"adj":0,"pl_line":"6.5 Staff - Marketing","alloc":{"SBH_own":80,"SBH_partner":0,"HLB":0,"BU3":20,"CSS":0},"_new":false,"comp":{"cost1":33690000,"cost2":5775000,"cost3":990000,"cost4":330000,"cost5":660000,"ded1":2640000,"ded2":495000,"ded3":330000,"ded4":149000,"ded5":903500}},{"id":30,"emp_no":"00379","name":"Raymond Smith","position":"Digital Marketing Manager","dept":"MARKETING","dept_label":"Marketing","status":"active","emp_type":"FTE","income":42187500,"base":64390000,"adj":0,"pl_line":"6.5 Staff - Marketing","alloc":{"SBH_own":80,"SBH_partner":0,"HLB":0,"BU3":20,"CSS":0},"_new":false,"comp":{"cost1":53815000,"cost2":7875000,"cost3":1350000,"cost4":450000,"cost5":900000,"ded1":3600000,"ded2":675000,"ded3":450000,"ded4":225000,"ded5":3005000}},{"id":31,"emp_no":"00288","name":"Patrick Smith","position":"Content Marketing","dept":"MARKETING","dept_label":"Marketing","status":"active","emp_type":"FTE","income":11000000,"base":15505000,"adj":0,"pl_line":"6.5 Staff - Marketing","alloc":{"SBH_own":80,"SBH_partner":0,"HLB":0,"BU3":20,"CSS":0},"_new":false,"comp":{"cost1":12920000,"cost2":1925000,"cost3":330000,"cost4":110000,"cost5":220000,"ded1":880000,"ded2":165000,"ded3":110000,"ded4":55000,"ded5":0}},{"id":32,"emp_no":"00433","name":"Joan Smith","position":"Sr. Content Creator","dept":"MARKETING","dept_label":"Marketing","status":"active","emp_type":"PRB","income":8181250,"base":8664375,"adj":0,"pl_line":"6.5 Staff - Marketing","alloc":{"SBH_own":80,"SBH_partner":0,"HLB":0,"BU3":20,"CSS":0},"_new":false,"comp":{"cost1":8664375,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":866438}},{"id":33,"emp_no":"00298","name":"Patricia Smith","position":"Business Development Manager","dept":"PARTNERSHIP","dept_label":"Partnership","status":"active","emp_type":"OUT","income":34800000,"base":34800000,"adj":0,"pl_line":"6.2 Staff - BD & Partnership","alloc":{"SBH_own":0,"SBH_partner":100,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":34800000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":3480000}},{"id":34,"emp_no":"00055","name":"Jennifer Smith","position":"BD Manager","dept":"PARTNERSHIP","dept_label":"Partnership","status":"active","emp_type":"FTE","income":33000000,"base":42445000,"adj":0,"pl_line":"6.2 Staff - BD & Partnership","alloc":{"SBH_own":0,"SBH_partner":100,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":34690000,"cost2":5775000,"cost3":990000,"cost4":330000,"cost5":660000,"ded1":2640000,"ded2":495000,"ded3":330000,"ded4":165000,"ded5":963500}},{"id":35,"emp_no":"00283","name":"Elizabeth Smith","position":"BD Executive","dept":"PARTNERSHIP","dept_label":"Partnership","status":"active","emp_type":"FTE","income":15000000,"base":19515000,"adj":0,"pl_line":"6.2 Staff - BD & Partnership","alloc":{"SBH_own":0,"SBH_partner":100,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":15990000,"cost2":2625000,"cost3":450000,"cost4":150000,"cost5":300000,"ded1":1200000,"ded2":225000,"ded3":150000,"ded4":75000,"ded5":0}},{"id":36,"emp_no":"00074","name":"Joseph Smith","position":"Partner Operations","dept":"PARTNERSHIP","dept_label":"Partnership","status":"active","emp_type":"FTE","income":14000000,"base":19080000,"adj":0,"pl_line":"6.2 Staff - BD & Partnership","alloc":{"SBH_own":0,"SBH_partner":100,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":15790000,"cost2":2450000,"cost3":420000,"cost4":140000,"cost5":280000,"ded1":1120000,"ded2":210000,"ded3":140000,"ded4":70000,"ded5":0}},{"id":37,"emp_no":"00394","name":"Betty Smith","position":"Project Manager","dept":"PARTNERSHIP","dept_label":"Partnership","status":"active","emp_type":"FTE","income":5416667,"base":5566667,"adj":0,"pl_line":"6.2 Staff - BD & Partnership","alloc":{"SBH_own":0,"SBH_partner":100,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":5566667,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":0}},{"id":38,"emp_no":"00425","name":"Edward Smith","position":"Business Development Specialist","dept":"PARTNERSHIP","dept_label":"Partnership","status":"active","emp_type":"PRB","income":13033333,"base":14590000,"adj":0,"pl_line":"6.2 Staff - BD & Partnership","alloc":{"SBH_own":0,"SBH_partner":100,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":14590000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":1390000}},{"id":39,"emp_no":"00427","name":"Gary Smith","position":"Business Development Specialist","dept":"PARTNERSHIP","dept_label":"Partnership","status":"active","emp_type":"PRB","income":13600000,"base":15171250,"adj":0,"pl_line":"6.2 Staff - BD & Partnership","alloc":{"SBH_own":0,"SBH_partner":100,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":15171250,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":1448125}},{"id":40,"emp_no":"00248","name":"Adam Smith","position":"PMO","dept":"PARTNERSHIP","dept_label":"Partnership","status":"active","emp_type":"FTE","income":13750000,"base":23021250,"adj":0,"pl_line":"6.2 Staff - BD & Partnership","alloc":{"SBH_own":0,"SBH_partner":100,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":19790000,"cost2":2406250,"cost3":412500,"cost4":137500,"cost5":275000,"ded1":1100000,"ded2":206250,"ded3":137500,"ded4":68750,"ded5":107813}},{"id":41,"emp_no":"00369","name":"Evelyn Smith","position":"Business Development Manager","dept":"PARTNERSHIP","dept_label":"Partnership","status":"active","emp_type":"FTE","income":38000000,"base":48620000,"adj":0,"pl_line":"6.2 Staff - BD & Partnership","alloc":{"SBH_own":0,"SBH_partner":100,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":39690000,"cost2":6650000,"cost3":1140000,"cost4":380000,"cost5":760000,"ded1":3040000,"ded2":570000,"ded3":380000,"ded4":190000,"ded5":1411000}},{"id":42,"emp_no":"00324","name":"James Smith","position":"Product Owner","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"FTE","income":30000000,"base":38090000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":31040000,"cost2":5250000,"cost3":900000,"cost4":300000,"cost5":600000,"ded1":2400000,"ded2":450000,"ded3":300000,"ded4":150000,"ded5":670000}},{"id":43,"emp_no":"00391","name":"Barbara Smith","position":"Business Analyst","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"FTE","income":15000000,"base":19565000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":16040000,"cost2":2625000,"cost3":450000,"cost4":150000,"cost5":300000,"ded1":1200000,"ded2":225000,"ded3":150000,"ded4":75000,"ded5":0}},{"id":44,"emp_no":"00182","name":"Charles Smith","position":"UI/UX Designer","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"FTE","income":17000000,"base":25085000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":21090000,"cost2":2975000,"cost3":510000,"cost4":170000,"cost5":340000,"ded1":1360000,"ded2":255000,"ded3":170000,"ded4":0,"ded5":155750}},{"id":45,"emp_no":"00337","name":"Anthony Smith","position":"Business Analyst","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"FTE","income":10000000,"base":13390000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":11040000,"cost2":1750000,"cost3":300000,"cost4":100000,"cost5":200000,"ded1":800000,"ded2":150000,"ded3":100000,"ded4":50000,"ded5":0}},{"id":46,"emp_no":"00083","name":"Mark Smith","position":"Head of Product","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"FTE","income":84500000,"base":106165000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":94790000,"cost2":8190000,"cost3":1404000,"cost4":845000,"cost5":936000,"ded1":3744000,"ded2":702000,"ded3":845000,"ded4":0,"ded5":10482700}},{"id":47,"emp_no":"00349","name":"Melissa Smith","position":"Business Analyst","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"FTE","income":9500000,"base":12772500,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":10540000,"cost2":1662500,"cost3":285000,"cost4":95000,"cost5":190000,"ded1":760000,"ded2":142500,"ded3":95000,"ded4":47500,"ded5":0}},{"id":48,"emp_no":"00420","name":"Rebecca Smith","position":"Data Analyst","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"PRB","income":3612500,"base":4150000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":4150000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":415000}},{"id":49,"emp_no":"00420","name":"Rebecca Smith","position":"Data Analyst","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"OUT","income":15840000,"base":15840000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":15840000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":1584000}},{"id":50,"emp_no":"00415","name":"Jacob Smith","position":"General Manager (FinanOne)","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"OUT","income":130000000,"base":130000000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":130000000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":13000000}},{"id":51,"emp_no":"00404","name":"Angela Smith","position":"UI/UX Designer","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"PRB","income":6800000,"base":7840000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":7840000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":784000}},{"id":52,"emp_no":"00410","name":"Emma Smith","position":"Business Analyst","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"FTE","income":30000000,"base":38090000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":31040000,"cost2":5250000,"cost3":900000,"cost4":300000,"cost5":600000,"ded1":2400000,"ded2":450000,"ded3":300000,"ded4":150000,"ded5":670000}},{"id":53,"emp_no":"00018","name":"Benjamin Smith","position":"UI/UX Designer","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"OUT","income":5100000,"base":5100000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":5100000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":510000}},{"id":54,"emp_no":"00370","name":"Samuel Smith","position":"UI/UX Designer","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"FTE","income":11000000,"base":14625000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":12040000,"cost2":1925000,"cost3":330000,"cost4":110000,"cost5":220000,"ded1":880000,"ded2":165000,"ded3":110000,"ded4":55000,"ded5":0}},{"id":55,"emp_no":"00398","name":"Jerry Smith","position":"Business Analyst","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"PRB","income":2727083,"base":3487500,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":3487500,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":348750}},{"id":56,"emp_no":"00355","name":"Aaron Smith","position":"Business Analyst","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"FTE","income":19166667,"base":25673334,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":20973334,"cost2":3500000,"cost3":600000,"cost4":200000,"cost5":400000,"ded1":1600000,"ded2":300000,"ded3":200000,"ded4":100000,"ded5":95104}},{"id":57,"emp_no":"00412","name":"Joyce Smith","position":"Data Analyst","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"FTE","income":15000000,"base":19565000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":16040000,"cost2":2625000,"cost3":450000,"cost4":150000,"cost5":300000,"ded1":1200000,"ded2":225000,"ded3":150000,"ded4":75000,"ded5":0}},{"id":58,"emp_no":"00082","name":"Henry Smith","position":"Product Owner","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"FTE","income":39500000,"base":49822500,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":40540000,"cost2":6912500,"cost3":1185000,"cost4":395000,"cost5":790000,"ded1":3160000,"ded2":592500,"ded3":395000,"ded4":197500,"ded5":900250}},{"id":59,"emp_no":"00400","name":"Ethan Smith","position":"Business Analyst","dept":"PRODUCT MANAGEMENT","dept_label":"Product Management","status":"active","emp_type":"PRB","income":5950000,"base":7361875,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":7361875,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":736188}},{"id":60,"emp_no":"00210","name":"David Smith","position":"PS Lead","dept":"PRODUCT OPS","dept_label":"Product OPS","status":"active","emp_type":"FTE","income":13000000,"base":19921250,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":16396250,"cost2":2625000,"cost3":450000,"cost4":150000,"cost5":300000,"ded1":1200000,"ded2":225000,"ded3":150000,"ded4":75000,"ded5":0}},{"id":61,"emp_no":"00350","name":"William Smith","position":"Software QA/QC","dept":"PRODUCT OPS","dept_label":"Product OPS","status":"active","emp_type":"FTE","income":7000000,"base":9685000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":8040000,"cost2":1225000,"cost3":210000,"cost4":70000,"cost5":140000,"ded1":560000,"ded2":105000,"ded3":70000,"ded4":35000,"ded5":0}},{"id":62,"emp_no":"00390","name":"Jessica Smith","position":"Sr. Software QA/QC","dept":"PRODUCT OPS","dept_label":"Product OPS","status":"active","emp_type":"FTE","income":32000000,"base":50185000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":42665000,"cost2":5600000,"cost3":960000,"cost4":320000,"cost5":640000,"ded1":2560000,"ded2":480000,"ded3":320000,"ded4":160000,"ded5":1649000}},{"id":63,"emp_no":"00208","name":"Donald Smith","position":"QA Lead","dept":"PRODUCT OPS","dept_label":"Product OPS","status":"active","emp_type":"FTE","income":55000000,"base":77670000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":66590000,"cost2":8190000,"cost3":1404000,"cost4":550000,"cost5":936000,"ded1":3744000,"ded2":702000,"ded3":550000,"ded4":234000,"ded5":4280800}},{"id":64,"emp_no":"00418","name":"Anna Smith","position":"Software QA/QC","dept":"PRODUCT OPS","dept_label":"Product OPS","status":"active","emp_type":"FTE","income":15800000,"base":21850000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":18090000,"cost2":2800000,"cost3":480000,"cost4":160000,"cost5":320000,"ded1":1280000,"ded2":240000,"ded3":160000,"ded4":80000,"ded5":0}},{"id":65,"emp_no":"00244","name":"Scott Smith","position":"Technical Suppoter","dept":"PRODUCT OPS","dept_label":"Product OPS","status":"active","emp_type":"FTE","income":10000000,"base":16111875,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":13761875,"cost2":1750000,"cost3":300000,"cost4":100000,"cost5":200000,"ded1":800000,"ded2":150000,"ded3":100000,"ded4":50000,"ded5":0}},{"id":66,"emp_no":"00351","name":"Christine Smith","position":"Software QA/QC","dept":"PRODUCT OPS","dept_label":"Product OPS","status":"active","emp_type":"FTE","income":7000000,"base":10942813,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":9297813,"cost2":1225000,"cost3":210000,"cost4":70000,"cost5":140000,"ded1":560000,"ded2":105000,"ded3":70000,"ded4":35000,"ded5":0}},{"id":67,"emp_no":"00242","name":"Gregory Smith","position":"Technical Suppoter","dept":"PRODUCT OPS","dept_label":"Product OPS","status":"active","emp_type":"FTE","income":9791667,"base":15283750,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":12933750,"cost2":1750000,"cost3":300000,"cost4":100000,"cost5":200000,"ded1":800000,"ded2":150000,"ded3":100000,"ded4":50000,"ded5":0}},{"id":68,"emp_no":"00249","name":"Maria Smith","position":"Software QA/QC","dept":"PRODUCT OPS","dept_label":"Product OPS","status":"active","emp_type":"FTE","income":12000000,"base":15860000,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":13040000,"cost2":2100000,"cost3":360000,"cost4":120000,"cost5":240000,"ded1":960000,"ded2":180000,"ded3":120000,"ded4":60000,"ded5":0}},{"id":69,"emp_no":"00333","name":"Lauren Smith","position":"Software QA/QC","dept":"PRODUCT OPS","dept_label":"Product OPS","status":"active","emp_type":"FTE","income":11000000,"base":17135938,"adj":0,"pl_line":"6.3 Staff - Product Development","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":14550938,"cost2":1925000,"cost3":330000,"cost4":110000,"cost5":220000,"ded1":880000,"ded2":165000,"ded3":110000,"ded4":55000,"ded5":0}},{"id":70,"emp_no":"00378","name":"Michael Smith","position":"Direct Sales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":6200000,"base":9375125,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":7918125,"cost2":1085000,"cost3":186000,"cost4":62000,"cost5":124000,"ded1":496000,"ded2":93000,"ded3":62000,"ded4":31000,"ded5":0}},{"id":71,"emp_no":"00399","name":"Linda Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":6600000,"base":9302833,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":7610833,"cost2":1260000,"cost3":216000,"cost4":72000,"cost5":144000,"ded1":576000,"ded2":108000,"ded3":72000,"ded4":36000,"ded5":0}},{"id":72,"emp_no":"00357","name":"Thomas Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":8206250,"base":11600750,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":9908750,"cost2":1260000,"cost3":216000,"cost4":72000,"cost5":144000,"ded1":576000,"ded2":108000,"ded3":72000,"ded4":36000,"ded5":0}},{"id":73,"emp_no":"00435","name":"Daniel Smith","position":"Direct Sales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"PRB","income":1062500,"base":1240833,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":1240833,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":0}},{"id":74,"emp_no":"00383","name":"Nancy Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":6200000,"base":8734500,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":7277500,"cost2":1085000,"cost3":186000,"cost4":62000,"cost5":124000,"ded1":496000,"ded2":93000,"ded3":62000,"ded4":31000,"ded5":0}},{"id":75,"emp_no":"00092","name":"Matthew Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":7531250,"base":9913250,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":8221250,"cost2":1260000,"cost3":216000,"cost4":72000,"cost5":144000,"ded1":576000,"ded2":108000,"ded3":72000,"ded4":36000,"ded5":0}},{"id":76,"emp_no":"00278","name":"Steven Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":6806254,"base":8953254,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":7496254,"cost2":1085000,"cost3":186000,"cost4":62000,"cost5":124000,"ded1":496000,"ded2":93000,"ded3":62000,"ded4":31000,"ded5":0}},{"id":77,"emp_no":"00384","name":"Paul Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":7200000,"base":10369500,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":8677500,"cost2":1260000,"cost3":216000,"cost4":72000,"cost5":144000,"ded1":576000,"ded2":108000,"ded3":72000,"ded4":36000,"ded5":0}},{"id":78,"emp_no":"00426","name":"Michelle Smith","position":"Direct Sales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"PRB","income":6375000,"base":8459531,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":8459531,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":845953}},{"id":79,"emp_no":"00364","name":"Kenneth Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":5812500,"base":7959500,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":6502500,"cost2":1085000,"cost3":186000,"cost4":62000,"cost5":124000,"ded1":496000,"ded2":93000,"ded3":62000,"ded4":31000,"ded5":0}},{"id":80,"emp_no":"00217","name":"Kevin Smith","position":"Sales Lead","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":22395833,"base":29840521,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":26315521,"cost2":2625000,"cost3":450000,"cost4":150000,"cost5":300000,"ded1":1200000,"ded2":225000,"ded3":150000,"ded4":75000,"ded5":0}},{"id":81,"emp_no":"00429","name":"Brian Smith","position":"Direct Sales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"PRB","income":6375000,"base":7415000,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":7415000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":741500}},{"id":82,"emp_no":"00388","name":"Timothy Smith","position":"Direct Sales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":7200000,"base":10369500,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":8677500,"cost2":1260000,"cost3":216000,"cost4":72000,"cost5":144000,"ded1":576000,"ded2":108000,"ded3":72000,"ded4":36000,"ded5":0}},{"id":83,"emp_no":"00372","name":"Jeffrey Smith","position":"Direct Sales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":7200000,"base":10719500,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":9027500,"cost2":1260000,"cost3":216000,"cost4":72000,"cost5":144000,"ded1":576000,"ded2":108000,"ded3":72000,"ded4":36000,"ded5":0}},{"id":84,"emp_no":"00220","name":"Amy Smith","position":"Sales Lead","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":18645833,"base":25249896,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":21724896,"cost2":2625000,"cost3":450000,"cost4":150000,"cost5":300000,"ded1":1200000,"ded2":225000,"ded3":150000,"ded4":75000,"ded5":133542}},{"id":85,"emp_no":"00277","name":"Eric Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":7643750,"base":10025750,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":8333750,"cost2":1260000,"cost3":216000,"cost4":72000,"cost5":144000,"ded1":576000,"ded2":108000,"ded3":72000,"ded4":36000,"ded5":0}},{"id":86,"emp_no":"00374","name":"Jonathan Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":7050000,"base":9432000,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":7740000,"cost2":1260000,"cost3":216000,"cost4":72000,"cost5":144000,"ded1":576000,"ded2":108000,"ded3":72000,"ded4":36000,"ded5":0}},{"id":87,"emp_no":"00237","name":"Stephen Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":7643750,"base":10025750,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":8333750,"cost2":1260000,"cost3":216000,"cost4":72000,"cost5":144000,"ded1":576000,"ded2":108000,"ded3":72000,"ded4":36000,"ded5":0}},{"id":88,"emp_no":"00215","name":"Brenda Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":8993750,"base":12163250,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":10471250,"cost2":1260000,"cost3":216000,"cost4":72000,"cost5":144000,"ded1":576000,"ded2":108000,"ded3":72000,"ded4":36000,"ded5":0}},{"id":89,"emp_no":"00296","name":"Larry Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":6418750,"base":8565750,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":7108750,"cost2":1085000,"cost3":186000,"cost4":62000,"cost5":124000,"ded1":496000,"ded2":93000,"ded3":62000,"ded4":31000,"ded5":0}},{"id":90,"emp_no":"00396","name":"Pamela Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":6750000,"base":9919500,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":8227500,"cost2":1260000,"cost3":216000,"cost4":72000,"cost5":144000,"ded1":576000,"ded2":108000,"ded3":72000,"ded4":36000,"ded5":0}},{"id":91,"emp_no":"00395","name":"Nicole Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":7200000,"base":9582000,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":7890000,"cost2":1260000,"cost3":216000,"cost4":72000,"cost5":144000,"ded1":576000,"ded2":108000,"ded3":72000,"ded4":36000,"ded5":0}},{"id":92,"emp_no":"00386","name":"Brandon Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":7200000,"base":10369500,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":8677500,"cost2":1260000,"cost3":216000,"cost4":72000,"cost5":144000,"ded1":576000,"ded2":108000,"ded3":72000,"ded4":36000,"ded5":0}},{"id":93,"emp_no":"00354","name":"Samantha Smith","position":"Sales Manager","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":32500000,"base":41827500,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":34190000,"cost2":5687500,"cost3":975000,"cost4":325000,"cost5":650000,"ded1":2600000,"ded2":487500,"ded3":325000,"ded4":162500,"ded5":918750}},{"id":94,"emp_no":"00430","name":"Helen Smith","position":"Direct Sales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"PRB","income":6467083,"base":7477916,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":7477916,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":747792}},{"id":95,"emp_no":"00423","name":"Alexander Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"PRB","income":5482500,"base":6841875,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":6841875,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":684188}},{"id":96,"emp_no":"00402","name":"Rachel Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":6200000,"base":8347000,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":6890000,"cost2":1085000,"cost3":186000,"cost4":62000,"cost5":124000,"ded1":496000,"ded2":93000,"ded3":62000,"ded4":31000,"ded5":0}},{"id":97,"emp_no":"00434","name":"Catherine Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"PRB","income":1328125,"base":1851042,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":1851042,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":0}},{"id":98,"emp_no":"00385","name":"Nathan Smith","position":"Telesales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":5425000,"base":8550125,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":7093125,"cost2":1085000,"cost3":186000,"cost4":62000,"cost5":124000,"ded1":496000,"ded2":93000,"ded3":62000,"ded4":31000,"ded5":0}},{"id":99,"emp_no":"00377","name":"Zachary Smith","position":"Project Sales Executive","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":9000000,"base":12455000,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":10340000,"cost2":1575000,"cost3":270000,"cost4":90000,"cost5":180000,"ded1":720000,"ded2":135000,"ded3":90000,"ded4":45000,"ded5":0}},{"id":100,"emp_no":"00380","name":"Walter Smith","position":"Sales Admin","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"FTE","income":10000000,"base":14223333,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":11873333,"cost2":1750000,"cost3":300000,"cost4":100000,"cost5":200000,"ded1":800000,"ded2":150000,"ded3":100000,"ded4":50000,"ded5":0}},{"id":101,"emp_no":"00428","name":"Judith Smith","position":"Direct Sales","dept":"SALES & BUSINESS DEVELOPMENT","dept_label":"Sales & BD","status":"active","emp_type":"PRB","income":6375000,"base":7415000,"adj":0,"pl_line":"4.1 Staff cost — Salary","alloc":{"SBH_own":100,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":7415000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":741500}},{"id":102,"emp_no":"00406","name":"John Smith","position":"DevOps Engineer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":14687500,"base":19245208,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":60,"SBH_partner":0,"HLB":0,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":15720208,"cost2":2625000,"cost3":450000,"cost4":150000,"cost5":300000,"ded1":1200000,"ded2":225000,"ded3":150000,"ded4":75000,"ded5":0}},{"id":103,"emp_no":"00162","name":"Richard Smith","position":"Golang Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":22500000,"base":34559531,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":60,"SBH_partner":0,"HLB":40,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":29272031,"cost2":3937500,"cost3":675000,"cost4":225000,"cost5":450000,"ded1":1800000,"ded2":337500,"ded3":225000,"ded4":112500,"ded5":456875}},{"id":104,"emp_no":"00080","name":"Lisa Smith","position":"Tech Lead","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":40000000,"base":65940000,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":60,"SBH_partner":0,"HLB":40,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":56540000,"cost2":7000000,"cost3":1200000,"cost4":400000,"cost5":800000,"ded1":3200000,"ded2":600000,"ded3":400000,"ded4":200000,"ded5":2495000}},{"id":105,"emp_no":"00071","name":"Margaret Smith","position":"Tech Lead","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":54000000,"base":73860000,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":60,"SBH_partner":0,"HLB":40,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":62790000,"cost2":8190000,"cost3":1404000,"cost4":540000,"cost5":936000,"ded1":3744000,"ded2":702000,"ded3":540000,"ded4":234000,"ded5":1771400}},{"id":106,"emp_no":"00335","name":"Deborah Smith","position":"Mobile Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":25600000,"base":40056000,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":60,"SBH_partner":0,"HLB":40,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":34040000,"cost2":4480000,"cost3":768000,"cost4":256000,"cost5":512000,"ded1":2048000,"ded2":384000,"ded3":256000,"ded4":128000,"ded5":916200}},{"id":107,"emp_no":"00408","name":"Stephanie Smith","position":"Web Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"OUT","income":49500000,"base":49500000,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":60,"SBH_partner":0,"HLB":40,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":49500000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":4950000}},{"id":108,"emp_no":"00367","name":"Jason Smith","position":"Golang Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":11000000,"base":14625000,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":60,"SBH_partner":0,"HLB":40,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":12040000,"cost2":1925000,"cost3":330000,"cost4":110000,"cost5":220000,"ded1":880000,"ded2":165000,"ded3":110000,"ded4":55000,"ded5":0}},{"id":109,"emp_no":"00361","name":"Sharon Smith","position":"Sr. Golang Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":32000000,"base":48560000,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":60,"SBH_partner":0,"HLB":40,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":41040000,"cost2":5600000,"cost3":960000,"cost4":320000,"cost5":640000,"ded1":2560000,"ded2":480000,"ded3":320000,"ded4":160000,"ded5":1649000}},{"id":110,"emp_no":"00371","name":"Laura Smith","position":"Mobile Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":29000000,"base":47450313,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":60,"SBH_partner":0,"HLB":40,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":40635313,"cost2":5075000,"cost3":870000,"cost4":290000,"cost5":580000,"ded1":2320000,"ded2":435000,"ded3":290000,"ded4":145000,"ded5":1345500}},{"id":111,"emp_no":"00405","name":"Ryan Smith","position":"Golang Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":22916667,"base":29802500,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":60,"SBH_partner":0,"HLB":40,"BU3":0,"CSS":0},"_new":false,"comp":{"cost1":23927500,"cost2":4375000,"cost3":750000,"cost4":250000,"cost5":500000,"ded1":2000000,"ded2":375000,"ded3":250000,"ded4":125000,"ded5":255625}},{"id":112,"emp_no":"00340","name":"Justin Smith","position":"Golang Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":11000000,"base":15306250,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":12721250,"cost2":1925000,"cost3":330000,"cost4":110000,"cost5":220000,"ded1":880000,"ded2":165000,"ded3":110000,"ded4":55000,"ded5":0}},{"id":113,"emp_no":"00261","name":"Katherine Smith","position":"Mobile Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":24000000,"base":33330000,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":27690000,"cost2":4200000,"cost3":720000,"cost4":240000,"cost5":480000,"ded1":1920000,"ded2":360000,"ded3":240000,"ded4":120000,"ded5":449000}},{"id":114,"emp_no":"00047","name":"Jack Smith","position":"Mobile Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"OUT","income":2000000,"base":2000000,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":2000000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":200000}},{"id":115,"emp_no":"00422","name":"Dennis Smith","position":"Web Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"PRB","income":28510417,"base":29200417,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":29200417,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":2920042}},{"id":116,"emp_no":"00421","name":"Tyler Smith","position":"Web Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"PRB","income":22932292,"base":23712084,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":23712084,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":2371208}},{"id":117,"emp_no":"00421","name":"Tyler Smith","position":"Web Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"OUT","income":14800000,"base":14800000,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":14800000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":1480000}},{"id":118,"emp_no":"00407","name":"Diane Smith","position":"Web Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":25000000,"base":26040000,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":26040000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":492500}},{"id":119,"emp_no":"00381","name":"Jose Smith","position":"Mobile Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":2203125,"base":2353125,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":2353125,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":0}},{"id":120,"emp_no":"00381","name":"Jose Smith","position":"Mobile Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"OUT","income":6720000,"base":6720000,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":6720000,"cost2":0,"cost3":0,"cost4":0,"cost5":0,"ded1":0,"ded2":0,"ded3":0,"ded4":0,"ded5":672000}},{"id":121,"emp_no":"00014","name":"Kelly Smith","position":"Head of Innovation","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":70000000,"base":90020000,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":78790000,"cost2":8190000,"cost3":1404000,"cost4":700000,"cost5":936000,"ded1":3744000,"ded2":702000,"ded3":700000,"ded4":234000,"ded5":4170800}},{"id":122,"emp_no":"00419","name":"Christina Smith","position":"Mobile Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":24687500,"base":31602500,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":25727500,"cost2":4375000,"cost3":750000,"cost4":250000,"cost5":500000,"ded1":2000000,"ded2":375000,"ded3":250000,"ded4":125000,"ded5":345625}},{"id":123,"emp_no":"00356","name":"Kyle Smith","position":"Sr. Golang Developer","dept":"SYSTEM & ENGINEERING","dept_label":"System & Engineering","status":"active","emp_type":"FTE","income":35000000,"base":59265000,"adj":0,"pl_line":"6.4 Staff - Technology","alloc":{"SBH_own":0,"SBH_partner":0,"HLB":0,"BU3":100,"CSS":0},"_new":false,"comp":{"cost1":51040000,"cost2":6125000,"cost3":1050000,"cost4":350000,"cost5":700000,"ded1":2800000,"ded2":525000,"ded3":350000,"ded4":175000,"ded5":757500}}];
+
+const BUS=[
+  {key:'SBH_own',    label:'SBH Own Channel', short:'SBH-Own',cls:'bu1',thcls:'th-bu1',outcls:'th-out1'},
+  {key:'SBH_partner',label:'SBH Partnership', short:'SBH-Ptn',cls:'bu2',thcls:'th-bu2',outcls:'th-out2'},
+  {key:'HLB',        label:'HLB',             short:'HLB',    cls:'bu3',thcls:'th-bu3',outcls:'th-out3'},
+  {key:'BU3',        label:'BU3 — FinanOne',  short:'BU3',    cls:'bu4',thcls:'th-bu4',outcls:'th-out4'},
+  {key:'CSS',        label:'Corp. Shared Svc',short:'CSS',    cls:'bu5',thcls:'th-bu5',outcls:'th-out5'},
+];
+const PL_LINES=[
+  '4.1 Staff cost — Salary',
+  '6.1 Staff - Customer Operation',
+  '6.2 Staff - BD & Partnership',
+  '6.3 Staff - Product Development',
+  '6.4 Staff - Technology',
+  '6.5 Staff - Marketing',
+  '7.1 Staff - Management',
+  '7.2 Staff - Accounting & Finance',
+  '7.3 Staff - Human Resource',
+];
+const PL_COA_MAP={
+  '4.1 Staff cost — Salary':         ['SBH_own','HLB','BU3'],
+  '6.1 Staff - Customer Operation':  ['SBH_own','HLB'],
+  '6.2 Staff - BD & Partnership':    ['SBH_partner','BU3'],
+  '6.3 Staff - Product Development': ['SBH_own','BU3'],
+  '6.4 Staff - Technology':          ['SBH_own','SBH_partner','HLB','BU3'],
+  '6.5 Staff - Marketing':           ['SBH_own','HLB','BU3'],
+  '7.1 Staff - Management':          ['SBH_own','BU3','CSS'],
+  '7.2 Staff - Accounting & Finance':['SBH_own','BU3','CSS'],
+  '7.3 Staff - Human Resource':      ['SBH_own','BU3','CSS'],
+};
+const DEPT_ORDER=['MANAGEMENT','ACCOUNTING & FINANCE','HR','CUSTOMER SERVICE & SUCCESS','MARKETING','PARTNERSHIP','PRODUCT MANAGEMENT','PRODUCT OPS','SALES & BUSINESS DEVELOPMENT','SYSTEM & ENGINEERING'];
+const DEPT_LABELS={'MANAGEMENT':'Management','ACCOUNTING & FINANCE':'Accounting & Finance','HR':'HR','CUSTOMER SERVICE & SUCCESS':'CS & Success','MARKETING':'Marketing','PARTNERSHIP':'Partnership','PRODUCT MANAGEMENT':'Product Management','PRODUCT OPS':'Product OPS','SALES & BUSINESS DEVELOPMENT':'Sales & BD','SYSTEM & ENGINEERING':'System & Engineering'};
+const DEPT_PL={'SALES & BUSINESS DEVELOPMENT':'4.1 Staff cost — Salary','CUSTOMER SERVICE & SUCCESS':'6.1 Staff - Customer Operation','PARTNERSHIP':'6.2 Staff - BD & Partnership','PRODUCT MANAGEMENT':'6.3 Staff - Product Development','PRODUCT OPS':'6.3 Staff - Product Development','SYSTEM & ENGINEERING':'6.4 Staff - Technology','MARKETING':'6.5 Staff - Marketing','MANAGEMENT':'7.1 Staff - Management','ACCOUNTING & FINANCE':'7.2 Staff - Accounting & Finance','HR':'7.3 Staff - Human Resource'};
+
+let persons=PERSONS_RAW.map(p=>({...p,alloc:{...p.alloc}}));
+
+// ── HELPERS ──
+const fmtMc=n=>{if(!n||n===0)return'—';const v=n/1e6;return(v>=1?v.toFixed(1):v.toFixed(2))+'tr';};
+const fmtMl=n=>n===0?'—':(n/1e6).toFixed(1)+'tr';
+const num=s=>parseFloat(s)||0;
+function effectiveCost(p){if(p.status==='inactive')return 0;return p.base+(p.adj||0);}
+function allocSum(p){return BUS.reduce((s,b)=>s+num(p.alloc[b.key]),0);}
+function buCost(p,buKey){return effectiveCost(p)*num(p.alloc[buKey])/100;}
+function getValidBUs(pl){return PL_COA_MAP[pl]||BUS.map(b=>b.key);}
+function getAutoAlloc(pl){const v=getValidBUs(pl);return v.length===1?v[0]:null;}
+function applyAutoAlloc(p){const a=getAutoAlloc(p.pl_line);if(a)BUS.forEach(b=>{p.alloc[b.key]=b.key===a?100:0;});}
+
+// ── DROPDOWN MENUS ──
+function toggleMenu(id,ev){
+  if(ev)ev.stopPropagation();
+  const m=document.getElementById(id);const wasOpen=m.classList.contains('open');
+  closeMenus();
+  if(!wasOpen)m.classList.add('open');
+}
+function closeMenus(){document.querySelectorAll('.menu-pop').forEach(m=>m.classList.remove('open'));}
+document.addEventListener('click',e=>{if(!e.target.closest('.menu-wrap'))closeMenus();});
+
+// ── TAB ──
+function showTab(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  document.getElementById('toolbar').style.display=id==='simulator'?'flex':'none';
+  if(id==='summary')buildSummary();
+  if(id==='journal')buildJournal();
+}
+
+// ── HEADER ──
+function buildHeader(){
+  const tr=document.createElement('tr');
+  const fixed=[
+    {l:'Nhân sự',cls:'left',style:'min-width:165px'},
+    {l:'Type',cls:'center',style:'min-width:42px'},
+    {l:'P&L Line',cls:'left',style:'min-width:185px'},
+    {l:'Fixed\nIncome',cls:'',style:'min-width:76px',title:'TOTAL FIXED INCOME từ payroll'},
+    {l:'Base Cost\n(T6 Payroll)',cls:'',style:'min-width:92px',title:'COMPANY EXPENSE = Actual Salary + SHUI công ty + Trade Union'},
+    {l:'Adj\n(M VND)',cls:'',style:'min-width:76px',title:'Chi phí nhân sự ngoài payroll'},
+    {l:'Total Eff.\nCost',cls:'',style:'min-width:90px'},
+    {l:'Status',cls:'center',style:'min-width:68px'},
+    {l:'Del',cls:'center',style:'min-width:34px'},
+    {l:'Alloc\nSum',cls:'center',style:'min-width:50px'},
+  ];
+  fixed.forEach(f=>{
+    const th=document.createElement('th');
+    th.className=f.cls||'';th.style.cssText=f.style||'';
+    if(f.title)th.title=f.title;
+    th.innerHTML=f.l.replace('\n','<br>');
+    tr.appendChild(th);
+  });
+  BUS.forEach(b=>{
+    const th=document.createElement('th');
+    th.innerHTML=`${b.short}<br><span style="font-size:8px;opacity:.55">% alloc</span>`;
+    th.className=`${b.thcls} th-sep`;th.style.cssText='min-width:56px';
+    tr.appendChild(th);
+  });
+  BUS.forEach(b=>{
+    const th=document.createElement('th');
+    th.innerHTML=`${b.short}<br><span style="font-size:8px;opacity:.55">cost</span>`;
+    th.className=`${b.outcls} th-sep`;th.style.cssText='min-width:68px';
+    tr.appendChild(th);
+  });
+  document.getElementById('sim-thead').appendChild(tr);
+}
+
+// ── FILTER ──
+function getFiltered(){
+  const q=(document.getElementById('search')?.value||'').toLowerCase();
+  const dept=document.getElementById('filter-dept')?.value||'';
+  const status=document.getElementById('filter-status')?.value||'';
+  const pl=document.getElementById('filter-pl')?.value||'';
+  const et=document.getElementById('filter-emptype')?.value||'';
+  return persons.filter(p=>{
+    if(q&&!p.name.toLowerCase().includes(q)&&!(p.position||'').toLowerCase().includes(q))return false;
+    if(dept&&p.dept!==dept)return false;
+    if(status&&p.status!==status)return false;
+    if(pl&&p.pl_line!==pl)return false;
+    if(et&&p.emp_type!==et)return false;
+    return true;
+  });
+}
+
+// ── BUILD TABLE ──
+function buildTable(){
+  const tbody=document.getElementById('sim-tbody');tbody.innerHTML='';
+  const filtered=getFiltered();
+  const deptFiltered=document.getElementById('filter-dept')?.value||'';
+  const depts=deptFiltered?[deptFiltered]:DEPT_ORDER;
+  const numCols=10+BUS.length*2;
+
+  depts.forEach(dept=>{
+    const rows=filtered.filter(p=>p.dept===dept);
+    if(!rows.length)return;
+    const dhr=document.createElement('tr');dhr.className='dept-hdr';
+    const deptLabel=DEPT_LABELS[dept]||dept;
+    const dActive=rows.filter(p=>p.status==='active');
+    const fte=rows.filter(p=>p.emp_type==='FTE').length;
+    const prb=rows.filter(p=>p.emp_type==='PRB').length;
+    const out=rows.filter(p=>p.emp_type==='OUT').length;
+    dhr.innerHTML=`<td colspan="${numCols}">${deptLabel} <span style="color:var(--sub);font-size:9px;font-weight:400;font-family:var(--fm)">${rows.length} người · FTE:${fte} PRB:${prb} OUT:${out} · active: ${dActive.length} · ${fmtMl(dActive.reduce((s,p)=>s+effectiveCost(p),0))}</span></td>`;
+    tbody.appendChild(dhr);
+
+    rows.forEach(p=>{
+      const tr=document.createElement('tr');
+      let rowClass='person-row';
+      if(p.status==='inactive')rowClass+=' inactive-row';
+      if(p._new)rowClass+=' new-row';
+      if(p.emp_type==='OUT')rowClass+=' out-row';
+      tr.className=rowClass;tr.id=`row-${p.id}`;
+      const ec=effectiveCost(p);
+      const as=allocSum(p);
+      const asOver=as>100.01;const asOk=Math.abs(as-100)<0.01;
+      const validBUs=getValidBUs(p.pl_line);
+
+      // Name
+      const tdN=document.createElement('td');tdN.className='left';
+      let tag='';
+      if(p._new)tag=`<span class="name-tag new">✦ NEW T6</span>`;
+      else if(p.emp_type==='OUT')tag=`<span class="name-tag out">◆ OUT</span>`;
+      else if(p.emp_type==='PRB')tag=`<span class="name-tag prb">◈ PRB</span>`;
+      tdN.innerHTML=`<div class="name-cell"><span class="name-main">${p.name}</span><span class="name-pos">${p.position||''}</span>${tag}</div>`;
+      tr.appendChild(tdN);
+
+      // Emp type badge
+      const tdT=document.createElement('td');tdT.className='center';
+      const typeColor=p.emp_type==='FTE'?'var(--green)':p.emp_type==='PRB'?'var(--amber)':'var(--purple)';
+      tdT.innerHTML=`<span style="font-family:var(--fm);font-size:9px;color:${typeColor}">${p.emp_type}</span>`;
+      tr.appendChild(tdT);
+
+      // PL line
+      const tdPL=document.createElement('td');tdPL.className='left';
+      const sel=document.createElement('select');sel.className='pl-select';
+      PL_LINES.forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=l;if(l===p.pl_line)o.selected=true;sel.appendChild(o);});
+      sel.onchange=e=>{p.pl_line=e.target.value;applyAutoAlloc(p);buildTable();updateStrip();saveState();};
+      tdPL.appendChild(sel);tr.appendChild(tdPL);
+
+      // Fixed income
+      const tdInc=document.createElement('td');
+      tdInc.innerHTML=`<span style="font-family:var(--fm);font-size:11px;color:var(--dim)">${fmtMc(p.income||0)}</span>`;
+      tr.appendChild(tdInc);
+
+      // Base
+      const tdBase=document.createElement('td');
+      tdBase.innerHTML=`<span style="font-family:var(--fm);font-size:11px;color:var(--sub)">${fmtMc(p.base)}</span>`;
+      tr.appendChild(tdBase);
+
+      // Adj
+      const tdAdj=document.createElement('td');
+      const inp=document.createElement('input');inp.className='inp-adj';inp.type='number';inp.placeholder='0';inp.step='0.5';
+      inp.value=p.adj?+(p.adj/1e6).toFixed(2):'';
+      inp.oninput=e=>{p.adj=Math.round((parseFloat(e.target.value)||0)*1e6);refreshRow(p.id);updateStrip();saveState();};
+      tdAdj.appendChild(inp);tr.appendChild(tdAdj);
+
+      // Total eff cost
+      const tdEC=document.createElement('td');tdEC.id=`ec-${p.id}`;
+      const ecColor=p.status==='inactive'?'var(--dim)':p.adj?'var(--teal)':'#fff';
+      tdEC.innerHTML=`<span style="font-family:var(--fm);font-size:11.5px;font-weight:500;color:${ecColor}" title="Base:${fmtMc(p.base)} + Adj:${fmtMc(p.adj||0)}">${fmtMc(ec)}</span>`;
+      tr.appendChild(tdEC);
+
+      // Status
+      const tdS=document.createElement('td');tdS.className='center';
+      const sbtn=document.createElement('button');sbtn.className=`status-toggle ${p.status}`;
+      sbtn.textContent=p.status==='active'?'Active':'Inactive';
+      sbtn.onclick=()=>{p.status=p.status==='active'?'inactive':'active';buildTable();updateStrip();saveState();};
+      tdS.appendChild(sbtn);tr.appendChild(tdS);
+
+      // Delete (new only)
+      const tdD=document.createElement('td');tdD.className='center';
+      if(p._new){
+        const db=document.createElement('button');db.className='del-btn';db.textContent='✕';
+        db.onclick=()=>{persons=persons.filter(x=>x.id!==p.id);buildTable();updateStrip();saveState();};
+        tdD.appendChild(db);
+      }
+      tr.appendChild(tdD);
+
+      // Alloc sum
+      const tdAS=document.createElement('td');tdAS.className='center';tdAS.id=`as-${p.id}`;
+      tdAS.innerHTML=`<span class="alloc-sum ${asOver?'over':asOk?'ok':'zero'}">${as.toFixed(0)}%</span>`;
+      tr.appendChild(tdAS);
+
+      // Alloc inputs
+      BUS.forEach((b,bi)=>{
+        const td=document.createElement('td');if(bi===0)td.className='th-sep';
+        const isValid=validBUs.includes(b.key);
+        const ai=document.createElement('input');
+        ai.className=`inp-alloc ${b.cls}${asOver?' over':asOk?' full':''}${!isValid?' dim-bu':''}`;
+        ai.type='number';ai.min='0';ai.max='100';ai.step='10';
+        ai.value=p.alloc[b.key]||'';ai.placeholder='0';
+        if(!isValid)ai.title=`${b.label} không trong COA của line này`;
+        ai.oninput=e=>{p.alloc[b.key]=parseFloat(e.target.value)||0;refreshRow(p.id);updateStrip();saveState();};
+        td.appendChild(ai);tr.appendChild(td);
+      });
+
+      // Cost outputs
+      BUS.forEach((b,bi)=>{
+        const td=document.createElement('td');td.id=`out-${p.id}-${b.key}`;
+        if(bi===0)td.className='th-sep';
+        const isValid=validBUs.includes(b.key);
+        const cost=buCost(p,b.key);
+        const dimStyle=!isValid&&cost===0?'opacity:.2':'';
+        td.innerHTML=`<span class="out-val ${cost>0?b.cls+' has-val':''}" style="${dimStyle}">${cost>0?fmtMc(cost):'—'}</span>`;
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+
+    // Dept subtotal
+    const stId=`st-${dept.replace(/\W/g,'_')}`;
+    const stRow=document.createElement('tr');stRow.className='dept-total';stRow.id=stId;
+    const totA=rows.filter(p=>p.status==='active');
+    const dEC=totA.reduce((s,p)=>s+effectiveCost(p),0);
+    const dAdj=totA.reduce((s,p)=>s+(p.adj||0),0);
+    let stHtml=`<td>↳ ${deptLabel} SUBTOTAL (${totA.length} active / ${rows.length} total)</td>
+      <td></td><td></td>
+      <td style="color:var(--dim);font-family:var(--fm)">${fmtMc(totA.reduce((s,p)=>s+(p.income||0),0))}</td>
+      <td style="font-family:var(--fm)"><span data-st="base">${fmtMc(totA.reduce((s,p)=>s+p.base,0))}</span></td>
+      <td style="font-family:var(--fm);color:${dAdj?'var(--amber)':'var(--dim)'}"><span data-st="adj">${dAdj?fmtMc(dAdj):'—'}</span></td>
+      <td><span data-st="ec">${fmtMc(dEC)}</span></td>
+      <td></td><td></td><td></td>`;
+    BUS.forEach(()=>stHtml+='<td></td>');
+    BUS.forEach((b,bi)=>{
+      const bT=totA.reduce((s,p)=>s+buCost(p,b.key),0);
+      stHtml+=`<td${bi===0?' class="th-sep"':''}><span data-st="${b.key}" style="color:var(--${b.cls});font-family:var(--fm)">${bT>0?fmtMc(bT):'—'}</span></td>`;
+    });
+    stRow.innerHTML=stHtml;tbody.appendChild(stRow);
+  });
+
+  // Grand total
+  const active=persons.filter(p=>p.status==='active');
+  const gEC=active.reduce((s,p)=>s+effectiveCost(p),0);
+  const gBase=active.reduce((s,p)=>s+p.base,0);
+  const gAdj=active.reduce((s,p)=>s+(p.adj||0),0);
+  const gtr=document.createElement('tr');gtr.className='grand-total';gtr.id='grand-total-row';
+  let gHtml=`<td>GRAND TOTAL — ${active.length} ACTIVE / ${persons.length} TOTAL</td>
+    <td></td><td></td>
+    <td style="color:var(--dim);font-family:var(--fm)">${fmtMc(active.reduce((s,p)=>s+(p.income||0),0))}</td>
+    <td style="font-family:var(--fm)"><span data-gt="base">${fmtMc(gBase)}</span></td>
+    <td style="font-family:var(--fm);color:var(--amber)"><span data-gt="adj">${gAdj?fmtMc(gAdj):'—'}</span></td>
+    <td style="font-family:var(--fm);font-size:13px;color:var(--gold2)"><span data-gt="ec">${fmtMc(gEC)}</span></td>
+    <td></td><td></td><td></td>`;
+  BUS.forEach(()=>gHtml+='<td></td>');
+  BUS.forEach((b,bi)=>{
+    const bT=active.reduce((s,p)=>s+buCost(p,b.key),0);
+    gHtml+=`<td${bi===0?' class="th-sep"':''}><span data-gt="${b.key}" style="color:var(--${b.cls});font-weight:700;font-family:var(--fm);font-size:12px">${bT>0?fmtMc(bT):'—'}</span></td>`;
+  });
+  gtr.innerHTML=gHtml;tbody.appendChild(gtr);
+}
+
+// ── REFRESH ROW ──
+function refreshRow(id){
+  const p=persons.find(x=>x.id===id);if(!p)return;
+  const ec=effectiveCost(p);const as=allocSum(p);
+  const asOver=as>100.01;const asOk=Math.abs(as-100)<0.01;
+  const ecEl=document.getElementById(`ec-${id}`);
+  if(ecEl){
+    const ecColor=p.status==='inactive'?'var(--dim)':p.adj?'var(--teal)':'#fff';
+    ecEl.innerHTML=`<span style="font-family:var(--fm);font-size:11.5px;font-weight:500;color:${ecColor}" title="Base:${fmtMc(p.base)} + Adj:${fmtMc(p.adj||0)}">${fmtMc(ec)}</span>`;
+  }
+  const asEl=document.getElementById(`as-${id}`);
+  if(asEl)asEl.innerHTML=`<span class="alloc-sum ${asOver?'over':asOk?'ok':'zero'}">${as.toFixed(0)}%</span>`;
+  BUS.forEach(b=>{
+    const el=document.getElementById(`out-${id}-${b.key}`);
+    if(el){const cost=buCost(p,b.key);el.innerHTML=`<span class="out-val ${cost>0?b.cls+' has-val':''}">${cost>0?fmtMc(cost):'—'}</span>`;}
+  });
+  const stEl=document.getElementById(`st-${p.dept.replace(/\W/g,'_')}`);
+  if(stEl){
+    const deptP=persons.filter(x=>x.dept===p.dept&&x.status==='active');
+    const dEC=deptP.reduce((s,x)=>s+effectiveCost(x),0);
+    const dAdj=deptP.reduce((s,x)=>s+(x.adj||0),0);
+    const dBase=deptP.reduce((s,x)=>s+x.base,0);
+    stEl.querySelectorAll('[data-st]').forEach(c=>{
+      const r=c.getAttribute('data-st');
+      if(r==='base')c.textContent=fmtMc(dBase);
+      else if(r==='adj'){c.textContent=dAdj?fmtMc(dAdj):'—';c.parentElement.style.color=dAdj?'var(--amber)':'var(--dim)';}
+      else if(r==='ec')c.textContent=fmtMc(dEC);
+      else{const bT=deptP.reduce((s,x)=>s+buCost(x,r),0);c.textContent=bT>0?fmtMc(bT):'—';}
+    });
+  }
+  const gEl=document.getElementById('grand-total-row');
+  if(gEl){
+    const act=persons.filter(x=>x.status==='active');
+    const gEC=act.reduce((s,x)=>s+effectiveCost(x),0);
+    const gAdj=act.reduce((s,x)=>s+(x.adj||0),0);
+    const gBase=act.reduce((s,x)=>s+x.base,0);
+    gEl.querySelectorAll('[data-gt]').forEach(c=>{
+      const r=c.getAttribute('data-gt');
+      if(r==='base')c.textContent=fmtMc(gBase);
+      else if(r==='adj')c.textContent=gAdj?fmtMc(gAdj):'—';
+      else if(r==='ec')c.textContent=fmtMc(gEC);
+      else{const bT=act.reduce((s,x)=>s+buCost(x,r),0);c.textContent=bT>0?fmtMc(bT):'—';}
+    });
+  }
+}
+
+// ── STRIP ──
+function updateStrip(){
+  const active=persons.filter(p=>p.status==='active');
+  const gEC=active.reduce((s,p)=>s+effectiveCost(p),0);
+  const gBase=active.reduce((s,p)=>s+p.base,0);
+  const gAdj=active.reduce((s,p)=>s+(p.adj||0),0);
+  const inactive=persons.filter(p=>p.status==='inactive').length;
+  const allocated=active.filter(p=>Math.abs(allocSum(p)-100)<0.5).length;
+  const buTotals=BUS.map(b=>active.reduce((s,p)=>s+buCost(p,b.key),0));
+  const totalAllocated=buTotals.reduce((s,v)=>s+v,0);
+  const fte=persons.filter(p=>p.emp_type==='FTE').length;
+  const prb=persons.filter(p=>p.emp_type==='PRB').length;
+  const out=persons.filter(p=>p.emp_type==='OUT').length;
+  const strip=document.getElementById('strip');
+  const kpis=[
+    {lbl:'Total Cost Active',val:fmtMl(gEC),sub:`${active.length} active`,cls:''},
+    {lbl:'Base T6',val:fmtMl(gBase),sub:'Company Expense',cls:''},
+    {lbl:'Adj.',val:gAdj?fmtMl(gAdj):'—',sub:'Lương khác',cls:gAdj?'teal':''},
+    {lbl:'FTE / PRB / OUT',val:`${fte}/${prb}/${out}`,sub:`${persons.length} total`,cls:''},
+    {lbl:'Inactive',val:inactive||'—',sub:'Không tính',cls:inactive?'red':''},
+    {lbl:'Alloc 100%',val:`${allocated}/${active.length}`,sub:'hoàn thiện',cls:allocated===active.length?'green':'amber'},
+    {lbl:'Allocated',val:fmtMl(totalAllocated),sub:`${gEC?((totalAllocated/gEC)*100).toFixed(0):0}% tổng`,cls:'teal'},
+    ...BUS.map((b,i)=>({lbl:b.short,val:fmtMl(buTotals[i]),sub:b.label,cls:''})),
+  ];
+  strip.innerHTML=kpis.map(k=>`<div class="kpi"><div class="kpi-lbl">${k.lbl}</div><div class="kpi-val ${k.cls}">${k.val}</div><div class="kpi-sub">${k.sub}</div></div><div style="width:1px;background:var(--border);flex-shrink:0"></div>`).join('').replace(/<div style[^>]+><\/div>$/,'');
+}
+
+// ── SUMMARY ──
+function buildSummary(){
+  const active=persons.filter(p=>p.status==='active');
+  const wrap=document.getElementById('summary-content');
+  const buTotals=BUS.map(b=>({...b,total:active.reduce((s,p)=>s+buCost(p,b.key),0),hc:active.filter(p=>p.alloc[b.key]>0).length}));
+  const buGrand=buTotals.reduce((s,b)=>s+b.total,0);
+  const gEC=active.reduce((s,p)=>s+effectiveCost(p),0);
+  const plTotals=PL_LINES.map(l=>{
+    const lp=active.filter(p=>p.pl_line===l);
+    const total=lp.reduce((s,p)=>s+effectiveCost(p),0);
+    const allocated=lp.reduce((s,p)=>s+BUS.reduce((ss,b)=>ss+buCost(p,b.key),0),0);
+    return{l2:l,hc:lp.length,total,allocated,unalloc:total-allocated};
+  });
+  const crossData={};
+  PL_LINES.forEach(l=>{crossData[l]={};BUS.forEach(b=>{crossData[l][b.key]=active.filter(p=>p.pl_line===l).reduce((s,p)=>s+buCost(p,b.key),0);});});
+  const drillData=BUS.map(b=>{
+    const plGroups=PL_LINES.map(l=>{
+      const pp=active.filter(p=>p.pl_line===l&&p.alloc[b.key]>0);
+      const cost=pp.reduce((s,p)=>s+buCost(p,b.key),0);
+      return{l2:l,cost,persons:pp.map(p=>({name:p.name,position:p.position,dept:DEPT_LABELS[p.dept]||p.dept,ec:effectiveCost(p),pct:p.alloc[b.key]||0,cost:buCost(p,b.key)})).sort((a,b)=>b.cost-a.cost)};
+    }).filter(g=>g.cost>0);
+    return{...b,plGroups,buTotal:plGroups.reduce((s,g)=>s+g.cost,0)};
+  }).filter(b=>b.buTotal>0);
+
+  wrap.innerHTML=`
+  ${BUDGET?(()=>{
+    const per=curPeriod();
+    const bGrand=budgetGrand(per);
+    // BU comparison: actual = allocated cost by BU
+    const buCmp=BUS.map(b=>({...b,actual:active.reduce((s,p)=>s+buCost(p,b.key),0),budget:budgetByBU(b.key,per)}));
+    const actGrand=buCmp.reduce((s,b)=>s+b.actual,0);
+    // PL comparison: actual = allocated cost by PL line (to match budget which is allocated)
+    const plCmp=PL_LINES.map(l=>{
+      const lp=active.filter(p=>p.pl_line===l);
+      const actual=lp.reduce((s,p)=>s+BUS.reduce((ss,b)=>ss+buCost(p,b.key),0),0);
+      return{l,actual,budget:budgetByPL(l,per)};
+    });
+    return `
+    <div>
+      <div class="sec-title" style="color:var(--teal)">⚖ Actual vs Budget (${per}) — theo BU / Segment</div>
+      <div class="sum-box"><table class="sum-tbl">
+        <thead><tr><th>BU / Segment</th><th>Actual (tr)</th><th>Budget (tr)</th><th>Variance</th><th>% Used</th></tr></thead>
+        <tbody>
+          ${buCmp.map(b=>`<tr>
+            <td><span style="display:inline-block;width:8px;height:8px;background:var(--${b.cls});border-radius:2px;margin-right:6px;vertical-align:middle"></span>${b.label}</td>
+            <td style="color:#fff;font-weight:600">${fmtMl(b.actual)}</td>
+            <td style="color:var(--sub)">${fmtMl(b.budget)}</td>
+            <td style="font-family:var(--fm)">${fmtVar(b.actual,b.budget)}</td>
+            <td style="color:var(--sub)">${b.budget?(b.actual/b.budget*100).toFixed(0):'—'}%</td>
+          </tr>`).join('')}
+          <tr class="sum-total">
+            <td>TOTAL</td><td>${fmtMl(actGrand)}</td><td>${fmtMl(bGrand)}</td>
+            <td style="font-family:var(--fm)">${fmtVar(actGrand,bGrand)}</td>
+            <td>${bGrand?(actGrand/bGrand*100).toFixed(0):'—'}%</td>
+          </tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div>
+      <div class="sec-title" style="color:var(--teal)">⚖ Actual vs Budget (${per}) — theo P&L Line</div>
+      <div class="sum-box"><table class="sum-tbl">
+        <thead><tr><th>P&L Line</th><th>Actual alloc (tr)</th><th>Budget (tr)</th><th>Variance</th><th>% Used</th></tr></thead>
+        <tbody>
+          ${plCmp.map(r=>`<tr>
+            <td>${r.l}</td>
+            <td style="color:#fff;font-weight:600">${fmtMl(r.actual)}</td>
+            <td style="color:var(--sub)">${fmtMl(r.budget)}</td>
+            <td style="font-family:var(--fm)">${(r.actual>0.5||r.budget>0.5)?fmtVar(r.actual,r.budget):'—'}</td>
+            <td style="color:var(--sub)">${r.budget?(r.actual/r.budget*100).toFixed(0):'—'}%</td>
+          </tr>`).join('')}
+          <tr class="sum-total">
+            <td>TOTAL</td><td>${fmtMl(plCmp.reduce((s,r)=>s+r.actual,0))}</td><td>${fmtMl(plCmp.reduce((s,r)=>s+r.budget,0))}</td>
+            <td style="font-family:var(--fm)">${fmtVar(plCmp.reduce((s,r)=>s+r.actual,0),plCmp.reduce((s,r)=>s+r.budget,0))}</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div>
+      <div class="sec-title" style="color:var(--teal)">⚖ Variance Matrix (${per}) — P&L × BU · Actual − Budget (tr)</div>
+      <div class="sum-box"><table class="sum-tbl">
+        <thead><tr><th>P&L Line</th>${BUS.map(b=>`<th style="color:var(--${b.cls})">${b.short}</th>`).join('')}<th>Row Var</th></tr></thead>
+        <tbody>
+          ${PL_LINES.map(l=>{
+            const lp=active.filter(p=>p.pl_line===l);
+            let rowVar=0;
+            const cells=BUS.map(b=>{
+              const act=lp.reduce((s,p)=>s+buCost(p,b.key),0);
+              const bud=getBudget(b.key,l,per);
+              const v=act-bud;rowVar+=v;
+              if(Math.abs(act)<0.5&&Math.abs(bud)<0.5)return `<td style="color:var(--dim)">—</td>`;
+              const color=Math.abs(v)<bud*0.02+0.5?'var(--green)':(v>0?'var(--red)':'var(--teal)');
+              return `<td style="font-family:var(--fm);color:${color}" title="A:${fmtMl(act)} B:${fmtMl(bud)}">${v>0?'+':''}${(v/1e6).toFixed(1)}</td>`;
+            }).join('');
+            return `<tr><td>${l}</td>${cells}<td style="font-family:var(--fm);color:${Math.abs(rowVar)<1e6?'var(--green)':(rowVar>0?'var(--red)':'var(--teal)')};font-weight:600">${rowVar>0?'+':''}${(rowVar/1e6).toFixed(1)}</td></tr>`;
+          }).join('')}
+        </tbody>
+      </table></div>
+      <div class="note-box">Var > 0 (đỏ) = Actual vượt Budget · Var < 0 (teal) = dưới Budget · xanh lá = sát budget (±2%). Hover cell xem chi tiết A/B.</div>
+    </div>
+    `;
+  })():''}
+  <div class="sum-grid">
+  <div>
+    <div class="sec-title">Chi phí theo BU / Segment</div>
+    <div class="sum-box"><table class="sum-tbl">
+      <thead><tr><th>BU / Segment</th><th>Cost (tr)</th><th>% Total</th><th>HC</th><th>Avg/người</th></tr></thead>
+      <tbody>
+        ${buTotals.map(b=>`<tr>
+          <td><span style="display:inline-block;width:8px;height:8px;background:var(--${b.cls});border-radius:2px;margin-right:6px;vertical-align:middle"></span>${b.label}</td>
+          <td style="color:var(--${b.cls});font-weight:600">${fmtMl(b.total)}</td>
+          <td style="color:var(--sub)">${gEC?(b.total/gEC*100).toFixed(1):0}%</td>
+          <td>${b.hc}</td>
+          <td style="color:var(--sub)">${b.hc?fmtMl(b.total/b.hc):'—'}</td>
+        </tr>`).join('')}
+        <tr class="sum-total"><td>TOTAL ALLOCATED</td><td>${fmtMl(buGrand)}</td><td>${gEC?(buGrand/gEC*100).toFixed(1):0}%</td><td>—</td><td>—</td></tr>
+        <tr><td style="color:var(--amber)">Chưa phân bổ</td><td style="color:var(--amber)">${fmtMl(gEC-buGrand)}</td><td style="color:var(--amber)">${gEC?((gEC-buGrand)/gEC*100).toFixed(1):0}%</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div>
+    <div class="sec-title">Chi phí theo P&L Line</div>
+    <div class="sum-box"><table class="sum-tbl">
+      <thead><tr><th>P&L L2</th><th>HC</th><th>Total (tr)</th><th>Allocated</th><th>Unalloc</th><th>%</th></tr></thead>
+      <tbody>
+        ${plTotals.map(row=>`<tr>
+          <td>${row.l2}</td>
+          <td style="color:var(--sub)">${row.hc}</td>
+          <td style="color:#fff;font-weight:600">${fmtMl(row.total)}</td>
+          <td style="color:var(--teal)">${fmtMl(row.allocated)}</td>
+          <td style="color:${row.unalloc>0.5?'var(--amber)':'var(--green)'}">${fmtMl(row.unalloc)}</td>
+          <td style="color:var(--sub)">${gEC?(row.total/gEC*100).toFixed(1):0}%</td>
+        </tr>`).join('')}
+        <tr class="sum-total"><td>GRAND TOTAL</td><td>${active.length}</td><td>${fmtMl(gEC)}</td><td>${fmtMl(buGrand)}</td><td style="color:${(gEC-buGrand)>0.5?'var(--amber)':'var(--green)'}">${fmtMl(gEC-buGrand)}</td><td>100%</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  </div>
+
+  <div>
+    <div class="sec-title">Cross Table: P&L Line × BU / Segment (triệu VND)</div>
+    <div class="sum-box"><table class="sum-tbl">
+      <thead><tr>
+        <th>P&L Line</th>
+        ${BUS.map(b=>`<th style="color:var(--${b.cls})">${b.short}</th>`).join('')}
+        <th>Allocated (tr)</th><th>EC Total (tr)</th><th style="color:var(--amber)">Unalloc</th>
+      </tr></thead>
+      <tbody>
+        ${PL_LINES.map(l=>{
+          const lp=active.filter(p=>p.pl_line===l);
+          const lineEC=lp.reduce((s,p)=>s+effectiveCost(p),0);
+          const buVals=BUS.map(b=>lp.reduce((s,p)=>s+buCost(p,b.key),0));
+          const rowTotal=buVals.reduce((s,v)=>s+v,0);
+          return`<tr>
+            <td>${l}</td>
+            ${buVals.map((v,i)=>`<td style="color:${v>0?'var(--'+BUS[i].cls+')':'var(--dim)'}">${v>0?fmtMl(v):'—'}</td>`).join('')}
+            <td style="color:var(--teal);font-weight:600">${fmtMl(rowTotal)}</td>
+            <td style="color:#fff">${fmtMl(lineEC)}</td>
+            <td style="color:${(lineEC-rowTotal)>0.5?'var(--amber)':'var(--green)'}">${fmtMl(lineEC-rowTotal)}</td>
+          </tr>`;
+        }).join('')}
+        <tr class="sum-total">
+          <td>TOTAL</td>
+          ${BUS.map(b=>`<td style="color:var(--${b.cls})">${fmtMl(buTotals.find(x=>x.key===b.key)?.total||0)}</td>`).join('')}
+          <td>${fmtMl(buGrand)}</td><td>${fmtMl(gEC)}</td>
+          <td style="color:${(gEC-buGrand)>0.5?'var(--amber)':'var(--green)'}">${fmtMl(gEC-buGrand)}</td>
+        </tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  ${drillData.map(bu=>`
+  <div>
+    <div class="sec-title" style="color:var(--${bu.cls})">${bu.label} — Chi tiết nhân sự · ${fmtMl(bu.buTotal)}</div>
+    <div class="sum-box"><table class="sum-tbl">
+      <thead><tr><th>Nhân sự</th><th>P&L Line</th><th>Dept</th><th>Position</th><th>Total EC</th><th>% Alloc</th><th style="color:var(--${bu.cls})">Cost to BU</th><th>% BU</th></tr></thead>
+      <tbody>
+        ${bu.plGroups.map(g=>`
+          <tr style="background:rgba(255,255,255,.04)">
+            <td colspan="6" style="font-size:10px;color:var(--${bu.cls});font-family:var(--fm);letter-spacing:.8px">${g.l2}</td>
+            <td style="color:var(--${bu.cls});font-weight:700;font-family:var(--fm)">${fmtMl(g.cost)}</td>
+            <td style="color:var(--sub);font-family:var(--fm)">${bu.buTotal?(g.cost/bu.buTotal*100).toFixed(1):0}%</td>
+          </tr>
+          ${g.persons.map((p,pi)=>`<tr style="${pi%2===0?'':'background:rgba(255,255,255,.015)'}">
+            <td style="color:#fff;font-weight:600;padding-left:20px">${p.name}</td>
+            <td style="color:var(--sub);font-size:10px">${g.l2}</td>
+            <td style="color:var(--sub);font-size:10px">${p.dept}</td>
+            <td style="color:var(--dim);font-size:10px">${p.position||'—'}</td>
+            <td style="font-family:var(--fm);color:var(--text)">${fmtMl(p.ec)}</td>
+            <td style="font-family:var(--fm);color:var(--${bu.cls})">${p.pct}%</td>
+            <td style="font-family:var(--fm);color:var(--${bu.cls});font-weight:600">${fmtMl(p.cost)}</td>
+            <td style="color:var(--sub);font-family:var(--fm)">${bu.buTotal?(p.cost/bu.buTotal*100).toFixed(1):0}%</td>
+          </tr>`).join('')}
+          <tr style="background:rgba(44,74,110,.3)">
+            <td colspan="6" style="color:var(--gold);font-family:var(--fm);font-size:10px;padding-left:20px">Subtotal ${g.l2} · ${g.persons.length} người</td>
+            <td style="color:var(--gold);font-family:var(--fm);font-weight:700">${fmtMl(g.cost)}</td>
+            <td style="color:var(--sub);font-family:var(--fm)">${bu.buTotal?(g.cost/bu.buTotal*100).toFixed(1):0}%</td>
+          </tr>
+        `).join('')}
+        <tr style="background:rgba(200,169,110,.08);border-top:2px solid rgba(200,169,110,.3)">
+          <td colspan="6" style="font-family:var(--fh);font-weight:700;color:var(--gold2);font-size:12px">TOTAL ${bu.label}</td>
+          <td style="font-family:var(--fm);font-weight:700;color:var(--gold2);font-size:13px">${fmtMl(bu.buTotal)}</td>
+          <td style="color:var(--gold2);font-family:var(--fm)">100%</td>
+        </tr>
+      </tbody>
+    </table></div>
+  </div>`).join('')}
+  `;
+}
+
+// ── FILTER ──
+function filterTable(){buildTable();updateStrip();}
+
+// ── ACTIVE ALL ──
+function activateAll(){
+  const inactive=persons.filter(p=>p.status==='inactive').length;
+  if(!inactive){alert('Tất cả nhân sự đã active.');return;}
+  if(!confirm(`Enable cost cho ${inactive} nhân sự đang inactive?`))return;
+  persons.forEach(p=>{p.status='active';});
+  buildTable();updateStrip();saveState();
+}
+
+// ── JOURNAL ENTRY CONFIG ──
+// Block 1: chi phí công ty (= base). Cost components, mỗi cái 1 cặp Dr/Cr, chi tiết PL×BU.
+// Adj (ngoài payroll) → gộp vào Cost 1.
+const JE_COST=[
+  {key:'cost1',label:'Cost 1 — Lương + phụ cấp',cr:'Payable to Employee',cr_acc:'334',withAdj:true},
+  {key:'cost2',label:'Cost 2 — BHXH công ty (17.5%)',cr:'Payable to Social Insurance',cr_acc:'3383'},
+  {key:'cost3',label:'Cost 3 — BHYT công ty (3%)',cr:'Payable to Social Insurance',cr_acc:'3384'},
+  {key:'cost4',label:'Cost 4 — BHTN công ty (1%)',cr:'Payable to Social Insurance',cr_acc:'3386'},
+  {key:'cost5',label:'Cost 5 — Trade Union công ty (2%)',cr:'Payable to Trade Union',cr_acc:'3382'},
+];
+// Block 2: khấu trừ từ NV. Dr Payable Employee / Cr payable khác. Theo PL line, KHÔNG BU.
+const JE_DED=[
+  {key:'ded1',label:'Deduction 1 — BHXH NV (8%)',cr:'Payable to Social Insurance',cr_acc:'3383'},
+  {key:'ded2',label:'Deduction 2 — BHYT NV (1.5%)',cr:'Payable to Social Insurance',cr_acc:'3384'},
+  {key:'ded3',label:'Deduction 3 — BHTN NV (1%)',cr:'Payable to Social Insurance',cr_acc:'3386'},
+  {key:'ded4',label:'Deduction 4 — Union NV (0.5%)',cr:'Payable to Trade Union',cr_acc:'3382'},
+  {key:'ded5',label:'Deduction 5 — Thuế TNCN (PIT)',cr:'Payable to Tax',cr_acc:'3335'},
+];
+// PL line → debit account (632/642 staff cost). Dùng acc 642111 cho tất cả (CP lương NV QL).
+const PL_DR_ACC='642111';
+
+function comp(p,key){
+  // cost1 includes adj (book 100% adj to Cost 1)
+  if(p.status==='inactive')return 0;
+  // New/imported hires without payroll breakdown: book full base to cost1
+  if(!p.comp){
+    if(key==='cost1')return p.base+(p.adj||0);
+    return 0;
+  }
+  const base=p.comp[key]||0;
+  if(key==='cost1')return base+(p.adj||0);
+  return base;
+}
+function compBU(p,key,buKey){return comp(p,key)*num(p.alloc[buKey])/100;}
+
+// ── BUILD JOURNAL ──
+function buildJournal(){
+  const active=persons.filter(p=>p.status==='active');
+  const wrap=document.getElementById('journal-content');
+
+  // BLOCK 1 — by PL line × BU, per cost component
+  // Aggregate: {plLine: {buKey: {cost1,cost2,...}}}
+  const b1={};
+  PL_LINES.forEach(l=>{b1[l]={};BUS.forEach(b=>{b1[l][b.key]={};JE_COST.forEach(c=>b1[l][b.key][c.key]=0);});});
+  active.forEach(p=>{
+    BUS.forEach(b=>{
+      JE_COST.forEach(c=>{b1[p.pl_line][b.key][c.key]+=compBU(p,c.key,b.key);});
+    });
+  });
+
+  // BLOCK 2 — by PL line only (no BU), per deduction
+  const b2={};
+  PL_LINES.forEach(l=>{b2[l]={};JE_DED.forEach(d=>b2[l][d.key]=0);});
+  active.forEach(p=>{JE_DED.forEach(d=>{b2[p.pl_line][d.key]+=comp(p,d.key);});});
+
+  // Grand totals per component
+  const b1tot={};JE_COST.forEach(c=>b1tot[c.key]=active.reduce((s,p)=>s+comp(p,c.key),0));
+  const b2tot={};JE_DED.forEach(d=>b2tot[d.key]=active.reduce((s,p)=>s+comp(p,d.key),0));
+  const block1Grand=Object.values(b1tot).reduce((s,v)=>s+v,0);
+
+  // Build Block 1 detail rows (PL × BU × component, only nonzero)
+  let b1rows='';
+  PL_LINES.forEach(l=>{
+    BUS.forEach(b=>{
+      JE_COST.forEach(c=>{
+        const amt=b1[l][b.key][c.key];
+        if(amt>0.5){
+          b1rows+=`<tr>
+            <td style="color:var(--sub);font-size:10px">${l}</td>
+            <td><span style="display:inline-block;width:7px;height:7px;background:var(--${b.cls});border-radius:2px;margin-right:5px"></span>${b.short}</td>
+            <td style="color:var(--text);font-size:10px">${c.label}</td>
+            <td style="font-family:var(--fm);color:var(--dim)">${PL_DR_ACC}</td>
+            <td style="font-family:var(--fm);color:#fff;font-weight:600">${fmtMl(amt)}</td>
+            <td style="font-family:var(--fm);color:var(--dim)">${c.cr_acc}</td>
+            <td style="color:var(--sub);font-size:10px">${c.cr}</td>
+          </tr>`;
+        }
+      });
+    });
+  });
+
+  // Block 2 detail rows (PL × deduction)
+  let b2rows='';
+  PL_LINES.forEach(l=>{
+    JE_DED.forEach(d=>{
+      const amt=b2[l][d.key];
+      if(amt>0.5){
+        b2rows+=`<tr>
+          <td style="color:var(--sub);font-size:10px">${l}</td>
+          <td style="color:var(--text);font-size:10px">${d.label}</td>
+          <td style="font-family:var(--fm);color:var(--dim)">334</td>
+          <td style="font-family:var(--fm);color:#fff;font-weight:600">${fmtMl(amt)}</td>
+          <td style="font-family:var(--fm);color:var(--dim)">${d.cr_acc}</td>
+          <td style="color:var(--sub);font-size:10px">${d.cr}</td>
+        </tr>`;
+      }
+    });
+  });
+
+  wrap.innerHTML=`
+  <div>
+    <div class="sec-title">Net Impact by Account Cluster — Tổng phát sinh Nợ/Có (${active.length} active)</div>
+    <div class="sum-box"><table class="sum-tbl">
+      <thead><tr><th>Account</th><th>Tên tài khoản</th><th>Dr (tr)</th><th>Cr (tr)</th><th>Net (tr)</th><th>Ý nghĩa</th></tr></thead>
+      <tbody>
+        ${(()=>{
+          const c1=b1tot.cost1,c2=b1tot.cost2,c3=b1tot.cost3,c4=b1tot.cost4,c5=b1tot.cost5;
+          const d1=b2tot.ded1,d2=b2tot.ded2,d3=b2tot.ded3,d4=b2tot.ded4,d5=b2tot.ded5;
+          const clusters=[
+            {acc:'642111',name:'Staff cost (P&L)',dr:c1+c2+c3+c4+c5,cr:0,note:'Chi phí lương ghi nhận'},
+            {acc:'334',name:'Payable to Employee',dr:d1+d2+d3+d4+d5,cr:c1,note:'Net = lương thực lãnh'},
+            {acc:'3383/3384/3386',name:'Payable to Social Insurance',dr:0,cr:c2+c3+c4+d1+d2+d3,note:'Phải nộp cơ quan BH'},
+            {acc:'3382',name:'Payable to Trade Union',dr:0,cr:c5+d4,note:'Phải nộp công đoàn'},
+            {acc:'3335',name:'Payable to Tax (PIT)',dr:0,cr:d5,note:'Phải nộp thuế TNCN'},
+          ];
+          const tDr=clusters.reduce((s,c)=>s+c.dr,0),tCr=clusters.reduce((s,c)=>s+c.cr,0);
+          const bal=Math.abs(tDr-tCr)<1;
+          return clusters.map(c=>{
+            const net=c.dr-c.cr;
+            return `<tr>
+              <td style="font-family:var(--fm);color:var(--gold)">${c.acc}</td>
+              <td>${c.name}</td>
+              <td style="font-family:var(--fm);color:${c.dr>0?'#fff':'var(--dim)'}">${c.dr>0?fmtMl(c.dr):'—'}</td>
+              <td style="font-family:var(--fm);color:${c.cr>0?'#fff':'var(--dim)'}">${c.cr>0?fmtMl(c.cr):'—'}</td>
+              <td style="font-family:var(--fm);color:${net>0?'var(--teal)':'var(--purple)'};font-weight:600">${net>0?'+':''}${fmtMl(Math.abs(net))}${net<0?' (Cr)':''}</td>
+              <td style="color:var(--sub);font-size:10px">${c.note}</td>
+            </tr>`;
+          }).join('')+`<tr class="sum-total">
+            <td colspan="2">TOTAL ${bal?'· ⚖ Balanced':'· ⚠ LỆCH'}</td>
+            <td>${fmtMl(tDr)}</td><td>${fmtMl(tCr)}</td>
+            <td style="color:${bal?'var(--green)':'var(--red)'}">${bal?'0 ✓':fmtMl(tDr-tCr)}</td>
+            <td style="color:${bal?'var(--green)':'var(--red)'};font-size:10px">Dr = Cr</td>
+          </tr>`;
+        })()}
+      </tbody>
+    </table></div>
+  </div>
+
+  <div>
+    <div class="sec-title">Summary — Bút toán tổng hợp (${active.length} nhân sự active)</div>
+    <div class="sum-grid">
+      <div class="sum-box"><table class="sum-tbl">
+        <thead><tr><th>Block 1 — Chi phí công ty</th><th>Dr</th><th>Cr</th><th>Amount (tr)</th></tr></thead>
+        <tbody>
+          ${JE_COST.map(c=>`<tr>
+            <td>${c.label}</td>
+            <td style="font-family:var(--fm);color:var(--dim)">${PL_DR_ACC}</td>
+            <td style="font-family:var(--fm);color:var(--dim)">${c.cr_acc}</td>
+            <td style="color:#fff;font-weight:600">${fmtMl(b1tot[c.key])}</td>
+          </tr>`).join('')}
+          <tr class="sum-total"><td>TOTAL BLOCK 1 (= Base)</td><td>—</td><td>—</td><td>${fmtMl(block1Grand)}</td></tr>
+        </tbody>
+      </table></div>
+      <div class="sum-box"><table class="sum-tbl">
+        <thead><tr><th>Block 2 — Khấu trừ NV</th><th>Dr</th><th>Cr</th><th>Amount (tr)</th></tr></thead>
+        <tbody>
+          ${JE_DED.map(d=>`<tr>
+            <td>${d.label}</td>
+            <td style="font-family:var(--fm);color:var(--dim)">334</td>
+            <td style="font-family:var(--fm);color:var(--dim)">${d.cr_acc}</td>
+            <td style="color:#fff;font-weight:600">${fmtMl(b2tot[d.key])}</td>
+          </tr>`).join('')}
+          <tr class="sum-total"><td>TOTAL BLOCK 2</td><td>—</td><td>—</td><td>${fmtMl(Object.values(b2tot).reduce((s,v)=>s+v,0))}</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sec-title">Block 1 Detail — Chi phí công ty theo PL Line × BU × Component</div>
+    <div class="sum-box"><table class="sum-tbl">
+      <thead><tr><th>P&L Line</th><th>BU/Segment</th><th>Component</th><th>Dr Acc</th><th>Amount (tr)</th><th>Cr Acc</th><th>Cr Account</th></tr></thead>
+      <tbody>${b1rows}
+        <tr class="sum-total"><td colspan="4">TOTAL BLOCK 1</td><td>${fmtMl(block1Grand)}</td><td colspan="2">= Company Staff Cost (Base)</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div>
+    <div class="sec-title">Block 2 Detail — Khấu trừ NV theo PL Line (không chi tiết BU)</div>
+    <div class="sum-box"><table class="sum-tbl">
+      <thead><tr><th>P&L Line</th><th>Component</th><th>Dr Acc</th><th>Amount (tr)</th><th>Cr Acc</th><th>Cr Account</th></tr></thead>
+      <tbody>${b2rows}
+        <tr class="sum-total"><td colspan="3">TOTAL BLOCK 2</td><td>${fmtMl(Object.values(b2tot).reduce((s,v)=>s+v,0))}</td><td colspan="2">Reclass trong Payable to Employee</td></tr>
+      </tbody>
+    </table></div>
+  </div>`;
+}
+
+// ── EXPORT JOURNAL EXCEL ──
+function exportJournalExcel(){
+  const active=persons.filter(p=>p.status==='active');
+  if(typeof XLSX==='undefined'){alert('Thư viện Excel chưa load. Kiểm tra kết nối mạng rồi thử lại.');return;}
+
+  // SUMMARY sheet
+  const sumData=[['FINAN — JOURNAL ENTRY SUMMARY — T6/2026'],['Source: Payroll_to_BOD_Jun5th · '+active.length+' active'],[]];
+  // Net impact by account cluster (top section)
+  const _c1=active.reduce((s,p)=>s+comp(p,'cost1'),0),_c2=active.reduce((s,p)=>s+comp(p,'cost2'),0),_c3=active.reduce((s,p)=>s+comp(p,'cost3'),0),_c4=active.reduce((s,p)=>s+comp(p,'cost4'),0),_c5=active.reduce((s,p)=>s+comp(p,'cost5'),0);
+  const _d1=active.reduce((s,p)=>s+comp(p,'ded1'),0),_d2=active.reduce((s,p)=>s+comp(p,'ded2'),0),_d3=active.reduce((s,p)=>s+comp(p,'ded3'),0),_d4=active.reduce((s,p)=>s+comp(p,'ded4'),0),_d5=active.reduce((s,p)=>s+comp(p,'ded5'),0);
+  const clusters=[
+    ['642111','Staff cost (P&L)',Math.round(_c1+_c2+_c3+_c4+_c5),0,'Chi phí lương ghi nhận'],
+    ['334','Payable to Employee',Math.round(_d1+_d2+_d3+_d4+_d5),Math.round(_c1),'Net = lương thực lãnh'],
+    ['3383/3384/3386','Payable to Social Insurance',0,Math.round(_c2+_c3+_c4+_d1+_d2+_d3),'Phải nộp cơ quan BH'],
+    ['3382','Payable to Trade Union',0,Math.round(_c5+_d4),'Phải nộp công đoàn'],
+    ['3335','Payable to Tax (PIT)',0,Math.round(_d5),'Phải nộp thuế TNCN'],
+  ];
+  sumData.push(['NET IMPACT BY ACCOUNT CLUSTER'],['Account','Account Name','Dr (VND)','Cr (VND)','Note']);
+  clusters.forEach(c=>sumData.push([c[0],c[1],c[2]||'',c[3]||'',c[4]]));
+  const _tDr=clusters.reduce((s,c)=>s+c[2],0),_tCr=clusters.reduce((s,c)=>s+c[3],0);
+  sumData.push(['TOTAL','Dr = Cr '+(Math.abs(_tDr-_tCr)<1?'(Balanced ✓)':'(LỆCH!)'),_tDr,_tCr,'']);
+  sumData.push([],
+    ['BLOCK 1 — COMPANY STAFF COST'],['Component','Dr Acc','Cr Acc','Cr Account','Amount (VND)']);
+  JE_COST.forEach(c=>{const t=active.reduce((s,p)=>s+comp(p,c.key),0);sumData.push([c.label,PL_DR_ACC,c.cr_acc,c.cr,t]);});
+  const b1g=JE_COST.reduce((s,c)=>s+active.reduce((ss,p)=>ss+comp(p,c.key),0),0);
+  sumData.push(['TOTAL BLOCK 1 (= Base)','','','',b1g],[],
+    ['BLOCK 2 — EMPLOYEE DEDUCTIONS'],['Component','Dr Acc','Cr Acc','Cr Account','Amount (VND)']);
+  JE_DED.forEach(d=>{const t=active.reduce((s,p)=>s+comp(p,d.key),0);sumData.push([d.label,'334',d.cr_acc,d.cr,t]);});
+  const b2g=JE_DED.reduce((s,d)=>s+active.reduce((ss,p)=>ss+comp(p,d.key),0),0);
+  sumData.push(['TOTAL BLOCK 2','','','',b2g]);
+
+  // DETAIL sheet: Block 1 (PL×BU×component) + Block 2 (PL×component)
+  const detData=[['BLOCK 1 — COMPANY STAFF COST (chi tiết PL Line × BU × Component)'],
+    ['P&L Line','BU/Segment','Component','Dr Acc','Amount (VND)','Cr Acc','Cr Account']];
+  PL_LINES.forEach(l=>{BUS.forEach(b=>{JE_COST.forEach(c=>{
+    const amt=active.filter(p=>p.pl_line===l).reduce((s,p)=>s+compBU(p,c.key,b.key),0);
+    if(amt>0.5)detData.push([l,b.label,c.label,PL_DR_ACC,Math.round(amt),c.cr_acc,c.cr]);
+  });});});
+  detData.push(['','','','TOTAL B1',Math.round(b1g),'','']);
+  detData.push([],['BLOCK 2 — EMPLOYEE DEDUCTIONS (chi tiết PL Line, không BU)'],
+    ['P&L Line','Component','Dr Acc','Amount (VND)','Cr Acc','Cr Account']);
+  PL_LINES.forEach(l=>{JE_DED.forEach(d=>{
+    const amt=active.filter(p=>p.pl_line===l).reduce((s,p)=>s+comp(p,d.key),0);
+    if(amt>0.5)detData.push([l,d.label,'334',Math.round(amt),d.cr_acc,d.cr]);
+  });});
+  detData.push(['','','TOTAL B2',Math.round(b2g),'','']);
+
+  // PERSON-LEVEL sheet (audit trail backup)
+  const persData=[['PERSON-LEVEL COMPONENTS (audit trail)'],
+    ['Emp No','Name','Dept','P&L Line','Status','Cost1+Adj','Cost2','Cost3','Cost4','Cost5','Ded1','Ded2','Ded3','Ded4','Ded5',...BUS.map(b=>b.short+' %')]];
+  persons.forEach(p=>{
+    persData.push([p.emp_no||'',p.name,p.dept_label,p.pl_line,p.status,
+      comp(p,'cost1'),comp(p,'cost2'),comp(p,'cost3'),comp(p,'cost4'),comp(p,'cost5'),
+      comp(p,'ded1'),comp(p,'ded2'),comp(p,'ded3'),comp(p,'ded4'),comp(p,'ded5'),
+      ...BUS.map(b=>p.alloc[b.key]||0)]);
+  });
+
+  const wb=XLSX.utils.book_new();
+  const ws1=XLSX.utils.aoa_to_sheet(sumData);
+  const ws2=XLSX.utils.aoa_to_sheet(detData);
+  const ws3=XLSX.utils.aoa_to_sheet(persData);
+  ws1['!cols']=[{wch:38},{wch:9},{wch:9},{wch:26},{wch:18}];
+  ws2['!cols']=[{wch:30},{wch:20},{wch:32},{wch:9},{wch:18},{wch:9},{wch:26}];
+  ws3['!cols']=[{wch:8},{wch:24},{wch:22},{wch:30},{wch:9},...Array(10).fill({wch:13}),...BUS.map(()=>({wch:9}))];
+  XLSX.utils.book_append_sheet(wb,ws1,'JE Summary');
+  XLSX.utils.book_append_sheet(wb,ws2,'JE Detail');
+  XLSX.utils.book_append_sheet(wb,ws3,'Person Detail');
+  XLSX.writeFile(wb,'finan_journal_entry_t6_v20.xlsx');
+}
+
+// ── RESET ALLOC ──
+function resetAlloc(){
+  if(!confirm('Reset toàn bộ % phân bổ về 0?'))return;
+  persons.forEach(p=>{BUS.forEach(b=>{p.alloc[b.key]=0;});});
+  buildTable();updateStrip();saveState();
+}
+
+// ── MODAL ──
+function openModal(){document.getElementById('modal').classList.add('open');}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function autoCalcBase(){
+  const g=parseFloat(document.getElementById('new-gross').value)||0;
+  document.getElementById('new-base').value=g>0?(g*1.30).toFixed(1):'';
+}
+function addPerson(){
+  const name=document.getElementById('new-name').value.trim();
+  if(!name){alert('Nhập tên nhân sự');return;}
+  const dept=document.getElementById('new-dept').value;
+  const baseM=parseFloat(document.getElementById('new-base').value)||0;
+  if(!baseM){alert('Nhập Gross Salary để tính Base');return;}
+  const np={
+    id:Date.now(),emp_no:'NEW',name,position:document.getElementById('new-position').value,
+    dept,dept_label:DEPT_LABELS[dept]||dept,
+    income:Math.round((parseFloat(document.getElementById('new-gross').value)||0)*1e6),
+    base:Math.round(baseM*1e6),
+    adj:Math.round((parseFloat(document.getElementById('new-adj').value)||0)*1e6),
+    status:'active',emp_type:'FTE',pl_line:document.getElementById('new-pl').value,
+    alloc:{SBH_own:0,SBH_partner:0,HLB:0,BU3:0,CSS:0},_new:true,
+  };
+  applyAutoAlloc(np);
+  persons.push(np);
+  closeModal();
+  ['new-name','new-position','new-gross','new-base','new-adj'].forEach(id=>document.getElementById(id).value='');
+  buildTable();updateStrip();saveState();
+}
+
+// ── LOCAL STORAGE ──
+const LS_KEY='finan_sim_t6_v25';
+function saveState(){
+  try{
+    // Persist FULL editable state incl. base/comp/income (Load Payroll can change these for any person)
+    const snap=persons.map(p=>({
+      id:p.id,emp_no:p.emp_no,name:p.name,position:p.position,dept:p.dept,dept_label:p.dept_label,
+      emp_type:p.emp_type,status:p.status,income:p.income,base:p.base,adj:p.adj,
+      pl_line:p.pl_line,alloc:{...p.alloc},comp:p.comp?{...p.comp}:null,_new:p._new||false
+    }));
+    localStorage.setItem(LS_KEY,JSON.stringify({ts:Date.now(),persons:snap}));
+    const ind=document.getElementById('save-indicator');
+    if(ind){ind.textContent='✓ Saved';ind.style.color='var(--green)';setTimeout(()=>{ind.textContent='Auto-saved';ind.style.color='var(--dim)';},1500);}
+  }catch(e){console.warn('Save failed',e);}
+}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(LS_KEY);if(!raw)return false;
+    const saved=JSON.parse(raw);if(!saved?.persons?.length)return false;
+    saved.persons.forEach(s=>{
+      const p=persons.find(x=>x.id===s.id)||(s.name?persons.find(x=>x.name===s.name&&x.emp_type===s.emp_type&&!x._restored):null);
+      if(p){
+        // restore full editable state
+        p.status=s.status;p.adj=s.adj||0;p.pl_line=s.pl_line;p.alloc={...s.alloc};
+        if(s.base!=null)p.base=s.base;
+        if(s.income!=null)p.income=s.income;
+        if(s.comp)p.comp={...s.comp};
+        if(s.emp_type)p.emp_type=s.emp_type;
+        if(s.position)p.position=s.position;
+        if(s.dept){p.dept=s.dept;p.dept_label=s.dept_label||DEPT_LABELS[s.dept]||s.dept;}
+        p._restored=true;
+      }else if(s._new||s.name){
+        // person added/loaded that isn't in PERSONS_RAW
+        persons.push({id:s.id,emp_no:s.emp_no||'NEW',name:s.name,position:s.position||'',dept:s.dept,dept_label:s.dept_label||DEPT_LABELS[s.dept]||s.dept,income:s.income||0,base:s.base||0,adj:s.adj||0,status:s.status||'active',emp_type:s.emp_type||'FTE',pl_line:s.pl_line,alloc:{...s.alloc},comp:s.comp?{...s.comp}:null,_new:s._new||false,_restored:true});
+      }
+    });
+    persons.forEach(p=>{delete p._restored;});
+    return true;
+  }catch(e){return false;}
+}
+function clearSavedState(){
+  if(!confirm('Xoá toàn bộ dữ liệu đã lưu và reset về T6 payroll gốc?'))return;
+  localStorage.removeItem(LS_KEY);
+  persons=PERSONS_RAW.map(p=>({...p,alloc:{...p.alloc}}));
+  buildTable();updateStrip();
+}
+
+// ── EXPORT CSV ──
+function exportCSV(){
+  const h=['ID','Emp No','Name','Position','Dept','Emp Type','P&L Line','Status','Fixed Income (VND)','Base Cost (VND)','Adj (VND)','Effective Cost (VND)',...BUS.map(b=>`${b.label} % Alloc`),...BUS.map(b=>`${b.label} Cost (VND)`)];
+  const rows=persons.map(p=>[p.id,p.emp_no||'',p.name,p.position||'',p.dept,p.emp_type||'',p.pl_line,p.status,p.income||0,p.base,p.adj||0,effectiveCost(p),...BUS.map(b=>p.alloc[b.key]||0),...BUS.map(b=>Math.round(buCost(p,b.key)))]);
+  const csv=[h,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='finan_staffcost_t6_v19.csv';a.click();
+}
+function exportSummaryCSV(){
+  const active=persons.filter(p=>p.status==='active');
+  const gEC=active.reduce((s,p)=>s+effectiveCost(p),0);
+  const buTotals=BUS.map(b=>({...b,total:active.reduce((s,p)=>s+buCost(p,b.key),0),hc:active.filter(p=>p.alloc[b.key]>0).length}));
+  const buGrand=buTotals.reduce((s,b)=>s+b.total,0);
+  const s1=[['=== SUMMARY BY BU/SEGMENT ==='],['BU','Cost (VND)','Cost (tr)','% EC','HC'],...buTotals.map(b=>[b.label,b.total,(b.total/1e6).toFixed(1),(gEC?(b.total/gEC*100).toFixed(1):'0')+'%',b.hc]),['TOTAL ALLOCATED',buGrand,(buGrand/1e6).toFixed(1),(gEC?(buGrand/gEC*100).toFixed(1):'0')+'%',''],['Unallocated',gEC-buGrand,((gEC-buGrand)/1e6).toFixed(1),(gEC?((gEC-buGrand)/gEC*100).toFixed(1):'0')+'%','']];
+  const s2=[[''],['=== SUMMARY BY P&L LINE ==='],['P&L Line','HC','EC (VND)','EC (tr)','Allocated (tr)','Unalloc (tr)','%'],...PL_LINES.map(l=>{const lp=active.filter(p=>p.pl_line===l);const tot=lp.reduce((s,p)=>s+effectiveCost(p),0);const alloc=lp.reduce((s,p)=>s+BUS.reduce((ss,b)=>ss+buCost(p,b.key),0),0);return[l,lp.length,tot,(tot/1e6).toFixed(1),(alloc/1e6).toFixed(1),((tot-alloc)/1e6).toFixed(1),(gEC?(tot/gEC*100).toFixed(1):'0')+'%'];}),['TOTAL',active.length,gEC,(gEC/1e6).toFixed(1),(buGrand/1e6).toFixed(1),((gEC-buGrand)/1e6).toFixed(1),'100%']];
+  const s3=[[''],['=== CROSS TABLE: P&L × BU (tr VND) ==='],['P&L Line',...BUS.map(b=>b.label),'Allocated (tr)','EC (tr)','Unalloc'],...PL_LINES.map(l=>{const lp=active.filter(p=>p.pl_line===l);const lineEC=lp.reduce((s,p)=>s+effectiveCost(p),0);const buVals=BUS.map(b=>lp.reduce((s,p)=>s+buCost(p,b.key),0));const rowTotal=buVals.reduce((s,v)=>s+v,0);return[l,...buVals.map(v=>(v/1e6).toFixed(1)),(rowTotal/1e6).toFixed(1),(lineEC/1e6).toFixed(1),((lineEC-rowTotal)/1e6).toFixed(1)];}),['TOTAL',...BUS.map(b=>(buTotals.find(x=>x.key===b.key)?.total||0)/1e6).map(v=>v.toFixed(1)),(buGrand/1e6).toFixed(1),(gEC/1e6).toFixed(1),((gEC-buGrand)/1e6).toFixed(1)]];
+  const csv=[...s1,...s2,...s3].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='finan_staffcost_t6_summary_v19.csv';a.click();
+}
+function exportJSON(){
+  const active=persons.filter(p=>p.status==='active');
+  const data={meta:{version:'v19',period:'T6-2026',source:'Payroll_to_BOD_Jun5th',exported:new Date().toISOString(),currency:'VND',display_unit:'M VND',base_definition:'COMPANY EXPENSE = Actual Salary + SHUI Company + Trade Union'},
+    summary:{total_persons:persons.length,active:active.length,total_effective_cost:active.reduce((s,p)=>s+effectiveCost(p),0),by_bu:Object.fromEntries(BUS.map(b=>[b.label,active.reduce((s,p)=>s+buCost(p,b.key),0)])),by_pl_line:Object.fromEntries(PL_LINES.map(l=>[l,active.filter(p=>p.pl_line===l).reduce((s,p)=>s+effectiveCost(p),0)]))},
+    cross_matrix:Object.fromEntries(PL_LINES.map(l=>[l,Object.fromEntries(BUS.map(b=>[b.key,active.filter(p=>p.pl_line===l).reduce((s,p)=>s+buCost(p,b.key),0)]))])),
+    persons:persons.map(p=>({id:p.id,emp_no:p.emp_no||'',name:p.name,position:p.position||'',dept:p.dept,emp_type:p.emp_type||'',pl_line:p.pl_line,status:p.status,fixed_income:p.income||0,base_cost:p.base,adjustment:p.adj||0,effective_cost:effectiveCost(p),allocations:Object.fromEntries(BUS.map(b=>[b.key,{pct:p.alloc[b.key]||0,amount:Math.round(buCost(p,b.key))}]))}))};
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='finan_staffcost_t6_v19.json';a.click();
+}
+
+
+// ── IMPORT JSON (restore snapshot) ──
+function triggerImportJSON(){
+  if(!confirm('Import JSON sẽ restore state (adj, status, P&L line, alloc%) từ file export trước.\nNhân sự mới trong file sẽ được thêm vào.\nState hiện tại sẽ bị ghi đè. Tiếp tục?'))return;
+  document.getElementById('json-file-input').click();
+}
+function importJSON(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      const list=data.persons||data.employees||(Array.isArray(data)?data:null);
+      if(!list||!list.length){alert('File JSON không có mảng persons hợp lệ.');return;}
+      let updated=0,added=0,skipped=0;
+      list.forEach(s=>{
+        // Normalize: export format uses base_cost/adjustment/allocations{pct}; snapshot uses base/adj/alloc
+        const id=s.id;
+        const name=(s.name||'').trim();
+        const adj=Math.round(s.adjustment!==undefined?s.adjustment:(s.adj||0));
+        const status=s.status||'active';
+        const pl_line=s.pl_line||'';
+        // allocations can be {key:{pct,amount}} or {key:pct}
+        const alloc={};
+        BUS.forEach(b=>{
+          const a=s.allocations?s.allocations[b.key]:(s.alloc?s.alloc[b.key]:undefined);
+          alloc[b.key]=(a&&typeof a==='object')?(a.pct||0):(a||0);
+        });
+        // match by id, then emp_no+name, then name
+        let p=id!==undefined?persons.find(x=>x.id===id):null;
+        if(!p&&s.emp_no)p=persons.find(x=>x.emp_no===s.emp_no&&x.name===name);
+        if(!p&&name)p=persons.find(x=>x.name===name);
+        if(p){
+          p.adj=adj;p.status=status||p.status;if(pl_line)p.pl_line=pl_line;p.alloc={...p.alloc,...alloc};
+          updated++;
+        }else if(name){
+          const base=Math.round(s.base_cost!==undefined?s.base_cost:(s.base||0));
+          if(base<=0){skipped++;return;}
+          persons.push({
+            id:id||Date.now()+added,emp_no:s.emp_no||'IMP',name,
+            position:s.position||'',dept:s.dept||'',dept_label:DEPT_LABELS[s.dept]||s.dept||'',
+            income:Math.round(s.fixed_income!==undefined?s.fixed_income:(s.income||0)),
+            base,adj,status:status||'active',emp_type:s.emp_type||'FTE',
+            pl_line:pl_line||DEPT_PL[s.dept]||'7.99 Khác',alloc,_new:true,
+          });
+          added++;
+        }else skipped++;
+      });
+      buildTable();updateStrip();saveState();
+      event.target.value='';
+      alert(`Import JSON hoàn tất:\n✓ Restore: ${updated}\n✦ Thêm mới: ${added}\n— Bỏ qua: ${skipped}`);
+    }catch(err){console.error(err);alert('Lỗi đọc JSON: '+err.message);}
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+// ── LOAD BUDGET (from Financial Forecast xlsx) ──
+let BUDGET=null; // {buKey: {pl_line: {T5,T6,...}}}
+const SCOPE_TO_BU={
+  'BU12 — SBH Own channel':'SBH_own',
+  'BU12 — SBH Partnership':'SBH_partner',
+  'BU12 — HLB':'HLB',
+  'BU3 — FinanOne':'BU3',
+  'Corporate Shared Service':'CSS',
+};
+function triggerLoadBudget(){
+  if(typeof XLSX==='undefined'){alert('Thư viện Excel chưa load. Kiểm tra mạng rồi thử lại.');return;}
+  document.getElementById('budget-file-input').click();
+}
+function loadBudget(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      const sheet=wb.Sheets['05_Staff_Cost'];
+      if(!sheet){alert('Không tìm thấy sheet "05_Staff_Cost" trong file.');return;}
+      const rows=XLSX.utils.sheet_to_json(sheet,{header:1});
+      if(!rows.length){alert('Sheet 05_Staff_Cost rỗng.');return;}
+      const hdr=rows[0].map(h=>String(h).trim());
+      const ci={};['Scope','P&L Line','T5','T6','T7','T8','T9','Forecast Total T5-T9'].forEach(c=>ci[c]=hdr.indexOf(c));
+      if(ci['Scope']<0||ci['P&L Line']<0){alert('Sheet thiếu cột Scope hoặc P&L Line.');return;}
+      const periods=['T5','T6','T7','T8','T9','Forecast Total T5-T9'];
+      const budget={};let parsed=0;const unmapped=new Set();
+      rows.slice(1).forEach(r=>{
+        const scope=String(r[ci['Scope']]||'').trim();
+        const pl=String(r[ci['P&L Line']]||'').trim();
+        if(!scope||!pl)return;
+        const buKey=SCOPE_TO_BU[scope];
+        if(!buKey){unmapped.add(scope);return;}
+        if(!budget[buKey])budget[buKey]={};
+        if(!budget[buKey][pl])budget[buKey][pl]={};
+        periods.forEach(per=>{
+          if(ci[per]>=0){const v=parseFloat(r[ci[per]])||0;budget[buKey][pl][per]=Math.abs(v)*1e6;}
+        });
+        parsed++;
+      });
+      BUDGET=budget;
+      document.getElementById('budget-period').style.display='inline-block';
+      event.target.value='';
+      let msg=`Load budget hoàn tất: ${parsed} dòng (Scope × P&L).`;
+      if(unmapped.size)msg+=`\n⚠ Scope chưa map: ${[...unmapped].join(', ')}`;
+      msg+='\nChuyển sang tab Summary để xem so sánh.';
+      alert(msg);
+      document.querySelectorAll('.tab-btn').forEach(b=>{if(b.textContent.includes('Summary'))b.click();});
+    }catch(err){console.error(err);alert('Lỗi đọc file budget: '+err.message);}
+  };
+  reader.readAsArrayBuffer(file);
+}
+function getBudget(buKey,pl,per){if(!BUDGET||!BUDGET[buKey]||!BUDGET[buKey][pl])return 0;return BUDGET[buKey][pl][per]||0;}
+function budgetByBU(buKey,per){if(!BUDGET||!BUDGET[buKey])return 0;return Object.values(BUDGET[buKey]).reduce((s,o)=>s+(o[per]||0),0);}
+function budgetByPL(pl,per){if(!BUDGET)return 0;return Object.keys(BUDGET).reduce((s,bk)=>s+(BUDGET[bk][pl]?BUDGET[bk][pl][per]||0:0),0);}
+function budgetGrand(per){if(!BUDGET)return 0;return Object.keys(BUDGET).reduce((s,bk)=>s+budgetByBU(bk,per),0);}
+function curPeriod(){const el=document.getElementById('budget-period');return el?el.value:'T6';}
+function fmtVar(actual,budget){
+  const v=actual-budget;const pct=budget!==0?(v/budget*100):0;
+  const color=Math.abs(v)<budget*0.02?'var(--green)':(v>0?'var(--red)':'var(--teal)');
+  const sign=v>0?'+':'';
+  return `<span style="color:${color}">${sign}${fmtMl(Math.abs(v))}${v<0?' ↓':v>0?' ↑':''} (${sign}${pct.toFixed(0)}%)</span>`;
+}
+
+// ── LOAD PAYROLL (from Payroll_to_BOD xlsx, merge keep state) ──
+function triggerLoadPayroll(){
+  if(typeof XLSX==='undefined'){alert('Thư viện Excel chưa load. Kiểm tra mạng rồi thử lại.');return;}
+  if(!confirm('Load Payroll sẽ MERGE data lương mới:\n• Người đã có: cập nhật base + components, GIỮ alloc%/adj/PL line\n• Người mới: thêm vào\n• Người cũ không có trong file: giữ lại, đánh dấu\n\nSẽ hiện preview trước khi áp dụng. Tiếp tục?'))return;
+  document.getElementById('payroll-file-input').click();
+}
+function _norm(s){return String(s==null?'':s).trim();}
+function _numCell(v){if(v==null||v==='-'||v==='')return 0;const n=parseFloat(String(v).replace(/,/g,''));return isNaN(n)?0:n;}
+function loadPayroll(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      const sheet=wb.Sheets['Payroll T05']||wb.Sheets[wb.SheetNames[0]];
+      if(!sheet){alert('Không tìm thấy sheet Payroll.');return;}
+      const rows=XLSX.utils.sheet_to_json(sheet,{header:1,defval:null});
+      // Find EN header row: the row containing 'FULL NAME' and 'COMPANY EXPENSE'
+      let hr=-1;
+      for(let i=0;i<Math.min(10,rows.length);i++){
+        const joined=(rows[i]||[]).map(x=>_norm(x).toUpperCase()).join('|');
+        if(joined.includes('FULL NAME')&&joined.includes('DEPARTMENT')){hr=i;break;}
+      }
+      if(hr<0){alert('Không tìm thấy dòng header (FULL NAME / DEPARTMENT).');return;}
+      const H=rows[hr].map(x=>_norm(x));
+      const find=(...kw)=>{for(let i=0;i<H.length;i++){if(H[i]&&kw.every(k=>H[i].toUpperCase().includes(k.toUpperCase())))return i;}return -1;};
+      // identity
+      const cName=find('FULL NAME'),cPos=find('POSITION'),cDept=find('DEPARTMENT'),cStatus=find('STATUS');
+      const cFixed=find('TOTAL FIXED INCOME'),cActual=find('ACTUAL SALARY'),cCE=find('COMPANY EXPENSE');
+      if(cName<0||cDept<0||cCE<0||cActual<0){alert('Thiếu cột bắt buộc (NAME/DEPT/ACTUAL SALARY/COMPANY EXPENSE).');return;}
+      // component anchors + offset
+      const shuiCo=find('SHUI BY COMPANY'),shuiEe=find('SHUI BY EMPLOYEE'),tu=find('TOTAL TRADE UNION'),pit=find('INCOME TAX PAYAB');
+      const c2=shuiCo-3,c3=shuiCo-2,c4=shuiCo-1;
+      const dd1=shuiEe-3,dd2=shuiEe-2,dd3=shuiEe-1;
+      const c5=tu-2,dd4=tu-1;
+      const cPIT=pit;
+      // section keywords to skip
+      const isSection=a=>{const u=_norm(a).toUpperCase();return['CAPITAL','FTE','PRB','OUT','TỔNG','CỘNG','FINAN ='].some(k=>u.includes(k))||['A.','B.','C.','I.','II.','III.','IV.'].includes(u);};
+      // parse employees: col0 (STT) numeric + has name
+      const parsed=[];
+      for(let r=hr+2;r<rows.length;r++){
+        const row=rows[r];if(!row)continue;
+        const stt=row[0],name=_norm(row[cName]);
+        if(!name)continue;
+        const sttNum=parseInt(String(stt).trim());
+        if(isNaN(sttNum))continue;       // employee rows have numeric STT
+        if(isSection(stt))continue;
+        const dept=_norm(row[cDept]);
+        if(!dept)continue;
+        const base=Math.round(_numCell(row[cCE]));
+        parsed.push({
+          name,position:_norm(row[cPos]),dept,
+          status:_norm(row[cStatus])||'FTE',
+          income:Math.round(_numCell(row[cFixed])),
+          base,
+          comp:{
+            cost1:Math.round(_numCell(row[cActual])),
+            cost2:Math.round(_numCell(row[c2])),cost3:Math.round(_numCell(row[c3])),cost4:Math.round(_numCell(row[c4])),
+            cost5:Math.round(_numCell(row[c5])),
+            ded1:Math.round(_numCell(row[dd1])),ded2:Math.round(_numCell(row[dd2])),ded3:Math.round(_numCell(row[dd3])),
+            ded4:Math.round(_numCell(row[dd4])),ded5:Math.round(_numCell(row[cPIT])),
+          }
+        });
+      }
+      if(!parsed.length){alert('Không parse được nhân viên nào. Kiểm tra format file.');return;}
+
+      // MERGE: match by name + emp_type (status) so duplicate-name records (PRB/OUT/FTE) map correctly
+      const normType=s=>s==='OUT'?'OUT':s==='PRB'?'PRB':'FTE';
+      parsed.forEach(p=>{p._etype=normType(p.status);});
+      let updated=0,added=0,missing=0;const usedNew=new Set();const matchedOld=new Set();const missingList=[];
+      const applyUpdate=(p,np)=>{
+        usedNew.add(np);matchedOld.add(p);
+        p.position=np.position||p.position;
+        p.dept=np.dept;p.dept_label=DEPT_LABELS[np.dept]||np.dept;
+        p.income=np.income;p.base=np.base;p.comp=np.comp;p.emp_type=np._etype;
+        // KEEP: status(active/inactive), adj, pl_line, alloc
+        updated++;
+      };
+      // PASS 1 — exact name + emp_type (handles PRB/OUT/FTE splits precisely)
+      persons.forEach(p=>{
+        const ot=normType(p.emp_type);
+        const idx=parsed.findIndex(c=>!usedNew.has(c)&&c.name===p.name&&c._etype===ot);
+        if(idx>=0)applyUpdate(p,parsed[idx]);
+      });
+      // PASS 2 — fallback name + dept (type may have changed), then name only
+      persons.forEach(p=>{
+        if(matchedOld.has(p))return;
+        let idx=parsed.findIndex(c=>!usedNew.has(c)&&c.name===p.name&&c.dept===p.dept);
+        if(idx<0)idx=parsed.findIndex(c=>!usedNew.has(c)&&c.name===p.name);
+        if(idx>=0)applyUpdate(p,parsed[idx]);
+        else{missing++;missingList.push(p.name+(normType(p.emp_type)!=='FTE'?` (${normType(p.emp_type)})`:''));}
+      });
+      // add new (records in file with no old match — incl. genuinely new PRB/OUT splits)
+      let newId=Math.max(0,...persons.map(p=>p.id))+1;
+      parsed.forEach(np=>{
+        if(usedNew.has(np))return;
+        persons.push({
+          id:newId++,emp_no:'NEW',name:np.name,position:np.position,
+          dept:np.dept,dept_label:DEPT_LABELS[np.dept]||np.dept,
+          income:np.income,base:np.base,adj:0,
+          status:'active',emp_type:np._etype,
+          pl_line:DEPT_PL[np.dept]||'7.99 Khác',
+          alloc:(()=>{const a={SBH_own:0,SBH_partner:0,HLB:0,BU3:0,CSS:0};const auto=getAutoAlloc(DEPT_PL[np.dept]);if(auto)a[auto]=100;else if(np.dept==='SALES & BUSINESS DEVELOPMENT')a.SBH_own=100;return a;})(),
+          comp:np.comp,_new:true,
+        });
+        added++;
+      });
+      buildTable();updateStrip();saveState();
+      event.target.value='';
+      const totalCE=parsed.reduce((s,p)=>s+p.base,0);
+      let msg=`✓ LOAD PAYROLL HOÀN TẤT (merge)\n\n`;
+      msg+=`File: ${parsed.length} nhân viên · Company Expense ${(totalCE/1e6).toFixed(1)}tr\n\n`;
+      msg+=`• Cập nhật (giữ alloc/adj/PL): ${updated}\n`;
+      msg+=`• Thêm mới: ${added}\n`;
+      msg+=`• Cũ không có trong file: ${missing}`;
+      if(missingList.length)msg+=`\n  → ${missingList.slice(0,8).join(', ')}${missingList.length>8?'...':''}`;
+      alert(msg);
+    }catch(err){console.error(err);alert('Lỗi đọc payroll: '+err.message);}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── INIT ──
+buildHeader();
+const hadSaved=loadState();
+buildTable();
+updateStrip();
+const ind=document.getElementById('save-indicator');
+if(hadSaved&&ind){
+  try{const ts=JSON.parse(localStorage.getItem(LS_KEY))?.ts;if(ts){ind.textContent=`Restored ${new Date(ts).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}`;ind.style.color='var(--teal)';}}catch(e){}
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+</script>
+</body>
+</html>
