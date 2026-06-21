@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chiến Tranh Mù — MVP HTML</title>
+  <style>
+    :root{
+      --bg:#0f172a;--panel:#111827;--panel2:#1f2937;--line:#334155;--text:#e5e7eb;--muted:#94a3b8;
+      --accent:#f59e0b;--good:#22c55e;--bad:#ef4444;--blue:#38bdf8;--red:#fb7185;
+      --move:#14532d;--attack:#7f1d1d;--deploy:#1e3a8a;--warn:#92400e;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(circle at top,#172554 0,#0f172a 38%,#020617 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+    header{padding:18px 22px;border-bottom:1px solid rgba(148,163,184,.25);background:rgba(15,23,42,.88);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10}
+    .topbar{display:flex;gap:14px;align-items:center;justify-content:space-between;max-width:1440px;margin:0 auto}
+    h1{margin:0;font-size:22px;letter-spacing:.2px}.sub{font-size:13px;color:var(--muted);margin-top:3px}
+    .wrap{max-width:1440px;margin:0 auto;padding:18px;display:grid;grid-template-columns:1fr 380px;gap:18px}
+    .card{background:rgba(17,24,39,.9);border:1px solid rgba(148,163,184,.22);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.28);overflow:hidden}
+    .cardHead{padding:14px 16px;border-bottom:1px solid rgba(148,163,184,.18);display:flex;gap:10px;align-items:center;justify-content:space-between;background:rgba(15,23,42,.45)}
+    .cardBody{padding:14px 16px}.pill{padding:6px 10px;border-radius:999px;background:#0b1220;border:1px solid rgba(148,163,184,.24);font-size:12px;color:var(--muted)}
+    .status{display:flex;gap:8px;flex-wrap:wrap}.status .pill strong{color:#fff}.gridArea{display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:start}.colLabels{grid-column:2;display:grid;grid-template-columns:repeat(12,1fr);gap:4px;padding:0 2px}.colLabels span{height:24px;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:12px}.boardWrap{display:grid;grid-template-columns:34px 1fr;gap:8px}.rowLabels{display:grid;grid-template-rows:repeat(12,1fr);gap:4px;align-self:stretch;height:100%;min-height:0}.rowLabels span{height:auto;min-height:0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:12px}.board{display:grid;grid-template-columns:repeat(12,minmax(42px,1fr));gap:4px;aspect-ratio:1/1}.cell{position:relative;border-radius:10px;border:1px solid rgba(148,163,184,.18);background:linear-gradient(145deg,#111827,#0b1220);display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;transition:.12s ease;min-width:42px;min-height:42px}.cell:nth-child(odd){background:linear-gradient(145deg,#182033,#0d1525)}.cell:hover{transform:translateY(-1px);border-color:rgba(245,158,11,.65)}.cell.deploy-red{box-shadow:inset 0 0 0 2px rgba(251,113,133,.22)}.cell.deploy-blue{box-shadow:inset 0 0 0 2px rgba(56,189,248,.22)}.cell.selected{outline:3px solid var(--accent);outline-offset:1px}.cell.move{background:linear-gradient(145deg,#14532d,#052e16)!important;border-color:rgba(34,197,94,.8)}.cell.attack{background:linear-gradient(145deg,#7f1d1d,#450a0a)!important;border-color:rgba(239,68,68,.9)}.cell.blast{background:linear-gradient(145deg,#92400e,#451a03)!important;border-color:rgba(245,158,11,.9)}.cell.scan{box-shadow:inset 0 0 0 2px rgba(34,197,94,.55);border-color:rgba(34,197,94,.75)}.cell.last-action{outline:2px dashed rgba(245,158,11,.85);outline-offset:-4px}.lastBadges{position:absolute;left:3px;right:3px;bottom:3px;display:flex;gap:2px;justify-content:center;pointer-events:none;z-index:3}.lastBadge{font-size:9px;line-height:1;padding:2px 4px;border-radius:999px;border:1px solid rgba(255,255,255,.22);box-shadow:0 2px 8px rgba(0,0,0,.35);font-weight:900}.lastBadge.red{background:rgba(251,113,133,.92);color:#fff}.lastBadge.blue{background:rgba(56,189,248,.92);color:#00111f}.lastMoveInfo{margin-top:10px;margin-bottom:10px;padding:9px 10px;border-radius:12px;background:#020617;border:1px solid rgba(148,163,184,.22);font-size:12px;color:#cbd5e1;line-height:1.45}.lastMoveInfo b{color:#fff}
+    .piece{width:82%;height:82%;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;line-height:1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 9px 18px rgba(0,0,0,.35);position:relative}.piece .abbr{font-size:15px}.piece .small{font-size:9px;margin-top:4px;opacity:.88;font-weight:650}.piece.red{background:linear-gradient(145deg,#fb7185,#9f1239);color:#fff}.piece.blue{background:linear-gradient(145deg,#38bdf8,#075985);color:#fff}.piece.hidden{background:linear-gradient(145deg,#475569,#111827);color:#f8fafc}.piece.revealed::after{content:"";position:absolute;right:5px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--accent)}.piece.dead{filter:grayscale(1);opacity:.45}.setupTray{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.trayItem{padding:9px;border-radius:12px;background:#0b1220;border:1px solid rgba(148,163,184,.22);display:flex;align-items:center;justify-content:space-between;cursor:pointer}.trayItem.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(245,158,11,.18)}.trayName{font-size:13px}.count{font-size:12px;color:var(--muted)}button,select{font:inherit}button{border:0;border-radius:12px;padding:10px 12px;background:#243244;color:#fff;cursor:pointer;font-weight:700;border:1px solid rgba(148,163,184,.22)}button:hover{filter:brightness(1.08)}button.primary{background:linear-gradient(145deg,#f59e0b,#b45309);color:#111827}button.danger{background:linear-gradient(145deg,#ef4444,#991b1b)}button.good{background:linear-gradient(145deg,#22c55e,#166534)}button:disabled{opacity:.45;cursor:not-allowed;filter:none}.btnRow{display:flex;gap:8px;flex-wrap:wrap}.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:12px;color:var(--muted)}select{width:100%;border-radius:12px;background:#0b1220;color:#fff;border:1px solid rgba(148,163,184,.25);padding:10px}.help{font-size:13px;color:#cbd5e1;line-height:1.45}.log{height:230px;overflow:auto;background:#020617;border:1px solid rgba(148,163,184,.2);border-radius:14px;padding:10px}.logEntry{font-size:12px;color:#cbd5e1;padding:7px 0;border-bottom:1px solid rgba(148,163,184,.12)}.logEntry b{color:#fff}.rules{max-height:310px;overflow:auto;font-size:12px;line-height:1.45;color:#cbd5e1}.rules table{width:100%;border-collapse:collapse}.rules td,.rules th{border-bottom:1px solid rgba(148,163,184,.14);padding:7px;text-align:left;vertical-align:top}.rules th{color:#fff}.banner{padding:12px 14px;border-radius:14px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);color:#fde68a;font-size:13px;line-height:1.45;margin-bottom:12px}.victory{padding:14px;border-radius:14px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.45);font-weight:800}.handoff{position:fixed;inset:0;background:rgba(2,6,23,.96);z-index:100;display:none;align-items:center;justify-content:center;text-align:center;padding:22px}.handoff.show{display:flex}.handoffBox{max-width:520px;background:#111827;border:1px solid rgba(148,163,184,.24);border-radius:22px;padding:24px;box-shadow:0 30px 90px rgba(0,0,0,.6)}.muted{color:var(--muted)}.kbd{font-size:11px;padding:2px 6px;border:1px solid rgba(148,163,184,.3);border-radius:6px;background:#020617}.onlineBox{padding:10px;border:1px dashed rgba(148,163,184,.35);border-radius:14px;color:#cbd5e1;font-size:12px;line-height:1.45;background:rgba(15,23,42,.35)}
+    .piece.exposedOwn{outline:3px solid #f59e0b;outline-offset:1px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14),0 0 0 4px rgba(245,158,11,.18),0 9px 18px rgba(0,0,0,.35)!important;filter:saturate(1.25) brightness(1.08)}
+    .piece.exposedOwn::before{content:"LỘ";position:absolute;left:4px;top:4px;font-size:8px;line-height:1;padding:2px 4px;border-radius:999px;background:#f59e0b;color:#111827;font-weight:950;letter-spacing:.2px}
+    .piece .symbol{font-size:22px;line-height:1}.piece .abbr{font-size:11px;margin-top:4px;opacity:.92}.piece.hidden .symbol{font-size:22px}.piece.hidden .abbr{font-size:10px}
+
+    .unitTooltip{position:fixed;z-index:250;display:none;max-width:320px;padding:10px 12px;border-radius:14px;background:rgba(2,6,23,.96);border:1px solid rgba(245,158,11,.45);box-shadow:0 18px 50px rgba(0,0,0,.45);color:#e5e7eb;font-size:12px;line-height:1.42;pointer-events:none}.unitTooltip b{color:#fff}.unitTooltip .ttTitle{font-weight:900;margin-bottom:5px}.unitTooltip .ttMuted{color:#94a3b8;margin-top:5px}.actionMenu{margin:8px 0 12px;padding:10px;border-radius:14px;background:#020617;border:1px solid rgba(148,163,184,.22)}.actionMenuTitle{font-size:12px;color:#94a3b8;margin-bottom:8px}.actionMenuBtns{display:flex;gap:7px;flex-wrap:wrap}.actionMenu button.active{outline:2px solid #f59e0b;outline-offset:1px;background:linear-gradient(145deg,#f59e0b,#b45309);color:#111827}.ruleCard{margin:8px 0 12px;padding:10px;border-radius:14px;background:rgba(15,23,42,.72);border:1px solid rgba(148,163,184,.22);font-size:12px;line-height:1.45;color:#cbd5e1}.ruleCard b{color:#fff}.ruleCard .ruleTitle{font-size:13px;margin-bottom:5px}.ruleCard .ruleNote{color:#94a3b8;margin-top:5px}
+    @media(max-width:1100px){.wrap{grid-template-columns:1fr}.board{grid-template-columns:repeat(12,minmax(30px,1fr))}.cell{min-width:30px;min-height:30px}.piece .small{display:none}.piece .abbr{font-size:12px}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div>
+        <h1>Chiến Tranh Mù — MVP</h1>
+        <div class="sub">Cờ chiến thuật ẩn danh tính quân · 12×12 · Tướng bị hạ là thua</div>
+      </div>
+      <div class="status">
+        <span class="pill">Phase: <strong id="phaseLabel">Menu</strong></span>
+        <span class="pill">Lượt: <strong id="turnLabel">-</strong></span>
+        <span class="pill">Đỏ: <strong id="redCount">16</strong>/16</span>
+        <span class="pill">Xanh: <strong id="blueCount">16</strong>/16</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="cardHead">
+        <div>
+          <strong>Bàn cờ chiến trường</strong>
+          <div class="sub">Chọn quân để xem nước đi / tấn công hợp lệ. Quân địch chưa lộ sẽ hiện dấu “?”.</div>
+        </div>
+        <div class="btnRow">
+          <button id="newGameBtn">Game mới</button>
+          <button id="randomSetupBtn" class="good">Sắp quân random</button>
+        </div>
+      </div>
+      <div class="cardBody">
+        <div id="gameMessage" class="banner">Chọn chế độ chơi ở panel bên phải, sau đó bắt đầu setup.</div>
+        <div class="gridArea">
+          <div></div>
+          <div class="colLabels" id="colLabels"></div>
+          <div class="rowLabels" id="rowLabels"></div>
+          <div class="board" id="board"></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="card">
+      <div class="cardHead"><strong>War Room</strong><span class="pill" id="viewerLabel">Viewer: -</span></div>
+      <div class="cardBody">
+        <div id="menuPanel">
+          <div class="field">
+            <label>Chế độ chơi</label>
+            <select id="modeSelect">
+              <option value="single">Single player — Đỏ vs AI Xanh</option>
+              <option value="local">Dual player local — pass & play</option>
+              <option value="online">Dual player online — cần backend</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Cách sắp quân</label>
+            <select id="setupModeSelect">
+              <option value="manual">Tự sắp xếp quân</option>
+              <option value="random">Random đội hình</option>
+            </select>
+          </div>
+          <div class="btnRow">
+            <button class="primary" id="startBtn">Bắt đầu setup</button>
+          </div>
+          <p class="help">Bản HTML này đã chơi được single player và local 2 người. Online thật cần thêm WebSocket/Firebase/Supabase để đồng bộ nước đi giữa 2 máy.</p>
+          <div class="onlineBox">
+            <b>Online-ready note:</b><br>
+            Game state đã được gom trong một object JavaScript. Bước tiếp theo là thêm roomId, playerId, event log và hàm sync qua server realtime.
+          </div>
+        </div>
+
+        <div id="setupPanel" style="display:none">
+          <div class="banner" id="setupHint">Đội Đỏ sắp quân trong 3 hàng dưới cùng.</div>
+          <div class="setupTray" id="setupTray"></div>
+          <div class="btnRow" style="margin-top:12px">
+            <button id="clearSetupBtn">Xóa setup bên này</button>
+            <button id="finishSetupBtn" class="primary">Xong setup</button>
+          </div>
+        </div>
+
+        <div id="playPanel" style="display:none">
+          <div class="field">
+            <label>Quân đang chọn</label>
+            <div class="pill" id="selectedInfo">Chưa chọn quân</div>
+          </div>
+          <div class="ruleCard" id="unitRuleCard">Chọn một quân của bạn để xem luật và thao tác hợp lệ.</div>
+          <div class="actionMenu" id="actionMenu">
+            <div class="actionMenuTitle">Action menu</div>
+            <div class="actionMenuBtns" id="actionMenuBtns"></div>
+          </div>
+          <div class="lastMoveInfo" id="lastMoveInfo">Last move: chưa có.</div>
+          <div class="btnRow">
+            <button id="scoutBtn" class="good" disabled>Trinh sát 7x7</button>
+            <button id="detonateBtn" class="danger" disabled>Nổ nhanh 3x3</button>
+            <button id="prepareBombBtn" class="primary" disabled>Đặt bom 5x5</button>
+            <button id="endTurnBtn">Bỏ lượt</button>
+          </div>
+          <p class="help" id="actionHelp">Mỗi lượt đi, tấn công hoặc dùng kỹ năng bằng 1 quân. Tấn công/kỹ năng sẽ làm lộ danh tính quân chủ động. Quân bị Trinh sát phát hiện sẽ lộ vĩnh viễn. Pháo bắn xa không chiếm ô mục tiêu.</p>
+          <div id="victoryBox" style="display:none" class="victory"></div>
+        </div>
+
+        <hr style="border:0;border-top:1px solid rgba(148,163,184,.18);margin:14px 0">
+
+        <strong>Battle log</strong>
+        <div class="log" id="log"></div>
+
+        <hr style="border:0;border-top:1px solid rgba(148,163,184,.18);margin:14px 0">
+        <details open>
+          <summary><strong>Rule nhanh</strong></summary>
+          <div class="rules">
+            <table>
+              <thead><tr><th>Quân</th><th>Di chuyển</th><th>Tấn công</th></tr></thead>
+              <tbody id="rulesTable"></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </aside>
+  </main>
+
+  <div class="handoff" id="handoff">
+    <div class="handoffBox">
+      <h2 id="handoffTitle">Chuyển lượt</h2>
+      <p class="muted" id="handoffText">Đưa máy cho người chơi tiếp theo. Bàn cờ đang được che để tránh lộ mặt quân.</p>
+      <button class="primary" id="handoffBtn">Tôi là người chơi tiếp theo</button>
+    </div>
+  </div>
+
+  <div class="unitTooltip" id="unitTooltip"></div>
+
+<script>
+(() => {
+  const BOARD = 12;
+  const COLS = 'ABCDEFGHIJKL'.split('');
+  const RED_DEPLOY = [9,10,11];
+  const BLUE_DEPLOY = [0,1,2];
+
+  const UNIT_DEFS = {
+    general:{name:'Tướng quân',abbr:'TG',icon:'♔',qty:1,rule:'Đi 1 ô mọi hướng. Đánh 1 ô mọi hướng. Bị hạ là thua.'},
+    guard:{name:'Vệ binh',abbr:'VB',icon:'🛡️',qty:2,rule:'Đi 1 ô mọi hướng. Đánh 1 ô mọi hướng. Có thể hy sinh chặn một đòn tấn công vào Tướng nếu Tướng nằm trong vùng 5x5 quanh Vệ binh; attacker không chiếm ô.'},
+    infantry:{name:'Bộ binh',abbr:'BB',icon:'⚔️',qty:5,rule:'Đi 1 ô ngang/dọc. Đánh 1 ô quanh mình. Tấn công xong nếu còn sống thì chiếm ô mục tiêu.'},
+    scout:{name:'Trinh sát',abbr:'TS',icon:'👁️',qty:2,rule:'Đi tối đa 3 ô ngang/dọc, không xuyên quân. Không tấn công. Mỗi Trinh sát chỉ quét 1 lần, làm lộ vĩnh viễn quân địch trong vùng 7x7, rồi tự biến thành Bộ binh.'},
+    fighter:{name:'Tiêm kích',abbr:'TK',icon:'✈️',qty:2,rule:'Bay/tấn công trong hình vuông 9x9, tức ngang/dọc ≤4. Muốn tấn công phải bay tới ô mục tiêu; nếu sống sót thì đứng tại ô đó. Nếu đánh Pháo thì cả hai cùng hy sinh; nếu bay vào vùng phòng không của Pháo địch thì có thể bị bắn hạ.'},
+    artillery:{name:'Pháo binh',abbr:'PB',icon:'💥',qty:2,rule:'Đi 1 ô ngang/dọc. Bắn Tiêm kích trong vùng phòng không 9x9. Bắn quân mặt đất nếu cùng ngang/dọc/chéo, cách tối thiểu 2 ô, tối đa 4 ô và không bị chặn đường. Không bắn quân mặt đất ở 8 ô liền kề. Bắn xong không chiếm ô mục tiêu.'},
+    commando:{name:'Đặc công',abbr:'ĐC',icon:'🧨',qty:2,rule:'Di chuyển tự do 1–2 ô theo mọi hướng. Đánh 1 ô quanh mình. Nổ nhanh 3x3 ngay, hoặc đặt bom 1 lượt rồi nổ 5x5. Nếu bị tấn công sẽ tự kích hoạt bom cảm tử; vụ nổ có friendly fire, không phân biệt ta/địch.'}
+  };
+
+  const state = {
+    mode:'single', setupMode:'manual', phase:'menu', setupSide:'red', current:'red', viewer:'red', turn:1,
+    units:[], selectedId:null, selectedSetupType:null, winner:null, log:[], gameOver:false, actionMode:null,
+    lastAction:{red:null, blue:null}
+  };
+
+  const els = {
+    board:document.getElementById('board'), colLabels:document.getElementById('colLabels'), rowLabels:document.getElementById('rowLabels'),
+    phaseLabel:document.getElementById('phaseLabel'), turnLabel:document.getElementById('turnLabel'), redCount:document.getElementById('redCount'), blueCount:document.getElementById('blueCount'),
+    viewerLabel:document.getElementById('viewerLabel'), gameMessage:document.getElementById('gameMessage'), modeSelect:document.getElementById('modeSelect'), setupModeSelect:document.getElementById('setupModeSelect'),
+    menuPanel:document.getElementById('menuPanel'), setupPanel:document.getElementById('setupPanel'), playPanel:document.getElementById('playPanel'), setupTray:document.getElementById('setupTray'),
+    setupHint:document.getElementById('setupHint'), selectedInfo:document.getElementById('selectedInfo'), lastMoveInfo:document.getElementById('lastMoveInfo'), scoutBtn:document.getElementById('scoutBtn'), detonateBtn:document.getElementById('detonateBtn'), prepareBombBtn:document.getElementById('prepareBombBtn'),
+    endTurnBtn:document.getElementById('endTurnBtn'), log:document.getElementById('log'), victoryBox:document.getElementById('victoryBox'), unitRuleCard:document.getElementById('unitRuleCard'), actionMenu:document.getElementById('actionMenu'), actionMenuBtns:document.getElementById('actionMenuBtns'), unitTooltip:document.getElementById('unitTooltip'), rulesTable:document.getElementById('rulesTable'),
+    handoff:document.getElementById('handoff'), handoffTitle:document.getElementById('handoffTitle'), handoffText:document.getElementById('handoffText'), handoffBtn:document.getElementById('handoffBtn')
+  };
+
+
+  function setActionMode(mode){
+    state.actionMode = state.actionMode===mode ? null : mode;
+    renderAll();
+  }
+  function hasSpecial(u){
+    return u && ((u.type==='scout' && !u.scoutUsed) || u.type==='commando');
+  }
+  function visibleToViewer(u){
+    return (state.phase==='setup' && u.side===state.setupSide) || u.side===state.viewer || u.revealed || state.phase==='ended';
+  }
+  function tooltipHtml(u){
+    const visible = visibleToViewer(u);
+    if(!visible){
+      return `<div class="ttTitle">? Quân địch chưa xác định</div><div>Bạn chỉ biết vị trí quân ở ${coord(u.x,u.y)}. Danh tính chỉ lộ khi bị Trinh sát phát hiện, khi tấn công/dùng kỹ năng, hoặc khi bị tiêu diệt.</div>`;
+    }
+    const def=UNIT_DEFS[u.type];
+    const exposed = u.side===state.viewer && u.revealed && state.phase!=='ended';
+    const extra=[];
+    if(u.type==='scout') extra.push(u.scoutUsed?'Trinh sát đã dùng kỹ năng và đáng lẽ đã chuyển thành Bộ binh.':'Còn 1 lần quét 7x7.');
+    if(u.type==='commando' && u.bombArmed) extra.push('Bom 5x5 đã đặt, có thể kích nổ ở lượt của quân này.');
+    if(exposed) extra.push('Quân này của bạn đã bị đối thủ biết danh tính.');
+    return `<div class="ttTitle">${def.icon} ${def.name} · ${sideName(u.side)} · ${coord(u.x,u.y)}</div><div>${def.rule}</div>${extra.length?`<div class="ttMuted">${extra.join('<br>')}</div>`:''}`;
+  }
+  function showTooltip(u,ev){
+    if(!els.unitTooltip) return;
+    els.unitTooltip.innerHTML=tooltipHtml(u);
+    els.unitTooltip.style.display='block';
+    moveTooltip(ev);
+  }
+  function moveTooltip(ev){
+    if(!els.unitTooltip || els.unitTooltip.style.display==='none') return;
+    const pad=14;
+    let x=ev.clientX+pad, y=ev.clientY+pad;
+    const r=els.unitTooltip.getBoundingClientRect();
+    if(x+r.width>window.innerWidth-8) x=ev.clientX-r.width-pad;
+    if(y+r.height>window.innerHeight-8) y=ev.clientY-r.height-pad;
+    els.unitTooltip.style.left=Math.max(8,x)+'px';
+    els.unitTooltip.style.top=Math.max(8,y)+'px';
+  }
+  function hideTooltip(){ if(els.unitTooltip) els.unitTooltip.style.display='none'; }
+
+  function initLabels(){
+    els.colLabels.innerHTML = COLS.map(c=>`<span>${c}</span>`).join('');
+    els.rowLabels.innerHTML = Array.from({length:BOARD},(_,i)=>`<span>${i+1}</span>`).join('');
+    els.rulesTable.innerHTML = Object.values(UNIT_DEFS).map(d=>`<tr><td><b>${d.name}</b></td><td colspan="2">${d.rule}</td></tr>`).join('');
+  }
+
+  function coord(x,y){ return `${COLS[x]}${y+1}`; }
+  function inside(x,y){ return x>=0 && x<BOARD && y>=0 && y<BOARD; }
+  function sideName(s){ return s==='red'?'Đỏ':'Xanh'; }
+  function enemyOf(s){ return s==='red'?'blue':'red'; }
+  function unitAt(x,y){ return state.units.find(u=>u.alive && u.x===x && u.y===y); }
+  function getUnit(id){ return state.units.find(u=>u.id===id); }
+  function ownUnits(side){ return state.units.filter(u=>u.side===side && u.alive); }
+  function enemyUnits(side){ return state.units.filter(u=>u.side!==side && u.alive); }
+  function isDeployCell(side,y){ return side==='red'?RED_DEPLOY.includes(y):BLUE_DEPLOY.includes(y); }
+  function pathClear(x1,y1,x2,y2){
+    const dx=Math.sign(x2-x1), dy=Math.sign(y2-y1);
+    let x=x1+dx, y=y1+dy;
+    while(x!==x2 || y!==y2){ if(unitAt(x,y)) return false; x+=dx; y+=dy; }
+    return true;
+  }
+  function aligned8(x1,y1,x2,y2){ const dx=Math.abs(x2-x1), dy=Math.abs(y2-y1); return dx===0 || dy===0 || dx===dy; }
+  function artilleryGroundLegal(a,t){
+    const dx=Math.abs(t.x-a.x), dy=Math.abs(t.y-a.y);
+    return t.type!=='fighter' && aligned8(a.x,a.y,t.x,t.y) && Math.max(dx,dy)>=2 && Math.max(dx,dy)<=4 && pathClear(a.x,a.y,t.x,t.y);
+  }
+  function findGuardBlocker(target){
+    if(!target || target.type!=='general') return null;
+    return ownUnits(target.side).find(g=>g.type==='guard' && g.alive && g.id!==target.id && Math.abs(g.x-target.x)<=2 && Math.abs(g.y-target.y)<=2) || null;
+  }
+  function guardBlocksAttack(attacker,target){
+    const guard=findGuardBlocker(target);
+    if(!guard) return false;
+    guard.revealed=true; guard.alive=false;
+    addLog(`<b>Vệ binh ${sideName(guard.side)}</b> tại ${coord(guard.x,guard.y)} hy sinh chặn đòn tấn công vào <b>Tướng quân</b> tại ${coord(target.x,target.y)}. Quân tấn công không chiếm ô.`);
+    checkGeneralDeath(guard);
+    return true;
+  }
+  function addLog(msg){ state.log.unshift({turn:state.turn,msg}); renderLog(); }
+  function recordLastAction(side, fromX, fromY, toX, toY, label='Hành động'){
+    state.lastAction[side] = {from:{x:fromX,y:fromY}, to:{x:toX,y:toY}, label, turn:state.turn};
+  }
+  function sameCell(a,x,y){ return a && a.x===x && a.y===y; }
+  function liveCount(side){ return ownUnits(side).length; }
+
+  function createUnitList(side){
+    const units=[]; let n=1;
+    for(const [type,def] of Object.entries(UNIT_DEFS)){
+      for(let i=0;i<def.qty;i++) units.push({id:`${side}-${type}-${n++}-${Math.random().toString(16).slice(2)}`,side,type,x:null,y:null,alive:true,revealed:false,scoutUsed:false,bombArmed:false});
+    }
+    return units;
+  }
+
+  function resetGame(){
+    Object.assign(state,{mode:els.modeSelect.value,setupMode:els.setupModeSelect.value,phase:'menu',setupSide:'red',current:'red',viewer:'red',turn:1,units:[],selectedId:null,selectedSetupType:null,winner:null,log:[],gameOver:false,actionMode:null,lastAction:{red:null,blue:null}});
+    els.modeSelect.value=state.mode;
+    els.setupModeSelect.value=state.setupMode;
+    renderAll();
+  }
+
+  function startSetup(){
+    state.mode=els.modeSelect.value;
+    state.setupMode=els.setupModeSelect.value;
+    if(state.mode==='online'){
+      alert('Online thật cần backend realtime. Bản HTML này sẽ mở chế độ local dual player để test rule trước.');
+      state.mode='local'; els.modeSelect.value='local';
+    }
+    state.phase='setup'; state.setupSide='red'; state.viewer='red'; state.current='red'; state.turn=1; state.winner=null; state.gameOver=false; state.units=[...createUnitList('red'),...createUnitList('blue')]; state.log=[]; state.selectedId=null; state.actionMode=null; state.selectedSetupType=null; state.lastAction={red:null,blue:null};
+    if(state.setupMode==='random'){
+      randomSetup('red', true);
+      randomSetup('blue', true);
+      state.phase='play'; state.current='red'; state.viewer='red'; state.setupSide='red';
+      addLog('Hai đội đã được sắp quân random bí mật. Đỏ đi trước.');
+      if(state.mode==='local') showHandoff('Bắt đầu trận', 'Đưa máy cho người chơi Đỏ. Cả hai đội đã được random đội hình và mặt quân đối phương sẽ được ẩn.');
+      renderAll();
+      return;
+    }
+    addLog('Game mới bắt đầu setup thủ công.');
+    renderAll();
+  }
+
+  function remainingSetupCounts(side){
+    const counts={};
+    for(const [type,def] of Object.entries(UNIT_DEFS)) counts[type]=def.qty;
+    state.units.filter(u=>u.side===side && u.x!==null).forEach(u=>counts[u.type]--);
+    return counts;
+  }
+
+  function renderSetupTray(){
+    const side=state.setupSide;
+    const counts=remainingSetupCounts(side);
+    els.setupTray.innerHTML='';
+    Object.entries(UNIT_DEFS).forEach(([type,def])=>{
+      const div=document.createElement('div'); div.className='trayItem'+(state.selectedSetupType===type?' active':'');
+      div.innerHTML=`<span class="trayName">${def.icon} ${def.name}</span><span class="count">còn ${counts[type]}</span>`;
+      div.onclick=()=>{ if(counts[type]>0){ state.selectedSetupType=type; renderSetupTray(); }};
+      els.setupTray.appendChild(div);
+    });
+    els.setupHint.textContent = `${sideName(side)} sắp quân trong ${side==='red'?'3 hàng dưới cùng':'3 hàng trên cùng'}. Chỉ mình thấy mặt quân của mình.`;
+  }
+
+  function clearSetupSide(){
+    const side=state.setupSide;
+    state.units.filter(u=>u.side===side).forEach(u=>{u.x=null;u.y=null;u.revealed=false;u.alive=true;u.scoutUsed=false;u.bombArmed=false;});
+    state.selectedSetupType=null; renderAll();
+  }
+
+  function randomSetup(side=state.setupSide, silent=false){
+    const rows=side==='red'?RED_DEPLOY:BLUE_DEPLOY;
+    const cells=[];
+    rows.forEach(y=>{ for(let x=0;x<BOARD;x++) cells.push({x,y}); });
+    shuffle(cells);
+    state.units.filter(u=>u.side===side).forEach((u,i)=>{u.x=cells[i].x;u.y=cells[i].y;u.alive=true;u.revealed=false;u.scoutUsed=false;u.bombArmed=false;});
+    state.selectedSetupType=null;
+    if(!silent){ addLog(`${sideName(side)} đã sắp quân random.`); renderAll(); }
+  }
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+  function finishSetup(){
+    const side=state.setupSide;
+    if(state.units.filter(u=>u.side===side && u.x!==null).length<16){ alert(`${sideName(side)} chưa đặt đủ 16 quân.`); return; }
+    if(side==='red'){
+      if(state.mode==='single'){
+        randomSetup('blue', true);
+        state.phase='play'; state.current='red'; state.viewer='red'; addLog('AI Xanh đã bí mật sắp quân. Đỏ đi trước.'); renderAll();
+      }else{
+        state.setupSide='blue'; state.viewer='blue'; state.selectedSetupType=null; showHandoff('Setup Xanh', 'Đưa máy cho người chơi Xanh để sắp quân. Người chơi Đỏ không nên nhìn màn hình.'); renderAll();
+      }
+    }else{
+      state.phase='play'; state.current='red'; state.viewer='red'; addLog('Setup hoàn tất. Đỏ đi trước.'); showHandoff('Bắt đầu trận', 'Đưa máy cho người chơi Đỏ. Mặt quân Xanh sẽ được ẩn.'); renderAll();
+    }
+  }
+
+  function showHandoff(title,text){
+    if(state.mode!=='local') return;
+    els.handoffTitle.textContent=title; els.handoffText.textContent=text; els.handoff.classList.add('show');
+  }
+  function hideHandoff(){ els.handoff.classList.remove('show'); renderAll(); }
+
+  function legalMoves(u){
+    if(u.bombArmed) return [];
+    const res=[]; const add=(x,y)=>{ if(inside(x,y) && !unitAt(x,y)) res.push({x,y,kind:'move'}); };
+    for(let y=0;y<BOARD;y++) for(let x=0;x<BOARD;x++){
+      const dx=Math.abs(x-u.x), dy=Math.abs(y-u.y), occ=unitAt(x,y); if(occ) continue;
+      if(u.type==='general'||u.type==='guard') { if(Math.max(dx,dy)===1) add(x,y); }
+      else if(u.type==='infantry') { if(dx+dy===1) add(x,y); }
+      else if(u.type==='scout') { if((dx===0&&dy>=1&&dy<=3)||(dy===0&&dx>=1&&dx<=3)) if(pathClear(u.x,u.y,x,y)) add(x,y); }
+      else if(u.type==='fighter') { if(Math.max(dx,dy)>=1 && dx<=4 && dy<=4) add(x,y); }
+      else if(u.type==='artillery') { if(dx+dy===1) add(x,y); }
+      else if(u.type==='commando') { if(Math.max(dx,dy)>=1 && Math.max(dx,dy)<=2) add(x,y); }
+    }
+    return res;
+  }
+
+  function legalAttacks(u){
+    if(u.bombArmed) return [];
+    const res=[]; const add=(target,tag='attack')=>{ if(target && target.side!==u.side) res.push({x:target.x,y:target.y,kind:tag,targetId:target.id}); };
+    enemyUnits(u.side).forEach(t=>{
+      const dx=Math.abs(t.x-u.x), dy=Math.abs(t.y-u.y);
+      if(u.type==='general'||u.type==='guard') { if(Math.max(dx,dy)===1) add(t); }
+      else if(u.type==='infantry') { if(Math.max(dx,dy)===1) add(t); }
+      else if(u.type==='scout') { /* Trinh sát không tấn công; dùng kỹ năng reveal 7x7. */ }
+      else if(u.type==='fighter') { if(dx<=4 && dy<=4 && Math.max(dx,dy)>=1) add(t); }
+      else if(u.type==='artillery') {
+        if(t.type==='fighter' && dx<=4 && dy<=4 && Math.max(dx,dy)>=1) add(t,'antiair');
+        else if(artilleryGroundLegal(u,t)) add(t,'attack');
+      }
+      else if(u.type==='commando') { if(Math.max(dx,dy)===1) add(t); }
+    });
+    return res;
+  }
+
+  function blastCells(u, radius=(u.bombArmed?2:1)){
+    const cells=[];
+    for(let dy=-radius;dy<=radius;dy++) for(let dx=-radius;dx<=radius;dx++){
+      const x=u.x+dx,y=u.y+dy; if(inside(x,y)) cells.push({x,y,kind:'blast'});
+    }
+    return cells;
+  }
+
+  function scoutCells(u){
+    const cells=[];
+    for(let dy=-3;dy<=3;dy++) for(let dx=-3;dx<=3;dx++){
+      const x=u.x+dx,y=u.y+dy; if(inside(x,y)) cells.push({x,y,kind:'scan'});
+    }
+    return cells;
+  }
+
+  function antiAirThreat(fighter,x,y,excludeId=null){
+    if(fighter.type!=='fighter') return null;
+    return enemyUnits(fighter.side).find(a=>a.type==='artillery' && a.id!==excludeId && Math.max(Math.abs(a.x-x),Math.abs(a.y-y))>=1 && Math.abs(a.x-x)<=4 && Math.abs(a.y-y)<=4) || null;
+  }
+
+  function executeMove(u,x,y){
+    const from=coord(u.x,u.y);
+    recordLastAction(u.side, u.x, u.y, x, y, 'di chuyển');
+    if(u.type==='fighter'){
+      const threat=antiAirThreat(u,x,y);
+      if(threat){
+        u.revealed=true; threat.revealed=true; u.alive=false;
+        addLog(`<b>${sideName(u.side)}</b> bay Tiêm kích từ ${from} tới ${coord(x,y)} nhưng lọt vào vùng phòng không của <b>Pháo binh</b> tại ${coord(threat.x,threat.y)}. Tiêm kích bị bắn hạ, Pháo bị lộ.`);
+        state.selectedId=null; state.actionMode=null; afterAction(); return;
+      }
+    }
+    addLog(`<b>${sideName(u.side)}</b> di chuyển một quân từ ${from} tới ${coord(x,y)}.`);
+    u.x=x;u.y=y; state.selectedId=null; state.actionMode=null; afterAction();
+  }
+
+  function executeAttack(attacker,target){
+    const fromX=attacker.x, fromY=attacker.y;
+    const tx=target.x, ty=target.y;
+    recordLastAction(attacker.side, fromX, fromY, tx, ty, 'tấn công');
+    attacker.revealed=true;
+    const aName=UNIT_DEFS[attacker.type].name, tName=UNIT_DEFS[target.type].name;
+
+    if(attacker.type==='fighter'){
+      if(target.type==='artillery'){
+        target.revealed=true;
+        attacker.x=tx; attacker.y=ty; attacker.alive=false; target.alive=false;
+        addLog(`<b>${sideName(attacker.side)}</b> dùng <b>${aName}</b> bay tới ${coord(tx,ty)} để tấn công <b>${tName}</b>. Pháo phản đòn: cả hai cùng bị tiêu diệt.`);
+        checkGeneralDeath(target); checkGeneralDeath(attacker);
+      }else{
+        const threat=antiAirThreat(attacker,tx,ty);
+        if(threat){
+          threat.revealed=true; attacker.alive=false;
+          addLog(`<b>${sideName(attacker.side)}</b> dùng <b>${aName}</b> bay tới ${coord(tx,ty)} để tấn công, nhưng bị <b>Pháo binh</b> tại ${coord(threat.x,threat.y)} phản ứng phòng không bắn hạ trước khi đánh trúng mục tiêu. Pháo bị lộ.`);
+          checkGeneralDeath(attacker);
+        }else if(guardBlocksAttack(attacker,target)){
+          // Vệ binh chặn đòn. Tiêm kích không chiếm ô Tướng/Vệ binh.
+        }else if(target.type==='commando'){
+          target.revealed=true;
+          attacker.x=tx; attacker.y=ty;
+          addLog(`<b>${sideName(attacker.side)}</b> dùng <b>${aName}</b> bay tới ${coord(tx,ty)} để tấn công <b>${tName}</b>.`);
+          triggerCommandoMartyr(target, attacker, 'bị Tiêm kích tấn công');
+        }else{
+          target.revealed=true; target.alive=false; attacker.x=tx; attacker.y=ty;
+          addLog(`<b>${sideName(attacker.side)}</b> lộ <b>${aName}</b>, bay tới ${coord(tx,ty)} và tiêu diệt <b>${tName}</b>. Tiêm kích chiếm ô mục tiêu.`);
+          checkGeneralDeath(target);
+        }
+      }
+    }else{
+      if(guardBlocksAttack(attacker,target)){
+        // Vệ binh đã hy sinh, quân tấn công đứng nguyên vị trí cũ.
+      }else if(target.type==='commando'){
+        target.revealed=true;
+        addLog(`<b>${sideName(attacker.side)}</b> lộ <b>${aName}</b> và tấn công <b>${tName}</b> tại ${coord(tx,ty)}.`);
+        triggerCommandoMartyr(target, attacker, `bị ${aName} tấn công`);
+      }else{
+        target.revealed=true; target.alive=false;
+        if(attacker.type==='artillery'){
+          const mode = target.type==='fighter' ? 'bắn hạ phòng không' : 'bắn xa';
+          addLog(`<b>${sideName(attacker.side)}</b> lộ <b>${aName}</b> và ${mode} <b>${tName}</b> tại ${coord(tx,ty)}. Pháo đứng nguyên vị trí, không chiếm ô mục tiêu.`);
+        }else{
+          attacker.x=tx; attacker.y=ty;
+          addLog(`<b>${sideName(attacker.side)}</b> lộ <b>${aName}</b>, tấn công và tiêu diệt <b>${tName}</b> tại ${coord(tx,ty)}. Quân tấn công chiếm ô mục tiêu.`);
+        }
+        checkGeneralDeath(target);
+      }
+    }
+    state.selectedId=null; state.actionMode=null; afterAction();
+  }
+
+  function executeScout(u){
+    if(u.type!=='scout' || u.scoutUsed) return;
+    recordLastAction(u.side, u.x, u.y, u.x, u.y, 'trinh sát 7x7');
+    u.revealed=true; u.scoutUsed=true;
+    const revealed=[];
+    scoutCells(u).forEach(c=>{
+      const t=unitAt(c.x,c.y);
+      if(t && t.side!==u.side && !t.revealed){ t.revealed=true; revealed.push(t); }
+    });
+    u.type='infantry';
+    addLog(`<b>${sideName(u.side)}</b> dùng <b>Trinh sát</b> tại ${coord(u.x,u.y)} quét vùng 7x7. Làm lộ vĩnh viễn ${revealed.length} quân địch. Sau khi hoàn thành nhiệm vụ, Trinh sát tự chuyển thành <b>Bộ binh</b>.`);
+    state.selectedId=null; state.actionMode=null; afterAction();
+  }
+
+  function prepareBomb(u){
+    if(u.type!=='commando' || u.bombArmed) return;
+    recordLastAction(u.side, u.x, u.y, u.x, u.y, 'đặt bom 5x5');
+    u.revealed=true; u.bombArmed=true;
+    addLog(`<b>${sideName(u.side)}</b> dùng <b>Đặc công</b> đặt bom 5x5 tại ${coord(u.x,u.y)}. Đặc công bị lộ; từ lượt sau có thể kích nổ 5x5 nếu còn sống.`);
+    state.selectedId=null; state.actionMode=null; afterAction();
+  }
+
+  function executeDetonate(u){
+    if(u.type!=='commando') return;
+    recordLastAction(u.side, u.x, u.y, u.x, u.y, u.bombArmed?'kích nổ 5x5':'nổ nhanh 3x3');
+    const radius=u.bombArmed?2:1;
+    const label=u.bombArmed?'bom 5x5':'nổ nhanh 3x3';
+    u.revealed=true;
+    const killed=[];
+    blastCells(u,radius).forEach(c=>{ const t=unitAt(c.x,c.y); if(t && t.id!==u.id){ t.revealed=true; t.alive=false; t.bombArmed=false; killed.push(t); }});
+    u.bombArmed=false; u.alive=false;
+    addLog(`<b>${sideName(u.side)}</b> dùng <b>Đặc công</b> ${label} tại ${coord(u.x,u.y)}. Vụ nổ tiêu diệt ${killed.length} quân trong vùng, không phân biệt ta/địch.`);
+    killed.forEach(checkGeneralDeath);
+    state.selectedId=null; state.actionMode=null; afterAction();
+  }
+
+  function triggerCommandoMartyr(commando, attacker, attackLabel='bị tấn công'){
+    const radius = commando.bombArmed ? 2 : 1;
+    const label = commando.bombArmed ? 'bom cảm tử 5x5' : 'bom cảm tử 3x3';
+    const cx=commando.x, cy=commando.y;
+    commando.revealed=true;
+    commando.bombArmed=false;
+    commando.alive=false;
+    const killed=[];
+    blastCells(commando,radius).forEach(c=>{
+      const t=unitAt(c.x,c.y);
+      if(t && t.id!==commando.id && t.alive){
+        t.revealed=true; t.alive=false; t.bombArmed=false; killed.push(t);
+      }
+    });
+    addLog(`<b>Đặc công ${sideName(commando.side)}</b> tại ${coord(cx,cy)} ${attackLabel} và tự kích hoạt <b>${label}</b>. Vụ nổ có friendly fire, không phân biệt ta/địch, tiêu diệt ${killed.length} quân.`);
+    killed.forEach(checkGeneralDeath);
+    checkGeneralDeath(commando);
+    return killed;
+  }
+
+  function checkGeneralDeath(u){
+    if(u && u.type==='general' && !u.alive){
+      state.winner=enemyOf(u.side); state.gameOver=true; state.phase='ended';
+      addLog(`<b>Tướng quân ${sideName(u.side)}</b> bị hạ. ${sideName(state.winner)} thắng!`);
+    }
+  }
+
+  function afterAction(){
+    if(state.gameOver){ renderAll(); return; }
+    if(state.mode==='single' && state.current==='red'){
+      state.current='blue'; state.viewer='red'; renderAll();
+      setTimeout(aiTurn, 450);
+    }else{
+      advanceTurn();
+    }
+  }
+
+  function advanceTurn(){
+    state.current=enemyOf(state.current); state.viewer=state.current;
+    if(state.current==='red') state.turn++;
+    if(state.mode==='local') showHandoff(`Lượt ${sideName(state.current)}`, `Đưa máy cho người chơi ${sideName(state.current)}. Chỉ người chơi hiện tại mới thấy mặt quân của mình.`);
+    renderAll();
+  }
+
+  function aiTurn(){
+    if(state.gameOver) return;
+    const side='blue';
+    const candidates=ownUnits(side).map(u=>({u,att:legalAttacks(u),mov:legalMoves(u)}));
+
+    const armedBombers=ownUnits(side).filter(u=>u.type==='commando' && u.bombArmed);
+    armedBombers.sort((a,b)=>blastValue(b,2)-blastValue(a,2));
+    if(armedBombers.length && blastValue(armedBombers[0],2)>=18){
+      executeDetonate(armedBombers[0]);
+    }else{
+      const quickBombers=ownUnits(side).filter(u=>u.type==='commando' && !u.bombArmed && blastValue(u,1)>=30);
+      if(quickBombers.length){
+        quickBombers.sort((a,b)=>blastValue(b,1)-blastValue(a,1));
+        executeDetonate(quickBombers[0]);
+      }else{
+        const attackers=candidates.filter(c=>c.att.length);
+        if(attackers.length){
+          attackers.sort((a,b)=>scoreTargets(b.att)-scoreTargets(a.att));
+          const chosen=attackers[0];
+          chosen.att.sort((a,b)=>targetScore(getUnit(b.targetId))-targetScore(getUnit(a.targetId)));
+          executeAttack(chosen.u,getUnit(chosen.att[0].targetId));
+        }else{
+          const scouts=ownUnits(side).filter(u=>u.type==='scout' && !u.scoutUsed && scoutCells(u).some(c=>{ const t=unitAt(c.x,c.y); return t && t.side!==side && !t.revealed; }));
+          if(scouts.length && Math.random()<0.45){
+            scouts.sort((a,b)=>scoutRevealValue(b)-scoutRevealValue(a));
+            executeScout(scouts[0]);
+          }else{
+            const prepBombers=ownUnits(side).filter(u=>u.type==='commando' && !u.bombArmed && blastValue(u,2)>=55);
+            if(prepBombers.length && Math.random()<0.5){
+              prepBombers.sort((a,b)=>blastValue(b,2)-blastValue(a,2));
+              prepareBomb(prepBombers[0]);
+            }else{
+              const movers=candidates.filter(c=>c.mov.length);
+              if(movers.length){
+                const chosen=movers[Math.floor(Math.random()*movers.length)];
+                const targetGeneral=ownUnits('red').find(u=>u.type==='general');
+                let moves=chosen.mov;
+                if(targetGeneral){ moves=[...moves].sort((a,b)=>dist(a,targetGeneral)-dist(b,targetGeneral)); }
+                const mv=moves[0] || chosen.mov[Math.floor(Math.random()*chosen.mov.length)];
+                executeMove(chosen.u,mv.x,mv.y);
+              }else{
+                addLog('AI Xanh không có nước đi hợp lệ.'); advanceTurn();
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  function targetScore(u){ if(!u) return 0; return {general:100,artillery:20,fighter:18,commando:16,guard:10,scout:8,infantry:5}[u.type]||1; }
+  function scoutRevealValue(u){ return scoutCells(u).reduce((sum,c)=>{ const t=unitAt(c.x,c.y); return sum + (t && t.side!==u.side && !t.revealed ? targetScore(t) : 0); },0); }
+  function scoreTargets(att){ return Math.max(...att.map(a=>targetScore(getUnit(a.targetId))),0); }
+  function blastValue(u,radius){ return blastCells(u,radius).reduce((sum,c)=>{ const t=unitAt(c.x,c.y); return sum + (t && t.id!==u.id ? (t.side===u.side ? -targetScore(t) : targetScore(t)) : 0); },0); }
+  function dist(a,b){ return Math.abs(a.x-b.x)+Math.abs(a.y-b.y); }
+
+  function boardClick(x,y){
+    if(state.phase==='setup') return setupClick(x,y);
+    if(state.phase!=='play' || state.gameOver) return;
+    if(state.mode==='single' && state.current==='blue') return;
+    const u=unitAt(x,y);
+    const selected=state.selectedId?getUnit(state.selectedId):null;
+    if(u && u.side===state.current){ state.selectedId=u.id; state.actionMode=null; renderAll(); return; }
+    if(!selected) return;
+    const move=legalMoves(selected).find(m=>m.x===x && m.y===y);
+    const attack=legalAttacks(selected).find(a=>a.x===x && a.y===y);
+    if(attack && (!state.actionMode || state.actionMode==='attack')){ executeAttack(selected,getUnit(attack.targetId)); return; }
+    if(move && (!state.actionMode || state.actionMode==='move')){ executeMove(selected,x,y); return; }
+  }
+
+  function setupClick(x,y){
+    const side=state.setupSide;
+    if(!isDeployCell(side,y)){ alert(`Chỉ được đặt quân trong vùng triển khai của ${sideName(side)}.`); return; }
+    const occ=unitAt(x,y);
+    if(occ){
+      if(occ.side===side){ occ.x=null; occ.y=null; state.selectedSetupType=occ.type; renderAll(); }
+      return;
+    }
+    if(!state.selectedSetupType) return;
+    const u=state.units.find(unit=>unit.side===side && unit.type===state.selectedSetupType && unit.x===null);
+    if(!u) return;
+    u.x=x; u.y=y; u.alive=true; u.revealed=false; u.scoutUsed=false; u.bombArmed=false;
+    if(remainingSetupCounts(side)[state.selectedSetupType]<=0) state.selectedSetupType=null;
+    renderAll();
+  }
+
+  function renderBoard(){
+    const selected=state.selectedId?getUnit(state.selectedId):null;
+    const showMove = !state.actionMode || state.actionMode==='move';
+    const showAttack = !state.actionMode || state.actionMode==='attack';
+    const showSpecial = !state.actionMode || state.actionMode==='special';
+    const moves=selected && showMove?legalMoves(selected):[]; const attacks=selected && showAttack?legalAttacks(selected):[]; const blasts=selected && showSpecial && selected.type==='commando'?blastCells(selected, selected.bombArmed?2:1):[]; const scans=selected && showSpecial && selected.type==='scout' && !selected.scoutUsed?scoutCells(selected):[];
+    els.board.innerHTML='';
+    for(let y=0;y<BOARD;y++) for(let x=0;x<BOARD;x++){
+      const cell=document.createElement('div'); cell.className='cell'; cell.dataset.x=x; cell.dataset.y=y;
+      if(state.phase==='setup'){
+        if(isDeployCell('red',y)) cell.classList.add('deploy-red');
+        if(isDeployCell('blue',y)) cell.classList.add('deploy-blue');
+      }
+      if(selected && selected.x===x && selected.y===y) cell.classList.add('selected');
+      if(moves.some(m=>m.x===x&&m.y===y)) cell.classList.add('move');
+      if(attacks.some(a=>a.x===x&&a.y===y)) cell.classList.add('attack');
+      if(selected && selected.type==='commando' && blasts.some(b=>b.x===x&&b.y===y)) cell.classList.add('blast');
+      if(selected && selected.type==='scout' && scans.some(b=>b.x===x&&b.y===y)) cell.classList.add('scan');
+      const lastBadges=[];
+      ['red','blue'].forEach(side=>{
+        const a=state.lastAction && state.lastAction[side];
+        if(!a) return;
+        const sideShort=side==='red'?'Đ':'X';
+        const sideClass=side==='red'?'red':'blue';
+        const fromHit=sameCell(a.from,x,y), toHit=sameCell(a.to,x,y);
+        if(fromHit || toHit) cell.classList.add('last-action');
+        if(fromHit && toHit) lastBadges.push(`<span class="lastBadge ${sideClass}" title="${sideName(side)} ${a.label}: ${coord(a.from.x,a.from.y)}">${sideShort}◎</span>`);
+        else if(fromHit) lastBadges.push(`<span class="lastBadge ${sideClass}" title="${sideName(side)} xuất phát: ${coord(a.from.x,a.from.y)}">${sideShort}↦</span>`);
+        else if(toHit) lastBadges.push(`<span class="lastBadge ${sideClass}" title="${sideName(side)} điểm đến/mục tiêu: ${coord(a.to.x,a.to.y)}">${sideShort}★</span>`);
+      });
+      const u=unitAt(x,y);
+      if(u){ cell.appendChild(renderPiece(u)); }
+      if(lastBadges.length){ const b=document.createElement('div'); b.className='lastBadges'; b.innerHTML=lastBadges.join(''); cell.appendChild(b); }
+      cell.onclick=()=>boardClick(x,y);
+      els.board.appendChild(cell);
+    }
+  }
+
+  function renderPiece(u){
+    const div=document.createElement('div');
+    const visible = (state.phase==='setup' && u.side===state.setupSide) || u.side===state.viewer || u.revealed || state.phase==='ended';
+    const exposedOwn = u.side===state.viewer && u.revealed && state.phase!=='ended';
+    const sideCls=u.side==='red'?'red':'blue';
+    div.className=`piece ${visible?sideCls:'hidden'} ${u.revealed?'revealed':''} ${exposedOwn?'exposedOwn':''}`;
+    const def=UNIT_DEFS[u.type];
+    div.innerHTML = visible ? `<span class="symbol">${def.icon}</span><span class="abbr">${def.abbr}</span>` : `<span class="symbol">?</span><span class="abbr">Địch</span>`;
+    div.title = visible ? `${sideName(u.side)} — ${def.name}${exposedOwn?' · Đã bị lộ với đối phương':''}` : 'Quân địch chưa xác định';
+    div.onmouseenter=(ev)=>showTooltip(u,ev);
+    div.onmousemove=moveTooltip;
+    div.onmouseleave=hideTooltip;
+    return div;
+  }
+
+
+  function renderActionMenu(selected){
+    if(!els.actionMenuBtns || !els.unitRuleCard) return;
+    els.actionMenuBtns.innerHTML='';
+    if(!selected || state.phase!=='play'){
+      els.actionMenu.style.display='block';
+      els.unitRuleCard.innerHTML='Chọn một quân của bạn để xem luật và thao tác hợp lệ.';
+      els.actionMenuBtns.innerHTML='<span class="muted">Chưa chọn quân.</span>';
+      return;
+    }
+    const def=UNIT_DEFS[selected.type];
+    const canAct = selected.side===state.current && !(state.mode==='single' && state.current==='blue');
+    const extras=[];
+    if(selected.side===state.viewer && selected.revealed) extras.push('Đã bị đối thủ biết danh tính.');
+    if(selected.type==='commando' && selected.bombArmed) extras.push('Bom 5x5 đã đặt.');
+    if(selected.type==='scout' && !selected.scoutUsed) extras.push('Còn 1 lần quét 7x7; dùng xong sẽ thành Bộ binh.');
+    els.unitRuleCard.innerHTML=`<div class="ruleTitle"><b>${def.icon} ${def.name}</b> tại ${coord(selected.x,selected.y)}</div><div>${def.rule}</div>${extras.length?`<div class="ruleNote">${extras.join('<br>')}</div>`:''}`;
+    const addBtn=(label,mode,disabled=false,handler=null,cls='')=>{
+      const b=document.createElement('button'); b.textContent=label; b.className=(state.actionMode===mode?'active ':'')+cls; b.disabled=disabled || !canAct;
+      b.onclick=handler || (()=>setActionMode(mode));
+      els.actionMenuBtns.appendChild(b);
+    };
+    addBtn(`Di chuyển (${legalMoves(selected).length})`,'move');
+    if(selected.type!=='scout') addBtn(`Tấn công (${legalAttacks(selected).length})`,'attack');
+    if(selected.type==='scout' && !selected.scoutUsed) addBtn('👁️ Trinh sát 7x7','special',false,()=>executeScout(selected),'good');
+    if(selected.type==='commando'){
+      addBtn(selected.bombArmed?'🧨 Kích nổ 5x5':'🧨 Nổ nhanh 3x3','special',false,()=>executeDetonate(selected),'danger');
+      if(!selected.bombArmed) addBtn('Đặt bom 5x5','special',false,()=>prepareBomb(selected),'primary');
+      else addBtn('Xem vùng nổ','special');
+    }else if(selected.type!=='scout'){
+      addBtn('Kỹ năng / vùng đặc biệt','special',!hasSpecial(selected));
+    }
+    addBtn('Hủy chọn',null,false,()=>{state.selectedId=null; state.actionMode=null; renderAll();});
+  }
+
+  function renderPanels(){
+    els.phaseLabel.textContent = state.phase==='menu'?'Menu':state.phase==='setup'?'Setup':state.phase==='play'?'Battle':state.phase==='ended'?'Ended':state.phase;
+    els.turnLabel.textContent = state.phase==='play'||state.phase==='ended' ? `${state.turn} · ${sideName(state.current)}` : '-';
+    els.viewerLabel.textContent = `Viewer: ${state.viewer?sideName(state.viewer):'-'}`;
+    els.redCount.textContent=liveCount('red'); els.blueCount.textContent=liveCount('blue');
+    els.menuPanel.style.display=state.phase==='menu'?'block':'none';
+    els.setupPanel.style.display=state.phase==='setup'?'block':'none';
+    els.playPanel.style.display=(state.phase==='play'||state.phase==='ended')?'block':'none';
+    document.getElementById('randomSetupBtn').style.display=state.phase==='setup'?'inline-block':'none';
+    if(state.phase==='setup') renderSetupTray();
+    const selected=state.selectedId?getUnit(state.selectedId):null;
+    renderActionMenu(selected);
+    if(selected){
+      const def=UNIT_DEFS[selected.type];
+      const scoutTxt = selected.type==='scout' ? (selected.scoutUsed ? ' · Scout đã dùng' : ' · Scout 7x7 còn 1 lần') : '';
+      const bombTxt = selected.type==='commando' && selected.bombArmed ? ' · Bom 5x5 đã đặt' : '';
+      const modeTxt = state.actionMode ? ` · Đang chọn: ${state.actionMode==='move'?'Di chuyển':state.actionMode==='attack'?'Tấn công':'Kỹ năng'}` : ' · Chọn action hoặc click ô hợp lệ';
+      els.selectedInfo.innerHTML=`${sideName(selected.side)} · <b>${def.icon} ${def.name}</b> tại ${coord(selected.x,selected.y)} · Move ${legalMoves(selected).length} · Attack ${legalAttacks(selected).length}${scoutTxt}${bombTxt}${modeTxt}`;
+      els.scoutBtn.textContent='Trinh sát 7x7';
+      els.detonateBtn.textContent=selected.type==='commando' && selected.bombArmed ? 'Kích nổ 5x5' : 'Nổ nhanh 3x3';
+      els.scoutBtn.disabled = !(selected.side===state.current && selected.type==='scout' && !selected.scoutUsed);
+      els.detonateBtn.disabled = !(selected.side===state.current && selected.type==='commando');
+      els.prepareBombBtn.disabled = !(selected.side===state.current && selected.type==='commando' && !selected.bombArmed);
+    }else{
+      els.selectedInfo.textContent='Chưa chọn quân'; els.scoutBtn.disabled=true; els.detonateBtn.disabled=true; els.prepareBombBtn.disabled=true; els.detonateBtn.textContent='Nổ nhanh 3x3';
+    }
+    if(state.phase==='menu') els.gameMessage.textContent='Chọn chế độ chơi và cách sắp quân ở panel bên phải, sau đó bắt đầu game.';
+    else if(state.phase==='setup') els.gameMessage.textContent=`Setup thủ công: ${sideName(state.setupSide)} đặt 16 quân trong vùng triển khai. Có thể click “Sắp quân random” để tự động xếp bên hiện tại.`;
+    else if(state.phase==='play') els.gameMessage.textContent=`Lượt ${sideName(state.current)}. Quân của bạn hiện rõ, quân địch chưa lộ sẽ là dấu hỏi.`;
+    else if(state.phase==='ended') els.gameMessage.textContent=`Trận kết thúc. ${sideName(state.winner)} thắng.`;
+    els.victoryBox.style.display=state.gameOver?'block':'none';
+    if(state.gameOver) els.victoryBox.textContent=`${sideName(state.winner)} thắng — Tướng quân đối phương đã bị hạ.`;
+    if(els.lastMoveInfo){
+      const fmt=(side)=>{
+        const a=state.lastAction && state.lastAction[side];
+        if(!a) return `<b>${sideName(side)}</b>: chưa có`;
+        return `<b>${sideName(side)}</b>: ${a.label} ${coord(a.from.x,a.from.y)} → ${coord(a.to.x,a.to.y)} <span class="muted">(Turn ${a.turn})</span>`;
+      };
+      els.lastMoveInfo.innerHTML = `Last move · ${fmt('red')}<br>${fmt('blue')}<div class="muted">Badge trên bàn: ↦ là ô xuất phát, ★ là ô đến/mục tiêu, ◎ là hành động tại chỗ.</div>`;
+    }
+  }
+
+  function renderLog(){
+    els.log.innerHTML = state.log.map(l=>`<div class="logEntry"><span class="kbd">Turn ${l.turn}</span> ${l.msg}</div>`).join('');
+  }
+
+  function renderAll(){ renderBoard(); renderPanels(); renderLog(); }
+
+  document.getElementById('startBtn').onclick=startSetup;
+  document.getElementById('newGameBtn').onclick=resetGame;
+  document.getElementById('randomSetupBtn').onclick=()=>randomSetup(state.setupSide);
+  document.getElementById('clearSetupBtn').onclick=clearSetupSide;
+  document.getElementById('finishSetupBtn').onclick=finishSetup;
+  els.handoffBtn.onclick=hideHandoff;
+  els.endTurnBtn.onclick=()=>{ if(state.phase==='play'&&!state.gameOver){ addLog(`${sideName(state.current)} bỏ lượt.`); advanceTurn(); }};
+  els.scoutBtn.onclick=()=>{ const u=getUnit(state.selectedId); if(u) executeScout(u); };
+  els.detonateBtn.onclick=()=>{ const u=getUnit(state.selectedId); if(u) executeDetonate(u); };
+  els.prepareBombBtn.onclick=()=>{ const u=getUnit(state.selectedId); if(u) prepareBomb(u); };
+
+  initLabels(); resetGame();
+})();
+</script>
+</body>
+</html>
