@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VFX — Profit Planning Model</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap&subset=latin,latin-ext,vietnamese" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#0a0e1a;--bg2:#0f1524;--card:#141b2e;--card2:#1c2640;--line:#27324d;
+--ink:#e8edf7;--mut:#8190ad;--dim:#5d6a86;
+--accent:#5b8def;--gold:#c9a24b;--grn:#3ec78a;--red:#f0556a;--amber:#f5a623;--purple:#9d7bea;--cyan:#3fc4d6;
+}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5}
+.serif{font-family:'Noto Serif Display',serif}
+.mono{font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums}
+.pos{color:var(--grn)}.neg{color:var(--red)}.zero{color:var(--dim)}
+
+/* top bar */
+.topbar{background:linear-gradient(135deg,#10182b,#0a0e1a 70%);border-bottom:1px solid var(--line);padding:18px 28px 0}
+.tb-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:16px}
+.tb-head h1{font-family:'Noto Serif Display',serif;font-size:21px;font-weight:700;letter-spacing:-.4px}
+.tb-head h1 .ac{color:var(--gold)}
+.tb-head .sub{color:var(--mut);font-size:12px;margin-top:5px}
+.tb-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{background:var(--card2);border:1px solid var(--line);color:var(--ink);font-family:'Outfit';font-size:12px;font-weight:500;padding:8px 14px;border-radius:8px;cursor:pointer;transition:.15s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.gold{border-color:rgba(201,162,75,.4);color:var(--gold)}.btn.gold:hover{background:rgba(201,162,75,.1)}
+.btn.red:hover{border-color:var(--red);color:var(--red)}
+/* tabs */
+.tabs{display:flex;gap:2px}
+.tab{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--mut);font-family:'Outfit';font-size:13px;font-weight:500;padding:11px 18px;cursor:pointer;transition:.15s;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--ink);border-bottom-color:var(--gold);font-weight:600}
+.tab .tn{width:18px;height:18px;border-radius:5px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:10px;font-family:'DM Mono'}
+.tab.on .tn{background:var(--gold);color:var(--bg)}
+.tab.disabled{opacity:.4;cursor:not-allowed}
+
+.page{padding:22px 28px 60px;display:none}
+.page.on{display:block}
+
+/* KPI strip */
+.kstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.kpi.a::before{background:var(--accent)}.kpi.g::before{background:var(--gold)}.kpi.p::before{background:var(--purple)}.kpi.c::before{background:var(--cyan)}
+.kpi .kl{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.7px;font-weight:600;margin-bottom:7px}
+.kpi .kv{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;letter-spacing:-.5px}
+.kpi .ks{font-size:10.5px;color:var(--mut);margin-top:4px}
+
+.sec{margin-top:24px}
+.sec-h{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.sec-h .ti{font-family:'Noto Serif Display',serif;font-size:16px;font-weight:600}
+.sec-h .bar{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.sec-h .hint{font-size:11px;color:var(--dim)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px}
+
+/* plan matrix */
+.matrix-wrap{overflow-x:auto}
+table.mtx{border-collapse:collapse;font-size:12px;width:100%;min-width:760px}
+table.mtx th{text-align:center;padding:7px 8px;color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.4px;font-weight:600;border-bottom:1px solid var(--line);white-space:nowrap}
+table.mtx th:first-child{text-align:left;position:sticky;left:0;background:var(--card);z-index:2}
+table.mtx td{padding:3px 5px;border-bottom:1px solid rgba(39,50,77,.4);text-align:center}
+table.mtx td:first-child{text-align:left;font-family:'Outfit';font-weight:500;position:sticky;left:0;background:var(--card);z-index:1;white-space:nowrap}
+table.mtx td.tot{font-family:'DM Mono';color:var(--gold);font-weight:600;background:rgba(201,162,75,.05)}
+table.mtx tr.prem td:first-child{color:var(--purple)}
+table.mtx tr.totrow td{border-top:1px solid var(--line);font-family:'DM Mono';font-weight:600;padding-top:7px}
+table.mtx input{width:42px;background:var(--bg2);border:1px solid transparent;color:var(--ink);font-family:'DM Mono',monospace;font-size:11.5px;padding:4px 3px;border-radius:5px;text-align:center}
+table.mtx input:hover{border-color:var(--line)}
+table.mtx input:focus{outline:none;border-color:var(--accent);background:var(--card2)}
+.tgt-cell{font-family:'DM Mono';font-size:10.5px;color:var(--dim)}
+.ach{font-family:'DM Mono';font-size:11px;font-weight:500}
+.ach.hi{color:var(--grn)}.ach.mid{color:var(--amber)}.ach.lo{color:var(--red)}
+
+/* margin stack mini */
+.stack-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.srow{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:12px}
+.srow .l{width:140px;color:var(--mut);flex-shrink:0}
+.srow .barw{flex:1;height:16px;background:var(--bg2);border-radius:4px;overflow:hidden}
+.srow .bar{height:100%;border-radius:4px;transition:width .25s}
+.srow .v{width:56px;text-align:right;font-family:'DM Mono';font-size:11.5px;flex-shrink:0}
+.stotal{margin-top:11px;padding-top:11px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
+.stotal .l{font-size:12px;font-weight:600}
+.stotal .v{font-family:'DM Mono';font-size:18px;font-weight:500}
+
+/* levers */
+.lev{margin-bottom:13px;background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:10px 12px}
+.lev-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.lev-n{font-size:12px;font-weight:500}
+.lev-v{font-family:'DM Mono';font-size:13px;color:var(--gold);font-weight:500}
+.lev-sl{width:100%;-webkit-appearance:none;height:4px;border-radius:3px;background:var(--bg2);outline:none;margin:3px 0 8px}
+.lev-sl::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--bg)}
+.lev-sl::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--bg)}
+.lev-b{display:flex;align-items:center;gap:6px;font-size:9.5px;color:var(--dim)}
+.lev-b input{width:46px;background:var(--bg2);border:1px solid var(--line);color:var(--mut);font-family:'DM Mono';font-size:10.5px;padding:3px 4px;border-radius:5px;text-align:center}
+.lev-b input:focus{outline:none;border-color:var(--accent);color:var(--ink)}
+.lev-b .bl{text-transform:uppercase;letter-spacing:.4px;font-weight:600;font-size:8.5px}
+.lev-b .sp{flex:1}
+.lev-pos{font-size:9px;color:var(--dim);margin-top:4px;font-family:'DM Mono'}
+.lev-note{font-size:10px;color:var(--dim);margin-top:5px;line-height:1.4}
+.src{font-size:8.5px;padding:1px 6px;border-radius:8px;letter-spacing:.3px;font-weight:700;margin-left:6px}
+.s-base{background:rgba(62,199,138,.14);color:var(--grn);border:1px solid rgba(62,199,138,.3)}
+.s-ass{background:rgba(245,166,35,.14);color:var(--amber);border:1px solid rgba(245,166,35,.3)}
+.s-dep{background:rgba(91,141,239,.14);color:var(--accent);border:1px solid rgba(91,141,239,.3)}
+
+.col2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.col-3-2{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+/* Tab2 two-column: left scroll, right frozen */
+.kd-split{display:grid;grid-template-columns:1fr 3fr;gap:20px;align-items:start}
+.kd-left{min-width:0}
+.kd-right{position:sticky;top:14px;max-height:calc(100vh - 130px);display:flex;flex-direction:column;gap:12px;min-width:0}
+/* TODO next update (A): bảng KH sản lượng Tab 2 bị cắt khi đủ 12 model (max-height:calc(100vh-130px) giới hạn cột phải).
+   Cách nới: (a) bỏ max-height + position:sticky để cột phải cao tự nhiên theo nội dung, HOẶC
+   (b) giữ sticky nhưng cho .matrix-wrap overflow-y:auto với chiều cao đủ 12 dòng + subtotal + tổng (~15 dòng),
+   HOẶC (c) giảm padding/font dòng bảng để 12 model vừa khít 1 màn. Ưu tiên (a) cho đơn giản. */
+/* TODO next update (B): TAB 3 — BỎ CUỘN ở các bảng (Sales Force + Opex KD). Cuộn làm khó view toàn cục.
+   Tab 3 đang dùng chung class .kd-right nên dính max-height + overflow như Tab 2. Cách xử lý: cho .page#page-sf .kd-right
+   KHÔNG có max-height/sticky/overflow (override riêng cho Tab 3) → 2 bảng hiện full, cuộn cả trang thay vì cuộn trong khung.
+   Lưu ý làm cùng (A) để nhất quán: tốt nhất bỏ luôn max-height+sticky cho .kd-right toàn cục, kiểm tra lại Tab 2. */
+.kstrip-c{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.kstrip-c .kpi{padding:11px 13px}
+.kstrip-c .kpi .kv{font-size:18px}
+.kstrip-c .kpi .kl{margin-bottom:5px}
+.plan-frozen{flex:1;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px}
+.plan-frozen::-webkit-scrollbar{width:7px;height:7px}.plan-frozen::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+.plan-frozen table.mtx{font-size:11px}
+.plan-frozen table.mtx th{padding:5px 6px;font-size:9px}
+.plan-frozen table.mtx td{padding:2px 4px}
+.plan-frozen table.mtx input{width:38px;font-size:10.5px;padding:3px 2px}
+.plan-frozen table.mtx tr.grphead td{background:rgba(91,141,239,.07);color:var(--accent);font-size:9px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;padding:5px 6px}
+.plan-frozen table.mtx tr.grphead.prem td{background:rgba(157,123,234,.08);color:var(--purple)}
+.plan-frozen table.mtx tr.subtot td{font-family:'DM Mono';font-size:10px;color:var(--mut);background:rgba(39,50,77,.25);font-weight:600}
+@media(max-width:980px){.kd-split{grid-template-columns:1fr}.kd-right{position:static;max-height:none}.kstrip-c{grid-template-columns:repeat(2,1fr)}}
+.placeholder{padding:60px 20px;text-align:center;color:var(--dim);border:1px dashed var(--line);border-radius:13px}
+.cm-radio{flex:1;cursor:pointer;position:relative}
+.cm-radio input{position:absolute;opacity:0}
+.cm-radio span{display:block;text-align:center;font-size:10px;font-weight:600;padding:5px 4px;border:1px solid var(--line);border-radius:7px;color:var(--dim);transition:.15s;white-space:nowrap}
+.cm-radio input:checked + span{background:var(--purple);border-color:var(--purple);color:#fff}
+.cm-radio:hover span{border-color:var(--purple)}
+.placeholder .pi{font-size:30px;margin-bottom:10px;opacity:.5}
+.placeholder .pt{font-size:14px;font-weight:600;color:var(--mut);margin-bottom:6px}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card2);border:1px solid var(--grn);color:var(--ink);padding:11px 20px;border-radius:10px;font-size:13px;transition:.3s;z-index:100;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@media(max-width:980px){.kstrip{grid-template-columns:repeat(2,1fr)}.stack-grid,.col2,.col-3-2{grid-template-columns:1fr}}
+.ps-tab *{box-sizing:border-box}
+.ps-tab {
+--bg:#0a0e1a;--bg2:#0f1524;--card:#141b2e;--card2:#1c2640;--line:#27324d;
+--ink:#e8edf7;--mut:#8190ad;--dim:#5d6a86;
+--accent:#5b8def;--gold:#c9a24b;--grn:#3ec78a;--red:#f0556a;--amber:#f5a623;--purple:#9d7bea;--cyan:#3fc4d6;
+}
+.ps-tab{font-family:'Outfit',system-ui,sans-serif;color:var(--ink);font-size:14px;line-height:1.5}
+.ps-tab .serif {font-family:'Noto Serif Display',serif}
+.ps-tab .mono {font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums}
+.ps-tab .pos {color:var(--grn)}
+.ps-tab .neg {color:var(--red)}
+.ps-tab .zero {color:var(--dim)}
+.ps-tab .hdr {background:linear-gradient(135deg,#10182b,#0a0e1a 70%);border-bottom:1px solid var(--line);padding:24px 30px 20px}
+.ps-tab .hdr h1 {font-family:'Noto Serif Display',serif;font-size:21px;font-weight:700;letter-spacing:-.4px}
+.ps-tab .hdr h1 .ac {color:var(--gold)}
+.ps-tab .hdr .sub {color:var(--mut);font-size:12px;margin-top:6px;max-width:780px;line-height:1.6}
+.ps-tab .hdr .warn {display:inline-flex;align-items:center;gap:6px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);color:var(--amber);font-size:11px;padding:5px 11px;border-radius:8px;margin-top:10px}
+.ps-tab .wrap {max-width:1360px;margin:0 auto;padding:22px 26px 60px}
+.ps-tab /* global controls */
+.gbar {background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px 20px;margin-bottom:20px;display:flex;gap:24px;align-items:flex-end;flex-wrap:wrap}
+.ps-tab .gctrl {display:flex;flex-direction:column;gap:6px;min-width:200px}
+.ps-tab .gctrl .gl {font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;font-weight:700;display:flex;justify-content:space-between}
+.ps-tab .gctrl .gl .v {color:var(--gold);font-family:'DM Mono'}
+.ps-tab .gctrl input[type=range] {width:100%;-webkit-appearance:none;height:5px;border-radius:3px;background:var(--bg2);outline:none}
+.ps-tab .gctrl input[type=range]::-webkit-slider-thumb {-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--bg)}
+.ps-tab .gctrl .note {font-size:10px;color:var(--dim)}
+.ps-tab .gctrl .bounds {display:flex;gap:5px;align-items:center;font-size:9px;color:var(--dim)}
+.ps-tab .gctrl .bounds input {width:42px;background:var(--bg2);border:1px solid var(--line);color:var(--mut);font-family:'DM Mono';font-size:10px;padding:2px 3px;border-radius:4px;text-align:center}
+.ps-tab .formula-box {background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-family:'DM Mono',monospace;font-size:12px;color:var(--mut);text-align:center;line-height:1.7}
+.ps-tab .formula-box .hl {color:var(--gold)}
+.ps-tab /* result strip */
+.result-strip {background:linear-gradient(135deg,var(--card2),var(--card));border:1px solid var(--gold);border-radius:14px;padding:18px 22px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.ps-tab .result-strip .rl {font-family:'Noto Serif Display',serif;font-size:15px;font-weight:600;max-width:560px;line-height:1.5}
+.ps-tab .result-strip .rl .hl {color:var(--gold)}
+.ps-tab .result-strip .rv {text-align:right}
+.ps-tab .result-strip .rv .big {font-family:'DM Mono';font-size:30px;font-weight:500;color:var(--grn)}
+.ps-tab .result-strip .rv .lbl {font-size:11px;color:var(--mut);margin-top:2px}
+.ps-tab /* showroom grid */
+.sr-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:14px;margin-bottom:22px}
+.ps-tab .sr-card {background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden}
+.ps-tab .sr-card.hub {border-color:var(--purple);border-style:dashed}
+.ps-tab .sr-card.empty {opacity:.55}
+.ps-tab .sr-head {padding:12px 15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:rgba(91,141,239,.05)}
+.ps-tab .sr-card.hub .sr-head {background:rgba(157,123,234,.07)}
+.ps-tab .sr-head .n {font-size:13.5px;font-weight:600}
+.ps-tab .sr-head .t {font-size:8.5px;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:8px;font-weight:700;background:rgba(91,141,239,.15);color:var(--accent)}
+.ps-tab .sr-card.hub .sr-head .t {background:rgba(157,123,234,.15);color:var(--purple)}
+.ps-tab .sr-body {padding:13px 15px}
+.ps-tab .field {margin-bottom:11px}
+.ps-tab .field .fl {font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;font-weight:600;display:flex;justify-content:space-between;margin-bottom:5px}
+.ps-tab .field .fl .v {color:var(--ink);font-family:'DM Mono';font-weight:500}
+.ps-tab .field input[type=range] {width:100%;-webkit-appearance:none;height:4px;border-radius:3px;background:var(--bg2);outline:none}
+.ps-tab .field input[type=range]::-webkit-slider-thumb {-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg)}
+.ps-tab .field input[type=number] {width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--ink);font-family:'DM Mono';font-size:12px;padding:5px 8px;border-radius:6px;text-align:center}
+.ps-tab .field input[type=number]:focus {outline:none;border-color:var(--accent)}
+.ps-tab .divider {border-top:1px dashed var(--line);margin:11px 0}
+.ps-tab .result-block {background:var(--bg2);border-radius:9px;padding:10px 12px;margin-top:10px}
+.ps-tab .rline {display:flex;justify-content:space-between;font-size:11.5px;padding:2px 0}
+.ps-tab .rline .l {color:var(--mut)}
+.ps-tab .rline .v {font-family:'DM Mono';font-weight:500}
+.ps-tab .gate {margin-top:9px;padding:8px 10px;border-radius:7px;font-size:11px;line-height:1.5}
+.ps-tab .gate.ok {background:rgba(62,199,138,.1);border:1px solid rgba(62,199,138,.3);color:var(--grn)}
+.ps-tab .gate.warn {background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);color:var(--amber)}
+.ps-tab .gate.bad {background:rgba(240,85,106,.1);border:1px solid rgba(240,85,106,.3);color:var(--red)}
+.ps-tab /* company summary table */
+.card {background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px}
+.ps-tab table.sumtbl {width:100%;border-collapse:collapse;font-size:12.5px}
+.ps-tab table.sumtbl th {text-align:center;padding:8px 10px;color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.4px;font-weight:700;border-bottom:1px solid var(--line)}
+.ps-tab table.sumtbl th:first-child {text-align:left}
+.ps-tab table.sumtbl td {padding:8px 10px;border-bottom:1px solid rgba(39,50,77,.4);text-align:center;font-family:'DM Mono'}
+.ps-tab table.sumtbl td:first-child {text-align:left;font-family:'Outfit';font-weight:500}
+.ps-tab table.sumtbl tr.totrow td {border-top:1px solid var(--line);font-weight:700;padding-top:10px;color:var(--gold)}
+.ps-tab .sec {margin-top:24px}
+.ps-tab .sec-h {display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.ps-tab .sec-h .ti {font-family:'Noto Serif Display',serif;font-size:16px;font-weight:600}
+.ps-tab .sec-h .bar {flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.ps-tab .sec-h .hint {font-size:11px;color:var(--dim)}
+.ps-tab .src {font-size:8px;padding:1px 6px;border-radius:7px;font-weight:700;letter-spacing:.3px;margin-left:5px}
+.ps-tab .s-field {background:rgba(245,166,35,.14);color:var(--amber);border:1px solid rgba(245,166,35,.3)}
+.ps-tab .s-calc {background:rgba(91,141,239,.14);color:var(--accent);border:1px solid rgba(91,141,239,.3)}
+.ps-tab .toast {position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card2);border:1px solid var(--grn);color:var(--ink);padding:11px 20px;border-radius:10px;font-size:13px;transition:.3s;z-index:100}
+.ps-tab .toast.show {transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tb-head">
+    <div>
+      <h1>VFX Auto — <span class="ac">Profit Planning Model</span></h1>
+      <div class="sub">Mô hình lập kế hoạch lợi nhuận · nguồn = kế hoạch sản lượng → mix, ASP, %đạt target, contribution tự suy ra</div>
+    </div>
+    <div class="tb-actions">
+      <button class="btn gold" onclick="document.getElementById('imp-tgt').click()">⤒ Import Target</button>
+      <input type="file" id="imp-tgt" accept=".json" style="display:none" onchange="importTarget(event)">
+      <button class="btn" onclick="exportCfg()">⤓ Export</button>
+      <button class="btn" onclick="document.getElementById('imp-cfg').click()">⤒ Import</button>
+      <input type="file" id="imp-cfg" accept=".json" style="display:none" onchange="importCfg(event)">
+      <button class="btn red" onclick="resetCfg()">↺ Reset</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab" data-tab="dash"><span class="tn">1</span>Dashboard</button>
+    <button class="tab on" data-tab="kd"><span class="tn">2</span>CM Kinh doanh xe</button>
+    <button class="tab" data-tab="sf"><span class="tn">3</span>Showroom Sales Force</button>
+    <button class="tab" data-tab="xdv"><span class="tn">4</span>XDV</button>
+    <button class="tab" data-tab="ps"><span class="tn">5</span>Price Sensitivity</button>
+  </div>
+</div>
+
+<!-- TAB 1: DASHBOARD (placeholder for now) -->
+<div class="page" id="page-dash">
+  <!-- ===== TAB 1 — DASHBOARD: KIẾN TRÚC ĐÃ CHỐT (build cuối, hội tụ, CHỈ ĐỌC) =====
+    NGUỒN: Tab 2 (CM% khối xe front+back, doanh thu xe, sản lượng, contribution) ·
+           Tab 3 (lương cứng TVBH, opex KD/SR, thu nhập sale, spoke-hub) · Tab 4 (CM xưởng, doanh thu DV, fixed XDV).
+    P&L CÂY 3 TẦNG (khối → điểm → công ty):
+      TẦNG 1 — THEO KHỐI: Khối KD xe (DThu−giá vốn=Front +Back=CM khối xe −lương cứng −opex KD =LN xe) ·
+                          Khối DV (DThu×%CM=CM xưởng −fixed XDV =LN DV) · Khối khác (BH/phụ kiện/MGTC, gộp).
+      TẦNG 2 — THEO ĐIỂM (SR): mỗi SR = LN khối xe + LN DV của SR đó → thấy SR nào lãi/lỗ toàn diện.
+      TẦNG 3 — CÔNG TY: Σ SR − cost cấp công ty (HO + lãi vay + floor plan, 1 DÒNG RIÊNG, KHÔNG phân bổ về SR) = LNTT.
+    TOGGLE 2 LÁT CẮT: khối ↔ điểm bán (cùng số, 2 cách nhìn).
+    CKNM/REBATE: tách 1 dòng nổi bật "nếu bỏ CKNM thì lãi/lỗ ra sao" → phơi bày rủi ro phụ thuộc rebate ~9.5tỷ/th.
+    SPOKE-HUB: 2 view — hub riêng vs cụm hub-spoke (xem note Tab 3 mục 4). Quyết định mở/giữ/đóng hub theo view cụm.
+    KPI CARDS đầu: LNTT công ty · CM% tổng · Sản lượng xe · Doanh thu tổng · Điểm hòa vốn / %công suất.
+    KHÔNG nhập liệu · có filter + collapse/expand cây.
+  ===== -->
+  <div class="placeholder"><div class="pi">📊</div><div class="pt">Dashboard — kiến trúc đã chốt, build cuối</div>
+  <div style="font-size:12px;max-width:460px;margin:0 auto">Hội tụ P&L cây 3 tầng (khối→điểm→công ty), toggle khối↔điểm, CKNM tách riêng, 2 view spoke-hub. Chỉ đọc, nhận từ Tab 2/3/4.</div></div>
+</div>
+
+<!-- TAB 2: CM KINH DOANH XE -->
+<div class="page on" id="page-kd">
+  <div class="kd-split">
+    <!-- LEFT: margin stack + levers (scrolls) -->
+    <div class="kd-left">
+      <div class="sec" style="margin-top:0">
+        <div class="sec-h"><span class="ti">Margin Stack — Front</span><span class="bar"></span><span class="hint">CKCB (theo mix) − chiết khấu + khai thác</span></div>
+        <div class="card">
+          <div id="stack-front"></div>
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
+            <div style="font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:12px">Lớp chiết khấu (trừ)</div>
+            <div id="levers-front"></div>
+            <div style="font-size:10px;color:var(--cyan);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin:16px 0 10px">Khối khai thác (cộng vào front)</div>
+            <div id="levers-front2"></div>
+            <div style="font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin:16px 0 10px">Van CM ↔ kích cầu (tham chiếu Tab 5)</div>
+            <div id="levers-cm"></div>
+            <div style="margin-top:10px;padding:9px 11px;background:rgba(157,123,234,.08);border:1px solid rgba(157,123,234,.3);border-radius:9px">
+              <div style="display:flex;gap:6px;margin-bottom:7px">
+                <label class="cm-radio"><input type="radio" name="cm-link" value="off" onchange="setCMLink('off')" checked><span>Unlink</span></label>
+                <label class="cm-radio"><input type="radio" name="cm-link" value="base" onchange="setCMLink('base')"><span>Link Baseline</span></label>
+                <label class="cm-radio"><input type="radio" name="cm-link" value="tgt" onchange="setCMLink('tgt')"><span>Link Target</span></label>
+              </div>
+              <div id="cm-link-desc" style="font-size:10.5px;color:var(--dim);line-height:1.4">Van CM chỉ trừ front + hiện Tiềm năng TT, không đụng KH quý.</div>
+              <div id="contrib-curve" style="margin-top:9px;padding-top:9px;border-top:1px solid rgba(157,123,234,.2)"></div>
+            </div>
+            <div id="cm-vol-box" style="margin-top:10px;padding:10px 12px;background:rgba(157,123,234,.06);border:1px dashed rgba(157,123,234,.35);border-radius:9px;font-size:11px;line-height:1.55"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-h"><span class="ti">Margin Stack — Back (rebate hãng)</span><span class="bar"></span><span class="hint">SO + SI (2 tầng) + ĐLSX + adhoc</span></div>
+        <div class="card">
+          <div id="stack-back"></div>
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
+            <div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:12px">Chính sách thưởng</div>
+            <div id="levers-back"></div>
+            <div style="font-size:10.5px;color:var(--dim);margin-top:10px;padding-top:10px;border-top:1px solid var(--line);line-height:1.5">
+              <b style="color:var(--gold)">SO/SI/ĐLSX là biến phụ thuộc</b> — drive bởi % đạt = kế hoạch ÷ target (cấp công ty). Sửa bảng kế hoạch bên phải để đổi.<br>
+              <b style="color:var(--purple)">Trợ giá cho khách</b> KHÔNG thuộc P&L công ty (tính ở Tab 3). Tab 2 chỉ tính hoa hồng gốc.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: KPI + plan (frozen) -->
+    <div class="kd-right">
+      <div class="kstrip-c">
+        <div class="kpi a"><div class="kl">Front</div><div class="kv" id="k-front">—</div><div class="ks" id="k-front-s">% DT xe</div></div>
+        <div class="kpi g"><div class="kl">Back</div><div class="kv" id="k-back">—</div><div class="ks" id="k-back-s">rebate</div></div>
+        <div class="kpi p"><div class="kl">CM khối xe</div><div class="kv" id="k-cm">—</div><div class="ks">Front+Back</div></div>
+        <div class="kpi c"><div class="kl">ASP</div><div class="kv" id="k-asp">—</div><div class="ks">bq theo mix</div></div>
+        <div class="kpi a"><div class="kl">Sản lượng</div><div class="kv" id="k-vol">—</div><div class="ks">xe/quý</div></div>
+        <div class="kpi g"><div class="kl">Contribution</div><div class="kv" id="k-contrib">—</div><div class="ks" id="k-contrib-s">tỷ/quý</div></div>
+      </div>
+      <div class="plan-frozen">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+          <span style="font-family:'Noto Serif Display',serif;font-size:14px;font-weight:600">Kế hoạch sản lượng</span>
+          <button class="btn gold" onclick="quickSetup()" style="padding:4px 10px;font-size:11px">⚡ Quick Setup (đạt 100%)</button>
+          <div style="flex:1"></div>
+          <button class="btn" id="btn-period" onclick="togglePeriod()" style="padding:4px 10px;font-size:11px">Quý 3</button>
+        </div>
+        <div class="matrix-wrap"><table class="mtx" id="plan-table"></table></div>
+        <div style="font-size:10px;color:var(--dim);margin-top:8px;line-height:1.4">★ = dòng cao cấp · % đạt = KH quý ÷ target commit · ⚡ Quick Setup điền KH = target (chia đều 3 tháng) để đạt 100% mọi chính sách, sửa ô nào sẽ override ô đó.</div>
+        <div id="ps-ref-box" style="margin-top:12px;padding:11px 13px;background:rgba(157,123,234,.06);border:1px dashed rgba(157,123,234,.35);border-radius:10px;font-size:11px;line-height:1.55"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3 — Showroom Sales Force -->
+<div class="page" id="page-sf">
+  <div class="kd-split">
+    <div class="kd-left">
+      <div style="font-size:18px;font-weight:600;color:var(--gold);margin-bottom:4px">Sales Force</div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:16px">Lực đẩy sale theo từng SR · headcount → lương cứng bậc thang → năng suất</div>
+      <div style="background:rgba(157,123,234,.06);border:1px solid rgba(157,123,234,.25);border-radius:10px;padding:12px 13px;margin-bottom:14px">
+        <div style="font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px">Đòn bẩy thu nhập sale</div>
+        <div style="font-size:11px;line-height:1.7;color:var(--mut)">
+          Giả định an toàn: sale <b style="color:#fff">cạnh tranh tới đồng cuối</b> → HH net/xe thấp & ~cố định.<br>
+          Thu nhập TVBH KHÔNG tăng nhờ margin/xe, mà nhờ <b style="color:#fff">số xe bán được</b> — vốn do <b style="color:#fff">chính sách giá công ty (van CM)</b> kích cầu.<br>
+          → Lợi ích sale & công ty căn chỉnh qua <b style="color:var(--purple)">volume</b>, không qua margin.
+        </div>
+      </div>
+      <div style="background:rgba(157,123,234,.06);border:1px solid rgba(157,123,234,.25);border-radius:10px;padding:12px 13px;margin-bottom:14px">
+        <div style="font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px">2 chỉ số hiệu quả</div>
+        <div style="font-size:11px;line-height:1.7;color:var(--mut)">
+          <b style="color:#fff">① Xe/tháng/người</b> = Volume ÷ TVBH ÷ 3 → năng suất<br>
+          <b style="color:#fff">② Fix cost/xe</b> = Lương cứng ÷ Volume → gánh nặng cố định
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--dim);line-height:1.5">
+        Fix cost = chỉ lương cứng TVBH, giữ tại từng SR (không phân bổ).<br>
+        Lương cứng/người seed 6tr · HH net/xe seed 4tr · Volume seed baseline thật — chỉnh tay.<br><br>
+        <span style="color:var(--purple)">Chừa sẵn:</span> cắm CM/xe → Fix ÷ CM = xe hòa vốn (build sau).
+      </div>
+    </div>
+    <div class="kd-right">
+      <div id="sf-kpi" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px"></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px">Lực đẩy theo showroom</div>
+      <div class="matrix-wrap"><table class="mtx" id="sf-table"></table></div>
+      <div style="font-size:10px;color:var(--dim);margin-top:8px;line-height:1.4">Lương cứng/người & Volume nhập tay · TVBH seed từ file nhân sự thật (T5/2026) · SL = hub Sa La</div>
+
+      <div style="font-size:13px;font-weight:600;margin:24px 0 4px">Opex kinh doanh xe theo showroom</div>
+      <div style="font-size:10px;color:var(--dim);margin-bottom:10px;line-height:1.45">Opex TRỰC TIẾP tại SR (bộ phận KD theo sổ, đã tách khỏi XDV) · seed số thật 3 kỳ T3-T5 · KHÔNG kéo HO/lãi vay về.<br>
+        <span style="color:var(--mut)">Đã loại chống trùng:</span> lương KPI (ở CM% Tab 2) · giảm giá-quà tặng (van CM Tab 2) · lương cơ bản (bảng lương trên).</div>
+      <div class="matrix-wrap"><table class="mtx" id="opex-table"></table></div>
+      <div style="font-size:10px;color:var(--dim);margin-top:8px;line-height:1.4">SL = 0: cost Sa La gộp trong Q9 (Thủ Đức) theo sổ · giá trị nhập tay được, seed từ thực tế.</div>
+    </div>
+  </div>
+</div>
+<div class="page" id="page-xdv">
+  <!-- ===== TAB 4 — XDV: KIẾN TRÚC ĐÃ CHỐT (build next), top-down =====
+    MÔ HÌNH: top-down per SR có xưởng (CHỈ Q9, LA, BL — QT & SL không có DV).
+      [Nhập] Doanh thu DV/SR  →  CM = DThu × %CM  →  LN = CM − Fixed  →  DThu hòa vốn = Fixed ÷ %CM
+    PHÂN LOẠI COST (đã làm sạch từ data BCQT, quyết định của CFO):
+      VARIABLE (vào %CM): phụ tùng/vật tư + TOÀN BỘ lương thợ (lương cơ bản + tăng ca + phụ cấp + BHXH).
+        Lý do: không thuê thợ ngồi chơi khi thiếu khách (headcount theo việc) + tăng ca tăng ngay theo khối lượng.
+      FIXED: thuê xưởng/mặt bằng + khấu hao + dụng cụ + tiền khác (KHÔNG gồm lương thợ).
+    %CM THẬT ~40% (toàn hệ thống) — KHÔNG phải 43-66% như sổ ghi (sổ để lương thợ ở opex → CM ảo cao).
+      → Tab 4 dùng %CM RIÊNG từng SR (mix phụ tùng/công khác nhau). Seed từ data thật, chỉnh tay.
+    SEED số thật 3 kỳ T3-T5 (bộ phận DV theo sổ):
+      Doanh thu: Q9=2.077, LA=809, BL=1.456 (triệu/3kỳ). QT=0, SL=0.
+      LN ròng DV (sổ): Q9=+78, LA=−213, BL=+193 → LA đang LỖ xưởng.
+    ⚠ ĐƠN VỊ: quy về /THÁNG cho nhất quán với Tab 3 (chia seed cho 3).
+    TODO sau khi đào sâu: tách lại fixed/variable của lương thợ (giờ tạm xếp hết variable);
+      phễu xe lũy kế → RO → giờ công → utilisation (mô hình what-if, idea gốc); phễu DV bảo hiểm.
+    Q3: chỉ đẩy doanh thu nhẹ vs Q2 → tác động tổng công ty nhỏ → an toàn dùng giả định gọn này trước.
+  ===== -->
+  <div class="placeholder"><div class="pi">🔧</div><div class="pt">XDV — kiến trúc đã chốt, build next</div>
+  <div style="font-size:12px;max-width:480px;margin:0 auto">Top-down: Doanh thu DV × %CM − Fixed, per SR (Q9/LA/BL). Lương thợ → variable (vào %CM ~40%). Fixed = thuê xưởng + khấu hao. %CM riêng từng SR, seed data thật T3-T5.</div></div>
+</div>
+</div>
+<div class="page" id="page-ps">
+<div class="ps-tab">
+<div class="hdr">
+  <h1>VFX — <span class="ac">Price Sensitivity Lab</span></h1>
+  <div class="sub">Mô-đun thử nghiệm độc lập — KHÔNG ghi đè kế hoạch ở Tab Kinh doanh xe. Ước tính tiềm năng cầu khi compromise hoa hồng gốc, đối chiếu với khả năng cung cấp xe (SI) thực tế từng showroom.</div>
+  <div class="warn">⚠ Kết quả mang tính tham khảo — hệ số nhạy cảm X là giả định kinh nghiệm, chưa có dữ liệu lịch sử giá×volume để hiệu chỉnh</div>
+</div>
+
+<div class="wrap">
+  <div class="gbar">
+    <div class="gctrl">
+      <span class="gl">Compromise hoa hồng gốc <span class="v" id="gv-compromise">1.0%</span></span>
+      <input type="range" id="g-compromise" min="0" max="3" step="0.1" value="1.0">
+      <span class="note">% ASP cắt từ hoa hồng gốc (van CM) · áp dụng toàn hệ thống</span>
+    </div>
+    <div class="gctrl">
+      <span class="gl">ASP tham chiếu <span class="v" id="gv-asp">450 tr</span></span>
+      <input type="range" id="g-asp" min="300" max="700" step="10" value="450">
+      <span class="note">Dùng quy đổi % compromise → giá trị tuyệt đối/xe</span>
+    </div>
+    <div style="flex:1"></div>
+    <button onclick="exportCfg()" style="background:var(--card2);border:1px solid var(--line);color:var(--gold);font-size:12px;padding:8px 14px;border-radius:8px;cursor:pointer">⤓ Export</button>
+    <button onclick="resetCfg()" style="background:var(--card2);border:1px solid var(--line);color:var(--ink);font-size:12px;padding:8px 14px;border-radius:8px;cursor:pointer">↺ Reset</button>
+  </div>
+
+  <div class="formula-box">
+    s<sub>mới</sub> = <span class="hl">(1+X%)×s₀</span> ÷ [ (1+X%)×s₀ + (1−s₀) ]&nbsp;&nbsp;·&nbsp;&nbsp; Δvolume% = (s<sub>mới</sub> − s₀) ÷ s₀&nbsp;&nbsp;·&nbsp;&nbsp; Tiềm năng (xe) = Volume gốc × (1+Δvolume%)
+  </div>
+
+  <div class="result-strip">
+    <div class="rl">Trung bình toàn hệ thống: mỗi <span class="hl">1% compromise hoa hồng gốc</span> → tiềm năng cầu tăng thêm <span class="hl" id="r-avg-pct">—</span> · nhưng <span class="hl" id="r-gate-summary">—</span> chuyển hóa được thành sale-out vì giới hạn nguồn SI.</div>
+    <div class="rv"><div class="big" id="r-net-vol">—</div><div class="lbl">xe/tháng tiềm năng tăng thêm (toàn hệ thống)</div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span class="ti">5 Showroom — song song</span><span class="bar"></span><span class="hint">Mỗi SR: thị phần khu vực (field báo) + hệ số nhạy X (kinh nghiệm) + giới hạn SI</span></div>
+    <div class="sr-grid" id="sr-grid"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span class="ti">Tổng hợp công ty</span><span class="bar"></span></div>
+    <div class="card">
+      <table class="sumtbl" id="sum-table"></table>
+    </div>
+  </div>
+</div>
+
+
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// SEED Q3/2026 — TGT_SO = chỉ tiêu VinFast giao (CỘT Q.III, TỔNG đại lý từ 4 SR: Q9/LA/QT/BL).
+// act5m = volume THẬT T1→T5/2026 bóc từ BKCT (baseline THAM CHIẾU, KHÔNG seed kế hoạch).
+// TGT_SI tạm = TGT_SO (chưa tách; SI suy từ SO + tồn — mục 5.7 handover).
+const SEED=[
+  {"name": "VF3",         "grp": "Phổ thông", "msrp": 299,  "Q3_SO": 120, "Q3_SI": 120, "act5m": 229, "is_high": false},
+  {"name": "VF5",         "grp": "Phổ thông", "msrp": 529,  "Q3_SO": 84,  "Q3_SI": 84,  "act5m": 139, "is_high": false},
+  {"name": "VF6",         "grp": "Phổ thông", "msrp": 689,  "Q3_SO": 74,  "Q3_SI": 74,  "act5m": 80,  "is_high": false},
+  {"name": "MPV7",        "grp": "Phổ thông", "msrp": 819,  "Q3_SO": 55,  "Q3_SI": 55,  "act5m": 57,  "is_high": false},
+  {"name": "Minio Green", "grp": "Phổ thông", "msrp": 269,  "Q3_SO": 21,  "Q3_SI": 21,  "act5m": 12,  "is_high": false},
+  {"name": "Herio Green", "grp": "Phổ thông", "msrp": 499,  "Q3_SO": 9,   "Q3_SI": 9,   "act5m": 0,   "is_high": false},
+  {"name": "Limo Green",  "grp": "Phổ thông", "msrp": 749,  "Q3_SO": 74,  "Q3_SI": 74,  "act5m": 218, "is_high": false},
+  {"name": "EC Van",      "grp": "Phổ thông", "msrp": 285,  "Q3_SO": 23,  "Q3_SI": 23,  "act5m": 29,  "is_high": false},
+  {"name": "VF7",         "grp": "Cao cấp",   "msrp": 799,  "Q3_SO": 36,  "Q3_SI": 36,  "act5m": 23,  "is_high": true},
+  {"name": "VF8",         "grp": "Cao cấp",   "msrp": 1019, "Q3_SO": 16,  "Q3_SI": 16,  "act5m": 11,  "is_high": true},
+  {"name": "VF9",         "grp": "Cao cấp",   "msrp": 1499, "Q3_SO": 10,  "Q3_SI": 10,  "act5m": 7,   "is_high": true},
+  {"name": "VF wild",     "grp": "Cao cấp",   "msrp": 899,  "Q3_SO": 3,   "Q3_SI": 3,   "act5m": 0,   "is_high": true}
+];
+const MONTHS_Q2=['T7','T8','T9'];
+const LINES=SEED.map(d=>d.name);
+const MSRP={}, GRP={}, HIGH={}, TGT_SO={}, TGT_SI={}, ACT5M={};
+SEED.forEach(d=>{MSRP[d.name]=d.msrp;GRP[d.name]=d.grp;HIGH[d.name]=d.is_high;TGT_SO[d.name]=d.Q3_SO;TGT_SI[d.name]=d.Q3_SI;ACT5M[d.name]=d.act5m;});
+const PREMIUM=LINES.filter(l=>HIGH[l]);
+function cssId(s){return s.replace(/[^a-zA-Z0-9]/g,'_');}
+// Display order: phổ thông (giá tăng dần) rồi cao cấp (giá tăng dần)
+const ORDER_MASS=LINES.filter(l=>!HIGH[l]).sort((a,b)=>MSRP[a]-MSRP[b]);
+const ORDER_PREM=LINES.filter(l=>HIGH[l]).sort((a,b)=>MSRP[a]-MSRP[b]);
+
+// ===== PARAM levers (front + back), each {min,max,val,step} =====
+const DEFAULTS={
+  // FRONT — margin bán xe (trừ dần)
+  ctkm:   {min:0.0,max:3.0,val:1.0,step:0.1,grp:'F',name:'CTKM (đại lý gánh)',src:'ass',note:'Phần đại lý gánh chương trình KM'},
+  hoahong:{min:1.0,max:3.0,val:1.7,step:0.1,grp:'F',name:'Hoa hồng gốc',src:'base',note:'Chi phí công ty trả TVBH · vào P&L'},
+  // FRONT — khai thác phụ kiện (cộng vào)
+  pk_val: {min:1,max:20,val:6,step:1,grp:'F2',name:'Giá trị PK khai thác/xe (triệu)',src:'ass',note:'Doanh thu phụ kiện bình quân mỗi xe',unit:'tr'},
+  pk_mgn: {min:5,max:20,val:12,step:1,grp:'F2',name:'Margin phụ kiện (%)',src:'ass',note:'% lãi trên giá trị PK khai thác',unit:'%pk'},
+  // FRONT — khai thác bảo hiểm (cộng vào, % ASP)
+  bh_mgn: {min:0.1,max:0.2,val:0.15,step:0.05,grp:'F2',name:'Margin bảo hiểm (% ASP)',src:'ass',note:'Hoa hồng bảo hiểm · nối phễu BH Tab 4',unit:'%'},
+  // CM — van trợ giá: giảm margin để kích cầu (đồng bộ PS_G.compromise của Tab 5)
+  cm_compromise: {min:-3.0,max:3.0,val:0.0,step:0.1,grp:'CM',name:'Van trợ giá CM% (Δ so baseline)',src:'ass',note:'Delta so baseline quý trước. (+) công ty bỏ lợi nhuận front trợ giá → TRỪ front margin, kích cầu. (-) thắt lại, giữ thêm front. Thực thi: hoa hồng NV / quà KH / giảm giá trực tiếp.',unit:'%'},
+  /* ============================================================
+     ĐÃ BUILD: (1) range -3/+3 default 0; (2) trừ thẳng front: frontCar = ckcb - ctkm - hoahong - cm_compromise.
+     TODO CÒN LẠI (build sau):
+     >>> ROOM KÍCH CẦU = TỔNG 2 POOL → link vào Δvolume: <<<
+        - Pool 1 — Hoa hồng salesperson (Tab 3): TVBH KHÔNG giữ 100% hoa hồng gốc; phần họ tự bỏ trợ giá. Pool "mềm", KHÔNG đụng P&L.
+        - Pool 2 — Van CM (Tab 2 front): công ty bỏ lợi nhuận front. Pool "cứng", đã trừ P&L.
+        - Room KH thực nhận = Pool1 + Pool2. Δvolume (co giãn logit Tab 5) tính trên TỔNG ROOM, KHÔNG chỉ van CM.
+        - Công thức: volume_input = subsidy_salesperson(Tab3) + cm_compromise(Tab2) → qua co giãn.
+     >>> RATIONALE: hoa hồng gốc = HẰNG SỐ NEO (mức baseline), KHÔNG vặn. Van CM% = đạo hàm sạch quanh neo → link 1-1 Δvolume.
+     >>> TOGGLE CM-driven: bật → PLAN tự = cột Tiềm năng TT (đảo chiều luồng). Tắt → nhập tay.
+     ============================================================ */
+  // BACK
+  adhoc:  {min:0.0,max:0.5,val:0.0,step:0.1,grp:'B',name:'Adhoc bonus',src:'ass',note:'Random theo tháng · mặc định 0'},
+};
+
+const LS_P='vfx_plan_P', LS_PLAN='vfx_plan_SO', LS_PLANSI='vfx_plan_SI';
+let P=loadCfg();
+let PLAN=loadPlan();        // {line: [m0,m1,m2]} kế hoạch sản lượng SO
+let PLAN_SI=loadPlanSI();   // kế hoạch nhập SI
+
+// ===== rebate engine (two-tier) =====
+function rateStep(p){if(p>=1)return .5;if(p>=.9)return .35;if(p>=.8)return .2;if(p>=.7)return .15;if(p>=.6)return .1;return 0;}
+function rateExc(pTot,pPrem){let b=0;for(const[t1,t2,q]of[[75,60,.25],[85,70,.35],[95,80,.5],[95,90,.75],[95,95,1.0]])if(pTot>=t1&&pPrem>=t2)b=q;return b;}
+
+function planTotals(){
+  // sum plan per line over months
+  const so={}, si={};
+  LINES.forEach(l=>{so[l]=(PLAN[l]||[0,0,0]).reduce((a,b)=>a+(+b||0),0); si[l]=(PLAN_SI[l]||[0,0,0]).reduce((a,b)=>a+(+b||0),0);});
+  return {so,si};
+}
+function computeKD(){
+  const {so,si}=planTotals();
+  // revenue weighted by MSRP
+  let totRev=0, premRev=0, massRev=0;
+  const lineRev={};
+  LINES.forEach(l=>{const r=so[l]*MSRP[l]; lineRev[l]=r; totRev+=r; if(HIGH[l])premRev+=r; else massRev+=r;});
+  // mix
+  const mix={}; LINES.forEach(l=>mix[l]=totRev? lineRev[l]/totRev:0);
+  // CKCB weighted
+  const CKCB={}; LINES.forEach(l=>CKCB[l]=HIGH[l]?(l==='VF7'?4.5:l==='VF8'?5.5:6):4);
+  let ckcb=0; LINES.forEach(l=>ckcb+=mix[l]*CKCB[l]);
+  // ASP
+  const totVol=LINES.reduce((s,l)=>s+so[l],0);
+  const asp=totVol? totRev/totVol : 0;
+  // achievement per line (SO)
+  const achSO={}, achSI={};
+  LINES.forEach(l=>{achSO[l]=TGT_SO[l]? so[l]/TGT_SO[l]:0; achSI[l]=TGT_SI[l]? si[l]/TGT_SI[l]:0;});
+  // SO: total tier + per-model tier
+  const pTotalSO = totRev? LINES.reduce((s,l)=>s+achSO[l]*lineRev[l],0)/totRev : 0;
+  const soTotal = rateStep(pTotalSO);
+  const soModel = totRev? LINES.reduce((s,l)=>s+rateStep(achSO[l])*lineRev[l],0)/totRev : 0;
+  const so_pct = soTotal + soModel;
+  // SI: same structure, revenue basis = SI volume × MSRP
+  let siRevTot=0; const siRev={}; LINES.forEach(l=>{siRev[l]=si[l]*MSRP[l];siRevTot+=siRev[l];});
+  const pTotalSI = siRevTot? LINES.reduce((s,l)=>s+achSI[l]*siRev[l],0)/siRevTot : 0;
+  const siTotal = rateStep(pTotalSI);
+  const siModel = siRevTot? LINES.reduce((s,l)=>s+rateStep(achSI[l])*siRev[l],0)/siRevTot : 0;
+  const si_pct = siTotal + siModel;
+  // ĐLSX gated by premium achievement (min of premium lines)
+  const premAch = PREMIUM.length? Math.min(...PREMIUM.map(l=>achSO[l]*100)) : 0;
+  const dlsx = rateExc(pTotalSO*100, premAch);
+  const adhoc = P.adhoc.val;
+  const back = so_pct + si_pct + dlsx + adhoc;
+  // front: margin bán xe + khai thác PK + bảo hiểm (all as % of car revenue/ASP)
+  // Van CM (cm_compromise): delta so baseline. Dấu (+) = công ty bỏ lợi nhuận front trợ giá → TRỪ front. Dấu (-) = thắt, giữ thêm front.
+  const cmComp = P.cm_compromise ? P.cm_compromise.val : 0;
+  const frontCar = ckcb - P.ctkm.val - P.hoahong.val - cmComp;
+  const pkProfitPerCar = P.pk_val.val * (P.pk_mgn.val/100); // triệu/xe
+  const frontPK = asp? pkProfitPerCar/asp*100 : 0;          // % ASP
+  const frontBH = P.bh_mgn.val;                              // % ASP
+  const front = frontCar + frontPK + frontBH;
+  // revenue per month (avg) → contribution
+  const months=3;
+  const revTotal=totRev/1000; // tỷ over the quarter
+  const contribQuarterTy = revTotal*(front+back)/100;
+  return {so,si,lineRev,mix,ckcb,asp,achSO,achSI,pTotalSO,pTotalSI,soTotal,soModel,so_pct,siTotal,siModel,si_pct,dlsx,adhoc,premAch,back,front,frontCar,frontPK,frontBH,cmComp,totVol,revTotal,contribQuarterTy,totRev};
+}
+
+// ===== RENDER =====
+// Tính Δ% co giãn tại một mức compromise bất kỳ (thuần, không đụng state)
+function cmDeltaPctAt(cmVal){
+  try{
+    let baseQ=0, potQ=0;
+    PS_SR_ORDER.forEach(code=>{const d=PS_SRD[code]; if(!d.has_data)return;
+      const p=PS_SRP[code], s0=p.s0, X=p.X*cmVal, s1=ps_newShare(s0,X);
+      const dp=s0>0?(s1-s0)/s0:0; const vb=d.vol_baseline||0;
+      baseQ+=vb*3; potQ+=vb*(1+dp)*3;});
+    return baseQ?(potQ-baseQ)/baseQ:0;
+  }catch(e){return 0;}
+}
+// Contribution (tỷ/quý) tại một mức van CM, theo link mode — thuần, không đổi state
+function contribAtCM(cmVal, mode){
+  const dPct=cmDeltaPctAt(cmVal);
+  const soSim={};
+  LINES.forEach(l=>{
+    if(mode==='off'){ soSim[l]=(PLAN[l]||[0,0,0]).reduce((a,b)=>a+(+b||0),0); }
+    else { const anchor=mode==='tgt'?(TGT_SO[l]||0):Math.round((ACT5M[l]||0)*3/5); soSim[l]=Math.round(anchor*(1+dPct)); }
+  });
+  let totRev=0; const lineRev={};
+  LINES.forEach(l=>{const r=soSim[l]*MSRP[l];lineRev[l]=r;totRev+=r;});
+  const mix={}; LINES.forEach(l=>mix[l]=totRev?lineRev[l]/totRev:0);
+  const CKCB={}; LINES.forEach(l=>CKCB[l]=HIGH[l]?(l==='VF7'?4.5:l==='VF8'?5.5:6):4);
+  let ckcb=0; LINES.forEach(l=>ckcb+=mix[l]*CKCB[l]);
+  const totVol=LINES.reduce((s,l)=>s+soSim[l],0);
+  const asp=totVol?totRev/totVol:0;
+  const achSO={}; LINES.forEach(l=>achSO[l]=TGT_SO[l]?soSim[l]/TGT_SO[l]:0);
+  const pTotalSO=totRev?LINES.reduce((s,l)=>s+achSO[l]*lineRev[l],0)/totRev:0;
+  const soTotal=rateStep(pTotalSO);
+  const soModel=totRev?LINES.reduce((s,l)=>s+rateStep(achSO[l])*lineRev[l],0)/totRev:0;
+  const so_pct=soTotal+soModel;
+  const si_pct=rateStep(1)+rateStep(1); // SI giả định đạt 100%
+  const premAch=PREMIUM.length?Math.min(...PREMIUM.map(l=>achSO[l]*100)):0;
+  const dlsx=rateExc(pTotalSO*100,premAch);
+  const back=so_pct+si_pct+dlsx+(P.adhoc?P.adhoc.val:0);
+  const frontCar=ckcb-P.ctkm.val-P.hoahong.val-cmVal;
+  const frontPK=asp?(P.pk_val.val*(P.pk_mgn.val/100))/asp*100:0;
+  const front=frontCar+frontPK+(P.bh_mgn?P.bh_mgn.val:0);
+  const revTotal=totRev/1000;
+  return {cm:cmVal, vol:totVol, ach:pTotalSO*100, front, back, contrib:revTotal*(front+back)/100};
+}
+// Vẽ SVG đường cong contribution vs van CM
+function renderContribCurve(){
+  const box=document.getElementById('contrib-curve'); if(!box)return;
+  const mode=cmLinkMode;
+  if(mode==='off'){box.innerHTML=`<div style="font-size:10.5px;color:var(--dim);text-align:center;padding:14px">Chọn <b style="color:var(--purple)">Link Baseline</b> hoặc <b style="color:var(--purple)">Link Target</b> để xem đường cong contribution theo van CM.</div>`;return;}
+  const pts=[]; for(let cm=-3;cm<=3.0001;cm+=0.1){const r=contribAtCM(+cm.toFixed(1),mode);pts.push(r);}
+  const curCM=P.cm_compromise?P.cm_compromise.val:0;
+  const cur=contribAtCM(curCM,mode);
+  let peak=pts[0]; pts.forEach(p=>{if(p.contrib>peak.contrib)peak=p;});
+  const W=300,H=140,padL=34,padR=10,padT=14,padB=22;
+  const xs=cm=>padL+(cm+3)/6*(W-padL-padR);
+  const mn=Math.min(...pts.map(p=>p.contrib)),mx=Math.max(...pts.map(p=>p.contrib));
+  const ys=v=>{const r=mx-mn||1;return H-padB-(v-mn)/r*(H-padT-padB);};
+  let path=pts.map((p,i)=>`${i?'L':'M'}${xs(p.cm).toFixed(1)},${ys(p.contrib).toFixed(1)}`).join(' ');
+  let ticks=''; [-3,-2,-1,0,1,2,3].forEach(t=>{ticks+=`<line x1="${xs(t)}" y1="${H-padB}" x2="${xs(t)}" y2="${H-padB+3}" stroke="var(--dim)" stroke-width="1"/><text x="${xs(t)}" y="${H-padB+13}" fill="var(--dim)" font-size="8" text-anchor="middle">${t>0?'+':''}${t}</text>`;});
+  let yt=''; [mn,(mn+mx)/2,mx].forEach(v=>{yt+=`<text x="${padL-4}" y="${ys(v)+3}" fill="var(--dim)" font-size="8" text-anchor="end">${v.toFixed(0)}</text>`;});
+  box.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
+    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="var(--line)" stroke-width="1"/>
+    <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="var(--line)" stroke-width="1"/>
+    ${ticks}${yt}
+    <line x1="${xs(0)}" y1="${padT}" x2="${xs(0)}" y2="${H-padB}" stroke="rgba(200,169,110,.3)" stroke-width="1" stroke-dasharray="2,2"/>
+    <path d="${path}" fill="none" stroke="var(--purple)" stroke-width="2"/>
+    <circle cx="${xs(peak.cm)}" cy="${ys(peak.contrib)}" r="3.5" fill="var(--gold)"/>
+    <text x="${xs(peak.cm)}" y="${ys(peak.contrib)-6}" fill="var(--gold)" font-size="8" text-anchor="middle">đỉnh ${peak.contrib.toFixed(1)}</text>
+    <circle cx="${xs(cur.cm)}" cy="${ys(cur.contrib)}" r="4" fill="#fff" stroke="var(--purple)" stroke-width="2"/>
+  </svg>
+  <div style="font-size:10px;color:var(--mut);text-align:center;margin-top:2px">Van hiện tại <b style="color:#fff">${curCM>0?'+':''}${curCM.toFixed(1)}%</b> → <b style="color:var(--purple)">${cur.contrib.toFixed(2)} tỷ</b> · Đỉnh tại van <b style="color:var(--gold)">${peak.cm>0?'+':''}${peak.cm.toFixed(1)}%</b> (<b style="color:var(--gold)">${peak.contrib.toFixed(2)} tỷ</b>)</div>`;
+}
+// Tổng tiềm năng cầu THUẦN/quý toàn hệ thống (từ van CM, công thức logit Tab 5) — chưa chặn SI
+function systemPotentialQ(){
+  let totPot=0;
+  try{PS_SR_ORDER.forEach(code=>{const d=PS_SRD[code]; if(!d.has_data)return; totPot+=ps_computeSR(code).potential;});}catch(e){return 0;}
+  return totPot*3; // vol_baseline là xe/tháng
+}
+function renderPlanTable(){
+  const R=computeKD();
+  const potTT=systemPotentialQ(); // tổng tiềm năng cầu thuần/quý toàn hệ thống
+  let head=`<thead><tr><th>Dòng xe</th>`;
+  MONTHS_Q2.forEach(m=>head+=`<th>${m}</th>`);
+  head+=`<th title="Run-rate quý quy đổi từ volume THẬT T1-T5/2026 (×3/5) — baseline quý gần nhất">Baseline Q</th><th title="Tiềm năng cầu thuần theo van CM (logit Tab 5), phân bổ theo mix DT — CHƯA chặn SI">Tiềm năng TT</th><th>KH quý</th><th>Tgt</th><th>%đạt</th><th>Mix</th></tr></thead>`;
+  function lineRow(l){
+    const pl=PLAN[l]||[0,0,0];
+    const khq=pl.reduce((a,b)=>a+(+b||0),0);
+    const ach=TGT_SO[l]? khq/TGT_SO[l]*100:0;
+    const acls=ach>=90?'hi':ach>=70?'mid':'lo';
+    let cells='';
+    MONTHS_Q2.forEach((m,i)=>cells+=`<td><input type="number" min="0" value="${pl[i]||0}" data-line="${l}" data-mi="${i}" oninput="onPlanInput(this)"></td>`);
+    const rr=Math.round((ACT5M[l]||0)*3/5);
+    const ptt=Math.round(potTT*(R.mix[l]||0));
+    return `<tr class="${HIGH[l]?'prem':''}"><td>${l}${HIGH[l]?' ★':''} <span style="color:var(--dim);font-size:9px">${MSRP[l]}</span></td>${cells}<td class="tgt-cell" style="color:var(--dim)" title="Nhịp bán thật T1-T5 quy đổi/quý">${rr||'–'}</td><td class="ptt-cell" id="ptt-${cssId(l)}" style="color:var(--purple)" title="Tiềm năng cầu thuần × mix DT">${ptt||'–'}</td><td class="tot" id="khq-${cssId(l)}">${khq}</td><td class="tgt-cell" id="tgt-${cssId(l)}">${TGT_SO[l]}</td><td class="ach ${acls}" id="ach-${cssId(l)}">${ach.toFixed(0)}%</td><td class="tgt-cell" id="mix-${cssId(l)}">${(R.mix[l]*100).toFixed(0)}%</td></tr>`;
+  }
+  function subtotRow(lines,label,cls){
+    const khq=lines.reduce((s,l)=>s+(PLAN[l]||[0,0,0]).reduce((a,b)=>a+(+b||0),0),0);
+    const tgt=lines.reduce((s,l)=>s+TGT_SO[l],0);
+    let cells='';
+    MONTHS_Q2.forEach((m,i)=>{const mt=lines.reduce((s,l)=>s+(+(PLAN[l]||[])[i]||0),0);cells+=`<td id="sub-${cls}-${i}">${mt}</td>`;});
+    const ach=tgt?khq/tgt*100:0;
+    const rr=lines.reduce((s,l)=>s+Math.round((ACT5M[l]||0)*3/5),0);
+    const ptt=lines.reduce((s,l)=>s+Math.round(potTT*(R.mix[l]||0)),0);
+    return `<tr class="subtot"><td>${label}</td>${cells}<td style="color:var(--dim)">${rr||'–'}</td><td style="color:var(--purple)">${ptt||'–'}</td><td id="subkhq-${cls}">${khq}</td><td>${tgt}</td><td id="subach-${cls}" class="${ach>=90?'hi':ach>=70?'mid':'lo'}">${ach.toFixed(0)}%</td><td></td></tr>`;
+  }
+  const span=MONTHS_Q2.length+7;
+  let body='<tbody>';
+  body+=`<tr class="grphead"><td colspan="${span}">Nhóm Phổ thông</td></tr>`;
+  ORDER_MASS.forEach(l=>body+=lineRow(l));
+  body+=subtotRow(ORDER_MASS,'∑ Phổ thông','mass');
+  body+=`<tr class="grphead prem"><td colspan="${span}">Nhóm Cao cấp ★</td></tr>`;
+  ORDER_PREM.forEach(l=>body+=lineRow(l));
+  body+=subtotRow(ORDER_PREM,'∑ Cao cấp','prem');
+  // grand total
+  const totKH=LINES.reduce((s,l)=>s+(PLAN[l]||[0,0,0]).reduce((a,b)=>a+(+b||0),0),0);
+  const totTgt=LINES.reduce((s,l)=>s+TGT_SO[l],0);
+  let totCells='';
+  MONTHS_Q2.forEach((m,i)=>{const mt=LINES.reduce((s,l)=>s+(+(PLAN[l]||[])[i]||0),0);totCells+=`<td class="tot" id="mtot-${i}">${mt}</td>`;});
+  const totRR=LINES.reduce((s,l)=>s+Math.round((ACT5M[l]||0)*3/5),0);
+  const totPTT=Math.round(potTT);
+  body+=`<tr class="totrow"><td>TỔNG</td>${totCells}<td style="color:var(--dim)">${totRR}</td><td style="color:var(--purple)" id="ptt-all">${totPTT}</td><td class="tot" id="khq-all">${totKH}</td><td class="tgt-cell">${totTgt}</td><td class="ach ${totKH/totTgt>=.9?'hi':totKH/totTgt>=.7?'mid':'lo'}" id="ach-all">${(totKH/totTgt*100).toFixed(0)}%</td><td></td></tr>`;
+  body+='</tbody>';
+  document.getElementById('plan-table').innerHTML=head+body;
+}
+function onPlanInput(el){
+  const l=el.dataset.line, mi=+el.dataset.mi;
+  if(!PLAN[l])PLAN[l]=[0,0,0];
+  PLAN[l][mi]=+el.value||0;
+  savePlan(); recompute(false); updatePlanDerived();
+}
+function updatePlanDerived(){
+  const R=computeKD();
+  LINES.forEach(l=>{
+    const khq=(PLAN[l]||[0,0,0]).reduce((a,b)=>a+(+b||0),0);
+    const ach=TGT_SO[l]? khq/TGT_SO[l]*100:0;
+    const khqEl=document.getElementById('khq-'+cssId(l)); if(khqEl)khqEl.textContent=khq;
+    const achEl=document.getElementById('ach-'+cssId(l)); if(achEl){achEl.textContent=ach.toFixed(0)+'%';achEl.className='ach '+(ach>=90?'hi':ach>=70?'mid':'lo');}
+    const mixEl=document.getElementById('mix-'+cssId(l)); if(mixEl)mixEl.textContent=(R.mix[l]*100).toFixed(0)+'%';
+  });
+  // group subtotals
+  [['mass',ORDER_MASS],['prem',ORDER_PREM]].forEach(([cls,lines])=>{
+    MONTHS_Q2.forEach((m,i)=>{const mt=lines.reduce((s,l)=>s+(+(PLAN[l]||[])[i]||0),0);const e=document.getElementById('sub-'+cls+'-'+i);if(e)e.textContent=mt;});
+    const khq=lines.reduce((s,l)=>s+(PLAN[l]||[0,0,0]).reduce((a,b)=>a+(+b||0),0),0);
+    const tgt=lines.reduce((s,l)=>s+TGT_SO[l],0);
+    const ke=document.getElementById('subkhq-'+cls); if(ke)ke.textContent=khq;
+    const ae=document.getElementById('subach-'+cls); if(ae){const a=tgt?khq/tgt*100:0;ae.textContent=a.toFixed(0)+'%';ae.className=(a>=90?'hi':a>=70?'mid':'lo');}
+  });
+  MONTHS_Q2.forEach((m,i)=>{const mt=LINES.reduce((s,l)=>s+(+(PLAN[l]||[])[i]||0),0);const e=document.getElementById('mtot-'+i);if(e)e.textContent=mt;});
+  const totKH=LINES.reduce((s,l)=>s+(PLAN[l]||[0,0,0]).reduce((a,b)=>a+(+b||0),0),0);
+  const totTgt=LINES.reduce((s,l)=>s+TGT_SO[l],0);
+  const ka=document.getElementById('khq-all'); if(ka)ka.textContent=totKH;
+  const aa=document.getElementById('ach-all'); if(aa){aa.textContent=(totKH/totTgt*100).toFixed(0)+'%';aa.className='ach '+(totKH/totTgt>=.9?'hi':totKH/totTgt>=.7?'mid':'lo');}
+}
+
+function barRow(label,val,maxv,color,neg){
+  const w=Math.min(100,Math.abs(val)/maxv*100);
+  return `<div class="srow"><span class="l">${label}</span><div class="barw"><div class="bar" style="width:${w}%;background:${neg?'var(--red)':color}"></div></div><span class="v ${neg?'neg':'pos'}">${neg?'−':''}${val.toFixed(2)}%</span></div>`;
+}
+function renderStacks(R){
+  const maxv=Math.max(R.ckcb,R.back,4);
+  let f='';
+  f+=barRow('CKCB (theo mix)',R.ckcb,maxv,'var(--grn)',false);
+  f+=barRow('− CTKM',P.ctkm.val,maxv,'var(--red)',true);
+  f+=barRow('− Hoa hồng gốc',P.hoahong.val,maxv,'var(--red)',true);
+  // Van CM: dấu (+) trừ front (đỏ), dấu (-) cộng front (xanh)
+  if(R.cmComp!==0){
+    const cmNeg=R.cmComp>0; // dương = trừ front
+    const cmW=Math.min(100,Math.abs(R.cmComp)/maxv*100);
+    f+=`<div class="srow"><span class="l" style="color:var(--purple)">${cmNeg?'−':'+'} Van trợ giá CM</span><div class="barw"><div class="bar" style="width:${cmW}%;background:var(--purple)"></div></div><span class="v ${cmNeg?'neg':'pos'}">${cmNeg?'−':'+'}${Math.abs(R.cmComp).toFixed(2)}%</span></div>`;
+  }
+  f+=barRow('+ Margin phụ kiện',R.frontPK,maxv,'var(--cyan)',false);
+  f+=barRow('+ Margin bảo hiểm',R.frontBH,maxv,'var(--cyan)',false);
+  f+=`<div class="stotal"><span class="l" style="color:var(--accent)">= Front margin</span><span class="v ${R.front>=0?'pos':'neg'}">${R.front.toFixed(2)}%</span></div>`;
+  f+=`<div style="font-size:10px;color:var(--dim);margin-top:6px">Bán xe ${R.frontCar.toFixed(2)}% (đã ${R.cmComp>=0?'trừ':'cộng'} van CM ${R.cmComp>=0?'−':'+'}${Math.abs(R.cmComp).toFixed(2)}%) + PK ${R.frontPK.toFixed(2)}% + BH ${R.frontBH.toFixed(2)}% · CKCB bq ${R.ckcb.toFixed(2)}% · ASP ${R.asp.toFixed(0)}tr</div>`;
+  document.getElementById('stack-front').innerHTML=f;
+  let b='';
+  b+=barRow('SO (tổng+per-model)',R.so_pct,maxv,'var(--gold)',false);
+  b+=barRow('SI (tổng+per-model)',R.si_pct,maxv,'var(--gold)',false);
+  b+=barRow('ĐLSX (gated VF7/8/9)',R.dlsx,maxv,'var(--gold)',false);
+  b+=barRow('Adhoc',R.adhoc,maxv,'var(--gold)',false);
+  b+=`<div class="stotal"><span class="l" style="color:var(--gold)">= Back margin</span><span class="v pos">${R.back.toFixed(2)}%</span></div>`;
+  b+=`<div style="font-size:10px;color:var(--dim);margin-top:6px">% đạt tổng SO ${(R.pTotalSO*100).toFixed(0)}% · ĐLSX gate: VF7/8/9 min ${R.premAch.toFixed(0)}%</div>`;
+  document.getElementById('stack-back').innerHTML=b;
+}
+
+function levUnit(k){const u=P[k].unit;if(u==='tr')return ' tr';if(u==='%pk')return '%';return '%';}
+function leverHtml(k){
+  const p=P[k];
+  return `<div class="lev" data-k="${k}">
+    <div class="lev-top"><span class="lev-n">${p.name}<span class="src s-${p.src}">${p.src==='base'?'BASELINE':p.src==='ass'?'GIẢ ĐỊNH':'PHỤ THUỘC'}</span></span><span class="lev-v" id="lv-${k}">${p.val}${levUnit(k)}</span></div>
+    <input type="range" class="lev-sl" id="sl-${k}" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.val}">
+    <div class="lev-b"><span class="bl">min</span><input type="number" id="mn-${k}" value="${p.min}" step="${p.step}"><span class="sp"></span><span class="bl">max</span><input type="number" id="mx-${k}" value="${p.max}" step="${p.step}"></div>
+    <div class="lev-pos" id="ps-${k}"></div>
+    <div class="lev-note">${p.note}</div>
+  </div>`;
+}
+function renderLevers(){
+  document.getElementById('levers-front').innerHTML=Object.keys(P).filter(k=>P[k].grp==='F').map(leverHtml).join('');
+  document.getElementById('levers-front2').innerHTML=Object.keys(P).filter(k=>P[k].grp==='F2').map(leverHtml).join('');
+  document.getElementById('levers-back').innerHTML=Object.keys(P).filter(k=>P[k].grp==='B').map(leverHtml).join('');
+  const cmEl=document.getElementById('levers-cm'); if(cmEl)cmEl.innerHTML=Object.keys(P).filter(k=>P[k].grp==='CM').map(leverHtml).join('');
+  bindLevers();
+}
+// ===== CM Link: van CM → ghi volume vào KH quý. Mode: 'off' | 'base' | 'tgt' =====
+const LS_CMLINK='vfx_cm_linkmode';
+let cmLinkMode=(()=>{try{const v=localStorage.getItem(LS_CMLINK);return (v==='base'||v==='tgt')?v:'off';}catch(e){return 'off';}})();
+
+// Δ% co giãn hệ thống do van CM (dùng systemPotentialQ so baseline thật)
+function cmDeltaPct(){
+  try{
+    let baseQ=0; PS_SR_ORDER.forEach(code=>{const d=PS_SRD[code]; if(d.has_data)baseQ+=(d.vol_baseline||0)*3;});
+    const potQ=systemPotentialQ();
+    return baseQ? (potQ-baseQ)/baseQ : 0;
+  }catch(e){return 0;}
+}
+// Ghi KH quý = anchor × (1+Δ), anchor = Baseline Q (mode 'base') hoặc Target Q3 (mode 'tgt'), phân bổ 3 tháng
+function applyCMtoPlan(){
+  if(cmLinkMode==='off')return;
+  const dPct=cmDeltaPct();
+  LINES.forEach(l=>{
+    const anchor = cmLinkMode==='tgt' ? (TGT_SO[l]||0) : Math.round((ACT5M[l]||0)*3/5);
+    const v=Math.round(anchor*(1+dPct));
+    const b=Math.floor(v/3);
+    PLAN[l]=[b,b,v-2*b];
+  });
+  savePlan();
+}
+const CM_LINK_DESC={
+  off:'Van CM chỉ trừ front + hiện Tiềm năng TT, không đụng KH quý.',
+  base:'KH quý = <b>Baseline Q</b> × (1+Δ van CM), phân bổ theo mix — kịch bản quán tính thị trường + trợ giá. Vẫn sửa tay được.',
+  tgt:'KH quý = <b>Target Q3</b> × (1+Δ van CM) — neo cam kết hãng, van đẩy %đạt quanh target để dò bậc rebate. Vẫn sửa tay được.'
+};
+function setCMLink(mode){
+  cmLinkMode=mode;
+  try{localStorage.setItem(LS_CMLINK,mode);}catch(e){}
+  const desc=document.getElementById('cm-link-desc');
+  if(desc){desc.innerHTML=CM_LINK_DESC[mode]; desc.style.color=mode==='off'?'var(--dim)':'var(--mut)';}
+  applyCMtoPlan();
+  recompute(true);
+}
+function bindLevers(){
+  for(const k in P){
+    const sl=document.getElementById('sl-'+k); if(!sl)continue;
+    const mn=document.getElementById('mn-'+k), mx=document.getElementById('mx-'+k);
+    sl.oninput=()=>{P[k].val=parseFloat(sl.value);updateLev(k);
+      if(k==='cm_compromise'){syncCMtoTab5(P[k].val); if(cmLinkMode!=='off')applyCMtoPlan(); recompute(true);saveCfg();return;}
+      recompute(false);saveCfg();};
+    const ab=()=>{let lo=parseFloat(mn.value),hi=parseFloat(mx.value);if(isNaN(lo))lo=P[k].min;if(isNaN(hi))hi=P[k].max;if(lo>=hi)hi=lo+P[k].step;P[k].min=lo;P[k].max=hi;sl.min=lo;sl.max=hi;if(P[k].val<lo)P[k].val=lo;if(P[k].val>hi)P[k].val=hi;sl.value=P[k].val;updateLev(k);recompute(false);saveCfg();};
+    mn.onchange=ab;mx.onchange=ab;
+  }
+}
+function updateLev(k){
+  const p=P[k];
+  document.getElementById('lv-'+k).textContent=p.val+levUnit(k);
+  const ps=document.getElementById('ps-'+k);
+  if(ps){const pct=(p.val-p.min)/(p.max-p.min)*100;ps.textContent=`↔ ${p.val}${levUnit(k)} · ${pct.toFixed(0)}% của dải [${p.min}–${p.max}]`;}
+}
+
+function recompute(full=true){
+  const R=computeKD();
+  document.getElementById('k-front').textContent=R.front.toFixed(2)+'%';
+  document.getElementById('k-front').className='kv '+(R.front>=0?'pos':'neg');
+  document.getElementById('k-back').textContent=R.back.toFixed(2)+'%';
+  document.getElementById('k-back').className='kv pos';
+  document.getElementById('k-cm').textContent=(R.front+R.back).toFixed(2)+'%';
+  document.getElementById('k-cm').className='kv '+((R.front+R.back)>=0?'pos':'neg');
+  document.getElementById('k-asp').textContent=R.asp.toFixed(0)+' tr';
+  document.getElementById('k-vol').textContent=R.totVol;
+  document.getElementById('k-contrib').textContent=R.contribQuarterTy.toFixed(2)+' tỷ';
+  document.getElementById('k-contrib-s').textContent=(R.contribQuarterTy/3).toFixed(2)+' tỷ/tháng';
+  document.getElementById('k-front-s').textContent='DT '+R.revTotal.toFixed(0)+'tỷ/quý';
+  document.getElementById('k-back-s').textContent='ĐLSX '+(R.dlsx>0?'mở':'khóa');
+  renderStacks(R);
+  if(full) renderPlanTable();
+  renderPSRef();
+  renderCMVolBox(R);
+  renderContribCurve();
+}
+
+// ===== CM lever → volume impact box (in Margin Stack, reads Tab5 elasticity) =====
+function renderCMVolBox(R){
+  const box=document.getElementById('cm-vol-box'); if(!box)return;
+  try{
+    let totalBase=0, totalPotential=0, totalRealized=0;
+    PS_SR_ORDER.forEach(code=>{
+      const d=PS_SRD[code]; if(!d.has_data)return;
+      const r=ps_computeSR(code);
+      totalBase+=r.volBase; totalPotential+=r.potential; totalRealized+=r.realized;
+    });
+    // baseline quý = run-rate tháng × 3 (PS vol_baseline là xe/tháng)
+    const baseQ=Math.round(totalBase*3);
+    const potQ=Math.round(totalPotential*3);
+    const realQ=Math.round(totalRealized*3);
+    const dPot=potQ-baseQ, dReal=realQ-baseQ;
+    const cm=(P.cm_compromise?P.cm_compromise.val:PS_G.compromise);
+    const planVol=(R&&R.totVol)?R.totVol:0;
+    box.innerHTML=`<b style="color:var(--purple)">Tác động Compromise CM ${(+cm).toFixed(1)}% lên sản lượng</b> — `+
+      `baseline quý trước (thật T1-T5): <span class="mono" style="color:var(--gold)">${baseQ} xe</span> · `+
+      `tiềm năng cầu: <span class="mono pos">${potQ} xe (${dPot>=0?'+':''}${dPot})</span> · `+
+      `hiện thực hóa (chặn SI): <span class="mono pos">${realQ} xe (${dReal>=0?'+':''}${dReal})</span>.<br>`+
+      `<span style="color:var(--dim)">Kế hoạch SO đang đặt: <span class="mono">${planVol} xe</span>. Đây là tham chiếu co giãn (logit, Tab 5) — KHÔNG tự ghi đè kế hoạch. Chỉnh chi tiết s₀/X từng SR ở Tab 5.</span>`;
+  }catch(e){
+    box.innerHTML=`<span style="color:var(--dim)">Van CM — đang khởi tạo tham chiếu Tab 5…</span>`;
+  }
+}
+
+// sync CM lever (Tab2) → PS_G.compromise + Tab5 slider, recompute Tab5
+function syncCMtoTab5(val){
+  try{
+    PS_G.compromise=val; ps_saveG();
+    const g=document.getElementById('g-compromise'); if(g){g.value=val;}
+    const gv=document.getElementById('gv-compromise'); if(gv){gv.textContent=val.toFixed(1)+'%';}
+    if(typeof ps_recompute==='function') ps_recompute();
+  }catch(e){}
+}
+
+// ===== Price Sensitivity reference box (Tab2 reads Tab5, never auto-writes plan) =====
+function renderPSRef(){
+  const box=document.getElementById('ps-ref-box');
+  if(!box) return;
+  try{
+    let totalAdd=0, totalBase=0, totalRealized=0;
+    PS_SR_ORDER.forEach(code=>{
+      const d=PS_SRD[code]; if(!d.has_data) return;
+      const r=ps_computeSR(code);
+      totalBase+=r.volBase; totalAdd+=r.addPotential; totalRealized+=Math.max(0,r.realized-r.volBase);
+    });
+    const pct=totalBase? totalAdd/totalBase*100:0;
+    const pctReal=totalBase? totalRealized/totalBase*100:0;
+    box.innerHTML=`<b style="color:var(--purple)">📊 Tham chiếu từ Price Sensitivity Lab</b> (Tab 5) — ở mức compromise hoa hồng hiện tại (<span class="mono" style="color:var(--gold)">${PS_G.compromise.toFixed(1)}%</span>), `+
+      `tiềm năng cầu toàn hệ thống tăng <span class="mono pos">+${pct.toFixed(1)}%</span> so với baseline, nhưng do giới hạn SI chỉ <span class="mono pos">+${pctReal.toFixed(1)}%</span> có thể hiện thực hóa. `+
+      `Đây CHỈ là tham khảo — không tự ghi vào kế hoạch. Nếu muốn áp dụng, hãy chủ động tăng kế hoạch SO/SI ở bảng trên theo tỷ lệ này.`;
+  }catch(e){
+    box.innerHTML=`<b style="color:var(--purple)">📊 Tham chiếu từ Price Sensitivity Lab</b> (Tab 5) — đang khởi tạo...`;
+  }
+}
+
+// Quick Setup: điền kế hoạch = target (chia đều 3 tháng) → đạt 100% mọi chính sách
+function quickSetup(){
+  if(!confirm('Điền kế hoạch = target cho tất cả dòng (chia đều 3 tháng)? Ô đã sửa sẽ bị ghi đè.'))return;
+  LINES.forEach(l=>{
+    const t=TGT_SO[l]||0, ti=TGT_SI[l]||0;
+    const base=Math.floor(t/3), baseI=Math.floor(ti/3);
+    PLAN[l]=[base,base,t-2*base];
+    PLAN_SI[l]=[baseI,baseI,ti-2*baseI];
+  });
+  savePlan(); recompute(true); toast('Đã set kế hoạch = target (100% baseline)');
+}
+
+// ===== persistence =====
+function loadCfg(){try{const s=localStorage.getItem(LS_P);if(s){const o=JSON.parse(s);const m=JSON.parse(JSON.stringify(DEFAULTS));for(const k in m)if(o[k]){
+  // MIGRATION: van CM đổi range 0-3 → -3/+3. Nếu localStorage cũ (min>=0) thì BỎ QUA, giữ default mới.
+  if(k==='cm_compromise' && o[k].min>=0) continue;
+  m[k].min=o[k].min;m[k].max=o[k].max;m[k].val=o[k].val;}return m;}}catch(e){}return JSON.parse(JSON.stringify(DEFAULTS));}
+function loadPlan(){try{const s=localStorage.getItem(LS_PLAN);if(s)return JSON.parse(s);}catch(e){}
+  const pl={};LINES.forEach(l=>{const a=TGT_SO[l]||0;pl[l]=[Math.round(a/3),Math.round(a/3),a-2*Math.round(a/3)];});return pl;}
+function loadPlanSI(){try{const s=localStorage.getItem(LS_PLANSI);if(s)return JSON.parse(s);}catch(e){}
+  const pl={};LINES.forEach(l=>{const a=TGT_SI[l]||0;pl[l]=[Math.round(a/3),Math.round(a/3),a-2*Math.round(a/3)];});return pl;}
+function saveCfg(){try{const o={};for(const k in P)o[k]={min:P[k].min,max:P[k].max,val:P[k].val};localStorage.setItem(LS_P,JSON.stringify(o));}catch(e){}}
+function savePlan(){try{localStorage.setItem(LS_PLAN,JSON.stringify(PLAN));localStorage.setItem(LS_PLANSI,JSON.stringify(PLAN_SI));}catch(e){}}
+
+function exportCfg(){
+  const o={params:{},plan:PLAN,plan_si:PLAN_SI};
+  for(const k in P)o.params[k]={min:P[k].min,max:P[k].max,val:P[k].val};
+  dl(o,'vfx-tab2-config.json'); toast('Đã export');
+}
+function importCfg(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(o.params)for(const k in P)if(o.params[k]){P[k]=Object.assign(P[k],o.params[k]);}if(o.plan)PLAN=o.plan;if(o.plan_si)PLAN_SI=o.plan_si;saveCfg();savePlan();renderLevers();for(const k in P)updateLev(k);recompute(true);toast('Đã import cấu hình');}catch(err){toast('File lỗi');}};r.readAsText(f);}
+function importTarget(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);
+  // expect array [{name, Q3_SO, Q3_SI}] hoặc {name, SO, SI}
+  let n=0;(Array.isArray(o)?o:o.targets||[]).forEach(d=>{if(TGT_SO[d.name]!=null){const so=d.Q3_SO!=null?d.Q3_SO:d.SO; const si=d.Q3_SI!=null?d.Q3_SI:d.SI; if(so!=null)TGT_SO[d.name]=so;if(si!=null)TGT_SI[d.name]=si;n++;}});
+  recompute(true);toast('Đã import target '+n+' dòng');}catch(err){toast('File target lỗi');}};r.readAsText(f);}
+function dl(o,name){const b=new Blob([JSON.stringify(o,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();}
+function resetCfg(){if(!confirm('Reset toàn bộ về mặc định?'))return;P=JSON.parse(JSON.stringify(DEFAULTS));localStorage.removeItem(LS_PLAN);localStorage.removeItem(LS_PLANSI);PLAN=loadPlan();PLAN_SI=loadPlanSI();saveCfg();savePlan();renderLevers();for(const k in P)updateLev(k);recompute(true);toast('Đã reset');}
+let tT;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2000);}
+
+let period='Q3';
+function togglePeriod(){toast('Hiện đang ở Q3/2026 — import target quý khác qua Import Target');}
+
+// ===== tab nav =====
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on');
+    document.getElementById('page-'+t.dataset.tab).classList.add('on');
+  };
+});
+
+// ===== init =====
+renderLevers();
+for(const k in P)updateLev(k);
+recompute(true);
+
+
+// ===== TAB 5: PRICE SENSITIVITY LAB =====
+
+// vol_baseline = run-rate THẬT xe/tháng từ BKCT T1-T5 (LA=118,BL=158,Q9=270,QT=131,SL=128 / 5 tháng).
+// Mã model: Q9=Thủ Đức(S11007), LA=Tân An(S11001), QT=Quang Trung(S11008), BL=Bến Lức(S11006). SL=hub Sa La (CÓ data bán xe thật).
+const PS_SRD={"LA": {"name": "Long An (Tân An)", "is_hub": false, "vol_baseline": 24, "has_data": true}, "BL": {"name": "Bến Lức", "is_hub": false, "vol_baseline": 32, "has_data": true}, "Q9": {"name": "Quận 9 (Thủ Đức)", "is_hub": false, "vol_baseline": 54, "has_data": true}, "QT": {"name": "Quang Trung", "is_hub": false, "vol_baseline": 26, "has_data": true}, "SL": {"name": "Sa La (hub)", "is_hub": true, "vol_baseline": 26, "has_data": true}};
+const PS_SR_ORDER=['LA','BL','Q9','QT','SL'];
+
+const PS_DEFAULTS_G={compromise:1.0, asp:450};
+const PS_DEFAULTS_SR={};
+PS_SR_ORDER.forEach(c=>{PS_DEFAULTS_SR[c]={s0:30, X:25, X_min:5, X_max:60, si_cap:Math.round((PS_SRD[c].vol_baseline||20)*1.15)};});
+
+const PS_LS_G='vfx_ps_global', PS_LS_SR='vfx_ps_sr';
+let PS_G=ps_loadG();
+let PS_SRP=ps_loadSR();
+
+function ps_newShare(s0,X){
+  s0=s0/100; const Xf=1+X/100;
+  const a=Xf*s0;
+  return a/(a+(1-s0))*100;
+}
+function ps_computeSR(code){
+  const d=PS_SRD[code], p=PS_SRP[code];
+  const s0=p.s0, X=p.X*PS_G.compromise; // X is "per 1% compromise"; scale by actual compromise level
+  const s1=ps_newShare(s0,X);
+  const dPct=s0>0? (s1-s0)/s0*100 : 0;
+  const volBase=d.vol_baseline||0;
+  const potential=volBase*(1+dPct/100);
+  const addPotential=potential-volBase;
+  const siCap=p.si_cap;
+  const realized=Math.min(potential,siCap);
+  const unrealized=Math.max(0,potential-siCap);
+  const commissionLoss=PS_G.compromise/100*PS_G.asp; // triệu/xe lost from base commission
+  return {s0,s1,dPct,volBase,potential,addPotential,siCap,realized,unrealized,commissionLoss};
+}
+
+function ps_leverRow(label,id,val,min,max,step,unit,note,extra=''){
+  return `<div class="field" data-k="${id}">
+    <div class="fl"><span>${label}</span><span class="v" id="v-${id}">${val}${unit}</span></div>
+    <input type="range" id="sl-${id}" min="${min}" max="${max}" step="${step}" value="${val}">
+    <div style="font-size:9px;color:var(--dim);margin-top:3px">${note}</div>${extra}
+  </div>`;
+}
+
+function ps_renderGrid(){
+  const grid=document.getElementById('sr-grid');
+  let html='';
+  PS_SR_ORDER.forEach(code=>{
+    const d=PS_SRD[code], p=PS_SRP[code];
+    const empty=!d.has_data;
+    html+=`<div class="sr-card ${d.is_hub?'hub':''} ${empty?'empty':''}">
+      <div class="sr-head"><span class="n">${d.name} <span style="color:var(--dim);font-weight:400;font-size:11px">${code}</span></span><span class="t">${d.is_hub?'HUB':'SPOKE'}</span></div>
+      <div class="sr-body" data-code="${code}">
+        <div class="field" data-k="s0-${code}">
+          <div class="fl"><span>Thị phần khu vực (s₀) <span class="src s-field">FIELD BÁO</span></span><span class="v" id="v-s0-${code}">${p.s0}%</span></div>
+          <input type="range" id="sl-s0-${code}" min="5" max="80" step="5" value="${p.s0}">
+          <div style="font-size:9px;color:var(--dim);margin-top:3px">% trong rổ VF cạnh tranh khu vực — showroom tự ước/khảo sát</div>
+        </div>
+        <div class="field" data-k="X-${code}">
+          <div class="fl"><span>Hệ số nhạy X (/1% compromise) <span class="src s-field">KINH NGHIỆM</span></span><span class="v" id="v-X-${code}">${p.X}%</span></div>
+          <input type="range" id="sl-X-${code}" min="${p.X_min}" max="${p.X_max}" step="5" value="${p.X}">
+          <div style="font-size:9px;color:var(--dim);margin-top:3px">min <input type="number" id="mn-X-${code}" value="${p.X_min}" style="width:36px;display:inline;padding:1px 3px;font-size:9px"> · max <input type="number" id="mx-X-${code}" value="${p.X_max}" style="width:36px;display:inline;padding:1px 3px;font-size:9px"></div>
+        </div>
+        <div class="divider"></div>
+        <div class="field" data-k="si-${code}">
+          <div class="fl"><span>Khả năng nhập SI/tháng <span class="src s-field">FIELD BÁO</span></span></div>
+          <input type="number" id="in-si-${code}" value="${p.si_cap}" min="0">
+          <div style="font-size:9px;color:var(--dim);margin-top:3px">Phân bổ xe từ hãng — phụ thuộc kế hoạch kinh doanh đã thống nhất với VF</div>
+        </div>
+        <div class="result-block" id="res-${code}"></div>
+      </div>
+    </div>`;
+  });
+  grid.innerHTML=html;
+  ps_bindGrid();
+}
+function ps_bindGrid(){
+  PS_SR_ORDER.forEach(code=>{
+    const sl_s0=document.getElementById('sl-s0-'+code);
+    sl_s0.oninput=()=>{PS_SRP[code].s0=+sl_s0.value;document.getElementById('v-s0-'+code).textContent=PS_SRP[code].s0+'%';ps_saveSR();ps_recompute();};
+    const sl_X=document.getElementById('sl-X-'+code);
+    sl_X.oninput=()=>{PS_SRP[code].X=+sl_X.value;document.getElementById('v-X-'+code).textContent=PS_SRP[code].X+'%';ps_saveSR();ps_recompute();};
+    const mnX=document.getElementById('mn-X-'+code), mxX=document.getElementById('mx-X-'+code);
+    const applyB=()=>{let lo=+mnX.value,hi=+mxX.value;if(isNaN(lo))lo=5;if(isNaN(hi))hi=60;if(lo>=hi)hi=lo+5;PS_SRP[code].X_min=lo;PS_SRP[code].X_max=hi;sl_X.min=lo;sl_X.max=hi;if(PS_SRP[code].X<lo)PS_SRP[code].X=lo;if(PS_SRP[code].X>hi)PS_SRP[code].X=hi;sl_X.value=PS_SRP[code].X;document.getElementById('v-X-'+code).textContent=PS_SRP[code].X+'%';ps_saveSR();ps_recompute();};
+    mnX.onchange=applyB; mxX.onchange=applyB;
+    const inSi=document.getElementById('in-si-'+code);
+    inSi.oninput=()=>{PS_SRP[code].si_cap=+inSi.value||0;ps_saveSR();ps_recompute();};
+  });
+}
+
+function ps_recompute(){
+  let totalAdd=0, totalUnrealized=0, totalBase=0, totalCommLoss=0, totalRealizedExtra=0;
+  let sumDpct=0, cnt=0;
+  PS_SR_ORDER.forEach(code=>{
+    const d=PS_SRD[code];
+    if(!d.has_data){document.getElementById('res-'+code).innerHTML=`<div style="text-align:center;color:var(--dim);font-size:11px;padding:6px">Chưa có data baseline</div>`;return;}
+    const r=ps_computeSR(code);
+    totalBase+=r.volBase; totalAdd+=r.addPotential; totalUnrealized+=r.unrealized;
+    totalRealizedExtra+=Math.max(0,r.realized-r.volBase);
+    totalCommLoss+=r.commissionLoss*r.realized;
+    sumDpct+=r.dPct; cnt++;
+    const gateClass = r.unrealized<=0.5 ? 'ok' : r.unrealized < r.addPotential*0.5 ? 'warn' : 'bad';
+    const gateMsg = r.unrealized<=0.5
+      ? `✓ SI đủ đáp ứng tiềm năng — toàn bộ +${r.addPotential.toFixed(1)} xe có thể hiện thực hóa`
+      : `⚠ SI giới hạn ${r.siCap} xe — chỉ hiện thực được +${Math.max(0,r.realized-r.volBase).toFixed(1)}/${r.addPotential.toFixed(1)} xe tiềm năng (mất ${r.unrealized.toFixed(1)} xe vì thiếu nguồn cung)`;
+    document.getElementById('res-'+code).innerHTML=`
+      <div class="rline"><span class="l">Thị phần mới</span><span class="v">${r.s1.toFixed(1)}% <span style="color:var(--dim)">(${r.s0}→${r.s1.toFixed(1)})</span></span></div>
+      <div class="rline"><span class="l">Δ Volume tiềm năng</span><span class="v pos">+${r.dPct.toFixed(1)}%</span></div>
+      <div class="rline"><span class="l">Volume gốc</span><span class="v">${r.volBase} xe/tháng</span></div>
+      <div class="rline"><span class="l">Tiềm năng cầu</span><span class="v pos">${r.potential.toFixed(1)} xe <span style="color:var(--dim)">(+${r.addPotential.toFixed(1)})</span></span></div>
+      <div class="gate ${gateClass}">${gateMsg}</div>`;
+  });
+  const avgDpct = cnt? sumDpct/cnt : 0;
+  document.getElementById('r-avg-pct').textContent='+'+avgDpct.toFixed(1)+'% volume';
+  document.getElementById('r-net-vol').textContent='+'+totalRealizedExtra.toFixed(1);
+  const lossShare = totalAdd>0? totalUnrealized/totalAdd*100 : 0;
+  document.getElementById('r-gate-summary').textContent= lossShare<5 ? 'gần như toàn bộ' : lossShare>50 ? `chỉ một phần nhỏ (mất ${lossShare.toFixed(0)}%)` : `phần lớn (mất ${lossShare.toFixed(0)}%)`;
+  ps_renderSummaryTable(totalBase,totalAdd,totalRealizedExtra,totalUnrealized,totalCommLoss);
+  if(typeof renderPSRef==='function') renderPSRef(); // sync reference box back in Tab 2
+}
+
+function ps_renderSummaryTable(base,add,realizedExtra,unrealized,commLoss){
+  let h=`<thead><tr><th>Showroom</th><th>Vol gốc</th><th>Tiềm năng +</th><th>SI cap</th><th>Hiện thực hóa được</th><th>Mất vì thiếu SI</th></tr></thead><tbody>`;
+  PS_SR_ORDER.forEach(code=>{
+    const d=PS_SRD[code]; if(!d.has_data){h+=`<tr><td>${d.name}</td><td colspan="5" style="color:var(--dim)">chưa có data</td></tr>`;return;}
+    const r=ps_computeSR(code);
+    h+=`<tr><td>${d.name}</td><td>${r.volBase}</td><td class="pos">+${r.addPotential.toFixed(1)}</td><td>${r.siCap}</td><td class="pos">+${Math.max(0,r.realized-r.volBase).toFixed(1)}</td><td class="${r.unrealized>0?'neg':'zero'}">${r.unrealized>0?'−'+r.unrealized.toFixed(1):'—'}</td></tr>`;
+  });
+  h+=`<tr class="totrow"><td>TỔNG</td><td>${base}</td><td>+${add.toFixed(1)}</td><td>${PS_SR_ORDER.reduce((s,c)=>s+(PS_SRP[c].si_cap||0),0)}</td><td>+${realizedExtra.toFixed(1)}</td><td>${unrealized>0?'−'+unrealized.toFixed(1):'—'}</td></tr>`;
+  h+='</tbody>';
+  document.getElementById('sum-table').innerHTML=h;
+}
+
+// global controls
+document.getElementById('g-compromise').oninput=function(){PS_G.compromise=+this.value;document.getElementById('gv-compromise').textContent=PS_G.compromise.toFixed(1)+'%';ps_saveG();ps_recompute();syncCMfromTab5(PS_G.compromise);};
+document.getElementById('g-asp').oninput=function(){PS_G.asp=+this.value;document.getElementById('gv-asp').textContent=PS_G.asp+' tr';ps_saveG();ps_recompute();};
+
+// persistence
+function ps_loadG(){try{const s=localStorage.getItem(PS_LS_G);if(s)return Object.assign({},PS_DEFAULTS_G,JSON.parse(s));}catch(e){}return JSON.parse(JSON.stringify(PS_DEFAULTS_G));}
+function ps_loadSR(){try{const s=localStorage.getItem(PS_LS_SR);if(s){const o=JSON.parse(s);const m=JSON.parse(JSON.stringify(PS_DEFAULTS_SR));for(const k in m)if(o[k])Object.assign(m[k],o[k]);return m;}}catch(e){}return JSON.parse(JSON.stringify(PS_DEFAULTS_SR));}
+function ps_saveG(){try{localStorage.setItem(PS_LS_G,JSON.stringify(PS_G));}catch(e){}}
+function ps_saveSR(){try{localStorage.setItem(PS_LS_SR,JSON.stringify(PS_SRP));}catch(e){}}
+function psExportCfg(){const o={global:PS_G,sr:PS_SRP};const b=new Blob([JSON.stringify(o,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='vfx-price-sensitivity.json';a.click();toast('Đã export');}
+function psResetCfg(){if(!confirm('Reset về mặc định?'))return;PS_G=JSON.parse(JSON.stringify(PS_DEFAULTS_G));PS_SRP=JSON.parse(JSON.stringify(PS_DEFAULTS_SR));ps_saveG();ps_saveSR();document.getElementById('g-compromise').value=PS_G.compromise;document.getElementById('gv-compromise').textContent=PS_G.compromise.toFixed(1)+'%';document.getElementById('g-asp').value=PS_G.asp;document.getElementById('gv-asp').textContent=PS_G.asp+' tr';ps_renderGrid();ps_recompute();toast('Đã reset');}
+let ps_tT;
+// init
+document.getElementById('gv-compromise').textContent=PS_G.compromise.toFixed(1)+'%';
+document.getElementById('g-compromise').value=PS_G.compromise;
+document.getElementById('gv-asp').textContent=PS_G.asp+' tr';
+document.getElementById('g-asp').value=PS_G.asp;
+ps_renderGrid();
+ps_recompute();
+// Đồng bộ Tab 5 compromise = van CM Tab 2 (van default 0 → Tab 5 cũng 0, Δvolume=0 tại baseline)
+if(typeof syncCMtoTab5==='function' && P.cm_compromise){try{syncCMtoTab5(P.cm_compromise.val);}catch(e){}}
+renderPSRef();
+// Tab 5 engine giờ đã sẵn sàng → render lại CM vol box + bảng kế hoạch (cột Tiềm năng TT cần Tab5)
+if(typeof renderCMVolBox==='function'){try{renderCMVolBox(typeof computeKD==='function'?computeKD():null);}catch(e){}}
+if(typeof renderPlanTable==='function'){try{renderPlanTable();}catch(e){}}
+// ===== TAB 3 — SALES FORCE =====
+// TODO bản tiếp theo (1) — ĐỔI THỨ TỰ CỘT: ưu tiên cụm hiệu quả volume trước, cụm tiền sau.
+//   Thứ tự mong muốn (trái→phải): Showroom · TVBH · Vol/quý · Xe/th/ng · Lương cứng/ng · HH net/xe · TN/TVBH/tháng.
+//   (hiện tại: TVBH · Lương/ng · HH net/xe · Vol · Lương cứng/quý · Xe/th/ng · TN HH/ng · Fix/xe)
+//   Mạch đọc: có bao nhiêu người → bán bao nhiêu xe → năng suất/người → rồi mới tới được trả bao nhiêu.
+// TODO bản tiếp theo (2): NGƯỠNG THU NHẬP TỐI THIỂU để giữ người (~15tr/tháng TP.HCM).
+//   SR có Tổng thu nhập/người < ngưỡng → cảnh báo đỏ "khó giữ sale". Ngưỡng = input chỉnh tay (mặc định ~15tr).
+//
+// TODO bản tiếp theo (3) — KHỐI "OPEX KD XE" RIÊNG (đặt DƯỚI bảng lương hiện tại):
+//   NGUỒN: file BCQT sheet "Tổng hợp chi phí", LỌC bộ phận KD theo SR (Q9KD/LAKD/QTKD/BLKD; QT không có DV).
+//          Sổ ĐÃ tách KD vs DV sẵn (vd thuê mặt bằng chia ~50/50 KD/DV) → lấy đúng phần KD, KHÔNG gộp DV.
+//   SEED: số thật theo sổ 3 kỳ T3-T5 (triệu), cho chỉnh tay.
+//   PHẠM VI: CHỈ opex trực tiếp tại SR, KHÔNG kéo HO/lãi vay về (giữ nguyên tắc không phân bổ; HO để Tab 1 xử lý).
+//   THÀNH PHẦN opex KD (đã loại trùng):
+//     ├─ Thuê mặt bằng (cố định) · Vận chuyển · Marketing (on+off) · Điện nước · Vệ sinh-bảo vệ
+//     ├─ BHXH/BHYT/phụ cấp/thưởng lễ tết (nhân sự ngoài lương) · Khấu hao + dụng cụ · Khác
+//   LOẠI khỏi TỔNG opex (chống tính trùng):
+//     ✗ Lương KPI bán hàng (~2.038tr/3kỳ) → ĐÃ ở front margin Tab 2 (hoa hồng gốc) + cột HH net/xe.
+//        NHƯNG trong bảng năng suất/thu nhập sale thì VẪN GIỮ (là thu nhập thật của TVBH) — note nhẹ "đã tính trong phần CM%".
+//     ✗ Giảm giá, quà tặng (~1.156tr) → trợ giá, đã ở van CM Tab 2. Tách riêng, chỉ ghi chú.
+//     ✗ Lương cơ bản (~1.503tr) → đã ở bảng lương cứng phía trên. Không cộng lại, ghi chú cross-ref.
+const LS_SF='vfx_sf_data';
+// TODO next update (4) — MÔ HÌNH SPOKE & HUB (quyết định chiến lược, nhập ở Tab 3, hiện P&L ở Tab 1):
+//   HUB (vd Sa La): điểm khuếch đại sức bán, giúp spoke vươn khỏi bán kính vật lý. Sinh fixed cost riêng.
+//   NHẬP (per hub): volume hub tự bán · fixed cost hub · LIFT = SỐ XE tăng thêm tuyệt đối hub mang cho spoke.
+//   P&L hub RIÊNG  = volume_hub × CM/xe − fixed_hub  (cho thấy hub đơn độc nặng gánh).
+//   P&L hub CỤM    = (volume_hub + lift) × CM/xe − fixed_hub  (lift credit cho hub).
+//   ⚠ CHỐNG ĐẾM TRÙNG: lift là số xe THẬT bán ở spoke. View cụm = CHUYỂN credit lift từ spoke SANG hub
+//     (spoke hiển thị volume thuần không lift; hub nhận lift). Tổng cụm = tổng hệ thống, KHÔNG phình xe ảo.
+//   DASHBOARD Tab 1: 2 view — (a) hub riêng, (b) cụm hub-spoke. Quyết định mở/giữ/đóng hub dựa trên view CỤM.
+//   Vặn 3 núm (volume hub, fixed hub, lift) → so hub-riêng-lỗ vs cụm-có-lãi → business case của hub thành mô hình sống.
+const SF_SEED={
+  Q9:{name:'Thủ Đức (Q9)',hc:25,sal:6,vol:162,comm:4},
+  LA:{name:'Tân An (LA)', hc:14,sal:6,vol:71,comm:4},
+  QT:{name:'Quang Trung', hc:16,sal:6,vol:79,comm:4},
+  BL:{name:'Bến Lức',     hc:16,sal:6,vol:95,comm:4},
+  SL:{name:'Sa La (hub)', hc:18,sal:6,vol:77,comm:4}
+};
+const SF_ORDER=['Q9','LA','QT','BL','SL'];
+let SF_DATA=(()=>{try{const s=localStorage.getItem(LS_SF);if(s){const o=JSON.parse(s);SF_ORDER.forEach(sr=>{if(o[sr]&&o[sr].comm==null)o[sr].comm=4;});return o;}}catch(e){}return JSON.parse(JSON.stringify(SF_SEED));})();
+function saveSF(){try{localStorage.setItem(LS_SF,JSON.stringify(SF_DATA));}catch(e){}}
+function sfInput(el){
+  const sr=el.dataset.sr, f=el.dataset.f;
+  SF_DATA[sr][f]=+el.value||0; saveSF(); renderSF(); if(typeof renderOpex==='function')renderOpex();
+}
+function renderSF(){
+  let h=`<thead><tr><th>Showroom</th><th title="Số TVBH">TVBH</th><th title="Lương cứng/người (triệu/tháng)">Lương/ng</th><th title="Hoa hồng net/xe (triệu) — giả định sale cạnh tranh tới đồng cuối">HH net/xe</th><th title="Volume KH/quý">Vol/quý</th><th title="Lương cứng tổng quý">Lương cứng/quý</th><th title="① Xe bán/tháng/người">Xe/th/ng</th><th title="Thu nhập HH/người/tháng = HH net/xe × vol ÷ TVBH ÷ 3">TN HH/ng</th><th title="② Fix cost sale/xe (triệu)">Fix/xe</th></tr></thead><tbody>`;
+  let totHC=0,totVol=0,totSal=0,totComm=0;
+  SF_ORDER.forEach(sr=>{
+    const d=SF_DATA[sr];
+    const salQ=d.hc*d.sal*3;
+    const perPM=d.hc?d.vol/d.hc/3:0;
+    const fixXe=d.vol?salQ/d.vol:0;
+    const commQ=(d.comm||0)*d.vol;              // tổng HH net/quý (triệu)
+    const tnHH=d.hc?commQ/d.hc/3:0;             // thu nhập HH/người/tháng
+    totHC+=d.hc; totVol+=d.vol; totSal+=salQ; totComm+=commQ;
+    const pmCls=perPM>=3?'hi':perPM>=2?'mid':'lo';
+    h+=`<tr><td>${d.name}</td>
+      <td><input type="number" min="0" value="${d.hc}" data-sr="${sr}" data-f="hc" oninput="sfInput(this)" style="width:46px"></td>
+      <td><input type="number" min="0" step="0.5" value="${d.sal}" data-sr="${sr}" data-f="sal" oninput="sfInput(this)" style="width:50px"></td>
+      <td><input type="number" min="0" step="0.5" value="${d.comm}" data-sr="${sr}" data-f="comm" oninput="sfInput(this)" style="width:50px"></td>
+      <td><input type="number" min="0" value="${d.vol}" data-sr="${sr}" data-f="vol" oninput="sfInput(this)" style="width:50px"></td>
+      <td class="tot">${salQ.toLocaleString()}</td>
+      <td class="ach ${pmCls}">${perPM.toFixed(2)}</td>
+      <td class="tgt-cell" style="color:var(--purple)">${tnHH.toFixed(1)}</td>
+      <td class="tgt-cell">${fixXe.toFixed(2)}</td></tr>`;
+  });
+  const tPerPM=totHC?totVol/totHC/3:0, tFixXe=totVol?totSal/totVol:0, tTnHH=totHC?totComm/totHC/3:0;
+  h+=`<tr class="totrow"><td>TỔNG</td><td>${totHC}</td><td>–</td><td>–</td><td>${totVol}</td><td class="tot">${totSal.toLocaleString()}</td><td class="ach ${tPerPM>=3?'hi':tPerPM>=2?'mid':'lo'}">${tPerPM.toFixed(2)}</td><td class="tgt-cell" style="color:var(--purple)">${tTnHH.toFixed(1)}</td><td class="tgt-cell">${tFixXe.toFixed(2)}</td></tr></tbody>`;
+  const t=document.getElementById('sf-table'); if(t)t.innerHTML=h;
+  const kpi=document.getElementById('sf-kpi');
+  const tTotalInc=tTnHH+(totHC?totSal/totHC/3:0); // tổng thu nhập/người/tháng = HH + lương cứng
+  if(kpi)kpi.innerHTML=`
+    <div class="kpi"><div class="kl">Xe/tháng/người</div><div class="kv" style="color:${tPerPM>=3?'var(--green)':tPerPM>=2?'var(--gold)':'var(--red)'}">${tPerPM.toFixed(2)}</div><div class="ks">năng suất bình quân</div></div>
+    <div class="kpi"><div class="kl">Tổng thu nhập/người</div><div class="kv" style="color:var(--purple)">${tTotalInc.toFixed(1)}</div><div class="ks">triệu/tháng · lương + HH</div></div>
+    <div class="kpi"><div class="kl">Fix cost sale/xe</div><div class="kv">${tFixXe.toFixed(2)}</div><div class="ks">triệu · lương cứng ÷ xe</div></div>`;
+}
+renderSF();
+
+// ===== OPEX KD XE (theo SR, số thật 3 kỳ T3-T5, đã loại chống trùng) =====
+// TODO next update — QUY OPEX VỀ THÁNG: hiện seed = TỔNG 3 kỳ (T3+T4+T5 cộng dồn = ~1 quý). Đổi về BÌNH QUÂN /THÁNG.
+//   Cách: chia seed cho 3 (OPEX_SEED ÷ 3), đổi nhãn "TỔNG OPEX KD/quý" → "/tháng", header bỏ "3 kỳ T3-T5" → "bình quân tháng".
+//   ⚠ NHẤT QUÁN KỲ: dòng "Opex/xe" ghép opex với SF_DATA.vol — mà vol đang là /QUÝ. Nếu opex về /tháng thì:
+//     hoặc (a) opex/xe = opex_tháng ÷ (vol_quý÷3), hoặc (b) quy luôn volume Tab 3 về /tháng cho đồng bộ toàn tab.
+//     Ưu tiên (b) nếu sau này cả Tab 3 chuẩn hóa theo tháng. Kiểm tra mọi phép ghép opex×volume cùng kỳ.
+const LS_OPEX='vfx_opex_kd';
+const OPEX_ROWS=['Thuê mặt bằng','Vận chuyển','Marketing','Điện nước','Vệ sinh, bảo vệ','Nhân sự khác (BH, phụ cấp, thưởng)','Khấu hao, dụng cụ','Khác'];
+const OPEX_SEED={
+  Q9:[295,24,116,125,50,73,77,88],
+  LA:[391,301,61,11,0,115,0,52],
+  QT:[289,39,61,3,0,47,3,47],
+  BL:[345,0,61,99,55,55,0,31],
+  SL:[0,0,0,0,0,0,0,0]
+};
+let OPEX_DATA=(()=>{try{const s=localStorage.getItem(LS_OPEX);if(s)return JSON.parse(s);}catch(e){}return JSON.parse(JSON.stringify(OPEX_SEED));})();
+function saveOpex(){try{localStorage.setItem(LS_OPEX,JSON.stringify(OPEX_DATA));}catch(e){}}
+function opexInput(el){
+  const sr=el.dataset.sr, i=+el.dataset.i;
+  if(!OPEX_DATA[sr])OPEX_DATA[sr]=[0,0,0,0,0,0,0,0];
+  OPEX_DATA[sr][i]=+el.value||0; saveOpex(); renderOpex();
+}
+function renderOpex(){
+  const SRs=SF_ORDER;
+  let h=`<thead><tr><th>Khoản opex KD</th>`;
+  SRs.forEach(s=>h+=`<th>${s}</th>`);
+  h+=`<th>TỔNG</th></tr></thead><tbody>`;
+  const colTot={}; SRs.forEach(s=>colTot[s]=0); let grand=0;
+  OPEX_ROWS.forEach((rowName,ri)=>{
+    h+=`<tr><td style="text-align:left">${rowName}</td>`;
+    let rt=0;
+    SRs.forEach(s=>{
+      const v=(OPEX_DATA[s]&&OPEX_DATA[s][ri])||0;
+      colTot[s]+=v; rt+=v;
+      h+=`<td><input type="number" min="0" value="${v}" data-sr="${s}" data-i="${ri}" oninput="opexInput(this)" style="width:50px"></td>`;
+    });
+    grand+=rt;
+    h+=`<td class="tgt-cell">${rt.toLocaleString()}</td></tr>`;
+  });
+  h+=`<tr class="totrow"><td>TỔNG OPEX KD/quý</td>`;
+  SRs.forEach(s=>h+=`<td class="tot">${colTot[s].toLocaleString()}</td>`);
+  h+=`<td class="tot">${grand.toLocaleString()}</td></tr>`;
+  h+=`<tr><td style="text-align:left;color:var(--dim)">Opex KD / xe (triệu)</td>`;
+  SRs.forEach(s=>{const vol=(SF_DATA[s]&&SF_DATA[s].vol)||0; const ox=vol?colTot[s]/vol:0; h+=`<td class="tgt-cell" style="color:var(--purple)">${ox.toFixed(2)}</td>`;});
+  const totVol=SRs.reduce((a,s)=>a+((SF_DATA[s]&&SF_DATA[s].vol)||0),0);
+  h+=`<td class="tgt-cell" style="color:var(--purple)">${totVol?(grand/totVol).toFixed(2):'0'}</td></tr></tbody>`;
+  const t=document.getElementById('opex-table'); if(t)t.innerHTML=h;
+}
+renderOpex();
+
+(function(){const r=document.querySelector(`input[name="cm-link"][value="${cmLinkMode}"]`); if(r)r.checked=true;
+  const desc=document.getElementById('cm-link-desc'); if(desc){desc.innerHTML=CM_LINK_DESC[cmLinkMode];desc.style.color=cmLinkMode==='off'?'var(--dim)':'var(--mut)';}
+  if(cmLinkMode!=='off'){try{applyCMtoPlan();if(typeof renderPlanTable==='function')renderPlanTable();}catch(e){}}
+  if(typeof renderContribCurve==='function'){try{renderContribCurve();}catch(e){}}
+})();
+</script>
+</body>
+</html>
