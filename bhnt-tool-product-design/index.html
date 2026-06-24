@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDD · Trợ lý Tư vấn BHNT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@200;300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap&subset=latin,latin-ext,vietnamese" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0e1a; --ink-2:#0f1424; --ink-3:#161c30;
+  --line:#222a42; --line-soft:#1a2138;
+  --txt:#e6e9f2; --txt-dim:#9aa3bd; --txt-mute:#646e8c;
+  --gold:#c9a55c; --gold-soft:#8a7540;
+  --teal:#4fd6c4; --rose:#e8657f; --violet:#9b8cff;
+  --green:#5fd38a; --amber:#e0a54e; --red:#e8657f;
+  --serif:'Noto Serif Display',Georgia,serif;
+  --sans:'Outfit',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink); color:var(--txt); font-family:var(--sans);
+  font-weight:300; line-height:1.65; font-size:15px;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(1100px 600px at 12% -5%, rgba(201,165,92,.06), transparent 60%),
+    radial-gradient(900px 700px at 95% 10%, rgba(79,214,196,.05), transparent 55%);
+}
+.wrap{max-width:1080px; margin:0 auto; padding:0 28px; position:relative; z-index:1}
+
+/* ---- top meta bar ---- */
+.topbar{
+  border-bottom:1px solid var(--line-soft);
+  font-family:var(--mono); font-size:11.5px; color:var(--txt-mute);
+  letter-spacing:.04em;
+}
+.topbar .wrap{display:flex; justify-content:space-between; align-items:center; padding-top:14px; padding-bottom:14px; flex-wrap:wrap; gap:8px}
+.topbar b{color:var(--gold); font-weight:500}
+
+/* ---- hero ---- */
+.hero{padding:84px 0 64px; border-bottom:1px solid var(--line-soft)}
+.eyebrow{
+  font-family:var(--mono); font-size:12px; letter-spacing:.34em;
+  text-transform:uppercase; color:var(--gold-soft); margin-bottom:26px;
+}
+.hero h1{
+  font-family:var(--serif); font-weight:500; font-size:clamp(34px,5.4vw,58px);
+  line-height:1.08; letter-spacing:-.01em; margin-bottom:24px;
+}
+.hero h1 em{font-style:italic; color:var(--gold)}
+.hero .lede{
+  font-size:18px; color:var(--txt-dim); max-width:660px; font-weight:300;
+}
+.hero .lede strong{color:var(--txt); font-weight:500}
+.tagstrip{display:flex; gap:10px; flex-wrap:wrap; margin-top:34px}
+.tag{
+  font-family:var(--mono); font-size:11px; letter-spacing:.05em;
+  padding:6px 13px; border:1px solid var(--line); border-radius:2px;
+  color:var(--txt-dim); background:var(--ink-2);
+}
+
+/* ---- section frame ---- */
+section{padding:70px 0; border-bottom:1px solid var(--line-soft)}
+.sec-head{display:flex; align-items:baseline; gap:18px; margin-bottom:40px}
+.sec-num{
+  font-family:var(--mono); font-size:13px; color:var(--gold);
+  letter-spacing:.1em; padding-top:6px; flex-shrink:0;
+}
+.sec-title{font-family:var(--serif); font-weight:500; font-size:clamp(24px,3.4vw,34px); line-height:1.15}
+.sec-sub{color:var(--txt-dim); font-size:15px; margin-top:8px; max-width:640px}
+
+/* ---- pain cards ---- */
+.pain-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px}
+.pain{
+  background:var(--ink-2); border:1px solid var(--line-soft); border-radius:4px;
+  padding:24px 22px; position:relative; overflow:hidden;
+}
+.pain::before{content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--rose)}
+.pain .who{font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--rose); margin-bottom:12px}
+.pain h3{font-family:var(--serif); font-weight:500; font-size:18px; margin-bottom:10px; line-height:1.3}
+.pain p{color:var(--txt-dim); font-size:14px}
+.pain .quote{margin-top:14px; padding-top:14px; border-top:1px solid var(--line-soft); font-style:italic; color:var(--txt-mute); font-size:13.5px}
+
+/* ---- the manulife contrast ---- */
+.contrast{display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid var(--line); border-radius:4px; overflow:hidden; margin-top:8px}
+.contrast > div{padding:28px 26px}
+.contrast .bad{background:var(--ink-2); border-right:1px solid var(--line)}
+.contrast .good{background:linear-gradient(180deg,rgba(201,165,92,.07),transparent)}
+.contrast .lbl{font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:16px}
+.contrast .bad .lbl{color:var(--txt-mute)}
+.contrast .good .lbl{color:var(--gold)}
+.contrast ul{list-style:none}
+.contrast li{padding:8px 0 8px 22px; position:relative; font-size:14px; color:var(--txt-dim); border-bottom:1px solid var(--line-soft)}
+.contrast li:last-child{border-bottom:none}
+.contrast .bad li::before{content:'×'; position:absolute; left:0; color:var(--txt-mute); font-family:var(--mono)}
+.contrast .good li::before{content:'→'; position:absolute; left:0; color:var(--gold); font-family:var(--mono)}
+
+/* ---- design idea blocks ---- */
+.idea{display:grid; grid-template-columns:64px 1fr; gap:24px; padding:28px 0; border-bottom:1px solid var(--line-soft)}
+.idea:last-child{border-bottom:none}
+.idea-no{font-family:var(--serif); font-size:42px; color:var(--gold-soft); line-height:1; font-style:italic}
+.idea h3{font-family:var(--serif); font-weight:500; font-size:21px; margin-bottom:10px}
+.idea p{color:var(--txt-dim); font-size:14.5px; margin-bottom:14px}
+.idea .means{display:flex; flex-wrap:wrap; gap:8px}
+.chip{font-family:var(--mono); font-size:11px; padding:5px 11px; background:var(--ink-3); border:1px solid var(--line); border-radius:2px; color:var(--teal)}
+
+/* ---- flow / architecture ---- */
+.flow{display:grid; grid-template-columns:repeat(5,1fr); gap:0; margin-top:10px; position:relative}
+.flow-step{padding:22px 16px; text-align:center; position:relative; background:var(--ink-2); border:1px solid var(--line-soft)}
+.flow-step:not(:last-child){border-right:none}
+.flow-step .fno{font-family:var(--mono); font-size:11px; color:var(--gold); letter-spacing:.1em}
+.flow-step h4{font-family:var(--serif); font-weight:500; font-size:15px; margin:8px 0 6px}
+.flow-step p{font-size:12px; color:var(--txt-mute); line-height:1.45}
+.flow-step .arrow{position:absolute; right:-9px; top:50%; transform:translateY(-50%); z-index:2; color:var(--gold); font-family:var(--mono); font-size:14px; background:var(--ink); padding:2px}
+
+/* ---- MOCKUP ---- */
+.mock{background:var(--ink-2); border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-top:8px; box-shadow:0 30px 60px -30px rgba(0,0,0,.7)}
+.mock-bar{display:flex; align-items:center; gap:8px; padding:11px 16px; background:var(--ink-3); border-bottom:1px solid var(--line)}
+.mock-bar .dot{width:10px; height:10px; border-radius:50%}
+.mock-bar .dot:nth-child(1){background:#e8657f55}.mock-bar .dot:nth-child(2){background:#e0a54e55}.mock-bar .dot:nth-child(3){background:#5fd38a55}
+.mock-bar .mt{font-family:var(--mono); font-size:11px; color:var(--txt-mute); margin-left:8px}
+.mock-bar .modeswitch{margin-left:auto; display:flex; border:1px solid var(--line); border-radius:3px; overflow:hidden}
+.mock-bar .modeswitch span{font-family:var(--mono); font-size:10px; padding:4px 10px; color:var(--txt-mute)}
+.mock-bar .modeswitch span.on{background:var(--gold); color:var(--ink); font-weight:500}
+.mock-body{padding:26px 26px 30px}
+.mock-stepnav{display:flex; gap:6px; margin-bottom:24px}
+.mock-stepnav div{flex:1; text-align:center; font-family:var(--mono); font-size:10.5px; padding:8px 4px; border-radius:3px; color:var(--txt-mute); background:var(--ink-3); border:1px solid var(--line-soft); letter-spacing:.03em}
+.mock-stepnav div.active{background:linear-gradient(180deg,rgba(201,165,92,.18),transparent); border-color:var(--gold-soft); color:var(--gold)}
+.mock-grid{display:grid; grid-template-columns:1.05fr 1fr; gap:24px}
+.mock-panel-label{font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--txt-mute); margin-bottom:14px}
+
+/* wizard side */
+.q{margin-bottom:16px}
+.q label{display:block; font-size:12.5px; color:var(--txt-dim); margin-bottom:6px}
+.q .inp{background:var(--ink-3); border:1px solid var(--line); border-radius:4px; padding:9px 12px; font-family:var(--mono); font-size:13px; color:var(--txt); display:flex; justify-content:space-between; align-items:center}
+.q .inp b{color:var(--gold); font-weight:500}
+.q-row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+
+/* timeline sim */
+.tl{position:relative; height:172px; margin:6px 0 4px; border-left:1px solid var(--line); border-bottom:1px solid var(--line); padding:0}
+.tl svg{position:absolute; inset:0; width:100%; height:100%}
+.tl-axis{position:absolute; bottom:-18px; width:100%; display:flex; justify-content:space-between; font-family:var(--mono); font-size:9.5px; color:var(--txt-mute)}
+.tl-shock{position:absolute; top:0; bottom:0; width:1px; background:var(--rose)}
+.tl-shock::after{content:'Biến cố · 45t'; position:absolute; top:-2px; left:6px; font-family:var(--mono); font-size:9px; color:var(--rose); white-space:nowrap}
+.tl-gap{position:absolute; background:rgba(232,101,127,.13); border-top:1px dashed var(--rose)}
+.legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:24px; font-family:var(--mono); font-size:10px; color:var(--txt-dim)}
+.legend i{display:inline-block; width:18px; height:2px; vertical-align:middle; margin-right:5px}
+
+/* fit score dashboard */
+.fit{background:var(--ink-3); border:1px solid var(--line-soft); border-radius:5px; padding:14px 16px; margin-bottom:11px}
+.fit-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:9px}
+.fit-name{font-family:var(--serif); font-size:15px; font-weight:500}
+.fit-score{font-family:var(--mono); font-size:13px; font-weight:500; padding:2px 9px; border-radius:3px}
+.s-hi{color:var(--green); background:rgba(95,211,138,.12)}
+.s-mid{color:var(--amber); background:rgba(224,165,78,.12)}
+.s-lo{color:var(--red); background:rgba(232,101,127,.12)}
+.fitbar{height:5px; background:var(--ink); border-radius:3px; overflow:hidden; margin-bottom:8px}
+.fitbar i{display:block; height:100%; border-radius:3px}
+.fit-why{font-size:11.5px; color:var(--txt-mute); line-height:1.5}
+.fit-why b{color:var(--txt-dim); font-weight:400}
+.ai-note{margin-top:16px; padding:14px 16px; border:1px solid var(--gold-soft); border-radius:5px; background:linear-gradient(180deg,rgba(201,165,92,.06),transparent); font-size:12.5px; color:var(--txt-dim); line-height:1.55}
+.ai-note .ai-lbl{font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin-bottom:7px; display:flex; align-items:center; gap:6px}
+
+/* ---- roadmap ---- */
+.phase{display:grid; grid-template-columns:130px 1fr; gap:0; border-left:2px solid var(--line); position:relative}
+.phase:last-child{border-left-color:transparent}
+.phase-side{padding:6px 22px 38px 24px; position:relative}
+.phase-side::before{content:''; position:absolute; left:-7px; top:8px; width:12px; height:12px; border-radius:50%; background:var(--ink); border:2px solid var(--gold)}
+.phase.future .phase-side::before{border-color:var(--line); background:var(--ink-3)}
+.phase-tag{font-family:var(--mono); font-size:11px; letter-spacing:.08em; color:var(--gold); margin-bottom:4px}
+.phase.future .phase-tag{color:var(--txt-mute)}
+.phase-when{font-size:12px; color:var(--txt-mute)}
+.phase-main{padding:0 0 38px 28px}
+.phase-main h3{font-family:var(--serif); font-weight:500; font-size:19px; margin-bottom:4px}
+.phase-goal{font-size:13px; color:var(--txt-dim); margin-bottom:14px; font-style:italic}
+.backlog{list-style:none}
+.backlog li{display:flex; gap:11px; padding:7px 0; font-size:13.5px; color:var(--txt-dim); border-bottom:1px solid var(--line-soft); align-items:flex-start}
+.backlog li:last-child{border-bottom:none}
+.backlog .bk-tag{font-family:var(--mono); font-size:9.5px; padding:2px 7px; border-radius:2px; flex-shrink:0; margin-top:2px; letter-spacing:.04em}
+.bk-core{background:rgba(201,165,92,.13); color:var(--gold)}
+.bk-data{background:rgba(79,214,196,.12); color:var(--teal)}
+.bk-ai{background:rgba(155,140,255,.13); color:var(--violet)}
+.bk-ux{background:rgba(95,211,138,.12); color:var(--green)}
+
+/* ---- principles strip ---- */
+.princ{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); border-radius:4px; overflow:hidden}
+.princ > div{background:var(--ink-2); padding:22px 20px}
+.princ .pq{font-family:var(--serif); font-style:italic; font-size:16px; color:var(--gold); margin-bottom:8px; line-height:1.3}
+.princ p{font-size:13px; color:var(--txt-dim)}
+
+footer{padding:50px 0 70px; text-align:center}
+footer .fline{font-family:var(--mono); font-size:11px; color:var(--txt-mute); letter-spacing:.06em}
+footer .fbig{font-family:var(--serif); font-style:italic; font-size:18px; color:var(--txt-dim); margin-top:14px}
+
+@media(max-width:780px){
+  .mock-grid{grid-template-columns:1fr}
+  .contrast{grid-template-columns:1fr}
+  .contrast .bad{border-right:none; border-bottom:1px solid var(--line)}
+  .flow{grid-template-columns:1fr 1fr}
+  .flow-step .arrow{display:none}
+  .phase{grid-template-columns:1fr}
+  .phase-main{padding-left:24px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <span>PRODUCT DESIGN DOC · <b>v1.0</b></span>
+  <span>TRỢ LÝ TƯ VẤN BHNT · IDEALAB</span>
+  <span>24·06·2026</span>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Product Design Documentation</div>
+  <h1>Trợ lý tư vấn bảo hiểm<br><em>cho người tư vấn bình thường</em></h1>
+  <p class="lede">Một công cụ giúp tư vấn viên — kể cả người mới — dẫn trọn một buổi tư vấn trong <strong>30 phút</strong>: vẽ bức tranh tài chính của khách, để khách <strong>tự thấy</strong> khoảng trống bảo hiểm, rồi đưa đề xuất có cơ sở. Không actuarial. Không bảng tính khô. Khách hàng phổ thông hiểu được, tự phục vụ được.</p>
+  <div class="tagstrip">
+    <span class="tag">Needs-analysis ≤ 30p</span>
+    <span class="tag">Simulation-driven</span>
+    <span class="tag">Master data sản phẩm</span>
+    <span class="tag">Fit-score minh bạch</span>
+    <span class="tag">Auto / Manual</span>
+  </div>
+</div></header>
+
+<!-- 01 PAINPOINT -->
+<section><div class="wrap">
+  <div class="sec-head">
+    <div class="sec-num">01</div>
+    <div><div class="sec-title">Vấn đề cần giải</div>
+    <div class="sec-sub">Chẩn đoán đúng phải đến trước. Tool hiện có trên thị trường không sai về kỹ thuật — nó sai về độ phù hợp với người dùng thật.</div></div>
+  </div>
+
+  <div class="pain-grid">
+    <div class="pain">
+      <div class="who">Tư vấn viên mới</div>
+      <h3>Không đủ trình để vận hành tool "academic"</h3>
+      <p>Công cụ phân tích nhu cầu hiện tại đòi hỏi hiểu biết actuarial, nhiều ô nhập, nhiều thuật ngữ. TVV trung bình không dám mở ra trước mặt khách.</p>
+      <div class="quote">"Đúng nhưng không bán được."</div>
+    </div>
+    <div class="pain">
+      <div class="who">Khách hàng phổ thông</div>
+      <h3>Nhìn vào thấy rối và khô, không "thấm"</h3>
+      <p>Bảng số liệu chi tiết không tạo được cảm giác cần thiết. Khách không tự thấy mình đang hở chỗ nào, nên đề xuất trở thành "bán hàng".</p>
+      <div class="quote">"Bản đồ chi tiết nhất, đưa nhầm người, thì vô nghĩa."</div>
+    </div>
+    <div class="pain">
+      <div class="who">Quy trình tư vấn</div>
+      <h3>Vào thẳng bảo hiểm, bỏ qua bức tranh lớn</h3>
+      <p>Mở màn bằng "anh/chị có bảo hiểm chưa" khiến khách phòng thủ. Thiếu bước khám tổng quát tài chính — nơi bảo hiểm hiện ra tự nhiên như một mảnh ghép còn trống.</p>
+      <div class="quote">Bán thêm phải đến từ gap, không từ cảm tính.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:34px">
+    <div class="mock-panel-label">Tool thị trường (Manulife) vs. hướng thiết kế này</div>
+    <div class="contrast">
+      <div class="bad">
+        <div class="lbl">Hiện trạng — academic</div>
+        <ul>
+          <li>Nhiều ô nhập, đòi hiểu actuarial</li>
+          <li>Bắt đầu thẳng từ sản phẩm bảo hiểm</li>
+          <li>Kết quả là bảng số, khách tự đọc</li>
+          <li>Một mình TVV giỏi mới dùng trơn</li>
+          <li>Không triển khai được trên diện rộng</li>
+        </ul>
+      </div>
+      <div class="good">
+        <div class="lbl">Hướng thiết kế — adoption-first</div>
+        <ul>
+          <li>4–5 con số cơ bản, phần còn lại tool tự suy</li>
+          <li>Mở bằng bức tranh tài chính tổng thể</li>
+          <li>Kết quả là hình ảnh, khách "ồ" lên trước</li>
+          <li>TVV mới cũng dẫn được, KH tự phục vụ được</li>
+          <li>Một mạch dẫn, không phải rừng tham số</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- 02 DESIGN IDEAS -->
+<section><div class="wrap">
+  <div class="sec-head">
+    <div class="sec-num">02</div>
+    <div><div class="sec-title">Ý tưởng thiết kế cốt lõi</div>
+    <div class="sec-sub">Hai nguyên lý đảo ngược so với tool hiện có — đặt sự dễ dùng và tức thời lên trước sự đầy đủ kỹ thuật.</div></div>
+  </div>
+
+  <div class="idea">
+    <div class="idea-no">i.</div>
+    <div>
+      <h3>Khai thác nhu cầu phải "ngu cũng làm được" — và nhanh</h3>
+      <p>Chặng khám nhu cầu nén thành một wizard cực ít ma sát: vài câu hỏi đời thường, tool tự suy ra phần còn lại bằng giả định mặc định hợp lý (chỉnh được nếu muốn). Trọn vẹn trong ≤ 30 phút, hoặc khách tự bấm cũng ra.</p>
+      <div class="means">
+        <span class="chip">≤ 30 phút</span><span class="chip">self-service</span><span class="chip">giả định mặc định thông minh</span><span class="chip">ngôn ngữ đời thường</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="idea">
+    <div class="idea-no">ii.</div>
+    <div>
+      <h3>Đề xuất cũng phải dễ — và thấy kết quả tức thì</h3>
+      <p>Hai chế độ: <b style="color:var(--gold);font-weight:500">Auto</b> — tool tự matching ra giải pháp; hoặc <b style="color:var(--gold);font-weight:500">Manual</b> — TVV/KH chọn sản phẩm từ menu, dashboard cập nhật visualise ngay lập tức. Không bấm tính rồi chờ. Con số luôn đi kèm hình.</p>
+      <div class="means">
+        <span class="chip">Auto matching</span><span class="chip">Manual menu</span><span class="chip">real-time visualise</span><span class="chip">không hộp đen</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:42px">
+    <div class="mock-panel-label">Cơ chế lõi — chuỗi xử lý</div>
+    <div class="flow">
+      <div class="flow-step"><div class="fno">01</div><h4>Wizard nhu cầu</h4><p>Bức tranh tài chính · ≤30p</p><span class="arrow">›</span></div>
+      <div class="flow-step"><div class="fno">02</div><h4>Simulation</h4><p>Timeline 3 lớp → gap</p><span class="arrow">›</span></div>
+      <div class="flow-step"><div class="fno">03</div><h4>Matching</h4><p>Gap ↔ master data SP</p><span class="arrow">›</span></div>
+      <div class="flow-step"><div class="fno">04</div><h4>Dashboard</h4><p>So sánh + fit-score + nhận xét</p><span class="arrow">›</span></div>
+      <div class="flow-step"><div class="fno">05</div><h4>TVV chốt</h4><p>Đề xuất có cơ sở</p></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- 03 MOCKUP -->
+<section><div class="wrap">
+  <div class="sec-head">
+    <div class="sec-num">03</div>
+    <div><div class="sec-title">Mock-up — một mạch ba chặng</div>
+    <div class="sec-sub">Phác thảo trực quan luồng tư vấn. Hai chế độ Presentation (trước mặt khách) / Prep (TVV chuẩn bị) chung một engine.</div></div>
+  </div>
+
+  <div class="mock">
+    <div class="mock-bar">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="mt">tro-ly-tu-van-bhnt · phiên demo</span>
+      <span class="modeswitch"><span class="on">Trình bày</span><span>Chuẩn bị</span></span>
+    </div>
+    <div class="mock-body">
+      <div class="mock-stepnav">
+        <div>① BỨC TRANH TÀI CHÍNH</div>
+        <div class="active">② NHU CẦU BẢO HIỂM</div>
+        <div>③ ĐỀ XUẤT &amp; FIT-SCORE</div>
+      </div>
+
+      <div class="mock-grid">
+        <!-- LEFT: input + simulation -->
+        <div>
+          <div class="mock-panel-label">Hồ sơ khách — 5 con số</div>
+          <div class="q-row">
+            <div class="q"><label>Tuổi trụ cột</label><div class="inp">35 <b>tuổi</b></div></div>
+            <div class="q"><label>Thu nhập / tháng</label><div class="inp">40 <b>triệu</b></div></div>
+          </div>
+          <div class="q-row">
+            <div class="q"><label>Số con phụ thuộc</label><div class="inp">2 <b>bé</b></div></div>
+            <div class="q"><label>Dư nợ còn lại</label><div class="inp">1.2 <b>tỷ</b></div></div>
+          </div>
+          <div class="q"><label>STBH đang có (nếu khách cũ)</label><div class="inp">500 <b>triệu</b></div></div>
+
+          <div class="mock-panel-label" style="margin-top:22px">Simulation — timeline 3 lớp</div>
+          <div class="tl">
+            <div class="tl-shock" style="left:33%"></div>
+            <div class="tl-gap" style="left:33%; right:14%; top:38px; height:46px"></div>
+            <svg viewBox="0 0 300 172" preserveAspectRatio="none">
+              <!-- income / life-cycle (gold) -->
+              <path d="M0,120 C40,108 70,70 120,64 C170,58 210,72 300,70" fill="none" stroke="#c9a55c" stroke-width="2"/>
+              <!-- expense + obligations (teal) -->
+              <path d="M0,96 C60,92 120,86 180,90 C230,93 270,100 300,104" fill="none" stroke="#4fd6c4" stroke-width="1.6" stroke-dasharray="1 0"/>
+              <!-- accumulation (violet) -->
+              <path d="M0,150 C80,144 160,128 220,104 C260,88 285,80 300,76" fill="none" stroke="#9b8cff" stroke-width="1.4" opacity=".8"/>
+              <!-- post-shock income collapse -->
+              <path d="M99,66 L99,150 C140,150 220,150 300,150" fill="none" stroke="#e8657f" stroke-width="1.6" stroke-dasharray="3 3"/>
+            </svg>
+            <div class="tl-axis"><span>35t</span><span>45t</span><span>55t</span><span>65t</span><span>75t</span></div>
+          </div>
+          <div class="legend">
+            <span><i style="background:#c9a55c"></i>Thu nhập</span>
+            <span><i style="background:#4fd6c4"></i>Chi tiêu + nợ + học con</span>
+            <span><i style="background:#9b8cff"></i>Tích lũy</span>
+            <span><i style="background:#e8657f"></i>Sau biến cố</span>
+          </div>
+        </div>
+
+        <!-- RIGHT: gap + fit score + AI note -->
+        <div>
+          <div class="mock-panel-label">Khoảng trống lộ ra (nhu cầu − hiện có)</div>
+          <div class="fit">
+            <div class="fit-top"><span class="fit-name">Bảo vệ thu nhập</span><span class="fit-score s-lo">hở 2.4 tỷ</span></div>
+            <div class="fitbar"><i style="width:21%;background:var(--red)"></i></div>
+            <div class="fit-why"><b>Cần ≈ 2.9 tỷ</b> · đang có 500tr — biến cố tuổi 45 để lại 14 năm thu nhập trống cho gia đình.</div>
+          </div>
+          <div class="fit">
+            <div class="fit-top"><span class="fit-name">Bệnh hiểm nghèo</span><span class="fit-score s-lo">hở 100%</span></div>
+            <div class="fitbar"><i style="width:6%;background:var(--red)"></i></div>
+            <div class="fit-why"><b>Cần ≈ 1.5 tỷ</b> · chưa có quyền lợi CI nào.</div>
+          </div>
+          <div class="fit">
+            <div class="fit-top"><span class="fit-name">Y tế / viện phí</span><span class="fit-score s-mid">một phần</span></div>
+            <div class="fitbar"><i style="width:48%;background:var(--amber)"></i></div>
+            <div class="fit-why">Có rider cơ bản, hạn mức thấp so với chi phí thực.</div>
+          </div>
+
+          <div class="mock-panel-label" style="margin-top:20px">Đề xuất — fit-score sản phẩm</div>
+          <div class="fit">
+            <div class="fit-top"><span class="fit-name">Sản phẩm A · LK đầu tư</span><span class="fit-score s-hi">88 điểm</span></div>
+            <div class="fitbar"><i style="width:88%;background:var(--green)"></i></div>
+            <div class="fit-why"><b>Phủ gap cao nhất</b> (thu nhập + CI) · phí ~18tr/năm vừa ngân sách · cân bằng bảo vệ–tích lũy.</div>
+          </div>
+          <div class="fit">
+            <div class="fit-top"><span class="fit-name">Sản phẩm B · Hỗn hợp</span><span class="fit-score s-mid">64 điểm</span></div>
+            <div class="fitbar"><i style="width:64%;background:var(--amber)"></i></div>
+            <div class="fit-why">Bảo vệ tốt nhưng tích lũy yếu · phí cao hơn ngân sách ~12%.</div>
+          </div>
+
+          <div class="ai-note">
+            <div class="ai-lbl">◈ Nhận xét tự động</div>
+            Ưu tiên vá <b style="color:var(--txt-dim)">bảo vệ thu nhập</b> trước — đây là khoảng hở nặng nhất và có hậu quả lớn nhất nếu biến cố xảy ra ở tuổi trụ cột. Sản phẩm A phủ đồng thời thu nhập và bệnh hiểm nghèo trong ngân sách phí hiện tại. Gợi ý trình bày: cho khách xem khoảng trống 14 năm trước, rồi mới nói giải pháp.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p style="color:var(--txt-mute);font-size:13px;margin-top:16px;font-style:italic">Số liệu trong mock-up là minh họa. Tool không tự chốt sản phẩm thay TVV — nó dọn sân để TVV đề xuất có cơ sở; người ra quyết định vẫn là con người.</p>
+</div></section>
+
+<!-- 04 PRINCIPLES -->
+<section><div class="wrap">
+  <div class="sec-head">
+    <div class="sec-num">04</div>
+    <div><div class="sec-title">Nguyên tắc nền</div>
+    <div class="sec-sub">Những ràng buộc thiết kế không thương lượng — giữ tool đúng bản chất qua mọi phiên bản.</div></div>
+  </div>
+  <div class="princ">
+    <div><div class="pq">Chẩn đoán trước, giải pháp sau</div><p>Mở bằng bức tranh tài chính, không mở bằng sản phẩm. Để khách tự thấy gap trước khi nói đến giải pháp.</p></div>
+    <div><div class="pq">Tạo need, không pitch sớm</div><p>Simulation là công cụ tạo cognitive dissonance — khách "ồ" lên trước, con số đến sau, sản phẩm đến cuối.</p></div>
+    <div><div class="pq">Minh bạch, không hộp đen</div><p>Fit-score luôn giải thích được tại sao cao/thấp. Người dùng tin vào chẩn đoán mới dùng được phương thuốc.</p></div>
+    <div><div class="pq">Người ra quyết định là con người</div><p>Tool anchor to action và dọn sân. TVV ráp sản phẩm + phí cụ thể. Không có nút "BUY THIS".</p></div>
+  </div>
+</div></section>
+
+<!-- 05 ROADMAP -->
+<section><div class="wrap">
+  <div class="sec-head">
+    <div class="sec-num">05</div>
+    <div><div class="sec-title">Lộ trình &amp; backlog</div>
+    <div class="sec-sub">Cắt nhỏ deliverable, làm phần có pain rõ nhất trước, tạo momentum bằng quick win. Mỗi phase có thể demo độc lập.</div></div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-side">
+      <div class="phase-tag">PHASE 0 · MVP</div>
+      <div class="phase-when">Quick win — bản demo dùng được</div>
+    </div>
+    <div class="phase-main">
+      <h3>Lõi simulation + wizard nhu cầu</h3>
+      <div class="phase-goal">Một TVV mới dẫn được trọn buổi tư vấn ≤ 30 phút bằng dữ liệu mẫu.</div>
+      <ul class="backlog">
+        <li><span class="bk-tag bk-core">CORE</span><span>Wizard 5 câu hỏi → suy ra nhu cầu bằng giả định mặc định (rule-of-thumb minh bạch, chỉnh được).</span></li>
+        <li><span class="bk-tag bk-core">CORE</span><span>Simulation timeline 3 lớp (đời sống · biến cố · tích lũy) → tính gap từng trụ bảo vệ.</span></li>
+        <li><span class="bk-tag bk-ux">UX</span><span>Hai chế độ Trình bày / Chuẩn bị chung engine, toggle nhanh.</span></li>
+        <li><span class="bk-tag bk-ux">UX</span><span>Visualise gap tức thì — khách thấy hình trước, số sau.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-side">
+      <div class="phase-tag">PHASE 1 · MATCHING</div>
+      <div class="phase-when">Biến menu thành khuyến nghị</div>
+    </div>
+    <div class="phase-main">
+      <h3>Master data sản phẩm + fit-score</h3>
+      <div class="phase-goal">Đề xuất có cơ sở, không cảm tính. Auto + Manual đều thấy kết quả ngay.</div>
+      <ul class="backlog">
+        <li><span class="bk-tag bk-data">DATA</span><span>Master data sản phẩm dạng config (STBH, quyền lợi, phí theo tuổi, rider, loại) — engine deterministic đọc vào.</span></li>
+        <li><span class="bk-tag bk-core">CORE</span><span>Matching engine: đối chiếu gap ↔ sản phẩm.</span></li>
+        <li><span class="bk-tag bk-core">CORE</span><span>Fit-score đa tiêu chí có trọng số minh bạch (độ phủ gap · affordability · cân bằng bảo vệ–tích lũy).</span></li>
+        <li><span class="bk-tag bk-ux">UX</span><span>Chế độ Auto (tool gợi ý) và Manual (chọn menu → dashboard real-time).</span></li>
+        <li><span class="bk-tag bk-ux">UX</span><span>Dashboard so sánh sản phẩm visualise sẵn — không bắt người dùng đọc bảng.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="phase future">
+    <div class="phase-side">
+      <div class="phase-tag">PHASE 2 · AI LAYER</div>
+      <div class="phase-when">Nhận xét &amp; onboarding nhanh</div>
+    </div>
+    <div class="phase-main">
+      <h3>AI commentary + config generator</h3>
+      <div class="phase-goal">Tool tự "nói" được như một advisor, và lên sản phẩm mới chỉ bằng mô tả.</div>
+      <ul class="backlog">
+        <li><span class="bk-tag bk-ai">AI</span><span>Nhận xét tự động trên kết quả: ưu tiên vá gap nào trước, gợi ý cách trình bày cho khách.</span></li>
+        <li><span class="bk-tag bk-ai">AI</span><span>Config generator: sinh master data sản phẩm mới từ mô tả ngôn ngữ tự nhiên (chèn đúng tầng config, đúng kiến trúc Idealab).</span></li>
+        <li><span class="bk-tag bk-ai">AI</span><span>Tóm tắt buổi tư vấn → bản đề xuất gửi khách (1 trang).</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="phase future">
+    <div class="phase-side">
+      <div class="phase-tag">PHASE 3 · SCALE</div>
+      <div class="phase-when">Triển khai diện rộng</div>
+    </div>
+    <div class="phase-main">
+      <h3>Multi-hãng · review HĐ cũ · phân phối</h3>
+      <div class="phase-goal">Mở rộng ra ngoài 1 hãng và các nhu cầu đã tạm gác.</div>
+      <ul class="backlog">
+        <li><span class="bk-tag bk-data">DATA</span><span>Master data trung lập đa hãng — connector kiểu kiến trúc F5.</span></li>
+        <li><span class="bk-tag bk-core">BACKLOG</span><span>Review hợp đồng hiện trạng nâng cao (đã gác ở v1 vì giá trị/độ phức tạp thấp — cân nhắc lại khi có nhu cầu thực).</span></li>
+        <li><span class="bk-tag bk-ux">UX</span><span>Bản self-service cho khách tự bấm (không cần TVV ngồi cạnh).</span></li>
+        <li><span class="bk-tag bk-data">DATA</span><span>Lưu hồ sơ khách + theo dõi tỷ lệ chốt theo gap để hiệu chỉnh fit-score.</span></li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="fline">PRODUCT DESIGN DOCUMENTATION · v1.0 · IDEALAB</div>
+  <div class="fbig">"Bản đồ đúng người, đúng lúc, đúng hành trình — thì vô giá."</div>
+</div></footer>
+
+</body>
+</html>
