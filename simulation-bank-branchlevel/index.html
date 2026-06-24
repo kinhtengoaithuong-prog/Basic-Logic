@@ -1,403 +1,9 @@
-<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>the Bank — Dashboard quản trị ngân hàng</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap&subset=latin,latin-ext,vietnamese" rel="stylesheet"><style>
-:root{--ink:#0a0e1a;--ink2:#111726;--ink3:#1a2235;--line:#26304a;--line2:#323e5e;
---txt:#e8ecf5;--txt2:#a7b2cc;--txt3:#6b7894;--gold:#c9a227;--gold2:#e3bd3e;--teal:#3fb8a0;--blue:#5a8ad6;--rose:#d97862;--green:#6fae4f;--amber:#d6a23e;--purple:#8b7fd6;
---up:#6fae4f;--up-bg:rgba(111,174,79,.13);--down:#d9685f;--down-bg:rgba(217,104,95,.13);--warn:#d6a23e;
---serif:'Noto Serif Display',Georgia,serif;--sans:'Outfit',system-ui,sans-serif;--mono:'DM Mono',monospace;}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--ink);color:var(--txt);font-family:var(--sans);font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased;padding:0 0 70px}
-.wrap{max-width:1060px;margin:0 auto;padding:0 30px}
-header{border-bottom:1px solid var(--line);padding:34px 0 20px;margin-bottom:22px}
-.kicker{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:11px}
-.kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}.kicker .seq{color:var(--txt3)}
-h1{font-family:var(--serif);font-weight:500;font-size:27px;line-height:1.14;margin-bottom:7px}
-.sub{color:var(--txt2);font-size:14px;max-width:730px}.sub b{color:var(--txt);font-weight:500}
-.sheetnav{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.sheet-tab{padding:10px 16px;font-size:13px;color:var(--txt3);border:none;background:none;font-family:var(--sans);border-bottom:2px solid transparent;margin-bottom:-1px}
-.sheet-tab.on{color:var(--gold2);border-bottom-color:var(--gold)}.sheet-tab.future{opacity:.4}
-.ctrlbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
-.ctrl-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3)}
-.tabs{display:inline-flex;background:var(--ink2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
-.tab{padding:7px 13px;font-size:12.5px;color:var(--txt3);cursor:pointer;border:none;background:none;font-family:var(--sans);border-radius:7px;transition:.13s}
-.tab:hover{color:var(--txt2)}.tab.on{background:var(--gold);color:var(--ink);font-weight:500}
-.kpirow{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:26px}
-@media(max-width:760px){.kpirow{grid-template-columns:1fr}}
-.kpicard{background:var(--ink2);border:1px solid var(--line);border-radius:13px;padding:17px 19px}
-.kpicard .kl{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt3);margin-bottom:9px}
-.kpicard .kv{font-family:var(--serif);font-size:25px;font-weight:500;line-height:1}.kpicard .ku{font-size:12px;color:var(--txt3)}
-.gauge{margin-top:13px}.gauge-track{height:6px;background:var(--ink3);border-radius:3px;position:relative;overflow:hidden}
-.gauge-fill{height:100%;border-radius:3px;transition:width .4s}.gauge-marker{position:absolute;top:-3px;width:2px;height:12px;background:var(--txt2);border-radius:1px}
-.gauge-cmp{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;font-family:var(--mono)}.gauge-cmp .cmpv{color:var(--txt2)}
-.delta{font-family:var(--mono);font-size:12px;padding:2px 8px;border-radius:5px}
-.delta.up{background:var(--up-bg);color:var(--up)}.delta.down{background:var(--down-bg);color:var(--down)}.delta.warn{background:rgba(214,162,62,.13);color:var(--warn)}
-.ach{font-size:11px;color:var(--txt3);margin-top:6px;font-family:var(--mono)}
-.sec-title{font-family:var(--serif);font-size:19px;font-weight:500;margin:32px 0 4px}
-.sec-sub{font-size:12px;color:var(--txt3);font-family:var(--mono);margin-bottom:16px}
-.dimgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-@media(max-width:760px){.dimgrid{grid-template-columns:1fr}}
-.dimcard{background:var(--ink2);border:1px solid var(--line);border-radius:13px;padding:17px 19px}
-.dimcard h4{font-family:var(--sans);font-size:14px;font-weight:500;margin-bottom:3px}
-.dimcard .dh{font-size:10.5px;color:var(--txt3);font-family:var(--mono);margin-bottom:14px}
-.dimcard .dh.real{color:var(--teal)}.dimcard .dh.sim{color:var(--amber)}
-.brow{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12.5px}
-.bname{width:130px;flex-shrink:0;color:var(--txt2);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bwrap{flex:1;height:16px;background:var(--ink3);border-radius:4px;overflow:hidden}
-.bbar{height:100%;border-radius:4px}
-.bval{width:62px;text-align:right;font-family:var(--mono);font-size:11.5px;color:var(--txt2);flex-shrink:0}
-.bg{width:54px;text-align:right;font-family:var(--mono);font-size:11px;flex-shrink:0}
-.bg.up{color:var(--up)}.bg.down{color:var(--down)}
-.casabox{background:var(--ink2);border:1px solid var(--line);border-radius:13px;padding:18px 20px;display:flex;gap:24px;align-items:center;flex-wrap:wrap}
-.casa-ring{width:120px;height:120px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;background:conic-gradient(var(--teal) 0% 35.42%, var(--ink3) 35.42% 100%)}
-.casa-ring::before{content:'';position:absolute;width:88px;height:88px;border-radius:50%;background:var(--ink2)}
-.casa-ring .cr-val{position:relative;font-family:var(--serif);font-size:24px;font-weight:500;color:var(--teal)}
-.casa-info{flex:1;min-width:200px}
-.casa-info h4{font-family:var(--serif);font-size:17px;font-weight:500;margin-bottom:8px}
-.casa-info p{font-size:13px;color:var(--txt2);margin-bottom:6px}
-.casa-info b{color:var(--teal);font-weight:500}
-.tbl{background:var(--ink2);border:1px solid var(--line);border-radius:12px;overflow-x:auto;margin-bottom:8px}
-table{width:100%;border-collapse:collapse;min-width:560px}
-th{font-family:var(--mono);font-size:9.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--txt3);text-align:right;padding:11px 15px;border-bottom:1px solid var(--line);font-weight:500;background:var(--ink3);white-space:nowrap}
-th:first-child{text-align:left}
-td{padding:10px 15px;font-size:13px;text-align:right;border-bottom:1px solid rgba(38,48,74,.4);font-family:var(--mono);color:var(--txt2);white-space:nowrap}
-td:first-child{text-align:left;font-family:var(--sans);color:var(--txt)}
-tr:last-child td{border-bottom:none}
-tr.total td{background:var(--ink3);color:var(--txt);font-weight:500;border-top:1px solid var(--line2)}
-.yoy{font-family:var(--mono);font-size:12px;padding:2px 7px;border-radius:5px}
-.yoy.up{background:var(--up-bg);color:var(--up)}.yoy.down{background:var(--down-bg);color:var(--down)}.yoy.flat{color:var(--txt3)}
-.metricbox{display:flex;gap:14px;flex-wrap:wrap}
-.mb{flex:1;min-width:120px;background:var(--ink3);border-radius:10px;padding:13px 15px}
-.mb .mbl{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt3);margin-bottom:5px}
-.mb .mbv{font-family:var(--serif);font-size:21px;font-weight:500}.mb .mbv.good{color:var(--teal)}.mb .mbs{font-size:10.5px;color:var(--txt3);margin-top:2px;font-family:var(--mono)}
-.trend{display:flex;align-items:flex-end;gap:0;height:120px;margin-top:8px}
-.tcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%}
-.tbar{width:22px;border-radius:3px 3px 0 0;background:var(--blue)}
-.tyear{font-family:var(--mono);font-size:11px;color:var(--txt3)}
-.note{background:linear-gradient(180deg,rgba(201,162,39,.06),rgba(201,162,39,.02));border:1px solid rgba(201,162,39,.24);border-radius:11px;padding:14px 18px;margin-top:18px;font-size:13.5px;color:var(--txt2);line-height:1.55}
-.note b{color:var(--gold2);font-weight:500}.note .nh{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
-.foot{margin-top:30px;padding-top:20px;border-top:1px solid var(--line);font-size:11px;color:var(--txt3);font-family:var(--mono);line-height:1.7}.foot b{color:var(--txt3)}
-.plan26line{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line2);font-size:12px;color:var(--txt3);font-family:var(--mono)}
-.plan26line b{color:var(--blue);font-weight:500}.plan26line .p26d{color:var(--teal);margin-left:4px}
-.bp26{width:64px;text-align:right;font-family:var(--mono);font-size:11px;color:var(--blue);flex-shrink:0;padding-left:4px}
-.bp26::before{content:"→ ";color:var(--txt3)}
-.p26h{background:rgba(90,138,214,.1)!important;color:var(--blue)!important}
-.p26c{background:rgba(90,138,214,.05);color:var(--blue)}
-tr.total .p26c{color:var(--blue);font-weight:500}
-.tbar.plan26{opacity:.6;outline:1px dashed var(--blue);outline-offset:1px}
-.tyear.plan26lbl{color:var(--blue);font-weight:500}
-
-/* ==overview== */
-
-:root{--ink:#0a0e1a;--ink2:#111726;--ink3:#1a2235;--line:#26304a;--line2:#323e5e;
---txt:#e8ecf5;--txt2:#a7b2cc;--txt3:#6b7894;--gold:#c9a227;--gold2:#e3bd3e;--teal:#3fb8a0;--blue:#5a8ad6;--rose:#d97862;--green:#6fae4f;--amber:#d6a23e;
---up:#6fae4f;--up-bg:rgba(111,174,79,.13);--down:#d9685f;--down-bg:rgba(217,104,95,.13);--warn:#d6a23e;
---serif:'Noto Serif Display',Georgia,serif;--sans:'Outfit',system-ui,sans-serif;--mono:'DM Mono',monospace;}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--ink);color:var(--txt);font-family:var(--sans);font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased;padding:0 0 70px}
-.wrap{max-width:1080px;margin:0 auto;padding:0 30px}
-header{border-bottom:1px solid var(--line);padding:34px 0 20px;margin-bottom:22px}
-.kicker{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:11px}
-.kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}.kicker .seq{color:var(--txt3)}
-h1{font-family:var(--serif);font-weight:500;font-size:27px;line-height:1.14;margin-bottom:7px}
-.sub{color:var(--txt2);font-size:14px;max-width:720px}.sub b{color:var(--txt);font-weight:500}
-
-.sheetnav{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.sheet-tab{padding:10px 16px;font-size:13px;color:var(--txt3);cursor:default;border:none;background:none;font-family:var(--sans);border-bottom:2px solid transparent;margin-bottom:-1px}
-.sheet-tab.on{color:var(--gold2);border-bottom-color:var(--gold)}
-.sheet-tab.future{opacity:.4}
-
-.ctrlbar{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}
-.ctrl-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3)}
-.cmp-tabs{display:inline-flex;background:var(--ink2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
-.cmp-tab{padding:7px 13px;font-size:12.5px;color:var(--txt3);cursor:pointer;border:none;background:none;font-family:var(--sans);border-radius:7px;transition:.13s}
-.cmp-tab:hover{color:var(--txt2)}.cmp-tab.on{background:var(--gold);color:var(--ink);font-weight:500}
-
-.kpigrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
-@media(max-width:820px){.kpigrid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:480px){.kpigrid{grid-template-columns:1fr}}
-.kpicard{background:var(--ink2);border:1px solid var(--line);border-radius:13px;padding:17px 18px}
-.kpicard .kl{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt3);margin-bottom:9px;min-height:24px}
-.kpicard .kv{font-family:var(--serif);font-size:25px;font-weight:500;line-height:1}
-.kpicard .ku{font-size:12px;color:var(--txt3);margin-left:3px}
-.gauge{margin-top:13px}
-.gauge-track{height:6px;background:var(--ink3);border-radius:3px;position:relative;overflow:hidden}
-.gauge-fill{height:100%;border-radius:3px;transition:width .4s}
-.gauge-marker{position:absolute;top:-3px;width:2px;height:12px;background:var(--txt2);border-radius:1px}
-.gauge-cmp{display:flex;justify-content:space-between;margin-top:8px;font-size:11.5px;font-family:var(--mono)}
-.gauge-cmp .cmpv{color:var(--txt2)}
-.delta{font-family:var(--mono);font-size:12.5px;padding:2px 8px;border-radius:5px;display:inline-block}
-.delta.up{background:var(--up-bg);color:var(--up)}.delta.down{background:var(--down-bg);color:var(--down)}
-.delta.warn{background:rgba(214,162,62,.13);color:var(--warn)}
-.ach{font-size:11px;color:var(--txt3);margin-top:6px;font-family:var(--mono)}
-
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:26px}
-@media(max-width:760px){.row2{grid-template-columns:1fr}}
-.panel{background:var(--ink2);border:1px solid var(--line);border-radius:13px;padding:18px 20px}
-.panel h3{font-family:var(--serif);font-size:16px;font-weight:500;margin-bottom:4px}
-.panel .ph{font-size:11.5px;color:var(--txt3);margin-bottom:16px;font-family:var(--mono)}
-
-.wf-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12.5px}
-.wf-label{width:130px;flex-shrink:0;color:var(--txt2);font-family:var(--sans);font-size:12.5px}
-.wf-bar-wrap{flex:1;height:18px;background:var(--ink3);border-radius:4px;position:relative;overflow:hidden}
-.wf-bar{height:100%;border-radius:4px}
-.wf-bar.pos{background:var(--teal)}.wf-bar.neg{background:var(--rose)}
-.wf-val{width:74px;text-align:right;font-family:var(--mono);font-size:12px;color:var(--txt2);flex-shrink:0}
-.wf-total{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:11px;border-top:1px solid var(--line);font-weight:500}
-.wf-total .wf-label{color:var(--txt)}.wf-total .wf-val{color:var(--gold2)}
-
-.trend{display:flex;align-items:flex-end;gap:0;height:150px;margin-top:6px;position:relative;padding-left:4px}
-.tcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%}
-.tbars{display:flex;align-items:flex-end;gap:3px;height:115px}
-.tbar{width:13px;border-radius:3px 3px 0 0}
-.tbar.dep{background:var(--blue)}.tbar.loan{background:var(--teal)}.tbar.pbt{background:var(--gold)}
-.tyear{font-family:var(--mono);font-size:11px;color:var(--txt3)}
-.tlegend{display:flex;gap:16px;margin-top:14px;font-size:11.5px;font-family:var(--mono);color:var(--txt3);flex-wrap:wrap}
-.tlegend span{display:inline-flex;align-items:center;gap:6px}
-.tsw{width:10px;height:10px;border-radius:2px}
-.tsw.dep{background:var(--blue)}.tsw.loan{background:var(--teal)}.tsw.pbt{background:var(--gold)}
-
-.note{background:linear-gradient(180deg,rgba(201,162,39,.06),rgba(201,162,39,.02));border:1px solid rgba(201,162,39,.24);border-radius:11px;padding:14px 18px;margin-bottom:8px;font-size:13.5px;color:var(--txt2);line-height:1.55}
-.note b{color:var(--gold2);font-weight:500}
-.note .nh{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
-.foot{margin-top:30px;padding-top:20px;border-top:1px solid var(--line);font-size:11px;color:var(--txt3);font-family:var(--mono);line-height:1.7}
-.foot b{color:var(--txt3)}
-.plan26line{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line2);font-size:12px;color:var(--txt3);font-family:var(--mono)}
-.plan26line b{color:var(--blue);font-weight:500}.plan26line .p26d{color:var(--teal);margin-left:4px}
-.tcol.planc-col .tyear.planlbl{color:var(--blue);font-weight:500}
-.tbar.plan{opacity:.65;outline:1px dashed var(--blue);outline-offset:1px}
-.tcol.planc-col{background:rgba(90,138,214,.05);border-radius:6px}
-
-/* ==tindung== */
-
-:root{--ink:#0a0e1a;--ink2:#111726;--ink3:#1a2235;--line:#26304a;--line2:#323e5e;
---txt:#e8ecf5;--txt2:#a7b2cc;--txt3:#6b7894;--gold:#c9a227;--gold2:#e3bd3e;--teal:#3fb8a0;--blue:#5a8ad6;--rose:#d97862;--green:#6fae4f;--amber:#d6a23e;--purple:#8b7fd6;
---up:#6fae4f;--up-bg:rgba(111,174,79,.13);--down:#d9685f;--down-bg:rgba(217,104,95,.13);--warn:#d6a23e;
---serif:'Noto Serif Display',Georgia,serif;--sans:'Outfit',system-ui,sans-serif;--mono:'DM Mono',monospace;}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--ink);color:var(--txt);font-family:var(--sans);font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased;padding:0 0 70px}
-.wrap{max-width:1060px;margin:0 auto;padding:0 30px}
-header{border-bottom:1px solid var(--line);padding:34px 0 20px;margin-bottom:22px}
-.kicker{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:11px}
-.kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}.kicker .seq{color:var(--txt3)}
-h1{font-family:var(--serif);font-weight:500;font-size:27px;line-height:1.14;margin-bottom:7px}
-.sub{color:var(--txt2);font-size:14px;max-width:730px}.sub b{color:var(--txt);font-weight:500}
-.sheetnav{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.sheet-tab{padding:10px 16px;font-size:13px;color:var(--txt3);border:none;background:none;font-family:var(--sans);border-bottom:2px solid transparent;margin-bottom:-1px}
-.sheet-tab.on{color:var(--gold2);border-bottom-color:var(--gold)}.sheet-tab.future{opacity:.4}
-
-.ctrlbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
-.ctrl-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3)}
-.tabs{display:inline-flex;background:var(--ink2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
-.tab{padding:7px 13px;font-size:12.5px;color:var(--txt3);cursor:pointer;border:none;background:none;font-family:var(--sans);border-radius:7px;transition:.13s}
-.tab:hover{color:var(--txt2)}.tab.on{background:var(--gold);color:var(--ink);font-weight:500}
-
-.kpirow{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:26px}
-@media(max-width:760px){.kpirow{grid-template-columns:1fr}}
-.kpicard{background:var(--ink2);border:1px solid var(--line);border-radius:13px;padding:17px 19px}
-.kpicard .kl{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt3);margin-bottom:9px}
-.kpicard .kv{font-family:var(--serif);font-size:26px;font-weight:500;line-height:1}.kpicard .ku{font-size:12px;color:var(--txt3)}
-.gauge{margin-top:13px}.gauge-track{height:6px;background:var(--ink3);border-radius:3px;position:relative;overflow:hidden}
-.gauge-fill{height:100%;border-radius:3px;transition:width .4s}.gauge-marker{position:absolute;top:-3px;width:2px;height:12px;background:var(--txt2);border-radius:1px}
-.gauge-cmp{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;font-family:var(--mono)}.gauge-cmp .cmpv{color:var(--txt2)}
-.delta{font-family:var(--mono);font-size:12px;padding:2px 8px;border-radius:5px}
-.delta.up{background:var(--up-bg);color:var(--up)}.delta.down{background:var(--down-bg);color:var(--down)}.delta.warn{background:rgba(214,162,62,.13);color:var(--warn)}
-.ach{font-size:11px;color:var(--txt3);margin-top:6px;font-family:var(--mono)}
-
-.sec-title{font-family:var(--serif);font-size:19px;font-weight:500;margin:32px 0 4px}
-.sec-sub{font-size:12px;color:var(--txt3);font-family:var(--mono);margin-bottom:16px}
-
-.dimgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-@media(max-width:760px){.dimgrid{grid-template-columns:1fr}}
-.dimcard{background:var(--ink2);border:1px solid var(--line);border-radius:13px;padding:17px 19px}
-.dimcard h4{font-family:var(--sans);font-size:14px;font-weight:500;margin-bottom:3px}
-.dimcard .dh{font-size:10.5px;color:var(--txt3);font-family:var(--mono);margin-bottom:14px}
-.dimcard .dh.real{color:var(--teal)}.dimcard .dh.sim{color:var(--amber)}
-.brow{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12.5px}
-.bname{width:120px;flex-shrink:0;color:var(--txt2);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bwrap{flex:1;height:16px;background:var(--ink3);border-radius:4px;overflow:hidden}
-.bbar{height:100%;border-radius:4px}
-.bval{width:62px;text-align:right;font-family:var(--mono);font-size:11.5px;color:var(--txt2);flex-shrink:0}
-.bg{width:50px;text-align:right;font-family:var(--mono);font-size:11px;flex-shrink:0}
-.bg.up{color:var(--up)}.bg.down{color:var(--down)}
-
-.tbl{background:var(--ink2);border:1px solid var(--line);border-radius:12px;overflow-x:auto;margin-bottom:8px}
-table{width:100%;border-collapse:collapse;min-width:600px}
-th{font-family:var(--mono);font-size:9.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--txt3);text-align:right;padding:11px 15px;border-bottom:1px solid var(--line);font-weight:500;background:var(--ink3);white-space:nowrap}
-th:first-child{text-align:left}
-td{padding:10px 15px;font-size:13px;text-align:right;border-bottom:1px solid rgba(38,48,74,.4);font-family:var(--mono);color:var(--txt2);white-space:nowrap}
-td:first-child{text-align:left;font-family:var(--sans);color:var(--txt)}
-tr:last-child td{border-bottom:none}
-tr.total td{background:var(--ink3);color:var(--txt);font-weight:500;border-top:1px solid var(--line2)}
-.yoy{font-family:var(--mono);font-size:12px;padding:2px 7px;border-radius:5px}
-.yoy.up{background:var(--up-bg);color:var(--up)}.yoy.down{background:var(--down-bg);color:var(--down)}.yoy.flat{color:var(--txt3)}
-.npl-pill{font-family:var(--mono);font-size:11.5px;padding:2px 7px;border-radius:5px}
-.npl-pill.good{background:var(--up-bg);color:var(--up)}.npl-pill.mid{background:rgba(214,162,62,.13);color:var(--warn)}.npl-pill.bad{background:var(--down-bg);color:var(--down)}
-
-.qualrow{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;margin-bottom:8px}
-@media(max-width:760px){.qualrow{grid-template-columns:1fr}}
-.metricbox{display:flex;gap:14px;flex-wrap:wrap}
-.mb{flex:1;min-width:120px;background:var(--ink3);border-radius:10px;padding:13px 15px}
-.mb .mbl{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt3);margin-bottom:5px}
-.mb .mbv{font-family:var(--serif);font-size:21px;font-weight:500}
-.mb .mbv.good{color:var(--teal)}.mb .mbs{font-size:10.5px;color:var(--txt3);margin-top:2px;font-family:var(--mono)}
-
-.trend{display:flex;align-items:flex-end;gap:0;height:120px;margin-top:8px}
-.tcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%}
-.tbar{width:22px;border-radius:3px 3px 0 0;background:var(--purple)}
-.tyear{font-family:var(--mono);font-size:11px;color:var(--txt3)}
-
-.note{background:linear-gradient(180deg,rgba(201,162,39,.06),rgba(201,162,39,.02));border:1px solid rgba(201,162,39,.24);border-radius:11px;padding:14px 18px;margin-top:18px;font-size:13.5px;color:var(--txt2);line-height:1.55}
-.note b{color:var(--gold2);font-weight:500}.note .nh{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
-.foot{margin-top:30px;padding-top:20px;border-top:1px solid var(--line);font-size:11px;color:var(--txt3);font-family:var(--mono);line-height:1.7}.foot b{color:var(--txt3)}
-.plan26line{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line2);font-size:12px;color:var(--txt3);font-family:var(--mono)}
-.plan26line b{color:var(--blue);font-weight:500}.plan26line .p26d{color:var(--teal);margin-left:4px}
-.bp26{width:64px;text-align:right;font-family:var(--mono);font-size:11px;color:var(--blue);flex-shrink:0;padding-left:4px}
-.bp26::before{content:"→ ";color:var(--txt3)}
-.p26h{background:rgba(90,138,214,.1)!important;color:var(--blue)!important}
-.p26c{background:rgba(90,138,214,.05);color:var(--blue)}
-tr.total .p26c{color:var(--blue);font-weight:500}
-.tbar.plan26{opacity:.6;outline:1px dashed var(--blue);outline-offset:1px}
-.tyear.plan26lbl{color:var(--blue);font-weight:500}
-
-/* ==kqkd== */
-
-:root{--ink:#0a0e1a;--ink2:#111726;--ink3:#1a2235;--line:#26304a;--line2:#323e5e;
---txt:#e8ecf5;--txt2:#a7b2cc;--txt3:#6b7894;--gold:#c9a227;--gold2:#e3bd3e;--teal:#3fb8a0;--blue:#5a8ad6;--rose:#d97862;--green:#6fae4f;--amber:#d6a23e;
---up:#6fae4f;--up-bg:rgba(111,174,79,.13);--down:#d9685f;--down-bg:rgba(217,104,95,.13);--warn:#d6a23e;
---serif:'Noto Serif Display',Georgia,serif;--sans:'Outfit',system-ui,sans-serif;--mono:'DM Mono',monospace;}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--ink);color:var(--txt);font-family:var(--sans);font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased;padding:0 0 70px}
-.wrap{max-width:1020px;margin:0 auto;padding:0 30px}
-header{border-bottom:1px solid var(--line);padding:34px 0 20px;margin-bottom:22px}
-.kicker{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:11px}
-.kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}.kicker .seq{color:var(--txt3)}
-h1{font-family:var(--serif);font-weight:500;font-size:27px;line-height:1.14;margin-bottom:7px}
-.sub{color:var(--txt2);font-size:14px;max-width:730px}.sub b{color:var(--txt);font-weight:500}
-.sheetnav{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.sheet-tab{padding:10px 16px;font-size:13px;color:var(--txt3);border:none;background:none;font-family:var(--sans);border-bottom:2px solid transparent;margin-bottom:-1px}
-.sheet-tab.on{color:var(--gold2);border-bottom-color:var(--gold)}.sheet-tab.future{opacity:.4}
-
-.ctrlbar{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap}
-.ctrl-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3)}
-.tabs{display:inline-flex;background:var(--ink2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
-.tab{padding:7px 14px;font-size:12.5px;color:var(--txt3);cursor:pointer;border:none;background:none;font-family:var(--sans);border-radius:7px;transition:.13s}
-.tab:hover{color:var(--txt2)}.tab.on{background:var(--gold);color:var(--ink);font-weight:500}
-.tab.seg.on{background:var(--blue);color:#fff}
-
-.toprow{display:grid;grid-template-columns:1fr 1.4fr;gap:18px;margin-bottom:24px}
-@media(max-width:760px){.toprow{grid-template-columns:1fr}}
-.kpicard{background:var(--ink2);border:1px solid var(--line);border-radius:13px;padding:18px 20px}
-.kpicard .kl{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt3);margin-bottom:9px}
-.kpicard .kv{font-family:var(--serif);font-size:30px;font-weight:500;line-height:1}.kpicard .ku{font-size:13px;color:var(--txt3)}
-.gauge{margin-top:14px}.gauge-track{height:6px;background:var(--ink3);border-radius:3px;position:relative;overflow:hidden}
-.gauge-fill{height:100%;border-radius:3px;transition:width .4s}.gauge-marker{position:absolute;top:-3px;width:2px;height:12px;background:var(--txt2);border-radius:1px}
-.gauge-cmp{display:flex;justify-content:space-between;margin-top:9px;font-size:11.5px;font-family:var(--mono)}.gauge-cmp .cmpv{color:var(--txt2)}
-.delta{font-family:var(--mono);font-size:12.5px;padding:2px 8px;border-radius:5px;display:inline-block}
-.delta.up{background:var(--up-bg);color:var(--up)}.delta.down{background:var(--down-bg);color:var(--down)}.delta.warn{background:rgba(214,162,62,.13);color:var(--warn)}
-.ach{font-size:11px;color:var(--txt3);margin-top:8px;font-family:var(--mono)}
-
-.compose{background:var(--ink2);border:1px solid var(--line);border-radius:13px;padding:18px 20px}
-.compose h3{font-family:var(--serif);font-size:16px;font-weight:500;margin-bottom:4px}
-.compose .ph{font-size:11.5px;color:var(--txt3);margin-bottom:16px;font-family:var(--mono)}
-.stackbar{display:flex;height:34px;border-radius:7px;overflow:hidden;margin-bottom:14px}
-.stackseg{display:flex;align-items:center;justify-content:center;font-size:11px;font-family:var(--mono);color:#0a0e1a;font-weight:500;min-width:0}
-.stackseg.core{background:var(--teal)}.stackseg.xlrr{background:var(--amber)}
-.complegend{display:flex;flex-direction:column;gap:9px}
-.cl-row{display:flex;align-items:center;gap:10px;font-size:13px}
-.cl-sw{width:11px;height:11px;border-radius:3px;flex-shrink:0}
-.cl-sw.core{background:var(--teal)}.cl-sw.xlrr{background:var(--amber)}.cl-sw.fee{background:var(--blue)}
-.cl-name{flex:1;color:var(--txt2)}.cl-val{font-family:var(--mono);color:var(--txt);font-weight:500}
-.cl-pct{font-family:var(--mono);font-size:11.5px;color:var(--txt3);width:46px;text-align:right}
-
-.tblwrap{margin-bottom:8px}
-.tbl-title{font-family:var(--serif);font-size:18px;font-weight:500;margin-bottom:4px}
-.tbl-sub{font-size:12px;color:var(--txt3);font-family:var(--mono);margin-bottom:14px}
-.tbl{background:var(--ink2);border:1px solid var(--line);border-radius:12px;overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:640px}
-th{font-family:var(--mono);font-size:9.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--txt3);text-align:right;padding:12px 15px;border-bottom:1px solid var(--line);font-weight:500;background:var(--ink3);white-space:nowrap}
-th:first-child{text-align:left}
-th.planh{background:rgba(90,138,214,.1);color:var(--blue)}
-td{padding:11px 15px;font-size:13px;text-align:right;border-bottom:1px solid rgba(38,48,74,.4);font-family:var(--mono);color:var(--txt2);white-space:nowrap}
-td:first-child{text-align:left;font-family:var(--sans);color:var(--txt)}
-td.planc{background:rgba(90,138,214,.05);color:var(--blue)}
-tr:last-child td{border-bottom:none}
-tr.total td{background:var(--ink3);color:var(--txt);font-weight:500;border-top:1px solid var(--line2)}
-tr.coreline td:first-child{color:var(--teal)} tr.xlrrline td:first-child{color:var(--amber)}
-.ach-pill{font-family:var(--mono);font-size:11.5px;padding:2px 7px;border-radius:5px}
-.ach-pill.good{background:var(--up-bg);color:var(--up)}.ach-pill.mid{background:rgba(214,162,62,.13);color:var(--warn)}.ach-pill.bad{background:var(--down-bg);color:var(--down)}
-.yoy{font-family:var(--mono);font-size:12px;padding:2px 7px;border-radius:5px}
-.yoy.up{background:var(--up-bg);color:var(--up)}.yoy.down{background:var(--down-bg);color:var(--down)}.yoy.flat{color:var(--txt3)}
-
-.note{background:linear-gradient(180deg,rgba(201,162,39,.06),rgba(201,162,39,.02));border:1px solid rgba(201,162,39,.24);border-radius:11px;padding:14px 18px;margin-top:16px;font-size:13.5px;color:var(--txt2);line-height:1.55}
-.note b{color:var(--gold2);font-weight:500}.note .nh{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
-.foot{margin-top:30px;padding-top:20px;border-top:1px solid var(--line);font-size:11px;color:var(--txt3);font-family:var(--mono);line-height:1.7}.foot b{color:var(--txt3)}
-
-/* ==t1== */
-
-:root{--ink:#0a0e1a;--ink2:#111726;--ink3:#1a2235;--line:#26304a;--line2:#323e5e;
---txt:#e8ecf5;--txt2:#a7b2cc;--txt3:#6b7894;--gold:#c9a227;--gold2:#e3bd3e;--teal:#3fb8a0;--blue:#5a8ad6;--rose:#d97862;--green:#6fae4f;
---up:#6fae4f;--up-bg:rgba(111,174,79,.12);--down:#d9685f;--down-bg:rgba(217,104,95,.13);
---serif:'Noto Serif Display',Georgia,serif;--sans:'Outfit',system-ui,sans-serif;--mono:'DM Mono',monospace;}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--ink);color:var(--txt);font-family:var(--sans);font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased;padding:0 0 70px}
-.wrap{max-width:920px;margin:0 auto;padding:0 30px}
-header{border-bottom:1px solid var(--line);padding:36px 0 22px;margin-bottom:24px}
-.kicker{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
-.kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
-.kicker .seq{color:var(--txt3)}
-h1{font-family:var(--serif);font-weight:500;font-size:28px;line-height:1.14;margin-bottom:8px}
-.sub{color:var(--txt2);font-size:14.5px;max-width:740px}.sub b{color:var(--txt);font-weight:500}
-
-.filterbar{display:flex;align-items:center;gap:14px;margin-bottom:8px;flex-wrap:wrap}
-.filter-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3)}
-.seg-tabs{display:inline-flex;background:var(--ink2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
-.seg-tab{padding:8px 18px;font-size:13.5px;color:var(--txt3);cursor:pointer;border:none;background:none;font-family:var(--sans);border-radius:7px;transition:.13s}
-.seg-tab:hover{color:var(--txt2)}
-.seg-tab.on{background:var(--gold);color:var(--ink);font-weight:500}
-.scope-note{font-size:11.5px;color:var(--txt3);font-family:var(--mono);margin-bottom:18px}
-
-.headline{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
-@media(max-width:620px){.headline{grid-template-columns:1fr}}
-.hl{background:var(--ink2);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
-.hl .hll{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);margin-bottom:7px}
-.hl .hlv{font-family:var(--serif);font-size:26px;font-weight:500;color:var(--gold2)}
-.hl .hlv .u{font-size:12px;color:var(--txt3)}
-.hl .hls{font-size:11.5px;margin-top:4px;font-family:var(--mono)}
-.hls.up{color:var(--up)}.hls.down{color:var(--down)}
-
-.tbl{background:var(--ink2);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-table{width:100%;border-collapse:collapse}
-th{font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--txt3);text-align:right;padding:13px 18px;border-bottom:1px solid var(--line);font-weight:500;background:var(--ink3);white-space:nowrap}
-th:first-child{text-align:left}
-td{padding:11px 18px;font-size:13.5px;text-align:right;border-bottom:1px solid rgba(38,48,74,.4);font-family:var(--mono);color:var(--txt2);white-space:nowrap}
-td:first-child{text-align:left;font-family:var(--sans);color:var(--txt)}
-tr:last-child td{border-bottom:none}
-tr.result td{background:rgba(26,34,53,.45);color:var(--txt);font-weight:500}
-tr.result td:first-child{color:var(--txt)}
-tr.grand td{background:var(--ink3);color:var(--txt);font-weight:500;border-top:1px solid var(--line2);font-size:14.5px}
-tr.minus td:first-child{color:var(--txt2)}
-tr.minus td:first-child::before{content:'(−) ';color:var(--txt3)}
-.yoy{font-family:var(--mono);font-size:12.5px;padding:2px 9px;border-radius:5px;display:inline-block;min-width:62px;text-align:center}
-.yoy.up{background:var(--up-bg);color:var(--up)}
-.yoy.down{background:var(--down-bg);color:var(--down)}
-.yoy.flat{color:var(--txt3)}
-.planh{background:rgba(90,138,214,.08)!important;color:var(--blue)!important}
-.planc{background:rgba(90,138,214,.05);color:var(--blue)}
-tr.grand .planc{color:var(--blue);font-weight:500}
-.hl.plan{border-color:rgba(90,138,214,.4);background:linear-gradient(180deg,rgba(90,138,214,.06),rgba(90,138,214,.02))}
-.section-head{display:flex;align-items:baseline;gap:12px;margin:34px 0 6px}
-.section-head .rn{font-family:var(--mono);font-size:12px;color:var(--gold);font-weight:500}
-.section-head h2{font-family:var(--serif);font-size:21px;font-weight:500}
-tr.grp td{background:rgba(201,162,39,.06);color:var(--gold2);font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:8px 18px}
-#ratiosection[data-dim="1"] .tbl{opacity:.45;pointer-events:none}
-.ratio-scope{background:rgba(90,138,214,.07);border:1px solid rgba(90,138,214,.2);border-radius:9px;padding:10px 14px;font-size:12.5px;color:var(--blue);margin:18px 0 6px;font-family:var(--mono)}
-.share-bar{display:inline-block;height:4px;border-radius:2px;background:var(--gold);vertical-align:middle;margin-left:8px;opacity:.5}
-.note{background:linear-gradient(180deg,rgba(201,162,39,.06),rgba(201,162,39,.02));border:1px solid rgba(201,162,39,.24);border-radius:11px;padding:14px 18px;margin-top:18px;font-size:13.5px;color:var(--txt2);line-height:1.55}
-.note b{color:var(--gold2);font-weight:500}
-.note .nh{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
-.foot{margin-top:34px;padding-top:20px;border-top:1px solid var(--line);font-size:11px;color:var(--txt3);font-family:var(--mono);line-height:1.7}
-.foot b{color:var(--txt3)}
-
-/* ==sim== */
-
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>the Bank — Branch Plan Simulator 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap&subset=latin,latin-ext,vietnamese" rel="stylesheet">
+<style>
 :root{--ink:#0a0e1a;--ink2:#111726;--ink3:#1a2235;--line:#26304a;--line2:#323e5e;
 --txt:#e8ecf5;--txt2:#a7b2cc;--txt3:#6b7894;--gold:#c9a227;--gold2:#e3bd3e;--teal:#3fb8a0;--blue:#5a8ad6;--rose:#d97862;--green:#6fae4f;--amber:#d6a23e;--purple:#8b7fd6;
 --up:#6fae4f;--up-bg:rgba(111,174,79,.13);--down:#d9685f;--down-bg:rgba(217,104,95,.13);--warn:#d6a23e;--warn-bg:rgba(214,162,62,.13);
@@ -409,11 +15,10 @@ header{border-bottom:1px solid var(--line);padding:30px 0 18px;margin-bottom:20p
 .kicker{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
 .kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
 h1{font-family:var(--serif);font-weight:500;font-size:25px;margin-bottom:6px}
-.sub{color:var(--txt2);font-size:13.5px;max-width:780px}.sub b{color:var(--txt);font-weight:500}
+.sub{color:var(--txt2);font-size:13.5px;max-width:820px}.sub b{color:var(--txt);font-weight:500}
 
-/* RESULT BAR (sticky top) */
 .results{position:sticky;top:0;z-index:20;background:rgba(10,14,26,.93);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:14px 0;margin-bottom:22px}
-.results .rgrid{max-width:1180px;margin:0 auto;padding:0 26px;display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.results .rgrid{max-width:1180px;margin:0 auto;padding:0 26px;display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
 @media(max-width:900px){.results .rgrid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:560px){.results .rgrid{grid-template-columns:repeat(2,1fr)}}
 .rcard{background:var(--ink2);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
@@ -423,38 +28,46 @@ h1{font-family:var(--serif);font-weight:500;font-size:25px;margin-bottom:6px}
 .rcard .rd{font-size:10px;font-family:var(--mono);margin-top:4px}
 .rcard .rd.up{color:var(--up)}.rcard .rd.down{color:var(--down)}.rcard .rd.warn{color:var(--warn)}
 
+.benchbar{max-width:1180px;margin:10px auto 0;padding:0 26px;display:flex;gap:8px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px}
+.benchbar .bt{padding:3px 9px;border-radius:6px;background:var(--ink3);color:var(--txt3)}
+.benchbar .bt b{color:var(--txt2);font-weight:500}
+.benchbar .bt.hit{background:var(--up-bg);color:var(--up)}
+.benchbar .bt.miss{background:var(--warn-bg);color:var(--warn)}
+
 .controls{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 @media(max-width:820px){.controls{grid-template-columns:1fr}}
-.segpanel{background:var(--ink2);border:1px solid var(--line);border-radius:13px;padding:18px 20px}
-.segpanel.rt{border-top:2px solid var(--teal)}
-.segpanel.ct{border-top:2px solid var(--amber)}
-.segpanel h3{font-family:var(--serif);font-size:17px;font-weight:500;margin-bottom:3px;display:flex;align-items:center;gap:8px}
-.segdot{width:9px;height:9px;border-radius:50%}
-.segdot.rt{background:var(--teal)}.segdot.ct{background:var(--amber)}
-.segpanel .sh{font-size:11px;color:var(--txt3);font-family:var(--mono);margin-bottom:16px}
-.seg-pbt{font-family:var(--mono);font-size:12px;color:var(--txt2);margin-left:auto}
-.seg-pbt b{color:var(--gold2);font-weight:500}
+.panel{background:var(--ink2);border:1px solid var(--line);border-radius:13px;padding:18px 20px}
+.panel.scale{border-top:2px solid var(--teal)}
+.panel.profit{border-top:2px solid var(--gold)}
+.panel h3{font-family:var(--serif);font-size:17px;font-weight:500;margin-bottom:3px}
+.panel .ph{font-size:11px;color:var(--txt3);font-family:var(--mono);margin-bottom:16px}
 
-.sgroup{margin-bottom:7px;padding-bottom:7px}
 .sgroup-title{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:14px 0 10px;padding-top:12px;border-top:1px solid var(--line)}
-.sgroup-title:first-child{border-top:none;padding-top:0;margin-top:0}
+.sgroup-title:first-of-type{border-top:none;padding-top:0;margin-top:0}
 
 .slider{margin-bottom:15px}
 .slabel{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
 .slabel .sn{font-size:12.5px;color:var(--txt2)}
 .slabel .sv{font-family:var(--mono);font-size:13px;color:var(--txt);font-weight:500}
 .slabel .sv .base{color:var(--txt3);font-size:10.5px;margin-left:6px}
-.strack{position:relative;height:26px;display:flex;align-items:center}
-.srange{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:3px;background:var(--ink3);outline:none;position:relative;z-index:2}
+.strack{position:relative;height:30px;display:flex;align-items:center}
+.srange{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:3px;background:var(--ink3);outline:none;position:relative;z-index:3}
 .srange::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--ink);box-shadow:0 0 0 1px var(--gold)}
 .srange::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--ink)}
-.basemark{position:absolute;top:50%;transform:translateY(-50%);width:2px;height:14px;background:var(--blue);border-radius:1px;z-index:1;pointer-events:none}
-.basemark::after{content:'2025';position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:7.5px;color:var(--blue);white-space:nowrap}
+.basemark,.kvmark,.khmark{position:absolute;top:50%;transform:translateY(-50%);width:2px;height:14px;border-radius:1px;z-index:1;pointer-events:none}
+.basemark{background:var(--blue)}.kvmark{background:var(--purple);height:11px}.khmark{background:var(--teal);height:11px}
+.markrow{position:relative;height:13px;font-family:var(--mono);font-size:7px}
+.mk{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.mk.b{color:var(--blue)}.mk.kv{color:var(--purple)}.mk.kh{color:var(--teal)}
+
+.derived{background:var(--ink3);border-radius:9px;padding:11px 14px;margin-top:8px;font-family:var(--mono);font-size:11.5px;color:var(--txt2);line-height:1.7}
+.derived b{color:var(--gold2);font-weight:500}
+.derived .dr{display:flex;justify-content:space-between}
 
 .midbar{background:var(--ink2);border:1px solid var(--line);border-radius:13px;padding:16px 20px;margin:22px 0}
 .midbar h3{font-family:var(--serif);font-size:16px;font-weight:500;margin-bottom:14px}
 .warnrow{display:flex;gap:14px;flex-wrap:wrap}
-.wbox{flex:1;min-width:140px;background:var(--ink3);border-radius:9px;padding:11px 14px;border-left:3px solid var(--line2)}
+.wbox{flex:1;min-width:150px;background:var(--ink3);border-radius:9px;padding:11px 14px;border-left:3px solid var(--line2)}
 .wbox.ok{border-left-color:var(--up)}.wbox.warn{border-left-color:var(--warn)}.wbox.bad{border-left-color:var(--down)}
 .wbox .wl{font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--txt3);margin-bottom:4px}
 .wbox .wv{font-family:var(--serif);font-size:18px;font-weight:500}
@@ -465,973 +78,37 @@ h1{font-family:var(--serif);font-weight:500;font-size:25px;margin-bottom:6px}
 .btn:hover{border-color:var(--gold);color:var(--txt)}
 .btn.primary{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:500}
 
-.shsgap{max-width:1180px;margin:10px auto 0;padding:0 26px;font-family:var(--mono);font-size:11.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.shsgap .tag{padding:3px 10px;border-radius:6px;font-weight:500}
-.shsgap .tag.ok{background:var(--up-bg);color:var(--up)}
-.shsgap .tag.under{background:var(--warn-bg);color:var(--warn)}
-.shsgap .note{color:var(--txt3)}
 .foot{margin-top:30px;padding-top:18px;border-top:1px solid var(--line);font-size:11px;color:var(--txt3);font-family:var(--mono);line-height:1.7}
-.foot b{color:var(--txt3)}
-
-.sheet-pane{animation:fade .25s ease}@keyframes fade{from{opacity:0}to{opacity:1}}#mainnav .sheet-tab{cursor:pointer}.sheet-tab.simtab{margin-left:auto;color:var(--teal)}.sheet-tab.simtab.on{border-bottom-color:var(--teal);color:var(--teal)}</style></head><body><div class="wrap">
-<header><div class="kicker"><span class="dot"></span>Báo cáo quản trị ngân hàng · Kế hoạch 2026 vs Thực hiện 2025</div><h1>the Bank — Dashboard quản trị</h1><p class="sub">Bộ báo cáo quản trị 5 phần + công cụ lập kế hoạch (Plan Simulator). Tập trung so sánh <b>kế hoạch 2026 với thực hiện 2025</b>. Thứ tự kỳ: gần nhất bên trái.</p></header><div class="sheetnav" id="mainnav"><button class="sheet-tab on" onclick="showSheet('overview')">Overview</button><button class="sheet-tab" onclick="showSheet('huydong')">Huy động vốn</button><button class="sheet-tab" onclick="showSheet('tindung')">Tín dụng</button><button class="sheet-tab" onclick="showSheet('kqkd')">Kết quả kinh doanh</button><button class="sheet-tab" onclick="showSheet('t1')">Bảng cân đối & chỉ số</button><button class="sheet-tab simtab" onclick="showSheet('sim')">Plan Simulator 2026</button><button class="sheet-tab" onclick="showSheet('branch')">Branch Simulator 2026</button></div></div>
-<div class="sheet-pane" id="pane-overview" style="display:block"><div class="ctrlbar">
-  <span class="ctrl-label">So sánh với</span>
-  <div class="cmp-tabs">
-    <button class="cmp-tab on" onclick="SH.overview.setCmp('plan')">Kế hoạch năm</button>
-    <button class="cmp-tab" onclick="SH.overview.setCmp('region')">TB khu vực</button>
-    <button class="cmp-tab" onclick="SH.overview.setCmp('bank')">TB toàn hàng</button>
-  </div>
-</div>
-
-<div class="kpigrid" id="overview-kpigrid"></div>
-
-<div class="row2">
-  <div class="panel">
-    <h3>Waterfall — biến động huy động</h3>
-    <div class="ph">Đóng góp vào tăng nguồn vốn từ đầu năm, theo nhóm khách hàng</div>
-    <div id="overview-wfdep"></div>
-  </div>
-  <div class="panel">
-    <h3>Waterfall — biến động cho vay</h3>
-    <div class="ph">Đóng góp vào tăng dư nợ từ đầu năm, theo nhóm khách hàng</div>
-    <div id="overview-wfloan"></div>
-  </div>
-</div>
-
-<div class="panel" style="margin-bottom:22px">
-  <h3>Xu hướng nhiều năm</h3>
-  <div class="ph">Huy động · cho vay · lợi nhuận qua các kỳ (tỷ đồng)</div>
-  <div class="trend" id="overview-trend"></div>
-  <div class="tlegend"><span><span class="tsw dep"></span>Huy động</span><span><span class="tsw loan"></span>Cho vay</span><span><span class="tsw pbt"></span>LNTT</span></div>
-</div>
-
-<div id="overview-note"></div>
-
-<div class="foot"><b>Nguồn số:</b> KPI quy mô &amp; lợi nhuận, huy động, cho vay, nợ xấu = số thực hiện từ báo cáo phân tích. <b>Kế hoạch 2026</b> giả lập theo định hướng phân tích (lợi nhuận +10%, quy mô +16-18%). <b>Mốc "TB khu vực / TB toàn hàng" và phân bổ waterfall theo nhóm KH</b> = giả lập minh họa giao diện, KHÔNG phải số thật · Đơn vị: tỷ đồng.</div></div>
-<div class="sheet-pane" id="pane-huydong" style="display:none"><div class="ctrlbar">
-  <span class="ctrl-label">So sánh với</span>
-  <div class="tabs">
-    <button class="tab on" onclick="SH.huydong.setCmp('plan')">Kế hoạch năm</button>
-    <button class="tab" onclick="SH.huydong.setCmp('region')">TB khu vực</button>
-    <button class="tab" onclick="SH.huydong.setCmp('bank')">TB toàn hàng</button>
-  </div>
-</div>
-<div class="kpirow" id="huydong-kpirow"></div>
-
-<div class="sec-title">Cơ cấu CASA — lợi thế chi phí vốn</div>
-<div class="sec-sub">Tỷ lệ tiền gửi không kỳ hạn — đặc thù tạo nên chi phí vốn thấp nhất ngành (số thật)</div>
-<div class="casabox" id="huydong-casabox"></div>
-
-<div class="sec-title">Bóc nguồn vốn theo chiều</div>
-<div class="sec-sub">Cơ cấu funding — đánh giá tính ổn định, chi phí, rủi ro tập trung. Nhãn xanh = thật, vàng = giả lập</div>
-<div class="dimgrid" id="huydong-dimgrid"></div>
-
-<div class="sec-title">Bảng chi tiết cơ cấu nguồn vốn</div>
-<div class="sec-sub">KH 2026 vs số dư 2025 · tăng trưởng từng cấu phần</div>
-<div class="tbl"><table id="huydong-nguontable"></table></div>
-
-<div class="sec-title">Năng suất huy động vốn</div>
-<div class="sec-sub">Huy động bình quân trên cán bộ — hiệu quả sử dụng nhân sự (giả lập)</div>
-<div class="dimcard">
-  <div class="metricbox" id="huydong-prodmetrics" style="margin-bottom:16px"></div>
-  <div class="trend" id="huydong-prodtrend"></div>
-</div>
-
-<div id="huydong-note"></div>
-<div class="foot"><b>Nguồn số:</b> Tổng huy động, tiền gửi KH, KBNN, TCTD, GTCG, CASA = số thực hiện từ báo cáo phân tích &amp; balance sheet. <b>Loại tiền, phân khúc khách hàng, năng suất huy động, mốc TB khu vực/toàn hàng</b> = giả lập minh họa theo cấu trúc dashboard tham chiếu. Mọi chiều bóc cộng khít tổng huy động thật 2.180.922 tỷ · Đơn vị: tỷ đồng.</div></div>
-<div class="sheet-pane" id="pane-tindung" style="display:none"><div class="ctrlbar">
-  <span class="ctrl-label">So sánh với</span>
-  <div class="tabs">
-    <button class="tab on" onclick="SH.tindung.setCmp('plan')">Kế hoạch năm</button>
-    <button class="tab" onclick="SH.tindung.setCmp('region')">TB khu vực</button>
-    <button class="tab" onclick="SH.tindung.setCmp('bank')">TB toàn hàng</button>
-  </div>
-</div>
-
-<div class="kpirow" id="tindung-kpirow"></div>
-
-<div class="sec-title">Bóc dư nợ theo chiều</div>
-<div class="sec-sub">Cơ cấu danh mục tín dụng — phát hiện tập trung rủi ro. Nhãn xanh = số thật, vàng = giả lập minh họa</div>
-<div class="dimgrid" id="tindung-dimgrid"></div>
-
-<div class="sec-title">Bảng chi tiết cơ cấu cho vay theo phân khúc</div>
-<div class="sec-sub">KH 2026 vs dư nợ 2025 · tăng trưởng · NPL từng phân khúc</div>
-<div class="tbl"><table id="tindung-segtable"></table></div>
-
-<div class="sec-title">Chất lượng nợ</div>
-<div class="sec-sub">Phân nhóm nợ, bao phủ và NPL theo phân khúc — cảnh báo sớm rủi ro chuyển nhóm</div>
-<div class="qualrow">
-  <div class="dimcard"><h4>Chỉ số chất lượng</h4><div class="dh real">số thật từ báo cáo</div><div class="metricbox" id="tindung-qualmetrics"></div></div>
-  <div class="dimcard"><h4>NPL theo phân khúc</h4><div class="dh real">số thật</div><div id="tindung-nplseg"></div></div>
-</div>
-
-<div class="sec-title">Năng suất tín dụng</div>
-<div class="sec-sub">Dư nợ bình quân trên cán bộ tín dụng — hiệu quả sử dụng nhân sự (giả lập)</div>
-<div class="dimcard">
-  <div class="metricbox" id="tindung-prodmetrics" style="margin-bottom:16px"></div>
-  <div class="trend" id="tindung-prodtrend"></div>
-</div>
-
-<div id="tindung-note"></div>
-
-<div class="foot"><b>Nguồn số:</b> Tổng dư nợ, phân khúc KH, ngành nghề, kỳ hạn, NPL = số thực hiện từ báo cáo phân tích. <b>Loại tiền, loại hình sản phẩm, tài sản bảo đảm, năng suất tín dụng, mốc TB khu vực/toàn hàng</b> = giả lập minh họa theo cấu trúc dashboard tham chiếu, KHÔNG phải số thật. Mọi chiều bóc cộng khít tổng dư nợ thật · Đơn vị: tỷ đồng.</div></div>
-<div class="sheet-pane" id="pane-kqkd" style="display:none"><div class="ctrlbar">
-  <span class="ctrl-label">So sánh</span>
-  <div class="tabs">
-    <button class="tab on" onclick="SH.kqkd.setCmp('plan')">Kế hoạch</button>
-  </div>
-  <span class="ctrl-label" style="margin-left:8px">Phân khúc</span>
-  <div class="tabs">
-    <button class="tab seg on" onclick="SH.kqkd.setSeg('all')">Toàn hàng</button>
-    <button class="tab seg" onclick="SH.kqkd.setSeg('rt')">Bán lẻ</button>
-    <button class="tab seg" onclick="SH.kqkd.setSeg('ct')">Doanh nghiệp</button>
-  </div>
-</div>
-
-<div class="toprow">
-  <div class="kpicard" id="kqkd-kpicard"></div>
-  <div class="compose" id="kqkd-compose"></div>
-</div>
-
-<div class="tblwrap">
-  <div class="tbl-title">Báo cáo P&amp;L đầy đủ</div>
-  <div class="tbl-sub" id="kqkd-plsub">Từ thu nhập xuống lợi nhuận · KH 2026 vs TH 2025 · benchmark</div>
-  <div class="tbl"><table id="kqkd-pltable"></table></div>
-</div>
-
-<div class="tblwrap">
-  <div class="tbl-title">Cấu phần &amp; chất lượng lợi nhuận</div>
-  <div class="tbl-sub" id="kqkd-tblsub">Tách lõi vs thu nợ XLRR · KH 2026 vs TH 2025 · benchmark</div>
-  <div class="tbl"><table id="kqkd-kqtable"></table></div>
-</div>
-
-<div id="kqkd-note"></div>
-
-<div class="foot"><b>Nguồn số:</b> P&amp;L &amp; cấu phần lợi nhuận = số thực hiện SHS; phân bổ theo khối = giả lập (khóa dư nợ/NPL). <b>Tách "thu nợ đã XLRR"</b> = giả lập (2025: hoàn nhập Q4 2.677 tỷ báo cáo nêu + thu hồi nợ đã xử lý). <b>Kế hoạch 2026</b> đặt LNTT +10%. <b>Benchmark TB toàn hàng</b> = giả lập minh họa (tham khảo) · Đơn vị: tỷ đồng.</div></div>
-<div class="sheet-pane" id="pane-t1" style="display:none"><div class="filterbar">
-  <span class="filter-label">Phân khúc</span>
-  <div class="seg-tabs">
-    <button class="seg-tab on" onclick="SH.t1.setSeg('all')">Toàn hàng</button>
-    <button class="seg-tab" onclick="SH.t1.setSeg('rt')">Bán lẻ</button>
-    <button class="seg-tab" onclick="SH.t1.setSeg('ct')">Doanh nghiệp</button>
-  </div>
-</div>
-<div class="scope-note" id="t1-scope"></div>
-
-<div class="headline" id="t1-headline"></div>
-<div class="section-head"><span class="rn">Bảng 1</span><h2>Báo cáo kết quả kinh doanh</h2></div>
-<div class="tbl"><table id="t1-pltable"></table></div>
-<div id="t1-note"></div>
-
-<div id="t1-ratiosection">
-  <div id="t1-ratioscope"></div>
-  <div class="section-head"><span class="rn">Bảng 2</span><h2>Chỉ số tài chính</h2></div>
-  <p class="rd">Hiệu quả sinh lời, chất lượng tài sản và cấu trúc — tính nhất quán từ P&amp;L và balance sheet.</p>
-  <div class="tbl" id="t1-ratiowrap"><table id="t1-ratiotable"></table></div>
-
-  <div class="section-head" style="margin-top:30px"><span class="rn">Bảng 3</span><h2>Bảng cân đối kế toán tóm tắt</h2></div>
-  <p class="rd">Quy mô tài sản, cho vay, huy động và vốn chủ — nền để tính các tỷ lệ sinh lời.</p>
-  <div class="tbl"><table id="t1-bstable"></table></div>
-</div>
-
-<div class="foot"><b>Nguồn số:</b> P&amp;L toàn hàng &amp; cơ cấu thu nhập = số thực hiện từ báo cáo phân tích (05/03/2026). <b>Phân bổ theo khối</b> (bán lẻ/doanh nghiệp) = giả lập theo khóa phân bổ dựa trên tỷ trọng dư nợ (45/55), NPL từng khối (0,7%/1,3%) và đặc thù chi phí — tổng các khối khớp đúng số thật toàn hàng. <b>Kế hoạch 2026</b> = giả lập đặt LNTT +10% so 2025, neo theo định hướng phân tích (tín dụng +16%, dự phòng bình thường hóa, CIR &lt;35%) · Đơn vị: tỷ đồng.</div></div>
-<div class="sheet-pane" id="pane-sim" style="display:none"><div class="results"><div class="rgrid" id="sim-results"></div><div id="sim-shsgap"></div></div>
-
-
+</style></head>
+<body>
+<div class="results"><div class="rgrid" id="results"></div><div class="benchbar" id="benchbar"></div></div>
+<div class="wrap">
+<header>
+  <div class="kicker"><span class="dot"></span>Branch Plan Simulator 2026 · Bottom-up theo chi nhánh</div>
+  <h1>Mô phỏng kế hoạch chi nhánh 2026</h1>
+  <p class="sub">Dựng plan từ <b>nguồn lực thật</b>: quy mô = <b>năng suất × số lao động</b>. Baseline từ báo cáo chi nhánh thực hiện. Mỗi năng suất có 3 vạch: <span style="color:var(--blue)">chi nhánh 2025</span> · <span style="color:var(--purple)">TB khu vực</span> · <span style="color:var(--teal)">TB toàn hàng</span>. Lợi nhuận so với 4 mốc thật.</p>
+</header>
 
 <div class="actions">
-  <button class="btn" onclick="SH.sim.resetBase()">Về baseline 2025 (phẳng)</button>
-  <button class="btn primary" onclick="SH.sim.loadSHS()">Định hướng toàn hàng</button>
-  <button class="btn" onclick="SH.sim.exportCfg()">Xuất cấu hình JSON</button>
+  <button class="btn" onclick="resetBase()">Về baseline 2025</button>
+  <button class="btn primary" onclick="loadStretch()">Kịch bản tăng tốc</button>
+  <button class="btn" onclick="exportCfg()">Xuất cấu hình JSON</button>
 </div>
 
 <div class="controls">
-  <div class="segpanel rt" id="sim-panel-rt"></div>
-  <div class="segpanel ct" id="sim-panel-ct"></div>
-</div>
-
-<div class="midbar">
-  <h3>Kiểm tra ràng buộc &amp; an toàn</h3>
-  <div class="warnrow" id="sim-warnrow"></div>
-</div>
-
-<div class="foot"><b>Phương pháp:</b> Incremental budgeting — plan 2026 = baseline 2025 × (1 + delta). <b>Baseline khối</b> suy ngược từ P&amp;L 2025 thực hiện (lãi cho vay bq, CASA, CoF). <b>NIM, LNTT, ROAE, LDR</b> = kết quả tính từ slider, không phải đầu vào. <b>Credit cost</b> default đặt ở mức bình thường hóa (BL 0,35% / DN 0,55%), cao hơn 2025 thực (thấp do hoàn nhập Q4). Chi phí vốn CASA cố định 0,2%/năm · Đơn vị: tỷ đồng.</div></div>
-<div class="sheet-pane" id="pane-branch" style="display:none"><div class="results"><div class="rgrid" id="branch-results"></div><div class="benchbar" id="branch-benchbar"></div></div>
-
-
-
-<div class="actions">
-  <button class="btn" onclick="SH.branch.resetBase()">Về baseline 2025</button>
-  <button class="btn primary" onclick="SH.branch.loadStretch()">Kịch bản tăng tốc</button>
-  <button class="btn" onclick="SH.branch.exportCfg()">Xuất cấu hình JSON</button>
-</div>
-
-<div class="controls">
-  <div class="panel scale" id="branch-panel-scale"></div>
-  <div class="panel profit" id="branch-panel-profit"></div>
+  <div class="panel scale" id="panel-scale"></div>
+  <div class="panel profit" id="panel-profit"></div>
 </div>
 
 <div class="midbar">
   <h3>Kiểm tra ràng buộc &amp; benchmark</h3>
-  <div class="warnrow" id="branch-warnrow"></div>
+  <div class="warnrow" id="warnrow"></div>
 </div>
 
-<div class="foot"><b>Phương pháp bottom-up:</b> Huy động = năng suất HĐ × lao động; Tín dụng = năng suất TD × lao động (lao động dùng chung). <b>Lợi nhuận HĐKD</b> = (Huy động + Tín dụng) × biên ròng (gộp spread FTP nội bộ + thu dịch vụ − opex chi nhánh, suy từ thực hiện). <b>Tổng LN</b> = LN HĐKD + Thu nợ XLRR (XLRR bất thường, mặc định giữ thấp). Năng suất tham chiếu = số thật từ báo cáo · Đơn vị: tỷ đồng.</div></div><script>
+<div class="foot"><b>Phương pháp bottom-up:</b> Huy động = năng suất HĐ × lao động; Tín dụng = năng suất TD × lao động (lao động dùng chung). <b>Lợi nhuận HĐKD</b> = (Huy động + Tín dụng) × biên ròng (gộp spread FTP nội bộ + thu dịch vụ − opex chi nhánh, suy từ thực hiện). <b>Tổng LN</b> = LN HĐKD + Thu nợ XLRR (XLRR bất thường, mặc định giữ thấp). Năng suất tham chiếu = số thật từ báo cáo · Đơn vị: tỷ đồng.</div>
+</div>
 
-function showSheet(key){document.querySelectorAll('.sheet-pane').forEach(p=>p.style.display='none');document.getElementById('pane-'+key).style.display='block';document.querySelectorAll('#mainnav .sheet-tab').forEach(t=>t.classList.remove('on'));event.target.classList.add('on');window.scrollTo({top:0,behavior:'smooth'});}
-// ===overview===
-(function(){
-
-const D=JSON.parse(JSON.stringify({"real":{"nii":{"2024":55406,"2025":58674},"fee":{"2024":5137,"2025":3470},"fx":{"2024":5292,"2025":6165},"sec":{"2024":373,"2025":457},"other":{"2024":2372,"2025":3592},"toi":{"2024":68578,"2025":72358},"opex":{"2024":23027,"2025":25152},"ppop":{"2024":45551,"2025":47205},"prov":{"2024":3315,"2025":3185},"pbt":{"2024":42236,"2025":44020}},"seg":{"rt":{"2024":{"nii":28434,"fee":1521,"fx":1567,"sec":110,"other":702,"toi":32334,"opex":12422,"ppop":19912,"prov":981,"pbt":18930},"2025":{"nii":30794,"fee":1061,"fx":1885,"sec":140,"other":1099,"toi":34979,"opex":13859,"ppop":21120,"prov":974,"pbt":20146}},"ct":{"2024":{"nii":26972,"fee":3616,"fx":3725,"sec":263,"other":1670,"toi":36246,"opex":10605,"ppop":25641,"prov":2334,"pbt":23308},"2025":{"nii":27880,"fee":2409,"fx":4280,"sec":317,"other":2493,"toi":37379,"opex":11293,"ppop":26086,"prov":2211,"pbt":23875}}},"share":{"2024":{"rt":0.4385,"ct":0.5615},"2025":{"rt":0.45,"ct":0.55}},"plan":{"all":{"nii":68976,"fee":4074,"fx":7102,"sec":537,"other":4217,"toi":84906,"opex":29493,"ppop":55413,"prov":6991,"pbt":48422},"rt":{"nii":36201,"fee":1246,"fx":2172,"sec":164,"other":1290,"toi":41073,"opex":16251,"ppop":24822,"prov":2138,"pbt":22684},"ct":{"nii":32775,"fee":2828,"fx":4930,"sec":373,"other":2927,"toi":43833,"opex":13242,"ppop":30591,"prov":4853,"pbt":25738}},"bs":{"ta":{"2024":2085874,"2025":2441929,"2026":2880262,"2023":1850521},"loan":{"2024":1418016,"2025":1648557,"2026":1914222},"dep":{"2024":1514665,"2025":1672534,"2026":1984562},"liab":{"2024":1889664,"2025":2214393,"2026":2613119},"equity":{"2024":196210,"2025":227536,"2026":267143,"2023":165274}},"lnst":{"2024":33853,"2025":35198,"2026":38738},"ratios":{"nim":{"2024":2.86,"2025":2.63,"2026":2.63},"cir":{"2024":33.58,"2025":34.76,"2026":34.76},"npl":{"2024":0.96,"2025":0.58,"2026":0.97},"casa":{"2024":36.72,"2025":35.42},"cov":{"2025":259.0},"ldr":{"2024":93.6,"2025":98.6,"2026":96.5},"roae":{"2024":18.73,"2025":16.6,"2026":15.63},"roaa":{"2024":1.72,"2025":1.55,"2026":1.45},"bvps":{"2024":23481,"2025":27230,"2026":31970},"eps":{"2024":4051,"2025":4212,"2026":4636}},"overview":{"kpi":{"huydong":{"label":"Tổng nguồn vốn huy động","cur":2180922,"ytd":1851561,"same":1851561,"plan":2159329,"unit":"tỷ","hb":true,"region":259634,"bank":239662,"plan26":2588754},"loinhuan":{"label":"Tổng lợi nhuận trước thuế","cur":44020,"ytd":42236,"same":42236,"plan":43157,"unit":"tỷ","hb":true,"region":5002,"bank":4634,"plan26":48422},"chovay":{"label":"Cơ cấu cho vay + trái phiếu","cur":1648557,"ytd":1418016,"same":1418016,"plan":1648557,"unit":"tỷ","hb":true,"region":191693,"bank":177264,"plan26":1914222},"npl":{"label":"Tỷ lệ nợ xấu","cur":0.58,"ytd":0.96,"same":0.96,"plan":1.0,"unit":"%","hb":false,"region":1.55,"bank":1.85,"plan26":0.97}},"wf_dep":[["KHBL (bán lẻ)",66306],["KHDN lớn",33152],["KHDN vừa & nhỏ",28416],["Định chế tài chính",20523],["KHDN FDI",9472]],"wf_loan":[["KHBL (bán lẻ)",106049],["KHDN vừa",62246],["KHDN FDI",34581],["KHDN lớn",32276],["DNNN",-4611]],"trend":{"years":["2022","2023","2024","2025","KH26"],"dep":[1230000,1350000,1514665,1672534,2588754],"loan":[1050000,1240000,1418016,1648557,1914222],"pbt":[37000,41200,42236,44020,48422]}},"kqkd":{"xlrr":{"2024":1850,"2025":2677,"2026":1200},"core":{"2024":40386,"2025":41343,"2026":47222},"fee":{"2024":5137,"2025":3470,"2026":4074},"pbt":{"2024":42236,"2025":44020,"2026":48422},"plan2025_pbt":43157,"bench":{"pbt":4634,"core":4307,"fee":377,"xlrr":335}},"pl_plan2025":{"nii":59827,"fee":3420,"fx":6324,"sec":470,"other":3526,"toi":72177,"opex":25572,"ppop":45963,"prov":3314,"pbt":45300,"noni":13740},"pl_bench":{"nii":6145,"fee":358,"fx":671,"sec":50,"other":395,"toi":7890,"opex":2691,"ppop":4976,"prov":345,"pbt":4540,"noni":1474},"tindung":{"loan":{"2024":1418016,"2025":1648557,"2026":1914222},"kpi_loan":{"cur":1648557,"plan":1648557,"ytd":1418016,"same":1418016,"region":191693,"bank":177264,"plan26":1914222},"kpi_npl":{"cur":0.58,"plan":1.0,"ytd":0.96,"same":0.96,"region":1.55,"bank":1.85,"plan26":0.97},"seg":[["KHBL (bán lẻ)",741850,18.5,0.7,903821],["KHDN vừa",306632,23.9,1.1,367958],["KHDN FDI",189584,17.0,0.9,218022],["KHDN lớn",278606,2.7,1.5,292536],["DNNN",131885,-12.7,2.1,131885]],"nganh":[["Xây dựng",153316,72.0,205327],["Bán buôn bán lẻ",346197,14.0,389818],["Công nghiệp chế biến",296740,12.0,328788],["BĐS",65942,8.0,70690],["Vận tải & kho bãi",115399,22.0,138248],["Nông nghiệp",82428,9.0,89105],["Tiêu dùng cá nhân",313226,28.0,392159],["Khác",275309,10.0,300087]],"kyhan":[["Ngắn hạn",692394,7.2,737922],["Trung hạn",346197,18.5,403839],["Dài hạn",609966,29.6,772461]],"loaitien":[["VND",1450730,16.8,1701261],["Ngoại tệ (quy đổi)",197827,8.5,212961]],"sanpham":[["Vay từng lần",560510,14,622018],["Hạn mức tín dụng",675908,17,779322],["Vay dự án/đầu tư",296740,28,371518],["Thẻ & tiêu dùng",115399,25,141364]],"tsbd":[["BĐS",956163,15,1100758],["Có bảo đảm khác",445110,18,517218],["Tín chấp",247284,22,296246]],"chatluong":{"npl_loan":{"2024":0.96,"2025":0.58},"npl_total":{"2025":0.97},"nhom2":{"2024":0.5,"2025":0.16},"coverage":{"2025":259},"npl_rt":0.7,"npl_ct":1.3},"nangsuat":{"staff":4520,"duno_per_staff":364.7,"region":310,"bank":285,"trend":[["2022",298],["2023",322],["2024",344],["2025",365],["KH26",411.2]],"per_2026":411.2}},"huydong":{"tong":{"2024":1851561,"2025":2180922,"2026":2588754},"kpi_hd":{"cur":2180922,"plan":2159329,"ytd":1851561,"same":1851561,"region":259634,"bank":239662,"plan26":2588754},"kpi_casa":{"cur":35.42,"plan":36.0,"ytd":36.72,"same":36.72,"region":28.5,"bank":24.8,"plan26":36.0},"kpi_ldr":{"cur":98.6,"plan":95.0,"ytd":93.6,"same":93.6,"region":92.0,"bank":95.5,"plan26":96.5},"nguon":[["Tiền gửi khách hàng",1672534,10.4,2043415],["Tiền gửi & vay TCTD khác",321159,36.9,346852],["Tiền gửi KBNN & CP",160128,104.7,168134],["Phát hành GTCG",27101,12.3,30353]],"loaitien":[["VND",1984639,17.5,2371272],["Ngoại tệ (quy đổi)",196283,12.0,217482]],"kyhan":[["Không kỳ hạn (CASA)",592412,-3.5,712560],["Ngắn hạn (<12 tháng)",1065089,19.2,1249136],["Trung dài hạn",523421,22.0,627058]],"phankhuc":[["KHBL (bán lẻ/dân cư)",1134080,11.5,1379272],["KHDN lớn",436184,9.8,474655],["KHDN vừa & nhỏ",283520,14.2,319754],["Định chế tài chính",239901,34.0,313311],["KHDN FDI",87237,18.5,101762]],"casa":{"pct_2025":35.42,"pct_2024":36.72,"rank":"thứ 3 ngành","cof":"thấp nhất hệ thống"},"nangsuat":{"staff":6800,"hd_per_staff":320.7,"region":245,"bank":228,"trend":[["2022",242],["2023",268],["2024",290],["2025",321],["KH26",369.6]],"per_2026":369.6}}}));
-const OV=D.overview, KPI=OV.kpi;
-let cmp='plan';
-const CMPNAME={plan:'Kế hoạch năm',ytd:'Đầu năm',same:'Cùng kỳ 2024',region:'TB khu vực',bank:'TB toàn hàng'};
-
-function fmt(x){return Math.round(x).toLocaleString('vi-VN')}
-function fmtU(v,u){return u==='%'?v.toFixed(2)+'%':fmt(v)}
-
-function kpiCard(k){
-  const v=KPI[k]; const cur=v.cur; const base=v[cmp];
-  const hb=v.hb;
-  let deltaTxt,deltaCls,achTxt='';
-  if(v.unit==='%'){
-    const d=cur-base; const good=hb?(d>=0):(d<=0);
-    deltaTxt=(d>=0?'+':'')+d.toFixed(2)+'đ'; deltaCls=Math.abs(d)<0.01?'warn':(good?'up':'down');
-  } else {
-    const pct=(cur/base-1)*100; const good=hb?(pct>=0):(pct<=0);
-    deltaTxt=(pct>=0?'+':'')+pct.toFixed(1)+'%'; deltaCls=Math.abs(pct)<0.3?'warn':(good?'up':'down');
-  }
-
-  // gauge: cur vs base, scale to max(cur,base)*1.15
-  const mx=Math.max(cur,base)*1.18;
-  const curW=cur/mx*100, baseW=base/mx*100;
-  const fillColor = (deltaCls==='up')?'var(--up)':(deltaCls==='down'?'var(--down)':'var(--warn)');
-  return '<div class="kpicard"><div class="kl">'+v.label+'</div>'+
-    '<div><span class="kv">'+fmtU(cur,v.unit)+'</span>'+(v.unit!=='%'?'<span class="ku">tỷ</span>':'')+'</div>'+
-    '<div class="gauge"><div class="gauge-track"><div class="gauge-fill" style="width:'+curW.toFixed(1)+'%;background:'+fillColor+'"></div>'+
-    '<div class="gauge-marker" style="left:'+baseW.toFixed(1)+'%"></div></div>'+
-    '<div class="gauge-cmp"><span class="delta '+deltaCls+'">'+deltaTxt+'</span><span class="cmpv">'+CMPNAME[cmp]+': '+fmtU(base,v.unit)+(v.unit!=='%'?' tỷ':'')+'</span></div></div>'+
-    (achTxt?'<div class="ach">'+achTxt+'</div>':'')+
-    (v.plan26!=null?'<div class="plan26line">KH 2026: <b>'+fmtU(v.plan26,v.unit)+(v.unit!=='%'?' tỷ':'')+'</b> <span class="p26d">'+(v.unit==='%'?((v.plan26-cur>=0?'+':'')+(v.plan26-cur).toFixed(2)+'đ'):((v.plan26/cur-1>=0?'+':'')+((v.plan26/cur-1)*100).toFixed(1)+'%'))+'</span></div>':'')+'</div>';
-}
-
-function renderKPI(){
-  document.getElementById('overview-kpigrid').innerHTML=['huydong','loinhuan','chovay','npl'].map(kpiCard).join('');
-}
-
-function renderWF(id,data){
-  const mx=Math.max(...data.map(x=>Math.abs(x[1])));
-  let h='';
-  data.forEach(([lab,val])=>{
-    const w=Math.abs(val)/mx*100;
-    h+='<div class="wf-row"><span class="wf-label">'+lab+'</span>'+
-       '<span class="wf-bar-wrap"><span class="wf-bar '+(val>=0?'pos':'neg')+'" style="width:'+w.toFixed(0)+'%"></span></span>'+
-       '<span class="wf-val">'+(val>=0?'+':'')+fmt(val)+'</span></div>';
-  });
-  const tot=data.reduce((a,x)=>a+x[1],0);
-  h+='<div class="wf-total wf-row"><span class="wf-label">Tổng biến động</span><span class="wf-bar-wrap"></span><span class="wf-val">+'+fmt(tot)+'</span></div>';
-  document.getElementById(id).innerHTML=h;
-}
-
-function renderTrend(){
-  const t=OV.trend; const mx=Math.max(...t.dep);
-  let h='';
-  t.years.forEach((y,i)=>{
-    const hd=t.dep[i]/mx*115, hl=t.loan[i]/mx*115, hp=t.pbt[i]/mx*115;
-    const isPlan=(y==='KH26');
-    const lbl=isPlan?'KH 2026':y;
-    h+='<div class="tcol'+(isPlan?' planc-col':'')+'"><div class="tbars">'+
-       '<div class="tbar dep'+(isPlan?' plan':'')+'" style="height:'+hd.toFixed(0)+'px"></div>'+
-       '<div class="tbar loan'+(isPlan?' plan':'')+'" style="height:'+hl.toFixed(0)+'px"></div>'+
-       '<div class="tbar pbt'+(isPlan?' plan':'')+'" style="height:'+Math.max(hp,3).toFixed(0)+'px"></div>'+
-       '</div><div class="tyear'+(isPlan?' planlbl':'')+'">'+lbl+'</div></div>';
-  });
-  document.getElementById('overview-trend').innerHTML=h;
-}
-
-function renderNote(){
-  const npl=KPI.npl, ln=KPI.loinhuan;
-  let n;
-  if(cmp==='plan') n='<b>Kế hoạch 2026:</b> lợi nhuận '+fmt(ln.plan26)+' tỷ (+'+((ln.plan26/ln.cur-1)*100).toFixed(1)+'%), huy động '+fmt(KPI.huydong.plan26)+' tỷ (+'+((KPI.huydong.plan26/KPI.huydong.cur-1)*100).toFixed(1)+'%), dư nợ '+fmt(KPI.chovay.plan26)+' tỷ (+'+((KPI.chovay.plan26/KPI.chovay.cur-1)*100).toFixed(1)+'%). NPL kế hoạch '+npl.plan26+'% (bình thường hóa nhẹ từ '+npl.cur+'%). Thực hiện 2025 đang vượt kế hoạch năm ở các chỉ tiêu quy mô.';
-  else if(cmp==='region'||cmp==='bank') n='So với '+CMPNAME[cmp].toLowerCase()+': điểm nổi bật là <b>NPL '+npl.cur+'% — thấp hơn nhiều</b> mức '+npl[cmp]+'%, phản ánh chất lượng tài sản vượt trội. Lưu ý: mốc benchmark khu vực/toàn hàng ở đây là <b>giả lập minh họa</b>, dùng để demo cấu trúc dashboard.';
-  else n='So với '+CMPNAME[cmp].toLowerCase()+': huy động +'+((KPI.huydong.cur/KPI.huydong[cmp]-1)*100).toFixed(1)+'%, dư nợ +'+((KPI.chovay.cur/KPI.chovay[cmp]-1)*100).toFixed(1)+'%, lợi nhuận +'+((ln.cur/ln[cmp]-1)*100).toFixed(1)+'%. Dư nợ tăng nhanh hơn huy động — cần theo dõi LDR và cơ cấu kỳ hạn nguồn vốn.';
-  document.getElementById('overview-note').innerHTML='<div class="note"><div class="nh">Đọc nhanh</div>'+n+'</div>';
-}
-
-function setCmp(c){
-  cmp=c;
-  document.querySelectorAll('.cmp-tab').forEach((t,i)=>t.classList.toggle('on',['plan','region','bank'][i]===c));
-  renderKPI(); renderNote();
-}
-renderKPI(); renderWF('overview-wfdep',OV.wf_dep); renderWF('overview-wfloan',OV.wf_loan); renderTrend(); renderNote();
-
-window.SH=window.SH||{};window.SH["overview"]={setCmp:(typeof setCmp!=="undefined"?setCmp:null),setSeg:(typeof setSeg!=="undefined"?setSeg:null)};
-})();
-// ===huydong===
-(function(){
-
-const D=JSON.parse(JSON.stringify({"real":{"nii":{"2024":55406,"2025":58674},"fee":{"2024":5137,"2025":3470},"fx":{"2024":5292,"2025":6165},"sec":{"2024":373,"2025":457},"other":{"2024":2372,"2025":3592},"toi":{"2024":68578,"2025":72358},"opex":{"2024":23027,"2025":25152},"ppop":{"2024":45551,"2025":47205},"prov":{"2024":3315,"2025":3185},"pbt":{"2024":42236,"2025":44020}},"seg":{"rt":{"2024":{"nii":28434,"fee":1521,"fx":1567,"sec":110,"other":702,"toi":32334,"opex":12422,"ppop":19912,"prov":981,"pbt":18930},"2025":{"nii":30794,"fee":1061,"fx":1885,"sec":140,"other":1099,"toi":34979,"opex":13859,"ppop":21120,"prov":974,"pbt":20146}},"ct":{"2024":{"nii":26972,"fee":3616,"fx":3725,"sec":263,"other":1670,"toi":36246,"opex":10605,"ppop":25641,"prov":2334,"pbt":23308},"2025":{"nii":27880,"fee":2409,"fx":4280,"sec":317,"other":2493,"toi":37379,"opex":11293,"ppop":26086,"prov":2211,"pbt":23875}}},"share":{"2024":{"rt":0.4385,"ct":0.5615},"2025":{"rt":0.45,"ct":0.55}},"plan":{"all":{"nii":68976,"fee":4074,"fx":7102,"sec":537,"other":4217,"toi":84906,"opex":29493,"ppop":55413,"prov":6991,"pbt":48422},"rt":{"nii":36201,"fee":1246,"fx":2172,"sec":164,"other":1290,"toi":41073,"opex":16251,"ppop":24822,"prov":2138,"pbt":22684},"ct":{"nii":32775,"fee":2828,"fx":4930,"sec":373,"other":2927,"toi":43833,"opex":13242,"ppop":30591,"prov":4853,"pbt":25738}},"bs":{"ta":{"2024":2085874,"2025":2441929,"2026":2880262,"2023":1850521},"loan":{"2024":1418016,"2025":1648557,"2026":1914222},"dep":{"2024":1514665,"2025":1672534,"2026":1984562},"liab":{"2024":1889664,"2025":2214393,"2026":2613119},"equity":{"2024":196210,"2025":227536,"2026":267143,"2023":165274}},"lnst":{"2024":33853,"2025":35198,"2026":38738},"ratios":{"nim":{"2024":2.86,"2025":2.63,"2026":2.63},"cir":{"2024":33.58,"2025":34.76,"2026":34.76},"npl":{"2024":0.96,"2025":0.58,"2026":0.97},"casa":{"2024":36.72,"2025":35.42},"cov":{"2025":259.0},"ldr":{"2024":93.6,"2025":98.6,"2026":96.5},"roae":{"2024":18.73,"2025":16.6,"2026":15.63},"roaa":{"2024":1.72,"2025":1.55,"2026":1.45},"bvps":{"2024":23481,"2025":27230,"2026":31970},"eps":{"2024":4051,"2025":4212,"2026":4636}},"overview":{"kpi":{"huydong":{"label":"Tổng nguồn vốn huy động","cur":2180922,"ytd":1851561,"same":1851561,"plan":2159329,"unit":"tỷ","hb":true,"region":259634,"bank":239662,"plan26":2588754},"loinhuan":{"label":"Tổng lợi nhuận trước thuế","cur":44020,"ytd":42236,"same":42236,"plan":43157,"unit":"tỷ","hb":true,"region":5002,"bank":4634,"plan26":48422},"chovay":{"label":"Cơ cấu cho vay + trái phiếu","cur":1648557,"ytd":1418016,"same":1418016,"plan":1648557,"unit":"tỷ","hb":true,"region":191693,"bank":177264,"plan26":1914222},"npl":{"label":"Tỷ lệ nợ xấu","cur":0.58,"ytd":0.96,"same":0.96,"plan":1.0,"unit":"%","hb":false,"region":1.55,"bank":1.85,"plan26":0.97}},"wf_dep":[["KHBL (bán lẻ)",66306],["KHDN lớn",33152],["KHDN vừa & nhỏ",28416],["Định chế tài chính",20523],["KHDN FDI",9472]],"wf_loan":[["KHBL (bán lẻ)",106049],["KHDN vừa",62246],["KHDN FDI",34581],["KHDN lớn",32276],["DNNN",-4611]],"trend":{"years":["2022","2023","2024","2025","KH26"],"dep":[1230000,1350000,1514665,1672534,2588754],"loan":[1050000,1240000,1418016,1648557,1914222],"pbt":[37000,41200,42236,44020,48422]}},"kqkd":{"xlrr":{"2024":1850,"2025":2677,"2026":1200},"core":{"2024":40386,"2025":41343,"2026":47222},"fee":{"2024":5137,"2025":3470,"2026":4074},"pbt":{"2024":42236,"2025":44020,"2026":48422},"plan2025_pbt":43157,"bench":{"pbt":4634,"core":4307,"fee":377,"xlrr":335}},"pl_plan2025":{"nii":59827,"fee":3420,"fx":6324,"sec":470,"other":3526,"toi":72177,"opex":25572,"ppop":45963,"prov":3314,"pbt":45300,"noni":13740},"pl_bench":{"nii":6145,"fee":358,"fx":671,"sec":50,"other":395,"toi":7890,"opex":2691,"ppop":4976,"prov":345,"pbt":4540,"noni":1474},"tindung":{"loan":{"2024":1418016,"2025":1648557,"2026":1914222},"kpi_loan":{"cur":1648557,"plan":1648557,"ytd":1418016,"same":1418016,"region":191693,"bank":177264,"plan26":1914222},"kpi_npl":{"cur":0.58,"plan":1.0,"ytd":0.96,"same":0.96,"region":1.55,"bank":1.85,"plan26":0.97},"seg":[["KHBL (bán lẻ)",741850,18.5,0.7,903821],["KHDN vừa",306632,23.9,1.1,367958],["KHDN FDI",189584,17.0,0.9,218022],["KHDN lớn",278606,2.7,1.5,292536],["DNNN",131885,-12.7,2.1,131885]],"nganh":[["Xây dựng",153316,72.0,205327],["Bán buôn bán lẻ",346197,14.0,389818],["Công nghiệp chế biến",296740,12.0,328788],["BĐS",65942,8.0,70690],["Vận tải & kho bãi",115399,22.0,138248],["Nông nghiệp",82428,9.0,89105],["Tiêu dùng cá nhân",313226,28.0,392159],["Khác",275309,10.0,300087]],"kyhan":[["Ngắn hạn",692394,7.2,737922],["Trung hạn",346197,18.5,403839],["Dài hạn",609966,29.6,772461]],"loaitien":[["VND",1450730,16.8,1701261],["Ngoại tệ (quy đổi)",197827,8.5,212961]],"sanpham":[["Vay từng lần",560510,14,622018],["Hạn mức tín dụng",675908,17,779322],["Vay dự án/đầu tư",296740,28,371518],["Thẻ & tiêu dùng",115399,25,141364]],"tsbd":[["BĐS",956163,15,1100758],["Có bảo đảm khác",445110,18,517218],["Tín chấp",247284,22,296246]],"chatluong":{"npl_loan":{"2024":0.96,"2025":0.58},"npl_total":{"2025":0.97},"nhom2":{"2024":0.5,"2025":0.16},"coverage":{"2025":259},"npl_rt":0.7,"npl_ct":1.3},"nangsuat":{"staff":4520,"duno_per_staff":364.7,"region":310,"bank":285,"trend":[["2022",298],["2023",322],["2024",344],["2025",365],["KH26",411.2]],"per_2026":411.2}},"huydong":{"tong":{"2024":1851561,"2025":2180922,"2026":2588754},"kpi_hd":{"cur":2180922,"plan":2159329,"ytd":1851561,"same":1851561,"region":259634,"bank":239662,"plan26":2588754},"kpi_casa":{"cur":35.42,"plan":36.0,"ytd":36.72,"same":36.72,"region":28.5,"bank":24.8,"plan26":36.0},"kpi_ldr":{"cur":98.6,"plan":95.0,"ytd":93.6,"same":93.6,"region":92.0,"bank":95.5,"plan26":96.5},"nguon":[["Tiền gửi khách hàng",1672534,10.4,2043415],["Tiền gửi & vay TCTD khác",321159,36.9,346852],["Tiền gửi KBNN & CP",160128,104.7,168134],["Phát hành GTCG",27101,12.3,30353]],"loaitien":[["VND",1984639,17.5,2371272],["Ngoại tệ (quy đổi)",196283,12.0,217482]],"kyhan":[["Không kỳ hạn (CASA)",592412,-3.5,712560],["Ngắn hạn (<12 tháng)",1065089,19.2,1249136],["Trung dài hạn",523421,22.0,627058]],"phankhuc":[["KHBL (bán lẻ/dân cư)",1134080,11.5,1379272],["KHDN lớn",436184,9.8,474655],["KHDN vừa & nhỏ",283520,14.2,319754],["Định chế tài chính",239901,34.0,313311],["KHDN FDI",87237,18.5,101762]],"casa":{"pct_2025":35.42,"pct_2024":36.72,"rank":"thứ 3 ngành","cof":"thấp nhất hệ thống"},"nangsuat":{"staff":6800,"hd_per_staff":320.7,"region":245,"bank":228,"trend":[["2022",242],["2023",268],["2024",290],["2025",321],["KH26",369.6]],"per_2026":369.6}}}));
-const H=D.huydong;
-let cmp='plan';
-const CMPNAME={plan:'Kế hoạch năm',ytd:'Đầu năm',same:'Cùng kỳ 2024',region:'TB khu vực',bank:'TB toàn hàng'};
-function fmt(x){return Math.round(x).toLocaleString('vi-VN')}
-function kpiCard(label,o,unit,hb){
-  const cur=o.cur,base=o[cmp];
-  let dt,cls,ach='';
-  if(unit==='%'){const d=cur-base;const good=hb?d>=0:d<=0;dt=(d>=0?'+':'')+d.toFixed(2)+'đ';cls=Math.abs(d)<0.01?'warn':(good?'up':'down');}
-  else{const p=(cur/base-1)*100;const good=hb?p>=0:p<=0;dt=(p>=0?'+':'')+p.toFixed(1)+'%';cls=Math.abs(p)<0.3?'warn':(good?'up':'down');}
-
-  const mx=Math.max(cur,base)*1.18;const fc=cls==='up'?'var(--up)':(cls==='down'?'var(--down)':'var(--warn)');
-  return '<div class="kpicard"><div class="kl">'+label+'</div><div><span class="kv">'+(unit==='%'?cur.toFixed(2)+'%':fmt(cur))+'</span>'+(unit!=='%'?'<span class="ku"> tỷ</span>':'')+'</div>'+
-    '<div class="gauge"><div class="gauge-track"><div class="gauge-fill" style="width:'+(cur/mx*100).toFixed(1)+'%;background:'+fc+'"></div><div class="gauge-marker" style="left:'+(base/mx*100).toFixed(1)+'%"></div></div>'+
-    '<div class="gauge-cmp"><span class="delta '+cls+'">'+dt+'</span><span class="cmpv">'+CMPNAME[cmp]+': '+(unit==='%'?base.toFixed(2)+'%':fmt(base))+'</span></div></div>'+(ach?'<div class="ach">'+ach+'</div>':'')+
-    (o.plan26!=null?'<div class="plan26line">KH 2026: <b>'+(unit==='%'?o.plan26.toFixed(2)+'%':fmt(o.plan26)+' tỷ')+'</b> <span class="p26d">'+(unit==='%'?((o.plan26-cur>=0?'+':'')+(o.plan26-cur).toFixed(2)+'đ'):('+'+((o.plan26/cur-1)*100).toFixed(1)+'%'))+'</span></div>':'')+'</div>';
-}
-function renderKPI(){
-  document.getElementById('huydong-kpirow').innerHTML=
-    kpiCard('Tổng nguồn vốn huy động',H.kpi_hd,'tỷ',true)+
-    kpiCard('Tỷ lệ CASA',H.kpi_casa,'%',true)+
-    kpiCard('LDR thuần',H.kpi_ldr,'%',false);
-}
-const COLORS=['var(--blue)','var(--teal)','var(--gold)','var(--purple)','var(--rose)','var(--amber)'];
-function dimCard(title,rows,real){
-  const mx=Math.max(...rows.map(r=>r[1]));
-  let h='<div class="dimcard"><h4>'+title+'</h4><div class="dh '+(real?'real':'sim')+'">'+(real?'số thật từ báo cáo':'giả lập minh họa')+'</div>';
-  rows.forEach((r,i)=>{
-    const w=r[1]/mx*100;const g=r[2];
-    const p26=r[r.length-1];
-    const hasP26=r.length>=4 && p26!=null && p26!==r[1];
-    h+='<div class="brow"><span class="bname">'+r[0]+'</span><span class="bwrap"><span class="bbar" style="width:'+w.toFixed(0)+'%;background:'+COLORS[i%6]+'"></span></span>'+
-       '<span class="bval">'+fmt(r[1])+'</span><span class="bg '+(g>=0?'up':'down')+'">'+(g>=0?'+':'')+g.toFixed(1)+'%</span>'+
-       (hasP26?'<span class="bp26">'+fmt(p26)+'</span>':'')+'</div>';
-  });
-  return h+'</div>';
-}
-function renderDims(){
-  document.getElementById('huydong-dimgrid').innerHTML=
-    dimCard('Theo cơ cấu nguồn',H.nguon,true)+
-    dimCard('Theo kỳ hạn',H.kyhan,true)+
-    dimCard('Theo phân khúc khách hàng',H.phankhuc,false)+
-    dimCard('Theo loại tiền',H.loaitien,false);
-}
-function renderCASA(){
-  const c=H.casa;
-  document.getElementById('huydong-casabox').innerHTML=
-    '<div class="casa-ring"><span class="cr-val">'+c.pct_2025+'%</span></div>'+
-    '<div class="casa-info"><h4>CASA '+c.pct_2025+'% — '+c.rank+'</h4>'+
-    '<p>Giảm nhẹ từ <b>'+c.pct_2024+'%</b> cuối 2024, nhưng vẫn ở mức cao '+c.rank+'.</p>'+
-    '<p>Tỷ trọng tiền gửi không kỳ hạn cao giúp <b>chi phí vốn '+c.cof+'</b> — lợi thế cạnh tranh cốt lõi của the Bank.</p></div>';
-}
-function renderTable(){
-  const tot=H.tong['2025'],tot24=H.tong['2024'],tot26=H.tong['2026'];
-  let h='<thead><tr><th>Cấu phần</th><th class="p26h">KH 2026</th><th>Số dư 2025</th><th>Tỷ trọng</th><th>Tăng trưởng</th></tr></thead><tbody>';
-  H.nguon.forEach((r,i)=>{
-    const p26=r[3];
-    h+='<tr><td>'+r[0]+'</td><td class="p26c">'+fmt(p26)+'</td><td>'+fmt(r[1])+'</td><td>'+(r[1]/tot*100).toFixed(1)+'%</td>'+
-       '<td><span class="yoy '+(r[2]>=0?'up':'down')+'">'+(r[2]>=0?'+':'')+r[2].toFixed(1)+'%</span></td></tr>';
-  });
-  h+='<tr class="total"><td>Tổng nguồn vốn huy động</td><td class="p26c">'+fmt(tot26)+'</td><td>'+fmt(tot)+'</td><td>100%</td><td><span class="yoy up">+'+((tot/tot24-1)*100).toFixed(1)+'%</span></td></tr></tbody>';
-  document.getElementById('huydong-nguontable').innerHTML=h;
-}
-function renderProd(){
-  const n=H.nangsuat;
-  document.getElementById('huydong-prodmetrics').innerHTML=
-    '<div class="mb"><div class="mbl">Huy động/cán bộ</div><div class="mbv">'+n.hd_per_staff+'</div><div class="mbs">tỷ đồng</div></div>'+
-    '<div class="mb"><div class="mbl">vs TB khu vực</div><div class="mbv good">+'+((n.hd_per_staff/n.region-1)*100).toFixed(0)+'%</div><div class="mbs">'+n.region+' tỷ</div></div>'+
-    '<div class="mb"><div class="mbl">vs TB toàn hàng</div><div class="mbv good">+'+((n.hd_per_staff/n.bank-1)*100).toFixed(0)+'%</div><div class="mbs">'+n.bank+' tỷ</div></div>'+
-    (n.per_2026!=null?'<div class="mb" style="border:1px solid rgba(90,138,214,.3)"><div class="mbl">KH 2026</div><div class="mbv" style="color:var(--blue)">'+n.per_2026+'</div><div class="mbs">+'+((n.per_2026/n.hd_per_staff-1)*100).toFixed(1)+'% vs 2025</div></div>':'');
-  const mx=Math.max(...n.trend.map(x=>x[1]));
-  document.getElementById('huydong-prodtrend').innerHTML=n.trend.map(([y,v])=>{
-    const isP=(y==='KH26');
-    return '<div class="tcol"><div class="tbar'+(isP?' plan26':'')+'" style="height:'+(v/mx*100).toFixed(0)+'px"></div><div class="tyear'+(isP?' plan26lbl':'')+'">'+(isP?'KH 2026':y)+'</div></div>';
-  }).join('');
-}
-function renderNote(){
-  document.getElementById('huydong-note').innerHTML='<div class="note"><div class="nh">Góc quản trị · cơ cấu funding</div>'+
-   'Tổng huy động <b>+17,8%</b>, nhanh hơn tăng trưởng tiền gửi KH (+10,4%) — phần chênh đến từ <b>KBNN tăng vọt +104,7%</b> và TCTD +36,9%. Đây là điểm cần đọc kỹ: nguồn KBNN và liên ngân hàng <b>kém ổn định hơn</b> tiền gửi dân cư, nên dù tổng tăng mạnh, chất lượng funding có dịch chuyển. CASA giảm nhẹ về 35,42% nhưng vẫn top 3 ngành. LDR thuần lên 98,6% (từ 93,6%) — dư nợ tăng nhanh hơn tiền gửi KH, cần theo dõi áp lực thanh khoản và chi phí vốn biên.</div>';
-}
-function setCmp(c){cmp=c;document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',['plan','region','bank'][i]===c));renderKPI();}
-renderKPI();renderCASA();renderDims();renderTable();renderProd();renderNote();
-
-window.SH=window.SH||{};window.SH["huydong"]={setCmp:(typeof setCmp!=="undefined"?setCmp:null),setSeg:(typeof setSeg!=="undefined"?setSeg:null)};
-})();
-// ===tindung===
-(function(){
-
-const D=JSON.parse(JSON.stringify({"real":{"nii":{"2024":55406,"2025":58674},"fee":{"2024":5137,"2025":3470},"fx":{"2024":5292,"2025":6165},"sec":{"2024":373,"2025":457},"other":{"2024":2372,"2025":3592},"toi":{"2024":68578,"2025":72358},"opex":{"2024":23027,"2025":25152},"ppop":{"2024":45551,"2025":47205},"prov":{"2024":3315,"2025":3185},"pbt":{"2024":42236,"2025":44020}},"seg":{"rt":{"2024":{"nii":28434,"fee":1521,"fx":1567,"sec":110,"other":702,"toi":32334,"opex":12422,"ppop":19912,"prov":981,"pbt":18930},"2025":{"nii":30794,"fee":1061,"fx":1885,"sec":140,"other":1099,"toi":34979,"opex":13859,"ppop":21120,"prov":974,"pbt":20146}},"ct":{"2024":{"nii":26972,"fee":3616,"fx":3725,"sec":263,"other":1670,"toi":36246,"opex":10605,"ppop":25641,"prov":2334,"pbt":23308},"2025":{"nii":27880,"fee":2409,"fx":4280,"sec":317,"other":2493,"toi":37379,"opex":11293,"ppop":26086,"prov":2211,"pbt":23875}}},"share":{"2024":{"rt":0.4385,"ct":0.5615},"2025":{"rt":0.45,"ct":0.55}},"plan":{"all":{"nii":68976,"fee":4074,"fx":7102,"sec":537,"other":4217,"toi":84906,"opex":29493,"ppop":55413,"prov":6991,"pbt":48422},"rt":{"nii":36201,"fee":1246,"fx":2172,"sec":164,"other":1290,"toi":41073,"opex":16251,"ppop":24822,"prov":2138,"pbt":22684},"ct":{"nii":32775,"fee":2828,"fx":4930,"sec":373,"other":2927,"toi":43833,"opex":13242,"ppop":30591,"prov":4853,"pbt":25738}},"bs":{"ta":{"2024":2085874,"2025":2441929,"2026":2880262,"2023":1850521},"loan":{"2024":1418016,"2025":1648557,"2026":1914222},"dep":{"2024":1514665,"2025":1672534,"2026":1984562},"liab":{"2024":1889664,"2025":2214393,"2026":2613119},"equity":{"2024":196210,"2025":227536,"2026":267143,"2023":165274}},"lnst":{"2024":33853,"2025":35198,"2026":38738},"ratios":{"nim":{"2024":2.86,"2025":2.63,"2026":2.63},"cir":{"2024":33.58,"2025":34.76,"2026":34.76},"npl":{"2024":0.96,"2025":0.58,"2026":0.97},"casa":{"2024":36.72,"2025":35.42},"cov":{"2025":259.0},"ldr":{"2024":93.6,"2025":98.6,"2026":96.5},"roae":{"2024":18.73,"2025":16.6,"2026":15.63},"roaa":{"2024":1.72,"2025":1.55,"2026":1.45},"bvps":{"2024":23481,"2025":27230,"2026":31970},"eps":{"2024":4051,"2025":4212,"2026":4636}},"overview":{"kpi":{"huydong":{"label":"Tổng nguồn vốn huy động","cur":2180922,"ytd":1851561,"same":1851561,"plan":2159329,"unit":"tỷ","hb":true,"region":259634,"bank":239662,"plan26":2588754},"loinhuan":{"label":"Tổng lợi nhuận trước thuế","cur":44020,"ytd":42236,"same":42236,"plan":43157,"unit":"tỷ","hb":true,"region":5002,"bank":4634,"plan26":48422},"chovay":{"label":"Cơ cấu cho vay + trái phiếu","cur":1648557,"ytd":1418016,"same":1418016,"plan":1648557,"unit":"tỷ","hb":true,"region":191693,"bank":177264,"plan26":1914222},"npl":{"label":"Tỷ lệ nợ xấu","cur":0.58,"ytd":0.96,"same":0.96,"plan":1.0,"unit":"%","hb":false,"region":1.55,"bank":1.85,"plan26":0.97}},"wf_dep":[["KHBL (bán lẻ)",66306],["KHDN lớn",33152],["KHDN vừa & nhỏ",28416],["Định chế tài chính",20523],["KHDN FDI",9472]],"wf_loan":[["KHBL (bán lẻ)",106049],["KHDN vừa",62246],["KHDN FDI",34581],["KHDN lớn",32276],["DNNN",-4611]],"trend":{"years":["2022","2023","2024","2025","KH26"],"dep":[1230000,1350000,1514665,1672534,2588754],"loan":[1050000,1240000,1418016,1648557,1914222],"pbt":[37000,41200,42236,44020,48422]}},"kqkd":{"xlrr":{"2024":1850,"2025":2677,"2026":1200},"core":{"2024":40386,"2025":41343,"2026":47222},"fee":{"2024":5137,"2025":3470,"2026":4074},"pbt":{"2024":42236,"2025":44020,"2026":48422},"plan2025_pbt":43157,"bench":{"pbt":4634,"core":4307,"fee":377,"xlrr":335}},"pl_plan2025":{"nii":59827,"fee":3420,"fx":6324,"sec":470,"other":3526,"toi":72177,"opex":25572,"ppop":45963,"prov":3314,"pbt":45300,"noni":13740},"pl_bench":{"nii":6145,"fee":358,"fx":671,"sec":50,"other":395,"toi":7890,"opex":2691,"ppop":4976,"prov":345,"pbt":4540,"noni":1474},"tindung":{"loan":{"2024":1418016,"2025":1648557,"2026":1914222},"kpi_loan":{"cur":1648557,"plan":1648557,"ytd":1418016,"same":1418016,"region":191693,"bank":177264,"plan26":1914222},"kpi_npl":{"cur":0.58,"plan":1.0,"ytd":0.96,"same":0.96,"region":1.55,"bank":1.85,"plan26":0.97},"seg":[["KHBL (bán lẻ)",741850,18.5,0.7,903821],["KHDN vừa",306632,23.9,1.1,367958],["KHDN FDI",189584,17.0,0.9,218022],["KHDN lớn",278606,2.7,1.5,292536],["DNNN",131885,-12.7,2.1,131885]],"nganh":[["Xây dựng",153316,72.0,205327],["Bán buôn bán lẻ",346197,14.0,389818],["Công nghiệp chế biến",296740,12.0,328788],["BĐS",65942,8.0,70690],["Vận tải & kho bãi",115399,22.0,138248],["Nông nghiệp",82428,9.0,89105],["Tiêu dùng cá nhân",313226,28.0,392159],["Khác",275309,10.0,300087]],"kyhan":[["Ngắn hạn",692394,7.2,737922],["Trung hạn",346197,18.5,403839],["Dài hạn",609966,29.6,772461]],"loaitien":[["VND",1450730,16.8,1701261],["Ngoại tệ (quy đổi)",197827,8.5,212961]],"sanpham":[["Vay từng lần",560510,14,622018],["Hạn mức tín dụng",675908,17,779322],["Vay dự án/đầu tư",296740,28,371518],["Thẻ & tiêu dùng",115399,25,141364]],"tsbd":[["BĐS",956163,15,1100758],["Có bảo đảm khác",445110,18,517218],["Tín chấp",247284,22,296246]],"chatluong":{"npl_loan":{"2024":0.96,"2025":0.58},"npl_total":{"2025":0.97},"nhom2":{"2024":0.5,"2025":0.16},"coverage":{"2025":259},"npl_rt":0.7,"npl_ct":1.3},"nangsuat":{"staff":4520,"duno_per_staff":364.7,"region":310,"bank":285,"trend":[["2022",298],["2023",322],["2024",344],["2025",365],["KH26",411.2]],"per_2026":411.2}},"huydong":{"tong":{"2024":1851561,"2025":2180922,"2026":2588754},"kpi_hd":{"cur":2180922,"plan":2159329,"ytd":1851561,"same":1851561,"region":259634,"bank":239662,"plan26":2588754},"kpi_casa":{"cur":35.42,"plan":36.0,"ytd":36.72,"same":36.72,"region":28.5,"bank":24.8,"plan26":36.0},"kpi_ldr":{"cur":98.6,"plan":95.0,"ytd":93.6,"same":93.6,"region":92.0,"bank":95.5,"plan26":96.5},"nguon":[["Tiền gửi khách hàng",1672534,10.4,2043415],["Tiền gửi & vay TCTD khác",321159,36.9,346852],["Tiền gửi KBNN & CP",160128,104.7,168134],["Phát hành GTCG",27101,12.3,30353]],"loaitien":[["VND",1984639,17.5,2371272],["Ngoại tệ (quy đổi)",196283,12.0,217482]],"kyhan":[["Không kỳ hạn (CASA)",592412,-3.5,712560],["Ngắn hạn (<12 tháng)",1065089,19.2,1249136],["Trung dài hạn",523421,22.0,627058]],"phankhuc":[["KHBL (bán lẻ/dân cư)",1134080,11.5,1379272],["KHDN lớn",436184,9.8,474655],["KHDN vừa & nhỏ",283520,14.2,319754],["Định chế tài chính",239901,34.0,313311],["KHDN FDI",87237,18.5,101762]],"casa":{"pct_2025":35.42,"pct_2024":36.72,"rank":"thứ 3 ngành","cof":"thấp nhất hệ thống"},"nangsuat":{"staff":6800,"hd_per_staff":320.7,"region":245,"bank":228,"trend":[["2022",242],["2023",268],["2024",290],["2025",321],["KH26",369.6]],"per_2026":369.6}}}));
-const T=D.tindung;
-let cmp='plan';
-const CMPNAME={plan:'Kế hoạch năm',ytd:'Đầu năm',same:'Cùng kỳ 2024',region:'TB khu vực',bank:'TB toàn hàng'};
-function fmt(x){return Math.round(x).toLocaleString('vi-VN')}
-
-function kpiCard(label,o,unit,hb){
-  const cur=o.cur,base=o[cmp];
-  let dt,cls,ach='';
-  if(unit==='%'){const d=cur-base;const good=hb?d>=0:d<=0;dt=(d>=0?'+':'')+d.toFixed(2)+'đ';cls=Math.abs(d)<0.01?'warn':(good?'up':'down');}
-  else{const p=(cur/base-1)*100;const good=hb?p>=0:p<=0;dt=(p>=0?'+':'')+p.toFixed(1)+'%';cls=Math.abs(p)<0.3?'warn':(good?'up':'down');}
-
-  const mx=Math.max(cur,base)*1.18;
-  const fc=cls==='up'?'var(--up)':(cls==='down'?'var(--down)':'var(--warn)');
-  return '<div class="kpicard"><div class="kl">'+label+'</div><div><span class="kv">'+(unit==='%'?cur.toFixed(2)+'%':fmt(cur))+'</span>'+(unit!=='%'?'<span class="ku"> tỷ</span>':'')+'</div>'+
-    '<div class="gauge"><div class="gauge-track"><div class="gauge-fill" style="width:'+(cur/mx*100).toFixed(1)+'%;background:'+fc+'"></div><div class="gauge-marker" style="left:'+(base/mx*100).toFixed(1)+'%"></div></div>'+
-    '<div class="gauge-cmp"><span class="delta '+cls+'">'+dt+'</span><span class="cmpv">'+CMPNAME[cmp]+': '+(unit==='%'?base.toFixed(2)+'%':fmt(base))+'</span></div></div>'+(ach?'<div class="ach">'+ach+'</div>':'')+
-    (o.plan26!=null?'<div class="plan26line">KH 2026: <b>'+(unit==='%'?o.plan26.toFixed(2)+'%':fmt(o.plan26)+' tỷ')+'</b> <span class="p26d">'+(unit==='%'?((o.plan26-cur>=0?'+':'')+(o.plan26-cur).toFixed(2)+'đ'):('+'+((o.plan26/cur-1)*100).toFixed(1)+'%'))+'</span></div>':'')+'</div>';
-}
-function renderKPI(){
-  document.getElementById('tindung-kpirow').innerHTML=
-    kpiCard('Cơ cấu cho vay + trái phiếu',T.kpi_loan,'tỷ',true)+
-    kpiCard('Tỷ lệ nợ xấu',T.kpi_npl,'%',false)+
-    '<div class="kpicard"><div class="kl">Năng suất tín dụng</div><div><span class="kv">'+T.nangsuat.duno_per_staff+'</span><span class="ku"> tỷ/cán bộ</span></div>'+
-    '<div class="ach" style="margin-top:14px">TB khu vực '+T.nangsuat.region+' · TB toàn hàng '+T.nangsuat.bank+' tỷ</div>'+
-    '<div class="ach">'+T.nangsuat.staff.toLocaleString("vi-VN")+' cán bộ tín dụng (giả lập)</div>'+
-    (T.nangsuat.per_2026!=null?'<div class="plan26line">KH 2026: <b>'+T.nangsuat.per_2026+' tỷ/cán bộ</b> <span class="p26d">+'+((T.nangsuat.per_2026/T.nangsuat.duno_per_staff-1)*100).toFixed(1)+'%</span></div>':'')+'</div>';
-}
-
-const COLORS=['var(--blue)','var(--teal)','var(--gold)','var(--purple)','var(--rose)','var(--amber)','var(--green)','var(--txt3)'];
-function dimCard(title,rows,real){
-  const mx=Math.max(...rows.map(r=>r[1]));
-  let h='<div class="dimcard"><h4>'+title+'</h4><div class="dh '+(real?'real':'sim')+'">'+(real?'số thật từ báo cáo':'giả lập minh họa')+'</div>';
-  rows.forEach((r,i)=>{
-    const w=r[1]/mx*100; const g=r[2];
-    const p26=r[r.length-1];
-    const hasP26=r.length>=4 && p26!=null && p26!==r[1];
-    h+='<div class="brow"><span class="bname">'+r[0]+'</span><span class="bwrap"><span class="bbar" style="width:'+w.toFixed(0)+'%;background:'+COLORS[i%8]+'"></span></span>'+
-       '<span class="bval">'+fmt(r[1])+'</span><span class="bg '+(g>=0?'up':'down')+'">'+(g>=0?'+':'')+g.toFixed(1)+'%</span>'+
-       (hasP26?'<span class="bp26">'+fmt(p26)+'</span>':'')+'</div>';
-  });
-  h+='</div>';
-  return h;
-}
-function renderDims(){
-  document.getElementById('tindung-dimgrid').innerHTML=
-    dimCard('Theo phân khúc khách hàng',T.seg,true)+
-    dimCard('Theo ngành nghề',T.nganh,true)+
-    dimCard('Theo kỳ hạn',T.kyhan,true)+
-    dimCard('Theo loại tiền',T.loaitien,false)+
-    dimCard('Theo loại hình sản phẩm',T.sanpham,false)+
-    dimCard('Theo tài sản bảo đảm',T.tsbd,false);
-}
-
-function nplPill(v){const c=v<0.8?'good':(v<1.5?'mid':'bad');return '<span class="npl-pill '+c+'">'+v.toFixed(1)+'%</span>';}
-function renderSegTable(){
-  const tot=T.loan['2025'],tot24=T.loan['2024'],tot26=T.loan['2026'];
-  let h='<thead><tr><th>Phân khúc</th><th class="p26h">KH 2026</th><th>Dư nợ 2025</th><th>Tỷ trọng</th><th>Tăng trưởng</th><th>NPL</th></tr></thead><tbody>';
-  T.seg.forEach((r,i)=>{
-    const p26=r[4];
-    h+='<tr><td>'+r[0]+'</td><td class="p26c">'+fmt(p26)+'</td><td>'+fmt(r[1])+'</td><td>'+(r[1]/tot*100).toFixed(1)+'%</td>'+
-       '<td><span class="yoy '+(r[2]>=0?'up':'down')+'">'+(r[2]>=0?'+':'')+r[2].toFixed(1)+'%</span></td>'+
-       '<td>'+nplPill(r[3])+'</td></tr>';
-  });
-  h+='<tr class="total"><td>Tổng dư nợ</td><td class="p26c">'+fmt(tot26)+'</td><td>'+fmt(tot)+'</td><td>100%</td><td><span class="yoy up">+'+((tot/tot24-1)*100).toFixed(1)+'%</span></td><td>'+nplPill(0.58)+'</td></tr></tbody>';
-  document.getElementById('tindung-segtable').innerHTML=h;
-}
-
-function renderQuality(){
-  const c=T.chatluong;
-  document.getElementById('tindung-qualmetrics').innerHTML=
-    '<div class="mb"><div class="mbl">Nợ nhóm 2</div><div class="mbv good">'+c.nhom2['2025']+'%</div><div class="mbs">2024: '+c.nhom2['2024']+'%</div></div>'+
-    '<div class="mb"><div class="mbl">NPL (cho vay KH)</div><div class="mbv good">'+c.npl_loan['2025']+'%</div><div class="mbs">2024: '+c.npl_loan['2024']+'%</div></div>'+
-    '<div class="mb"><div class="mbl">Bao phủ nợ xấu</div><div class="mbv good">'+c.coverage['2025']+'%</div><div class="mbs">dẫn đầu ngành</div></div>';
-  document.getElementById('tindung-nplseg').innerHTML=
-    '<div class="brow"><span class="bname">Bán lẻ</span><span class="bwrap"><span class="bbar" style="width:'+(c.npl_rt/2*100)+'%;background:var(--teal)"></span></span><span class="bval">'+c.npl_rt+'%</span></div>'+
-    '<div class="brow"><span class="bname">Doanh nghiệp</span><span class="bwrap"><span class="bbar" style="width:'+(c.npl_ct/2*100)+'%;background:var(--amber)"></span></span><span class="bval">'+c.npl_ct+'%</span></div>'+
-    '<div class="brow"><span class="bname">NPL tổng tín dụng</span><span class="bwrap"><span class="bbar" style="width:'+(c.npl_total['2025']/2*100)+'%;background:var(--blue)"></span></span><span class="bval">'+c.npl_total['2025']+'%</span></div>';
-}
-
-function renderProd(){
-  const n=T.nangsuat;
-  document.getElementById('tindung-prodmetrics').innerHTML=
-    '<div class="mb"><div class="mbl">Dư nợ/cán bộ TD</div><div class="mbv">'+n.duno_per_staff+'</div><div class="mbs">tỷ đồng</div></div>'+
-    '<div class="mb"><div class="mbl">vs TB khu vực</div><div class="mbv good">+'+((n.duno_per_staff/n.region-1)*100).toFixed(0)+'%</div><div class="mbs">'+n.region+' tỷ</div></div>'+
-    '<div class="mb"><div class="mbl">vs TB toàn hàng</div><div class="mbv good">+'+((n.duno_per_staff/n.bank-1)*100).toFixed(0)+'%</div><div class="mbs">'+n.bank+' tỷ</div></div>';
-  const mx=Math.max(...n.trend.map(x=>x[1]));
-  document.getElementById('tindung-prodtrend').innerHTML=n.trend.map(([y,v])=>{
-    const isP=(y==='KH26');
-    return '<div class="tcol"><div class="tbar'+(isP?' plan26':'')+'" style="height:'+(v/mx*100).toFixed(0)+'px"></div><div class="tyear'+(isP?' plan26lbl':'')+'">'+(isP?'KH 2026':y)+'</div></div>';
-  }).join('');
-}
-
-function renderNote(){
-  document.getElementById('tindung-note').innerHTML='<div class="note"><div class="nh">Góc quản trị · kinh doanh &amp; rủi ro</div>'+
-   'Tăng trưởng dư nợ <b>+16,3%</b> dẫn dắt bởi bán lẻ (+18,5%) và DN vừa (+23,9%). Đáng chú ý về <b>tập trung rủi ro</b>: ngành xây dựng tăng vọt +72% (dòng vốn đầu tư công), nâng tỷ trọng lên 9,3% — cần theo dõi. Về chất lượng: NPL 0,58% và nợ nhóm 2 giảm mạnh xuống 0,16% là tín hiệu tốt, nhưng <b>NPL doanh nghiệp 1,3% gấp đôi bán lẻ 0,7%</b> — rủi ro tín dụng tập trung ở khối DN, đặc biệt DNNN (NPL 2,1% dù dư nợ co lại −12,7%).</div>';
-}
-
-function setCmp(c){cmp=c;document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',['plan','region','bank'][i]===c));renderKPI();}
-renderKPI();renderDims();renderSegTable();renderQuality();renderProd();renderNote();
-
-window.SH=window.SH||{};window.SH["tindung"]={setCmp:(typeof setCmp!=="undefined"?setCmp:null),setSeg:(typeof setSeg!=="undefined"?setSeg:null)};
-})();
-// ===kqkd===
-(function(){
-
-const D=JSON.parse(JSON.stringify({"real":{"nii":{"2024":55406,"2025":58674},"fee":{"2024":5137,"2025":3470},"fx":{"2024":5292,"2025":6165},"sec":{"2024":373,"2025":457},"other":{"2024":2372,"2025":3592},"toi":{"2024":68578,"2025":72358},"opex":{"2024":23027,"2025":25152},"ppop":{"2024":45551,"2025":47205},"prov":{"2024":3315,"2025":3185},"pbt":{"2024":42236,"2025":44020}},"seg":{"rt":{"2024":{"nii":28434,"fee":1521,"fx":1567,"sec":110,"other":702,"toi":32334,"opex":12422,"ppop":19912,"prov":981,"pbt":18930},"2025":{"nii":30794,"fee":1061,"fx":1885,"sec":140,"other":1099,"toi":34979,"opex":13859,"ppop":21120,"prov":974,"pbt":20146}},"ct":{"2024":{"nii":26972,"fee":3616,"fx":3725,"sec":263,"other":1670,"toi":36246,"opex":10605,"ppop":25641,"prov":2334,"pbt":23308},"2025":{"nii":27880,"fee":2409,"fx":4280,"sec":317,"other":2493,"toi":37379,"opex":11293,"ppop":26086,"prov":2211,"pbt":23875}}},"share":{"2024":{"rt":0.4385,"ct":0.5615},"2025":{"rt":0.45,"ct":0.55}},"plan":{"all":{"nii":68976,"fee":4074,"fx":7102,"sec":537,"other":4217,"toi":84906,"opex":29493,"ppop":55413,"prov":6991,"pbt":48422},"rt":{"nii":36201,"fee":1246,"fx":2172,"sec":164,"other":1290,"toi":41073,"opex":16251,"ppop":24822,"prov":2138,"pbt":22684},"ct":{"nii":32775,"fee":2828,"fx":4930,"sec":373,"other":2927,"toi":43833,"opex":13242,"ppop":30591,"prov":4853,"pbt":25738}},"bs":{"ta":{"2024":2085874,"2025":2441929,"2026":2880262,"2023":1850521},"loan":{"2024":1418016,"2025":1648557,"2026":1914222},"dep":{"2024":1514665,"2025":1672534,"2026":1984562},"liab":{"2024":1889664,"2025":2214393,"2026":2613119},"equity":{"2024":196210,"2025":227536,"2026":267143,"2023":165274}},"lnst":{"2024":33853,"2025":35198,"2026":38738},"ratios":{"nim":{"2024":2.86,"2025":2.63,"2026":2.63},"cir":{"2024":33.58,"2025":34.76,"2026":34.76},"npl":{"2024":0.96,"2025":0.58,"2026":0.97},"casa":{"2024":36.72,"2025":35.42},"cov":{"2025":259.0},"ldr":{"2024":93.6,"2025":98.6,"2026":96.5},"roae":{"2024":18.73,"2025":16.6,"2026":15.63},"roaa":{"2024":1.72,"2025":1.55,"2026":1.45},"bvps":{"2024":23481,"2025":27230,"2026":31970},"eps":{"2024":4051,"2025":4212,"2026":4636}},"overview":{"kpi":{"huydong":{"label":"Tổng nguồn vốn huy động","cur":2180922,"ytd":1851561,"same":1851561,"plan":2159329,"unit":"tỷ","hb":true,"region":259634,"bank":239662,"plan26":2588754},"loinhuan":{"label":"Tổng lợi nhuận trước thuế","cur":44020,"ytd":42236,"same":42236,"plan":43157,"unit":"tỷ","hb":true,"region":5002,"bank":4634,"plan26":48422},"chovay":{"label":"Cơ cấu cho vay + trái phiếu","cur":1648557,"ytd":1418016,"same":1418016,"plan":1648557,"unit":"tỷ","hb":true,"region":191693,"bank":177264,"plan26":1914222},"npl":{"label":"Tỷ lệ nợ xấu","cur":0.58,"ytd":0.96,"same":0.96,"plan":1.0,"unit":"%","hb":false,"region":1.55,"bank":1.85,"plan26":0.97}},"wf_dep":[["KHBL (bán lẻ)",66306],["KHDN lớn",33152],["KHDN vừa & nhỏ",28416],["Định chế tài chính",20523],["KHDN FDI",9472]],"wf_loan":[["KHBL (bán lẻ)",106049],["KHDN vừa",62246],["KHDN FDI",34581],["KHDN lớn",32276],["DNNN",-4611]],"trend":{"years":["2022","2023","2024","2025","KH26"],"dep":[1230000,1350000,1514665,1672534,2588754],"loan":[1050000,1240000,1418016,1648557,1914222],"pbt":[37000,41200,42236,44020,48422]}},"kqkd":{"xlrr":{"2024":1850,"2025":2677,"2026":1200},"core":{"2024":40386,"2025":41343,"2026":47222},"fee":{"2024":5137,"2025":3470,"2026":4074},"pbt":{"2024":42236,"2025":44020,"2026":48422},"plan2025_pbt":43157,"bench":{"pbt":4634,"core":4307,"fee":377,"xlrr":335}},"pl_plan2025":{"nii":59827,"fee":3420,"fx":6324,"sec":470,"other":3526,"toi":72177,"opex":25572,"ppop":45963,"prov":3314,"pbt":45300,"noni":13740},"pl_bench":{"nii":6145,"fee":358,"fx":671,"sec":50,"other":395,"toi":7890,"opex":2691,"ppop":4976,"prov":345,"pbt":4540,"noni":1474},"tindung":{"loan":{"2024":1418016,"2025":1648557,"2026":1914222},"kpi_loan":{"cur":1648557,"plan":1648557,"ytd":1418016,"same":1418016,"region":191693,"bank":177264,"plan26":1914222},"kpi_npl":{"cur":0.58,"plan":1.0,"ytd":0.96,"same":0.96,"region":1.55,"bank":1.85,"plan26":0.97},"seg":[["KHBL (bán lẻ)",741850,18.5,0.7,903821],["KHDN vừa",306632,23.9,1.1,367958],["KHDN FDI",189584,17.0,0.9,218022],["KHDN lớn",278606,2.7,1.5,292536],["DNNN",131885,-12.7,2.1,131885]],"nganh":[["Xây dựng",153316,72.0,205327],["Bán buôn bán lẻ",346197,14.0,389818],["Công nghiệp chế biến",296740,12.0,328788],["BĐS",65942,8.0,70690],["Vận tải & kho bãi",115399,22.0,138248],["Nông nghiệp",82428,9.0,89105],["Tiêu dùng cá nhân",313226,28.0,392159],["Khác",275309,10.0,300087]],"kyhan":[["Ngắn hạn",692394,7.2,737922],["Trung hạn",346197,18.5,403839],["Dài hạn",609966,29.6,772461]],"loaitien":[["VND",1450730,16.8,1701261],["Ngoại tệ (quy đổi)",197827,8.5,212961]],"sanpham":[["Vay từng lần",560510,14,622018],["Hạn mức tín dụng",675908,17,779322],["Vay dự án/đầu tư",296740,28,371518],["Thẻ & tiêu dùng",115399,25,141364]],"tsbd":[["BĐS",956163,15,1100758],["Có bảo đảm khác",445110,18,517218],["Tín chấp",247284,22,296246]],"chatluong":{"npl_loan":{"2024":0.96,"2025":0.58},"npl_total":{"2025":0.97},"nhom2":{"2024":0.5,"2025":0.16},"coverage":{"2025":259},"npl_rt":0.7,"npl_ct":1.3},"nangsuat":{"staff":4520,"duno_per_staff":364.7,"region":310,"bank":285,"trend":[["2022",298],["2023",322],["2024",344],["2025",365],["KH26",411.2]],"per_2026":411.2}},"huydong":{"tong":{"2024":1851561,"2025":2180922,"2026":2588754},"kpi_hd":{"cur":2180922,"plan":2159329,"ytd":1851561,"same":1851561,"region":259634,"bank":239662,"plan26":2588754},"kpi_casa":{"cur":35.42,"plan":36.0,"ytd":36.72,"same":36.72,"region":28.5,"bank":24.8,"plan26":36.0},"kpi_ldr":{"cur":98.6,"plan":95.0,"ytd":93.6,"same":93.6,"region":92.0,"bank":95.5,"plan26":96.5},"nguon":[["Tiền gửi khách hàng",1672534,10.4,2043415],["Tiền gửi & vay TCTD khác",321159,36.9,346852],["Tiền gửi KBNN & CP",160128,104.7,168134],["Phát hành GTCG",27101,12.3,30353]],"loaitien":[["VND",1984639,17.5,2371272],["Ngoại tệ (quy đổi)",196283,12.0,217482]],"kyhan":[["Không kỳ hạn (CASA)",592412,-3.5,712560],["Ngắn hạn (<12 tháng)",1065089,19.2,1249136],["Trung dài hạn",523421,22.0,627058]],"phankhuc":[["KHBL (bán lẻ/dân cư)",1134080,11.5,1379272],["KHDN lớn",436184,9.8,474655],["KHDN vừa & nhỏ",283520,14.2,319754],["Định chế tài chính",239901,34.0,313311],["KHDN FDI",87237,18.5,101762]],"casa":{"pct_2025":35.42,"pct_2024":36.72,"rank":"thứ 3 ngành","cof":"thấp nhất hệ thống"},"nangsuat":{"staff":6800,"hd_per_staff":320.7,"region":245,"bank":228,"trend":[["2022",242],["2023",268],["2024",290],["2025",321],["KH26",369.6]],"per_2026":369.6}}}));
-const KQ=D.kqkd, SEG=D.seg, PLAN=D.plan;
-let cmp='plan', seg='all';
-const CMPNAME={plan:'Kế hoạch',ytd:'Đầu năm',same:'Cùng kỳ 2024',bank:'TB toàn hàng'};
-function fmt(x){return Math.round(x).toLocaleString('vi-VN')}
-
-// segment scaling: KQKD core/xlrr/fee are whole-bank; scale by segment PBT share when filtered
-function segScale(){
-  if(seg==='all') return 1;
-  return SEG[seg]['2025'].pbt / D.real.pbt['2025'];
-}
-function pbtOf(y){
-  if(seg==='all') return KQ.pbt[y];
-  if(y==='2026') return PLAN[seg].pbt;
-  return SEG[seg][y].pbt;
-}
-function coreOf(y){ return pbtOf(y)-xlrrOf(y); }
-function xlrrOf(y){ return Math.round(KQ.xlrr[y]*segScale()); }
-function feeOf(y){
-  if(seg==='all') return KQ.fee[y];
-  if(y==='2026') return PLAN[seg].fee;
-  return SEG[seg][y].fee;
-}
-function planPbt(){ return Math.round(KQ.plan2025_pbt*segScale()); }
-function benchOf(key){ return Math.round(KQ.bench[key]*(seg==='all'?1:segScale())); }
-
-function cmpVal(metric){ // metric: 'pbt'
-  if(cmp==='plan') return planPbt();
-  if(cmp==='ytd'||cmp==='same') return pbtOf('2024');
-  if(cmp==='bank') return benchOf('pbt');
-}
-
-function renderKPI(){
-  const cur=pbtOf('2025'), base=cmpVal('pbt');
-  const pct=(cur/base-1)*100;
-  const good=pct>=0; const cls=Math.abs(pct)<0.3?'warn':(good?'up':'down');
-  const mx=Math.max(cur,base)*1.18;
-  const fillColor=cls==='up'?'var(--up)':(cls==='down'?'var(--down)':'var(--warn)');
-  let ach='';
-  document.getElementById('kqkd-kpicard').innerHTML=
-    '<div class="kl">Tổng lợi nhuận trước thuế</div><div><span class="kv">'+fmt(cur)+'</span><span class="ku"> tỷ</span></div>'+
-    '<div class="gauge"><div class="gauge-track"><div class="gauge-fill" style="width:'+(cur/mx*100).toFixed(1)+'%;background:'+fillColor+'"></div>'+
-    '<div class="gauge-marker" style="left:'+(base/mx*100).toFixed(1)+'%"></div></div>'+
-    '<div class="gauge-cmp"><span class="delta '+cls+'">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span><span class="cmpv">'+CMPNAME[cmp]+': '+fmt(base)+' tỷ</span></div></div>'+
-    (ach?'<div class="ach">'+ach+'</div>':'');
-}
-
-function renderCompose(){
-  const core=coreOf('2025'), xlrr=xlrrOf('2025'), fee=feeOf('2025'), tot=pbtOf('2025');
-  const corePct=core/tot*100, xlrrPct=xlrr/tot*100;
-  document.getElementById('kqkd-compose').innerHTML=
-    '<h3>Cấu phần lợi nhuận 2025</h3><div class="ph">Lõi vs thu nợ đã xử lý rủi ro (bất thường)</div>'+
-    '<div class="stackbar"><div class="stackseg core" style="width:'+corePct.toFixed(1)+'%">'+(corePct>15?fmt(core):'')+'</div>'+
-    '<div class="stackseg xlrr" style="width:'+xlrrPct.toFixed(1)+'%">'+(xlrrPct>8?fmt(xlrr):'')+'</div></div>'+
-    '<div class="complegend">'+
-    '<div class="cl-row"><span class="cl-sw core"></span><span class="cl-name">LN từ hoạt động kinh doanh (lõi)</span><span class="cl-val">'+fmt(core)+'</span><span class="cl-pct">'+corePct.toFixed(0)+'%</span></div>'+
-    '<div class="cl-row"><span class="cl-sw fee"></span><span class="cl-name" style="padding-left:18px;font-size:12px">trong đó · thu dịch vụ</span><span class="cl-val" style="font-size:12px">'+fmt(fee)+'</span><span class="cl-pct"></span></div>'+
-    '<div class="cl-row"><span class="cl-sw xlrr"></span><span class="cl-name">Thu nợ đã XLRR (bất thường)</span><span class="cl-val">'+fmt(xlrr)+'</span><span class="cl-pct">'+xlrrPct.toFixed(0)+'%</span></div>'+
-    '</div>';
-}
-
-function achPill(cur,plan){
-  const p=cur/plan*100; const c=p>=100?'good':(p>=95?'mid':'bad');
-  return '<span class="ach-pill '+c+'">'+p.toFixed(0)+'%</span>';
-}
-function yoyPill(a,b){
-  const v=(a/b-1)*100; const c=Math.abs(v)<0.3?'flat':(v>=0?'up':'down');
-  return '<span class="yoy '+c+'">'+(v>=0?'+':'')+v.toFixed(1)+'%</span>';
-}
-
-function renderTable(){
-  // rows: LN HĐKD lõi, (thu dịch vụ), thu nợ XLRR, TỔNG
-  // cols (gần nhất trái): KH2026 | TH2025 | TH2024 | YoY25/24 | %đạt KH2025 | TB toàn hàng
-  const rows=[
-    ['LN từ hoạt động kinh doanh', coreOf('2026'), coreOf('2025'), benchOf('core'),'coreline'],
-    ['Thu nợ đã XLRR', xlrrOf('2026'), xlrrOf('2025'), benchOf('xlrr'),'xlrrline'],
-  ];
-  let h='<thead><tr><th>Cấu phần (tỷ đồng)</th><th class="planh">KH 2026</th><th>TH 2025</th><th class="planh">+/− KH</th><th>TB toàn hàng</th></tr></thead><tbody>';
-  rows.forEach(([lab,p26,th25,bench,cls])=>{
-    h+='<tr class="'+cls+'"><td>'+lab+'</td><td class="planc">'+fmt(p26)+'</td><td>'+fmt(th25)+'</td>'+
-       '<td class="planc">'+yoyPill(p26,th25)+'</td><td>'+fmt(bench)+'</td></tr>';
-  });
-  // thu dịch vụ info row
-  h+='<tr><td style="padding-left:28px;color:var(--blue)">trong đó · thu dịch vụ</td><td class="planc">'+fmt(feeOf('2026'))+'</td><td>'+fmt(feeOf('2025'))+'</td><td class="planc">'+yoyPill(feeOf('2026'),feeOf('2025'))+'</td><td>'+fmt(benchOf('fee'))+'</td></tr>';
-  // total
-  h+='<tr class="total"><td>Tổng lợi nhuận trước thuế</td><td class="planc">'+fmt(pbtOf('2026'))+'</td><td>'+fmt(pbtOf('2025'))+'</td><td class="planc">'+yoyPill(pbtOf('2026'),pbtOf('2025'))+'</td><td>'+fmt(benchOf('pbt'))+'</td></tr>';
-  h+='</tbody>';
-  document.getElementById('kqkd-kqtable').innerHTML=h;
-}
-
-function renderNote(){
-  const core25=coreOf('2025'),xlrr25=xlrrOf('2025'),tot25=pbtOf('2025');
-  const core26=coreOf('2026');
-  const n='Lợi nhuận 2025 <b>'+fmt(tot25)+' tỷ</b> nhưng <b>lõi chỉ '+fmt(core25)+' tỷ</b> ('+(core25/tot25*100).toFixed(0)+'%) — phần còn lại '+fmt(xlrr25)+' tỷ là thu nợ đã XLRR, khoản <b>không lặp lại bền vững</b>. Kế hoạch 2026 đặt thu XLRR giảm còn '+fmt(xlrrOf('2026'))+' tỷ, nên <b>lõi phải tăng +'+((core26/core25-1)*100).toFixed(0)+'%</b> (cao hơn mức tăng tổng +10%) để bù — đây là kế hoạch tham vọng hơn con số tổng cho thấy. Đọc chất lượng lợi nhuận quan trọng hơn đọc con số tổng.';
-  document.getElementById('kqkd-note').innerHTML='<div class="note"><div class="nh">Góc quản trị · chất lượng lợi nhuận</div>'+n+'</div>';
-}
-
-function renderAll(){ renderPL(); renderKPI(); renderCompose(); renderTable(); renderNote(); }
-
-const PLLINES=[
-  ['nii','Thu nhập lãi thuần',false,false],
-  ['noni','Thu nhập ngoài lãi',false,false],
-  ['toi','Tổng thu nhập hoạt động',true,false],
-  ['opex','Chi phí hoạt động',false,true],
-  ['ppop','LN thuần trước dự phòng',true,false],
-  ['prov','Chi phí dự phòng RRTD',false,true],
-  ['pbt','Lợi nhuận trước thuế',true,false],
-];
-function plVal(k,y){
-  if(seg==='all'){
-    if(y==='2026'){ return k==='noni'?(PLAN.all.fee+PLAN.all.fx+PLAN.all.sec+PLAN.all.other):PLAN.all[k]; }
-    if(k==='noni') return D.real.fee[y]+D.real.fx[y]+D.real.sec[y]+D.real.other[y];
-    return D.real[k][y];
-  }
-  const src = (y==='2026')?PLAN[seg]:SEG[seg][y];
-  if(k==='noni') return src.fee+src.fx+src.sec+src.other;
-  return src[k];
-}
-function plPlan(k){ const base=D.pl_plan2025[k]; return seg==='all'?base:Math.round(base*segScale()); }
-function plBench(k){ const base=D.pl_bench[k]; return seg==='all'?base:Math.round(base*segScale()); }
-function yoyPillInv(a,b,inv){
-  const v=(a/b-1)*100; const dir=inv?-v:v;
-  const c=Math.abs(v)<0.3?'flat':(dir>=0?'up':'down');
-  return '<span class="yoy '+c+'">'+(v>=0?'+':'')+v.toFixed(1)+'%</span>';
-}
-function renderPL(){
-  let h='<thead><tr><th>Chỉ tiêu (tỷ đồng)</th><th class="planh">KH 2026</th><th>TH 2025</th><th class="planh">+/− KH</th><th>TB toàn hàng</th></tr></thead><tbody>';
-  PLLINES.forEach(([k,lab,result,inv])=>{
-    const p26=plVal(k,'2026'),th25=plVal(k,'2025'),bn=plBench(k);
-    const cls=(result?'total':'');
-    const sg=inv?'−':'';
-    h+='<tr class="'+cls+'"><td>'+(inv?'(−) ':'')+lab+'</td><td class="planc">'+sg+fmt(p26)+'</td><td>'+sg+fmt(th25)+'</td>'+
-       '<td class="planc">'+yoyPillInv(p26,th25,inv)+'</td><td>'+sg+fmt(bn)+'</td></tr>';
-  });
-  h+='</tbody>';
-  document.getElementById('kqkd-pltable').innerHTML=h;
-}
-function setCmp(c){cmp=c;document.querySelectorAll('.tab:not(.seg)').forEach((t,i)=>t.classList.toggle('on',['plan'][i]===c));renderKPI();renderNote();}
-function setSeg(s){seg=s;document.querySelectorAll('.tab.seg').forEach((t,i)=>t.classList.toggle('on',['all','rt','ct'][i]===s));
-  document.getElementById('kqkd-tblsub').textContent=s==='all'?'Toàn hàng · cấu phần · KH 2026 vs TH 2025 · benchmark':'Khối '+(s==='rt'?'bán lẻ':'doanh nghiệp')+' (phân bổ giả lập theo tỷ trọng lợi nhuận)';
-  renderAll();}
-renderAll();
-
-window.SH=window.SH||{};window.SH["kqkd"]={setCmp:(typeof setCmp!=="undefined"?setCmp:null),setSeg:(typeof setSeg!=="undefined"?setSeg:null)};
-})();
-// ===t1===
-(function(){
-
-const D={"real":{"nii":{"2024":55406,"2025":58674},"fee":{"2024":5137,"2025":3470},"fx":{"2024":5292,"2025":6165},"sec":{"2024":373,"2025":457},"other":{"2024":2372,"2025":3592},"toi":{"2024":68578,"2025":72358},"opex":{"2024":23027,"2025":25152},"ppop":{"2024":45551,"2025":47205},"prov":{"2024":3315,"2025":3185},"pbt":{"2024":42236,"2025":44020}},"seg":{"rt":{"2024":{"nii":28434,"fee":1521,"fx":1567,"sec":110,"other":702,"toi":32334,"opex":12422,"ppop":19912,"prov":981,"pbt":18930},"2025":{"nii":30794,"fee":1061,"fx":1885,"sec":140,"other":1099,"toi":34979,"opex":13859,"ppop":21120,"prov":974,"pbt":20146}},"ct":{"2024":{"nii":26972,"fee":3616,"fx":3725,"sec":263,"other":1670,"toi":36246,"opex":10605,"ppop":25641,"prov":2334,"pbt":23308},"2025":{"nii":27880,"fee":2409,"fx":4280,"sec":317,"other":2493,"toi":37379,"opex":11293,"ppop":26086,"prov":2211,"pbt":23875}}},"share":{"2024":{"rt":0.4385,"ct":0.5615},"2025":{"rt":0.45,"ct":0.55}},"plan":{"all":{"nii":68976,"fee":4074,"fx":7102,"sec":537,"other":4217,"toi":84906,"opex":29493,"ppop":55413,"prov":6991,"pbt":48422},"rt":{"nii":36201,"fee":1246,"fx":2172,"sec":164,"other":1290,"toi":41073,"opex":16251,"ppop":24822,"prov":2138,"pbt":22684},"ct":{"nii":32775,"fee":2828,"fx":4930,"sec":373,"other":2927,"toi":43833,"opex":13242,"ppop":30591,"prov":4853,"pbt":25738}},"bs":{"ta":{"2024":2085874,"2025":2441929,"2026":2880262,"2023":1850521},"loan":{"2024":1418016,"2025":1648557,"2026":1914222},"dep":{"2024":1514665,"2025":1672534,"2026":1984562},"liab":{"2024":1889664,"2025":2214393,"2026":2613119},"equity":{"2024":196210,"2025":227536,"2026":267143,"2023":165274}},"lnst":{"2024":33853,"2025":35198,"2026":38738},"ratios":{"nim":{"2024":2.86,"2025":2.63,"2026":2.63},"cir":{"2024":33.58,"2025":34.76,"2026":34.76},"npl":{"2024":0.96,"2025":0.58,"2026":0.97},"casa":{"2024":36.72,"2025":35.42},"cov":{"2025":259.0},"ldr":{"2024":93.6,"2025":98.6,"2026":96.5},"roae":{"2024":18.73,"2025":16.6,"2026":15.63},"roaa":{"2024":1.72,"2025":1.55,"2026":1.45},"bvps":{"2024":23481,"2025":27230,"2026":31970},"eps":{"2024":4051,"2025":4212,"2026":4636}}};
-const R=D.real, SEG=D.seg, PLAN=D.plan, RT=D.ratios, BS=D.bs;
-let seg='all';
-
-const LINES=[
-  ['nii','Thu nhập lãi thuần',false,false],
-  ['noni','Thu nhập ngoài lãi',false,false],
-  ['toi','Tổng thu nhập hoạt động',true,false],
-  ['opex','Chi phí hoạt động',false,true],
-  ['ppop','LN thuần trước dự phòng',true,false],
-  ['prov','Chi phí dự phòng RRTD',false,true],
-  ['pbt','Lợi nhuận trước thuế',true,false],
-];
-
-function f(x){return Math.round(x).toLocaleString('vi-VN')}
-function val(k,y){
-  if(seg==='all'){
-    if(k==='noni') return R.fee[y]+R.fx[y]+R.sec[y]+R.other[y];
-    return R[k][y];
-  }
-  const s=SEG[seg][y];
-  if(k==='noni') return s.fee+s.fx+s.sec+s.other;
-  return s[k];
-}
-function valPlan(k){
-  const p=(seg==='all')?PLAN.all:PLAN[seg];
-  if(k==='noni') return p.fee+p.fx+p.sec+p.other;
-  return p[k];
-}
-function yoyPill(a,b,inv){
-  const v=(a-b)/Math.abs(b)*100; const dir=(inv? -v : v);
-  const c=Math.abs(v)<0.3?'flat':(dir>=0?'up':'down');
-  return '<span class="yoy '+c+'">'+(v>=0?'+':'')+v.toFixed(1)+'%</span>';
-}
-
-function render(){
-  const SEGNAME={all:'Toàn hàng',rt:'Khối bán lẻ',ct:'Khối doanh nghiệp'};
-  document.getElementById('t1-scope').textContent=
-    seg==='all'?'Số thực hiện toàn hàng — nguồn báo cáo phân tích':
-    'P&L '+SEGNAME[seg].toLowerCase()+' — phân bổ giả lập, cộng các khối = tổng toàn hàng';
-
-  // headline cards: PBT, TOI, CIR
-  const pbt25=val('pbt','2025');
-  const toi25=val('toi','2025');
-  const opex25=val('opex','2025');
-  const cir25=opex25/toi25*100, cirP=valPlan('opex')/valPlan('toi')*100;
-  const pbtP=valPlan('pbt');
-  document.getElementById('t1-headline').innerHTML=
-    '<div class="hl"><div class="hll">LNTT 2025 thực hiện</div><div class="hlv">'+f(pbt25)+'<span class="u"> tỷ</span></div><div class="hls up">KH 2026: '+f(pbtP)+' tỷ</div></div>'+
-    '<div class="hl plan"><div class="hll">LNTT 2026 kế hoạch</div><div class="hlv" style="color:var(--blue)">'+f(pbtP)+'<span class="u"> tỷ</span></div><div class="hls up">+'+((pbtP-pbt25)/pbt25*100).toFixed(1)+'% so 2025</div></div>'+
-    '<div class="hl"><div class="hll">CIR — TH 2025 / KH 2026</div><div class="hlv">'+cir25.toFixed(1)+'<span class="u">% → '+cirP.toFixed(1)+'%</span></div><div class="hls '+(cirP<=cir25?'up':'down')+'">định hướng dưới 35%</div></div>';
-
-  // P&L table
-  let rows='<thead><tr><th>Chỉ tiêu</th><th class="planh">KH 2026</th><th>TH 2025</th><th class="planh">+/− KH</th></tr></thead><tbody>';
-  LINES.forEach(([k,lab,result,inv])=>{
-    const a=val(k,'2025'),pv=valPlan(k);
-    const cls=(result?'result':'')+(inv?' minus':'')+(k==='pbt'?' grand':'');
-    const av=inv?'−'+f(a):f(a), pvv=inv?'−'+f(pv):f(pv);
-    rows+='<tr class="'+cls.trim()+'"><td>'+lab+'</td><td class="planc">'+pvv+'</td><td>'+av+'</td><td class="planc">'+yoyPill(pv,a,inv)+'</td></tr>';
-  });
-  rows+='</tbody>';
-  document.getElementById('t1-pltable').innerHTML=rows;
-
-  // contextual note
-  let note;
-  const provP=valPlan('prov'),provA=val('prov','2025');
-  if(seg==='all'){
-    note='<b>Kế hoạch 2026 đặt LNTT +10%</b> ('+f(valPlan('pbt'))+' tỷ so với '+f(val('pbt','2025'))+' tỷ thực hiện 2025) — đáng chú ý là kế hoạch này <b>đã hấp thụ dự phòng tăng gấp '+(provP/provA).toFixed(1)+' lần</b> (bình thường hóa sau hoàn nhập 2025), nhờ thu nhập lõi tăng mạnh (NII +'+((valPlan('nii')-val('nii','2025'))/val('nii','2025')*100).toFixed(0)+'% theo tăng trưởng tín dụng) trong khi CIR vẫn giữ dưới 35%.';
-  } else if(seg==='rt'){
-    note='Bán lẻ: thu nhập lãi dày nhưng opex nặng (CIR khối '+(val('opex','2025')/val('toi','2025')*100).toFixed(1)+'%), dự phòng nhẹ (NPL 0,7%). <b>Kế hoạch 2026: LNTT '+f(valPlan('pbt'))+' tỷ (+'+((valPlan('pbt')-val('pbt','2025'))/val('pbt','2025')*100).toFixed(1)+'%)</b> — khối được kỳ vọng dẫn dắt tăng trưởng, cao hơn mức chung +10%.';
-  } else {
-    note='Doanh nghiệp: thu dịch vụ &amp; ngoại hối lớn, opex hiệu quả (CIR khối '+(val('opex','2025')/val('toi','2025')*100).toFixed(1)+'%), nhưng gánh phần lớn dự phòng (NPL 1,3%). <b>Kế hoạch 2026: LNTT '+f(valPlan('pbt'))+' tỷ (+'+((valPlan('pbt')-val('pbt','2025'))/val('pbt','2025')*100).toFixed(1)+'%)</b> — tăng chậm hơn bán lẻ do hấp thụ phần dự phòng bình thường hóa lớn hơn.';
-  }
-  document.getElementById('t1-note').innerHTML='<div class="note"><div class="nh">Góc quản trị</div>'+note+'</div>';
-
-  renderRatios();
-}
-
-function pillRaw(v,inv,suffix){
-  const c=Math.abs(v)<0.05?'flat':((inv?-v:v)>=0?'up':'down');
-  let dec=1;
-  if(suffix==='đ') dec=2;
-  else if(suffix===''||suffix===undefined) dec=0;
-  const txt=(v>=0?'+':'')+v.toFixed(dec)+(suffix||'');
-  return '<span class="yoy '+c+'">'+txt+'</span>';
-}
-
-function renderRatios(){
-  // Chỉ số chỉ ở cấp toàn hàng (báo cáo không tách theo khối) -> dim khi filter khối
-  const segAll = seg==='all';
-  const dim = segAll? '' : ' style="opacity:.45"';
-  const scopeMsg = segAll? '' : '<div class="ratio-scope">Chỉ số tài chính &amp; balance sheet ở cấp toàn hàng — báo cáo không tách theo khối. Chuyển về "Toàn hàng" để xem đầy đủ.</div>';
-
-  // Ratio table
-  const rrow=(lab,o,suf,inv)=>{
-    const b=o['2025'],p=o['2026'];
-    const d2=(p!=null?(p-b):null);
-    const fmtR=(x)=>suf==='%'?x.toFixed(2)+'%':(suf===''?Math.round(x).toLocaleString('vi-VN'):x.toFixed(0)+(suf||''));
-    return '<tr><td>'+lab+'</td><td class="planc">'+(p!=null?fmtR(p):'—')+'</td><td>'+(b!=null?fmtR(b):'—')+'</td>'+
-      '<td class="planc">'+(d2!=null?pillRaw(d2,inv,suf==='%'?'đ':''):'—')+'</td></tr>';
-  };
-  let rt='<thead><tr><th>Chỉ số</th><th class="planh">KH 2026</th><th>TH 2025</th><th class="planh">+/−</th></tr></thead><tbody>';
-  rt+='<tr class="grp"><td colspan="4">Hiệu quả sinh lời</td></tr>';
-  rt+=rrow('ROAE',RT.roae,'%',false);
-  rt+=rrow('ROAA',RT.roaa,'%',false);
-  rt+=rrow('NIM',RT.nim,'%',false);
-  rt+=rrow('CIR (chi phí/thu nhập)',RT.cir,'%',true);
-  rt+='<tr class="grp"><td colspan="4">Chất lượng tài sản</td></tr>';
-  rt+=rrow('NPL',RT.npl,'%',true);
-  rt+=rrow('Bao phủ nợ xấu',RT.cov,'%',false);
-  rt+='<tr class="grp"><td colspan="4">Cấu trúc &amp; cổ phiếu</td></tr>';
-  rt+=rrow('CASA',RT.casa,'%',false);
-  rt+=rrow('LDR (cho vay/tiền gửi)',RT.ldr,'%',true);
-  rt+=rrow('BVPS (đồng)',RT.bvps,'',false);
-  rt+=rrow('EPS (đồng)',RT.eps,'',false);
-  rt+='</tbody>';
-  document.getElementById('t1-ratiotable').innerHTML=rt;
-
-  // Balance sheet
-  const brow=(lab,o,res)=>{
-    const b=o['2025'],p=o['2026'];
-    return '<tr class="'+(res?'result':'')+'"><td>'+lab+'</td><td class="planc">'+f(p)+'</td><td>'+f(b)+'</td><td class="planc">'+pillRaw((p-b)/b*100,false,'%')+'</td></tr>';
-  };
-  let bt='<thead><tr><th>Khoản mục (tỷ đồng)</th><th class="planh">KH 2026</th><th>TH 2025</th><th class="planh">+/−</th></tr></thead><tbody>';
-  bt+=brow('Cho vay khách hàng',BS.loan,false);
-  bt+=brow('Tổng tài sản',BS.ta,true);
-  bt+=brow('Tiền gửi khách hàng',BS.dep,false);
-  bt+=brow('Vốn chủ sở hữu',BS.equity,true);
-  bt+='</tbody>';
-  document.getElementById('t1-bstable').innerHTML=bt;
-
-  document.getElementById('t1-ratiowrap').innerHTML=document.getElementById('t1-ratiowrap').innerHTML;
-  document.getElementById('t1-ratiosection').setAttribute("data-dim", segAll?"0":"1");
-  document.getElementById('t1-ratioscope').innerHTML=scopeMsg;
-}
-
-function setSeg(s){
-  seg=s;
-  document.querySelectorAll('.seg-tab').forEach((t,i)=>t.classList.toggle('on',['all','rt','ct'][i]===s));
-  render();
-}
-render();
-
-window.SH=window.SH||{};window.SH["t1"]={setCmp:(typeof setCmp!=="undefined"?setCmp:null),setSeg:(typeof setSeg!=="undefined"?setSeg:null)};
-})();
-// ===sim===
-(function(){
-
-const D=JSON.parse(JSON.stringify({"real":{"nii":{"2024":55406,"2025":58674},"fee":{"2024":5137,"2025":3470},"fx":{"2024":5292,"2025":6165},"sec":{"2024":373,"2025":457},"other":{"2024":2372,"2025":3592},"toi":{"2024":68578,"2025":72358},"opex":{"2024":23027,"2025":25152},"ppop":{"2024":45551,"2025":47205},"prov":{"2024":3315,"2025":3185},"pbt":{"2024":42236,"2025":44020}},"seg":{"rt":{"2024":{"nii":28434,"fee":1521,"fx":1567,"sec":110,"other":702,"toi":32334,"opex":12422,"ppop":19912,"prov":981,"pbt":18930},"2025":{"nii":30794,"fee":1061,"fx":1885,"sec":140,"other":1099,"toi":34979,"opex":13859,"ppop":21120,"prov":974,"pbt":20146}},"ct":{"2024":{"nii":26972,"fee":3616,"fx":3725,"sec":263,"other":1670,"toi":36246,"opex":10605,"ppop":25641,"prov":2334,"pbt":23308},"2025":{"nii":27880,"fee":2409,"fx":4280,"sec":317,"other":2493,"toi":37379,"opex":11293,"ppop":26086,"prov":2211,"pbt":23875}}},"share":{"2024":{"rt":0.4385,"ct":0.5615},"2025":{"rt":0.45,"ct":0.55}},"plan":{"all":{"nii":68976,"fee":4074,"fx":7102,"sec":537,"other":4217,"toi":84906,"opex":29493,"ppop":55413,"prov":6991,"pbt":48422},"rt":{"nii":36201,"fee":1246,"fx":2172,"sec":164,"other":1290,"toi":41073,"opex":16251,"ppop":24822,"prov":2138,"pbt":22684},"ct":{"nii":32775,"fee":2828,"fx":4930,"sec":373,"other":2927,"toi":43833,"opex":13242,"ppop":30591,"prov":4853,"pbt":25738}},"bs":{"ta":{"2024":2085874,"2025":2441929,"2026":2880262,"2023":1850521},"loan":{"2024":1418016,"2025":1648557,"2026":1914222},"dep":{"2024":1514665,"2025":1672534,"2026":1984562},"liab":{"2024":1889664,"2025":2214393,"2026":2613119},"equity":{"2024":196210,"2025":227536,"2026":267143,"2023":165274}},"lnst":{"2024":33853,"2025":35198,"2026":38738},"ratios":{"nim":{"2024":2.86,"2025":2.63,"2026":2.63},"cir":{"2024":33.58,"2025":34.76,"2026":34.76},"npl":{"2024":0.96,"2025":0.58,"2026":0.97},"casa":{"2024":36.72,"2025":35.42},"cov":{"2025":259.0},"ldr":{"2024":93.6,"2025":98.6,"2026":96.5},"roae":{"2024":18.73,"2025":16.6,"2026":15.63},"roaa":{"2024":1.72,"2025":1.55,"2026":1.45},"bvps":{"2024":23481,"2025":27230,"2026":31970},"eps":{"2024":4051,"2025":4212,"2026":4636}},"overview":{"kpi":{"huydong":{"label":"Tổng nguồn vốn huy động","cur":2180922,"ytd":1851561,"same":1851561,"plan":2159329,"unit":"tỷ","hb":true,"region":259634,"bank":239662,"plan26":2588754},"loinhuan":{"label":"Tổng lợi nhuận trước thuế","cur":44020,"ytd":42236,"same":42236,"plan":43157,"unit":"tỷ","hb":true,"region":5002,"bank":4634,"plan26":48422},"chovay":{"label":"Cơ cấu cho vay + trái phiếu","cur":1648557,"ytd":1418016,"same":1418016,"plan":1648557,"unit":"tỷ","hb":true,"region":191693,"bank":177264,"plan26":1914222},"npl":{"label":"Tỷ lệ nợ xấu","cur":0.58,"ytd":0.96,"same":0.96,"plan":1.0,"unit":"%","hb":false,"region":1.55,"bank":1.85,"plan26":0.97}},"wf_dep":[["KHBL (bán lẻ)",66306],["KHDN lớn",33152],["KHDN vừa & nhỏ",28416],["Định chế tài chính",20523],["KHDN FDI",9472]],"wf_loan":[["KHBL (bán lẻ)",106049],["KHDN vừa",62246],["KHDN FDI",34581],["KHDN lớn",32276],["DNNN",-4611]],"trend":{"years":["2022","2023","2024","2025","KH26"],"dep":[1230000,1350000,1514665,1672534,2588754],"loan":[1050000,1240000,1418016,1648557,1914222],"pbt":[37000,41200,42236,44020,48422]}},"kqkd":{"xlrr":{"2024":1850,"2025":2677,"2026":1200},"core":{"2024":40386,"2025":41343,"2026":47222},"fee":{"2024":5137,"2025":3470,"2026":4074},"pbt":{"2024":42236,"2025":44020,"2026":48422},"plan2025_pbt":43157,"bench":{"pbt":4634,"core":4307,"fee":377,"xlrr":335}},"pl_plan2025":{"nii":59827,"fee":3420,"fx":6324,"sec":470,"other":3526,"toi":72177,"opex":25572,"ppop":45963,"prov":3314,"pbt":45300,"noni":13740},"pl_bench":{"nii":6145,"fee":358,"fx":671,"sec":50,"other":395,"toi":7890,"opex":2691,"ppop":4976,"prov":345,"pbt":4540,"noni":1474},"tindung":{"loan":{"2024":1418016,"2025":1648557,"2026":1914222},"kpi_loan":{"cur":1648557,"plan":1648557,"ytd":1418016,"same":1418016,"region":191693,"bank":177264,"plan26":1914222},"kpi_npl":{"cur":0.58,"plan":1.0,"ytd":0.96,"same":0.96,"region":1.55,"bank":1.85,"plan26":0.97},"seg":[["KHBL (bán lẻ)",741850,18.5,0.7,903821],["KHDN vừa",306632,23.9,1.1,367958],["KHDN FDI",189584,17.0,0.9,218022],["KHDN lớn",278606,2.7,1.5,292536],["DNNN",131885,-12.7,2.1,131885]],"nganh":[["Xây dựng",153316,72.0,205327],["Bán buôn bán lẻ",346197,14.0,389818],["Công nghiệp chế biến",296740,12.0,328788],["BĐS",65942,8.0,70690],["Vận tải & kho bãi",115399,22.0,138248],["Nông nghiệp",82428,9.0,89105],["Tiêu dùng cá nhân",313226,28.0,392159],["Khác",275309,10.0,300087]],"kyhan":[["Ngắn hạn",692394,7.2,737922],["Trung hạn",346197,18.5,403839],["Dài hạn",609966,29.6,772461]],"loaitien":[["VND",1450730,16.8,1701261],["Ngoại tệ (quy đổi)",197827,8.5,212961]],"sanpham":[["Vay từng lần",560510,14,622018],["Hạn mức tín dụng",675908,17,779322],["Vay dự án/đầu tư",296740,28,371518],["Thẻ & tiêu dùng",115399,25,141364]],"tsbd":[["BĐS",956163,15,1100758],["Có bảo đảm khác",445110,18,517218],["Tín chấp",247284,22,296246]],"chatluong":{"npl_loan":{"2024":0.96,"2025":0.58},"npl_total":{"2025":0.97},"nhom2":{"2024":0.5,"2025":0.16},"coverage":{"2025":259},"npl_rt":0.7,"npl_ct":1.3},"nangsuat":{"staff":4520,"duno_per_staff":364.7,"region":310,"bank":285,"trend":[["2022",298],["2023",322],["2024",344],["2025",365],["KH26",411.2]],"per_2026":411.2}},"huydong":{"tong":{"2024":1851561,"2025":2180922,"2026":2588754},"kpi_hd":{"cur":2180922,"plan":2159329,"ytd":1851561,"same":1851561,"region":259634,"bank":239662,"plan26":2588754},"kpi_casa":{"cur":35.42,"plan":36.0,"ytd":36.72,"same":36.72,"region":28.5,"bank":24.8,"plan26":36.0},"kpi_ldr":{"cur":98.6,"plan":95.0,"ytd":93.6,"same":93.6,"region":92.0,"bank":95.5,"plan26":96.5},"nguon":[["Tiền gửi khách hàng",1672534,10.4,2043415],["Tiền gửi & vay TCTD khác",321159,36.9,346852],["Tiền gửi KBNN & CP",160128,104.7,168134],["Phát hành GTCG",27101,12.3,30353]],"loaitien":[["VND",1984639,17.5,2371272],["Ngoại tệ (quy đổi)",196283,12.0,217482]],"kyhan":[["Không kỳ hạn (CASA)",592412,-3.5,712560],["Ngắn hạn (<12 tháng)",1065089,19.2,1249136],["Trung dài hạn",523421,22.0,627058]],"phankhuc":[["KHBL (bán lẻ/dân cư)",1134080,11.5,1379272],["KHDN lớn",436184,9.8,474655],["KHDN vừa & nhỏ",283520,14.2,319754],["Định chế tài chính",239901,34.0,313311],["KHDN FDI",87237,18.5,101762]],"casa":{"pct_2025":35.42,"pct_2024":36.72,"rank":"thứ 3 ngành","cof":"thấp nhất hệ thống"},"nangsuat":{"staff":6800,"hd_per_staff":320.7,"region":245,"bank":228,"trend":[["2022",242],["2023",268],["2024",290],["2025",321],["KH26",369.6]],"per_2026":369.6}},"sim_baseline":{"rt":{"loan":741851,"dep":970070,"casa":28.0,"lai_cho_vay":8.74,"cof":3.51,"nii":30794,"fee":1061,"opex":13859,"toi":34979,"prov":974,"fx":1885,"sec":140,"other":1099,"cc_default":0.35,"nim":4.15},"ct":{"loan":906706,"dep":702464,"casa":43.0,"lai_cho_vay":5.26,"cof":2.82,"nii":27880,"fee":2409,"opex":11293,"toi":37379,"prov":2211,"fx":4280,"sec":317,"other":2493,"cc_default":0.55,"nim":3.07},"common":{"lai_casa":0.2,"lai_td_2025":4.8,"tax":0.2,"shares":8356,"equity25":227536,"ta25":2441929,"g_loan_rt":17.0,"g_loan_ct":15.0,"g_dep_rt":18.0,"g_dep_ct":19.0,"g_fee_rt":17.0,"g_fee_ct":17.0,"g_opex_rt":16.0,"g_opex_ct":15.0,"g_other_rt":16.0,"g_other_ct":16.0}}}));
-const BL=D.sim_baseline, C=BL.common;
-
-// slider definitions per segment
-const SLIDERS=[
-  {grp:'Quy mô (incremental)'},
-  {k:'g_loan', name:'Tăng trưởng dư nợ', unit:'%', min:-5, max:35, step:0.5, base:s=>C['g_loan_'+s]},
-  {k:'g_dep',  name:'Tăng trưởng huy động', unit:'%', min:-5, max:35, step:0.5, base:s=>C['g_dep_'+s]},
-  {grp:'Biên lãi (margin)'},
-  {k:'lai_cho_vay', name:'Lãi suất cho vay bq', unit:'%', min:3, max:12, step:0.05, base:s=>BL[s].lai_cho_vay},
-  {k:'casa', name:'CASA', unit:'%', min:15, max:55, step:0.5, base:s=>BL[s].casa},
-  {k:'lai_td', name:'Lãi suất huy động kỳ hạn', unit:'%', min:2, max:8, step:0.05, base:s=>C.lai_td_2025},
-  {grp:'Thu ngoài lãi & chi phí'},
-  {k:'g_fee', name:'Tăng trưởng thu dịch vụ', unit:'%', min:-20, max:50, step:1, base:s=>C['g_fee_'+s]},
-  {k:'g_other', name:'Tăng trưởng thu khác (FX/CK)', unit:'%', min:-15, max:40, step:1, base:s=>C['g_other_'+s]},
-  {k:'g_opex', name:'Tăng trưởng chi phí HĐ', unit:'%', min:0, max:30, step:0.5, base:s=>C['g_opex_'+s]},
-  {grp:'Rủi ro'},
-  {k:'credit_cost', name:'Credit cost (dự phòng/dư nợ)', unit:'%', min:0, max:1.5, step:0.05, base:s=>BL[s].cc_default},
-];
-
-let state={rt:{},ct:{}};
-function initState(){
-  ['rt','ct'].forEach(s=>{
-    SLIDERS.forEach(sl=>{ if(sl.k) state[s][sl.k]=sl.base(s); });
-  });
-}
-initState();
-
-function fmt(x){return Math.round(x).toLocaleString('vi-VN')}
-function fmt1(x){return x.toFixed(1)}
-
-// === ENGINE: compute segment P&L from state ===
-function calcSeg(s){
-  const st=state[s], bl=BL[s];
-  const loan26=bl.loan*(1+st.g_loan/100);
-  const dep26=bl.dep*(1+st.g_dep/100);
-  const loan_avg=(bl.loan+loan26)/2;       // bình quân
-  const dep_avg=(bl.dep+dep26)/2;
-  // CoF từ CASA + lãi kỳ hạn
-  const cof=st.casa/100*C.lai_casa + (1-st.casa/100)*st.lai_td;
-  const nii=loan_avg*st.lai_cho_vay/100 - dep_avg*cof/100;
-  const nim=nii/loan_avg*100;
-  const fee=bl.fee*(1+st.g_fee/100);
-  const gother=st.g_other/100;
-  const fx=bl.fx*(1+gother);
-  const sec=bl.sec*(1+gother);
-  const other=bl.other*(1+gother);
-  const toi=nii+fee+fx+sec+other;
-  const opex=bl.opex*(1+st.g_opex/100);
-  const ppop=toi-opex;
-  const prov=loan_avg*st.credit_cost/100;
-  const pbt=ppop-prov;
-  const cir=opex/toi*100;
-  return {loan26,dep26,loan_avg,dep_avg,cof,nii,nim,fee,toi,opex,ppop,prov,pbt,cir};
-}
-
-function calcAll(){
-  const rt=calcSeg('rt'), ct=calcSeg('ct');
-  const pbt=rt.pbt+ct.pbt;
-  const toi=rt.toi+ct.toi, opex=rt.opex+ct.opex;
-  const nii=rt.nii+ct.nii, prov=rt.prov+ct.prov;
-  const loan26=rt.loan26+ct.loan26, dep26=rt.dep26+ct.dep26;
-  const lnst=pbt*(1-C.tax);
-  const ta26=C.ta25*(loan26/(BL.rt.loan+BL.ct.loan)); // ước TA theo tăng dư nợ
-  const equity26=C.equity25+lnst*0.65; // giữ lại 65% lợi nhuận
-  const roae=lnst/((C.equity25+equity26)/2)*100;
-  const roaa=lnst/((C.ta25+ta26)/2)*100;
-  const nim=nii/((rt.loan_avg+ct.loan_avg))*100;
-  const cir=opex/toi*100;
-  const ldr=loan26/dep26*100;
-  const eps=lnst/C.shares*1000;
-  return {rt,ct,pbt,toi,opex,nii,prov,loan26,dep26,lnst,roae,roaa,nim,cir,ldr,eps,equity26};
-}
-
-// baseline 2025 consolidated for comparison
-const BASE25={
-  pbt:BL.rt.prov!=null?(BL.rt.toi-BL.rt.opex-BL.rt.prov)+(BL.ct.toi-BL.ct.opex-BL.ct.prov):44020,
-  roae:16.6, roaa:1.55, nim:2.63, cir:34.76, ldr:98.6,
-};
-
-function renderResults(){
-  const r=calcAll();
-  const SHS_TARGET=48422;
-  const items=[
-    ['LNTT 2026', fmt(r.pbt)+' tỷ', (r.pbt/BASE25.pbt-1)*100, '%', true],
-    ['ROAE', r.roae.toFixed(2)+'%', r.roae-BASE25.roae, 'đ', false],
-    ['ROAA', r.roaa.toFixed(2)+'%', r.roaa-BASE25.roaa, 'đ', false],
-    ['NIM', r.nim.toFixed(2)+'%', r.nim-BASE25.nim, 'đ', false],
-    ['CIR', r.cir.toFixed(1)+'%', r.cir-BASE25.cir, 'đ', false, true],
-    ['LDR', r.ldr.toFixed(1)+'%', r.ldr-BASE25.ldr, 'đ', false, true],
-  ];
-  document.getElementById('sim-results').innerHTML=items.map(([l,v,d,u,hl,inv])=>{
-    const good = inv? d<=0 : d>=0;
-    const cls=Math.abs(d)<0.05?'warn':(good?'up':'down');
-    const dtxt=(d>=0?'+':'')+(u==='%'?d.toFixed(1):d.toFixed(2))+u+' vs 2025';
-    return '<div class="rcard"><div class="rl">'+l+'</div><div class="rv'+(hl?' hl':'')+'">'+v+'</div><div class="rd '+cls+'">'+dtxt+'</div></div>';
-  }).join('');
-  // phân tích target gap banner
-  const gap=r.pbt-SHS_TARGET;
-  const gapCls=gap>=0?'ok':'under';
-  document.getElementById('sim-shsgap').className='shsgap';
-  document.getElementById('sim-shsgap').innerHTML=
-    '<span class="tag '+gapCls+'">'+(gap>=0?'Đạt/vượt':'Còn thiếu')+' '+(gap>=0?'+':'')+fmt(gap)+' tỷ vs định hướng toàn hàng 48.422</span>'+
-    '<span class="note">Mục tiêu +10% (48.422) tính NII trên dư nợ cuối kỳ; mô hình này tính trên dư nợ bình quân (chính xác hơn — phản ánh độ trễ giải ngân). Chênh lệch = phần plan phân tích lạc quan hóa.</span>';
-  // seg pbt labels
-  document.querySelector('#sim-panel-rt .seg-pbt').innerHTML='LNTT: <b>'+fmt(r.rt.pbt)+' tỷ</b>';
-  document.querySelector('#sim-panel-ct .seg-pbt').innerHTML='LNTT: <b>'+fmt(r.ct.pbt)+' tỷ</b>';
-  renderWarn(r);
-}
-
-function renderWarn(r){
-  const ldr=r.ldr, cir=r.cir;
-  const ldrCls=ldr>100?'bad':(ldr>98?'warn':'ok');
-  const cirCls=cir>35?'warn':'ok';
-  // huy động đủ nuôi tín dụng?
-  const fundGap=r.dep26-r.loan26;
-  const provNorm = (r.prov/((BL.rt.loan+BL.ct.loan))) *100;
-  document.getElementById('sim-warnrow').innerHTML=
-    '<div class="wbox '+ldrCls+'"><div class="wl">LDR (cho vay/huy động)</div><div class="wv">'+ldr.toFixed(1)+'%</div><div class="ws">'+(ldr>100?'⚠ vượt 100% — thiếu nguồn':(ldr>98?'cảnh báo — sát trần':'an toàn'))+'</div></div>'+
-    '<div class="wbox '+cirCls+'"><div class="wl">CIR</div><div class="wv">'+cir.toFixed(1)+'%</div><div class="ws">'+(cir>35?'⚠ vượt định hướng 35%':'trong định hướng')+'</div></div>'+
-    '<div class="wbox '+(fundGap<0?'warn':'ok')+'"><div class="wl">Chênh huy động − cho vay</div><div class="wv">'+(fundGap>=0?'+':'')+fmt(fundGap)+'</div><div class="ws">'+(fundGap<0?'nguồn không đủ phủ dư nợ':'nguồn dư')+'</div></div>'+
-    '<div class="wbox '+(provNorm<0.25?'warn':'ok')+'"><div class="wl">Credit cost hợp nhất</div><div class="wv">'+provNorm.toFixed(2)+'%</div><div class="ws">'+(provNorm<0.25?'thấp — kiểm tra bình thường hóa':'mức hợp lý')+'</div></div>';
-}
-
-function renderPanel(s){
-  const name=s==='rt'?'Khối Bán lẻ':'Khối Doanh nghiệp';
-  let h='<h3><span class="segdot '+s+'"></span>'+name+'<span class="seg-pbt"></span></h3><div class="sh">Baseline dư nợ '+fmt(BL[s].loan)+' tỷ · NIM 2025 '+BL[s].nim+'%</div>';
-  SLIDERS.forEach(sl=>{
-    if(sl.grp){ h+='<div class="sgroup-title">'+sl.grp+'</div>'; return; }
-    const base=sl.base(s), val=state[s][sl.k];
-    const pct=(val-sl.min)/(sl.max-sl.min)*100;
-    const basePct=(base-sl.min)/(sl.max-sl.min)*100;
-    h+='<div class="slider"><div class="slabel"><span class="sn">'+sl.name+'</span>'+
-       '<span class="sv" id="sim-sv-'+s+'-'+sl.k+'">'+val.toFixed(sl.step<1?2:1)+sl.unit+'<span class="base">2025: '+base.toFixed(sl.step<1?2:1)+sl.unit+'</span></span></div>'+
-       '<div class="strack"><div class="basemark" style="left:calc('+basePct.toFixed(1)+'% - 1px)"></div>'+
-       '<input type="range" class="srange" min="'+sl.min+'" max="'+sl.max+'" step="'+sl.step+'" value="'+val+'" '+
-       'oninput="upd(\''+s+'\',\''+sl.k+'\',this.value,'+(sl.step<1?2:1)+',\''+sl.unit+'\')"></div></div>';
-  });
-  document.getElementById('sim-panel-'+s).innerHTML=h;
-}
-
-window.upd=function upd(s,k,v,dec,unit){
-  state[s][k]=parseFloat(v);
-  document.getElementById('sim-sv-'+s+'-'+k).innerHTML=parseFloat(v).toFixed(dec)+unit+'<span class="base">2025: '+SLIDERS.find(x=>x.k===k).base(s).toFixed(dec)+unit+'</span>';
-  renderResults();
-}
-
-function resetBase(){  // Về 2025: phẳng + credit cost thực 2025
-  ['rt','ct'].forEach(s=>{
-    state[s].g_loan=0; state[s].g_dep=0; state[s].g_fee=0; state[s].g_other=0; state[s].g_opex=0;
-    state[s].lai_cho_vay=BL[s].lai_cho_vay; state[s].casa=BL[s].casa; state[s].lai_td=C.lai_td_2025;
-    state[s].credit_cost=BL[s].prov/BL[s].loan*100;
-  });
-  renderPanel('rt');renderPanel('ct');renderResults();
-}
-function loadSHS(){  // Định hướng SHS: growth phân tích + credit cost normalized
-  ['rt','ct'].forEach(s=>SLIDERS.forEach(sl=>{if(sl.k)state[s][sl.k]=sl.base(s);}));
-  renderPanel('rt');renderPanel('ct');renderResults();
-}
-function exportCfg(){
-  const blob=new Blob([JSON.stringify({state:state,result:calcAll()},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plan2026_sim.json';a.click();
-}
-
-renderPanel('rt');renderPanel('ct');renderResults();
-
-window.SH=window.SH||{};window.SH["sim"]={setCmp:(typeof setCmp!=="undefined"?setCmp:null),setSeg:(typeof setSeg!=="undefined"?setSeg:null),resetBase:resetBase,loadSHS:loadSHS,exportCfg:exportCfg,upd:upd};
-})();
-// ===branch===
-(function(){
-
+<script>
 const D=JSON.parse(JSON.stringify({"real":{"nii":{"2024":55406,"2025":58674},"fee":{"2024":5137,"2025":3470},"fx":{"2024":5292,"2025":6165},"sec":{"2024":373,"2025":457},"other":{"2024":2372,"2025":3592},"toi":{"2024":68578,"2025":72358},"opex":{"2024":23027,"2025":25152},"ppop":{"2024":45551,"2025":47205},"prov":{"2024":3315,"2025":3185},"pbt":{"2024":42236,"2025":44020}},"seg":{"rt":{"2024":{"nii":28434,"fee":1521,"fx":1567,"sec":110,"other":702,"toi":32334,"opex":12422,"ppop":19912,"prov":981,"pbt":18930},"2025":{"nii":30794,"fee":1061,"fx":1885,"sec":140,"other":1099,"toi":34979,"opex":13859,"ppop":21120,"prov":974,"pbt":20146}},"ct":{"2024":{"nii":26972,"fee":3616,"fx":3725,"sec":263,"other":1670,"toi":36246,"opex":10605,"ppop":25641,"prov":2334,"pbt":23308},"2025":{"nii":27880,"fee":2409,"fx":4280,"sec":317,"other":2493,"toi":37379,"opex":11293,"ppop":26086,"prov":2211,"pbt":23875}}},"share":{"2024":{"rt":0.4385,"ct":0.5615},"2025":{"rt":0.45,"ct":0.55}},"plan":{"all":{"nii":68976,"fee":4074,"fx":7102,"sec":537,"other":4217,"toi":84906,"opex":29493,"ppop":55413,"prov":6991,"pbt":48422},"rt":{"nii":36201,"fee":1246,"fx":2172,"sec":164,"other":1290,"toi":41073,"opex":16251,"ppop":24822,"prov":2138,"pbt":22684},"ct":{"nii":32775,"fee":2828,"fx":4930,"sec":373,"other":2927,"toi":43833,"opex":13242,"ppop":30591,"prov":4853,"pbt":25738}},"bs":{"ta":{"2024":2085874,"2025":2441929,"2026":2880262,"2023":1850521},"loan":{"2024":1418016,"2025":1648557,"2026":1914222},"dep":{"2024":1514665,"2025":1672534,"2026":1984562},"liab":{"2024":1889664,"2025":2214393,"2026":2613119},"equity":{"2024":196210,"2025":227536,"2026":267143,"2023":165274}},"lnst":{"2024":33853,"2025":35198,"2026":38738},"ratios":{"nim":{"2024":2.86,"2025":2.63,"2026":2.63},"cir":{"2024":33.58,"2025":34.76,"2026":34.76},"npl":{"2024":0.96,"2025":0.58,"2026":0.97},"casa":{"2024":36.72,"2025":35.42},"cov":{"2025":259.0},"ldr":{"2024":93.6,"2025":98.6,"2026":96.5},"roae":{"2024":18.73,"2025":16.6,"2026":15.63},"roaa":{"2024":1.72,"2025":1.55,"2026":1.45},"bvps":{"2024":23481,"2025":27230,"2026":31970},"eps":{"2024":4051,"2025":4212,"2026":4636}},"overview":{"kpi":{"huydong":{"label":"Tổng nguồn vốn huy động","cur":2180922,"ytd":1851561,"same":1851561,"plan":2159329,"unit":"tỷ","hb":true,"region":259634,"bank":239662,"plan26":2588754},"loinhuan":{"label":"Tổng lợi nhuận trước thuế","cur":44020,"ytd":42236,"same":42236,"plan":43157,"unit":"tỷ","hb":true,"region":5002,"bank":4634,"plan26":48422},"chovay":{"label":"Cơ cấu cho vay + trái phiếu","cur":1648557,"ytd":1418016,"same":1418016,"plan":1648557,"unit":"tỷ","hb":true,"region":191693,"bank":177264,"plan26":1914222},"npl":{"label":"Tỷ lệ nợ xấu","cur":0.58,"ytd":0.96,"same":0.96,"plan":1.0,"unit":"%","hb":false,"region":1.55,"bank":1.85,"plan26":0.97}},"wf_dep":[["KHBL (bán lẻ)",66306],["KHDN lớn",33152],["KHDN vừa & nhỏ",28416],["Định chế tài chính",20523],["KHDN FDI",9472]],"wf_loan":[["KHBL (bán lẻ)",106049],["KHDN vừa",62246],["KHDN FDI",34581],["KHDN lớn",32276],["DNNN",-4611]],"trend":{"years":["2022","2023","2024","2025","KH26"],"dep":[1230000,1350000,1514665,1672534,2588754],"loan":[1050000,1240000,1418016,1648557,1914222],"pbt":[37000,41200,42236,44020,48422]}},"kqkd":{"xlrr":{"2024":1850,"2025":2677,"2026":1200},"core":{"2024":40386,"2025":41343,"2026":47222},"fee":{"2024":5137,"2025":3470,"2026":4074},"pbt":{"2024":42236,"2025":44020,"2026":48422},"plan2025_pbt":43157,"bench":{"pbt":4634,"core":4307,"fee":377,"xlrr":335}},"pl_plan2025":{"nii":59827,"fee":3420,"fx":6324,"sec":470,"other":3526,"toi":72177,"opex":25572,"ppop":45963,"prov":3314,"pbt":45300,"noni":13740},"pl_bench":{"nii":6145,"fee":358,"fx":671,"sec":50,"other":395,"toi":7890,"opex":2691,"ppop":4976,"prov":345,"pbt":4540,"noni":1474},"tindung":{"loan":{"2024":1418016,"2025":1648557,"2026":1914222},"kpi_loan":{"cur":1648557,"plan":1648557,"ytd":1418016,"same":1418016,"region":191693,"bank":177264,"plan26":1914222},"kpi_npl":{"cur":0.58,"plan":1.0,"ytd":0.96,"same":0.96,"region":1.55,"bank":1.85,"plan26":0.97},"seg":[["KHBL (bán lẻ)",741850,18.5,0.7,903821],["KHDN vừa",306632,23.9,1.1,367958],["KHDN FDI",189584,17.0,0.9,218022],["KHDN lớn",278606,2.7,1.5,292536],["DNNN",131885,-12.7,2.1,131885]],"nganh":[["Xây dựng",153316,72.0,205327],["Bán buôn bán lẻ",346197,14.0,389818],["Công nghiệp chế biến",296740,12.0,328788],["BĐS",65942,8.0,70690],["Vận tải & kho bãi",115399,22.0,138248],["Nông nghiệp",82428,9.0,89105],["Tiêu dùng cá nhân",313226,28.0,392159],["Khác",275309,10.0,300087]],"kyhan":[["Ngắn hạn",692394,7.2,737922],["Trung hạn",346197,18.5,403839],["Dài hạn",609966,29.6,772461]],"loaitien":[["VND",1450730,16.8,1701261],["Ngoại tệ (quy đổi)",197827,8.5,212961]],"sanpham":[["Vay từng lần",560510,14,622018],["Hạn mức tín dụng",675908,17,779322],["Vay dự án/đầu tư",296740,28,371518],["Thẻ & tiêu dùng",115399,25,141364]],"tsbd":[["BĐS",956163,15,1100758],["Có bảo đảm khác",445110,18,517218],["Tín chấp",247284,22,296246]],"chatluong":{"npl_loan":{"2024":0.96,"2025":0.58},"npl_total":{"2025":0.97},"nhom2":{"2024":0.5,"2025":0.16},"coverage":{"2025":259},"npl_rt":0.7,"npl_ct":1.3},"nangsuat":{"staff":4520,"duno_per_staff":364.7,"region":310,"bank":285,"trend":[["2022",298],["2023",322],["2024",344],["2025",365],["KH26",411.2]],"per_2026":411.2}},"huydong":{"tong":{"2024":1851561,"2025":2180922,"2026":2588754},"kpi_hd":{"cur":2180922,"plan":2159329,"ytd":1851561,"same":1851561,"region":259634,"bank":239662,"plan26":2588754},"kpi_casa":{"cur":35.42,"plan":36.0,"ytd":36.72,"same":36.72,"region":28.5,"bank":24.8,"plan26":36.0},"kpi_ldr":{"cur":98.6,"plan":95.0,"ytd":93.6,"same":93.6,"region":92.0,"bank":95.5,"plan26":96.5},"nguon":[["Tiền gửi khách hàng",1672534,10.4,2043415],["Tiền gửi & vay TCTD khác",321159,36.9,346852],["Tiền gửi KBNN & CP",160128,104.7,168134],["Phát hành GTCG",27101,12.3,30353]],"loaitien":[["VND",1984639,17.5,2371272],["Ngoại tệ (quy đổi)",196283,12.0,217482]],"kyhan":[["Không kỳ hạn (CASA)",592412,-3.5,712560],["Ngắn hạn (<12 tháng)",1065089,19.2,1249136],["Trung dài hạn",523421,22.0,627058]],"phankhuc":[["KHBL (bán lẻ/dân cư)",1134080,11.5,1379272],["KHDN lớn",436184,9.8,474655],["KHDN vừa & nhỏ",283520,14.2,319754],["Định chế tài chính",239901,34.0,313311],["KHDN FDI",87237,18.5,101762]],"casa":{"pct_2025":35.42,"pct_2024":36.72,"rank":"thứ 3 ngành","cof":"thấp nhất hệ thống"},"nangsuat":{"staff":6800,"hd_per_staff":320.7,"region":245,"bank":228,"trend":[["2022",242],["2023",268],["2024",290],["2025",321],["KH26",369.6]],"per_2026":369.6}},"sim_baseline":{"rt":{"loan":741851,"dep":970070,"casa":28.0,"lai_cho_vay":8.74,"cof":3.51,"nii":30794,"fee":1061,"opex":13859,"toi":34979,"prov":974,"fx":1885,"sec":140,"other":1099,"cc_default":0.35,"nim":4.15},"ct":{"loan":906706,"dep":702464,"casa":43.0,"lai_cho_vay":5.26,"cof":2.82,"nii":27880,"fee":2409,"opex":11293,"toi":37379,"prov":2211,"fx":4280,"sec":317,"other":2493,"cc_default":0.55,"nim":3.07},"common":{"lai_casa":0.2,"lai_td_2025":4.8,"tax":0.2,"shares":8356,"equity25":227536,"ta25":2441929,"g_loan_rt":17.0,"g_loan_ct":15.0,"g_dep_rt":18.0,"g_dep_ct":19.0,"g_fee_rt":17.0,"g_fee_ct":17.0,"g_opex_rt":16.0,"g_opex_ct":15.0,"g_other_rt":16.0,"g_other_ct":16.0}},"branch":{"hdv":11984.115803,"td":14496.97629,"hdv_seg":{"KHDN":2854.357846,"DCTC":6149.946993,"KHBL":2979.810953},"td_seg":{"KHDN":10331.963009,"KHBL":2702.265401},"lao_dong":91,"ns_hdv":90.106133,"ns_hdv_kv":82.835324,"ns_hdv_hang":93.33342,"ns_td":296.232464,"ns_td_kv":230.642058,"ns_td_hang":191.054349,"npl":48.990913,"npl_ratio":0.33793883648546685,"no_nhom2":20.202893,"du_no_xlrr":720.34935496,"kqkd":{"thu_xlrr":16.393895,"thu_dv":44.250752,"ln_hdkd":239.943024,"tong_ln":256.336919},"kqkd_bench":{"thu_xlrr":{"kv":37.18,"hang":20.08,"daunam":15.94},"thu_dv":{"kv":75.79,"hang":51.95,"daunam":45.3},"ln_hdkd":{"kv":213.7,"hang":172.8,"daunam":132.01},"tong_ln":{"kv":250.88,"hang":192.88,"daunam":147.95}},"hdv_daunam":11443.63,"td_daunam":13428.35,"model":{"quy_mo_2025":26481.092093,"bien_rong":0.9061,"ln_hdkd_2025":239.943024,"thu_dv_2025":44.250752,"thu_xlrr_2025":16.393895,"note":"LN HĐKD = quy mô × biên ròng; thu DV đã gộp trong LN HĐKD; XLRR tách riêng (bất thường)"}}}));
 const B=D.branch, M=B.model;
 
@@ -1496,7 +173,7 @@ function renderResults(){
     ['Tín dụng', fmt(r.td)+' tỷ', (r.td/BASE.td-1)*100, '%', false],
     ['Lao động', r.lao+' người', r.lao-B.lao_dong, ' người', false, 'abs'],
   ];
-  document.getElementById('branch-results').innerHTML=items.map(([l,v,dd,u,hl,mode])=>{
+  document.getElementById('results').innerHTML=items.map(([l,v,dd,u,hl,mode])=>{
     const good=dd>=0;
     const cls=Math.abs(dd)<0.05?'warn':(good?'up':'down');
     const dtxt=mode==='abs'?((dd>=0?'+':'')+dd+u+' vs 2025'):((dd>=0?'+':'')+dd.toFixed(1)+u+' vs 2025');
@@ -1505,7 +182,7 @@ function renderResults(){
   // benchmark bar: tong LN vs 4 mốc thật
   const bm=BASE.bench;
   const marks=[['TB khu vực',bm.kv],['TB toàn hàng',bm.hang],['Đầu năm',bm.daunam],['TH 2025',BASE.tong_ln]];
-  document.getElementById('branch-benchbar').innerHTML='<span style="color:var(--txt3)">Tổng LN plan vs:</span>'+
+  document.getElementById('benchbar').innerHTML='<span style="color:var(--txt3)">Tổng LN plan vs:</span>'+
     marks.map(([n,v])=>{
       const hit=r.tong_ln>=v;
       return '<span class="bt '+(hit?'hit':'miss')+'">'+n+' '+fmt1(v)+' <b>'+(hit?'✓':'')+(r.tong_ln>=v?'+':'')+fmt1(r.tong_ln-v)+'</b></span>';
@@ -1521,7 +198,7 @@ function renderWarn(r){
   const tdCls=state.ns_td>B.ns_td_hang*1.4?'warn':'ok';
   const nplCls=state.npl_target>1.0?'bad':(state.npl_target>0.6?'warn':'ok');
   const laoCls=state.lao_dong>B.lao_dong*1.15?'warn':'ok';
-  document.getElementById('branch-warnrow').innerHTML=
+  document.getElementById('warnrow').innerHTML=
     '<div class="wbox '+hdvCls+'"><div class="wl">Năng suất HĐ vs toàn hàng</div><div class="wv">'+(nsHdvVsHang*100).toFixed(0)+'%</div><div class="ws">'+(hdvCls==='warn'?'⚠ cao bất thường — khó đạt':'trong vùng hợp lý')+'</div></div>'+
     '<div class="wbox '+tdCls+'"><div class="wl">Năng suất TD vs toàn hàng</div><div class="wv">'+(nsTdVsHang*100).toFixed(0)+'%</div><div class="ws">'+(tdCls==='warn'?'⚠ vượt xa hệ thống':'khả thi')+'</div></div>'+
     '<div class="wbox '+nplCls+'"><div class="wl">NPL mục tiêu</div><div class="wv">'+state.npl_target.toFixed(2)+'%</div><div class="ws">'+(nplCls==='bad'?'⚠ vượt 1%':(nplCls==='warn'?'cần theo dõi':'chất lượng tốt'))+'</div></div>'+
@@ -1541,8 +218,8 @@ function makeSlider(sl){
   if(sl.kv){bm+='<div class="kvmark" style="left:calc('+pct(sl.kv()).toFixed(1)+'% - 1px)"></div>';}
   if(sl.kh){bm+='<div class="khmark" style="left:calc('+pct(sl.kh()).toFixed(1)+'% - 1px)"></div>';}
   return '<div class="slider"><div class="slabel"><span class="sn">'+sl.name+'</span>'+
-    '<span class="sv" id="branch-sv-'+sl.k+'">'+val.toFixed(sl.dec)+sl.unit+'<span class="base">2025: '+base.toFixed(sl.dec)+sl.unit+'</span></span></div>'+
-    '<div class="strack">'+bm+'<input type="range" class="srange" min="'+sl.min+'" max="'+sl.max+'" step="'+sl.step+'" value="'+val+'" oninput="upd_branch(\''+sl.k+'\',this.value,'+sl.dec+',\''+sl.unit+'\')"></div>'+marks+'</div>';
+    '<span class="sv" id="sv-'+sl.k+'">'+val.toFixed(sl.dec)+sl.unit+'<span class="base">2025: '+base.toFixed(sl.dec)+sl.unit+'</span></span></div>'+
+    '<div class="strack">'+bm+'<input type="range" class="srange" min="'+sl.min+'" max="'+sl.max+'" step="'+sl.step+'" value="'+val+'" oninput="upd(\''+sl.k+'\',this.value,'+sl.dec+',\''+sl.unit+'\')"></div>'+marks+'</div>';
 }
 
 function renderScale(){
@@ -1552,7 +229,7 @@ function renderScale(){
   h+='<div class="derived"><div class="dr"><span>Huy động plan</span><b>'+fmt(r.hdv)+' tỷ</b></div>'+
      '<div class="dr"><span>Tín dụng plan</span><b>'+fmt(r.td)+' tỷ</b></div>'+
      '<div class="dr"><span>Quy mô sinh lời</span><b>'+fmt(r.quy_mo)+' tỷ</b></div></div>';
-  document.getElementById('branch-panel-scale').innerHTML=h;
+  document.getElementById('panel-scale').innerHTML=h;
 }
 function renderProfit(){
   let h='<h3>Chuyển quy mô thành lợi nhuận</h3><div class="ph">Biên ròng + thu DV + rủi ro</div>';
@@ -1561,13 +238,13 @@ function renderProfit(){
   h+='<div class="derived"><div class="dr"><span>LN từ HĐKD</span><b>'+fmt1(r.ln_hdkd)+' tỷ</b></div>'+
      '<div class="dr"><span>+ Thu nợ XLRR</span><b>'+fmt1(state.thu_xlrr)+' tỷ</b></div>'+
      '<div class="dr"><span>= Tổng lợi nhuận</span><b>'+fmt1(r.tong_ln)+' tỷ</b></div></div>';
-  document.getElementById('branch-panel-profit').innerHTML=h;
+  document.getElementById('panel-profit').innerHTML=h;
 }
 
-window.upd_branch=function upd(k,v,dec,unit){
+function upd(k,v,dec,unit){
   state[k]=parseFloat(v);
   const sl=[...SCALE,...PROFIT].find(x=>x.k===k);
-  document.getElementById('branch-sv-'+k).innerHTML=parseFloat(v).toFixed(dec)+unit+'<span class="base">2025: '+sl.base().toFixed(dec)+unit+'</span>';
+  document.getElementById('sv-'+k).innerHTML=parseFloat(v).toFixed(dec)+unit+'<span class="base">2025: '+sl.base().toFixed(dec)+unit+'</span>';
   // re-render derived boxes (cheap) + results
   renderScale(); renderProfit(); renderResults();
   // restore focus not needed since sliders recreated; but to keep UX, just update results without full re-render:
@@ -1593,7 +270,5 @@ function exportCfg(){
 }
 
 renderScale(); renderProfit(); renderResults();
-
-window.SH=window.SH||{};window.SH["branch"]={setCmp:(typeof setCmp!=="undefined"?setCmp:null),setSeg:(typeof setSeg!=="undefined"?setSeg:null),resetBase:resetBase,loadStretch:loadStretch,exportCfg:exportCfg,upd:upd};
-})();
-</script></body></html>
+</script>
+</body></html>
