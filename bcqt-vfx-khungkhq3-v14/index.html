@@ -1,0 +1,499 @@
+<!DOCTYPE html><html lang="vi"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BCQT VFX Auto · khung KH Q3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap&subset=latin,latin-ext,vietnamese" rel="stylesheet">
+<style>
+:root{--ink:#0a0e1a;--ink2:#0f1420;--panel:#121826;--panel2:#161d2e;--line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.12);--txt:#e8ecf4;--mut:#9aa6bd;--dim:#5d6884;--gold:#d9b56a;--grn:#5ec98a;--red:#e8736a;--purple:#9d8df1;--cyan:#5fc8d6;--amber:#e0a955;--accent:#7b8cf0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--txt);font-family:'Outfit',sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1480px;margin:0 auto;padding:0 22px 80px}
+header.top{padding:34px 0 18px;border-bottom:1px solid var(--line)}
+.brand{font-family:'Noto Serif Display',serif;font-size:30px;font-weight:700;letter-spacing:-.5px}
+.brand .accent{color:var(--gold)}
+.sub{color:var(--mut);font-size:13px;margin-top:6px;max-width:880px}
+.sub b{color:var(--txt);font-weight:500}
+.tabs{display:flex;gap:2px;margin:22px 0 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tab{background:none;border:none;color:var(--dim);font-family:'Outfit';font-size:13.5px;font-weight:500;padding:11px 18px;cursor:pointer;border-bottom:2px solid transparent;transition:.15s;white-space:nowrap}
+.tab:hover{color:var(--mut)} .tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.view{display:none;animation:fade .3s} .view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+h2.sec{font-family:'Noto Serif Display',serif;font-size:18px;font-weight:600;margin:26px 0 4px;display:flex;align-items:baseline;gap:10px}
+h2.sec .n{color:var(--gold);font-size:13px;font-weight:700}
+.secnote{color:var(--dim);font-size:11.5px;margin-bottom:12px}
+.ctrl{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:14px 0}
+.mfilter{display:flex;gap:5px;flex-wrap:wrap}
+.mbtn{background:var(--panel);border:1px solid var(--line2);color:var(--mut);font-family:'DM Mono';font-size:12px;padding:6px 12px;border-radius:8px;cursor:pointer;transition:.12s}
+.mbtn:hover{border-color:var(--accent);color:var(--txt)} .mbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.flbl{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.srpick{display:flex;gap:7px;flex-wrap:wrap;margin:4px 0 16px}
+.srbtn{background:var(--panel);border:1px solid var(--line2);color:var(--mut);font-family:'Outfit';font-size:12.5px;font-weight:500;padding:8px 14px;border-radius:9px;cursor:pointer;transition:.15s}
+.srbtn:hover{border-color:var(--accent);color:var(--txt)} .srbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.srbtn.allbtn{border-style:dashed;color:var(--gold);border-color:rgba(217,181,106,.4)}
+.srbtn.allbtn:hover{background:rgba(217,181,106,.1)}
+.tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;background:rgba(255,255,255,.012);min-width:680px}
+thead th{background:var(--panel2);color:var(--mut);font-weight:600;font-size:10px;letter-spacing:.5px;text-transform:uppercase;padding:10px 12px;text-align:right;border-bottom:1px solid var(--line2);white-space:nowrap}
+thead th:first-child{text-align:left;position:sticky;left:0;background:var(--panel2);z-index:2;min-width:215px}
+thead th.mh{border-left:1px solid var(--line)}
+td{padding:8px 12px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;font-family:'DM Mono',monospace;white-space:nowrap}
+td:first-child{text-align:left;font-family:'Outfit';font-size:12.5px;color:var(--txt);position:sticky;left:0;background:var(--ink);z-index:1;min-width:215px}
+td.mpc{color:var(--dim);font-size:10.5px;border-right:1px solid var(--line)}
+td.mv{border-left:1px solid var(--line)}
+thead th.sumh{background:rgba(217,181,106,.1);color:var(--gold);border-left:1px solid var(--line2)}
+td.sumv{background:rgba(217,181,106,.04);border-left:1px solid var(--line2);font-weight:600;color:var(--gold)}
+td.sumv.neg{color:var(--red)}
+.inpct{color:var(--dim);font-size:10px;font-family:'DM Mono'}
+tr.grand td{background:rgba(217,181,106,.13);border-top:2px solid var(--gold);font-size:13px}
+tr.grand td:first-child{color:var(--gold);font-weight:700}
+tr.subgrp td{background:rgba(255,255,255,.02);color:var(--mut);font-style:italic;font-family:'Outfit';font-size:10.5px;letter-spacing:.3px;padding:5px 12px 5px 22px;border-bottom:1px dashed var(--line)}
+tr.subgrp td:first-child{background:rgba(255,255,255,.02);font-style:italic;color:var(--mut)}
+tr:last-child td{border-bottom:none}
+tr.grp td{background:rgba(123,140,240,.07);color:var(--accent);font-weight:600;font-family:'Outfit';font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;padding:7px 12px}
+tr.grp td:first-child{background:#10162400;background:linear-gradient(90deg,rgba(123,140,240,.07),rgba(123,140,240,.07))}
+tr.tot td{background:rgba(217,181,106,.06);font-weight:700;color:var(--gold);border-top:1px solid var(--line2)}
+tr.tot td:first-child{color:var(--gold);font-family:'Outfit';background:#13151f}
+tr.sub td:first-child{color:var(--mut);padding-left:22px;font-size:12px}
+.pos{color:var(--grn)} .neg{color:var(--red)} .gold{color:var(--gold)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0 6px}
+.kpi{background:linear-gradient(160deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+.kpi .kl{color:var(--dim);font-size:10px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
+.kpi .kv{font-family:'Noto Serif Display',serif;font-size:23px;font-weight:600;line-height:1}
+.kpi .ks{color:var(--mut);font-size:10.5px;margin-top:4px}
+.note{background:rgba(224,169,85,.05);border:1px solid rgba(224,169,85,.18);border-radius:10px;padding:11px 14px;font-size:11.5px;color:var(--mut);line-height:1.55;margin:12px 0}
+.note b{color:var(--amber)}
+.xc{display:inline-block;padding:2px 8px;border-radius:6px;font-family:'DM Mono';font-size:11px;margin-left:8px}
+.xc.ok{background:rgba(94,201,138,.12);color:var(--grn)} .xc.warn{background:rgba(224,169,85,.12);color:var(--amber)}
+.foot{color:var(--dim);font-size:10.5px;margin-top:40px;padding-top:18px;border-top:1px solid var(--line);line-height:1.6}
+@media(max-width:760px){.brand{font-size:24px}}
+</style></head><body><div class="wrap">
+<header class="top">
+ <div class="brand">VFX Auto · <span class="accent">BCQT theo khung KH Q3</span></div>
+ <div class="sub">Tái dựng từ sổ giao dịch <b>BKCT</b> (5 tháng T1–T5/2026, đủ 6 showroom gồm Sa La) · cấu trúc margin stack <b>front + back = CM</b>, không phân bổ chéo, lương KPI ở front · kỳ gần nhất bên trái · triệu đồng/tháng</div>
+</header>
+<div class="tabs">
+ <button class="tab on" data-v="cty">① Tầng công ty</button>
+ <button class="tab" data-v="sr">② Tầng showroom</button>
+ <button class="tab" data-v="cm">③ Đào sâu %CM</button>
+ <button class="tab" data-v="xdv">④ P&L Xưởng dịch vụ</button>
+</div>
+<div class="ctrl">
+ <span class="flbl">Hiện tháng:</span>
+ <div class="mfilter" id="mfilter"></div>
+</div>
+<div id="cty" class="view on"></div>
+<div id="sr" class="view"></div>
+<div id="cm" class="view"></div>
+<div id="xdv" class="view"></div>
+<div class="foot" id="foot"></div>
+</div>
+<script>
+const B={"sr": {"Q9": {"name": "Quận 9 (Thủ Đức)", "g": {"back": [255.8, 66.7, 1877.3, 558.0, 548.1], "opex": [-689.1, -760.0, -805.2, -959.4, -909.6], "fin": [-199.9, 0.0, -268.7, -317.4, -449.4], "ge": [-427.1, -184.5, -167.5, -224.8, -161.0], "fix_dv": [-632.1, -678.3, -630.0, -649.4, -763.6], "front_qt": [-12.4, -23.0, -9.7, -4.1, -13.5], "cogs_dv": [-1304.6, -862.4, -952.1, -1053.4, -1181.7], "rev_dv": [1975.7, 1470.5, 1683.8, 1871.9, 2077.1], "cogs_xe": [-12118.8, -20480.3, -37452.6, -31928.9, -26952.1], "rev_xe": [12702.1, 21309.1, 38558.6, 32948.6, 27767.0], "cogs_other": [-53.6, 0.0, -31.0, -38.7, -22.8], "back_dv": [53.1, 0.0, 31.3, 69.9, 36.1], "rev_other": [54.9, 55.8, 15.6, 316.9, 1.1], "dc_dv": [-6.7, -6.0, -8.0, -16.5, -9.5], "cogs_pk": [-14.0, -15.7, -4.5, -11.2, -13.2], "rev_pk": [19.8, 20.6, 6.4, 15.9, 19.4], "front_luongkpi": [-308.4, -528.4, -452.3, -641.7, -657.4], "front_other": [0.0, -9.0, 0.0, 0.0, 0.0], "rev_bh": [0.0, 0.0, 6.4, 115.2, 65.6], "ckcb": [519.8, 893.9, 1545.8, 1316.0, 1180.6], "ctkm": [63.5, -65.1, -439.8, -296.3, -365.7], "frontphu": [7.1, 60.7, -7.1, 398.1, 50.1]}}, "LA": {"name": "Long An (Tân An)", "g": {"back": [144.2, 33.3, 1129.8, 118.7, 98.6], "opex": [-422.6, -370.2, -442.3, -436.6, -496.8], "fin": [-148.9, 0.0, -92.4, -87.7, -154.4], "cogs_dv": [-783.7, -429.4, -420.1, -650.5, -551.0], "rev_dv": [1073.8, 601.1, 678.5, 859.8, 809.5], "cogs_other": [-27.5, -13.0, -16.9, -11.0, -16.7], "cogs_xe": [-9026.9, -5304.7, -17551.5, -8750.1, -9230.3], "rev_xe": [9460.7, 5555.4, 18317.8, 9067.7, 9542.5], "fix_dv": [-433.1, -445.6, -420.8, -425.6, -440.1], "front_qt": [-65.1, 5.8, -229.7, 0.0, -10.0], "back_dv": [32.3, 17.8, 41.0, 92.9, 21.6], "rev_other": [31.3, 14.7, 19.2, 12.5, 19.0], "ge": [-420.4, -121.2, -118.2, -142.9, -106.6], "cogs_pk": [-1.8, -2.4, -3.5, -14.1, -4.4], "rev_pk": [2.6, 3.4, 5.0, 18.5, 6.4], "dc_dv": [-1.1, 0.0, 0.0, 0.0, 0.0], "front_luongkpi": [-227.6, -141.5, -368.9, -179.6, -216.9], "rev_bh": [0.0, 3.0, 0.0, 0.0, 12.4], "ckcb": [379.2, 222.2, 750.9, 362.6, 385.0], "ctkm": [54.6, 28.5, 15.4, -45.0, -72.8], "frontphu": [4.6, 5.7, 3.8, 5.9, 16.7]}}, "BL": {"name": "Bến Lức", "g": {"back": [143.5, 33.3, 1660.5, 207.1, 130.4], "opex": [-404.9, -360.0, -466.6, -472.4, -528.3], "fin": [-179.7, 0.0, -119.7, -192.4, -200.2], "dc_dv": [-29.7, -16.2, -25.5, -15.1, -21.0], "cogs_dv": [-1008.8, -804.8, -985.0, -1055.2, -658.3], "rev_dv": [1669.2, 1383.6, 1820.1, 1629.7, 1455.7], "front_qt": [58.6, -35.7, -259.6, 0.0, -11.0], "cogs_other": [-8.3, -11.1, -6.3, 0.0, -19.7], "fix_dv": [-413.7, -422.5, -447.0, -461.1, -499.0], "cogs_xe": [-9228.6, -6806.4, -20720.5, -18362.3, -11988.7], "rev_xe": [9611.1, 7135.9, 21537.4, 19030.8, 12367.8], "rev_other": [55.6, 7.6, 11.8, 17.2, 13.4], "back_dv": [34.7, 25.2, 18.6, 73.4, 12.5], "cogs_pk": [-8.3, -1.1, -9.2, -47.2, -32.6], "rev_pk": [12.0, 1.5, 11.0, 57.5, 39.8], "cogs_xecu": [-1397.6, -141.1, -749.1, 0.0, 0.0], "rev_xecu": [1804.5, 202.7, 890.9, 0.0, 0.0], "ge": [-461.0, -208.4, -197.3, -241.2, -193.0], "front_luongkpi": [-243.9, -183.6, -482.4, -357.4, -248.5], "front_other": [-7.5, -2.5, 0.0, 0.0, 0.0], "rev_bh": [0.0, 16.0, 0.2, 0.0, 21.5], "ckcb": [387.5, 260.0, 869.5, 819.4, 474.2], "ctkm": [-5.0, 69.5, -52.6, -150.9, -95.1], "frontphu": [457.9, 74.5, 149.3, 27.5, 22.4]}}, "QT": {"name": "Quang Trung", "g": {"back": [93.3, 33.3, 676.1, 250.0, 209.5], "opex": [-305.9, -290.8, -345.7, -395.9, -469.4], "fin": [-148.3, 0.0, -137.3, -182.3, -229.7], "cogs_xe": [-7043.9, -4227.3, -16596.0, -17907.4, -13751.2], "rev_xe": [7428.3, 4457.5, 17180.9, 18464.6, 14189.8], "ge": [-106.8, -61.0, -55.3, -62.6, -54.9], "front_qt": [-17.1, -47.3, -247.1, 0.0, -13.5], "front_luongkpi": [-147.3, -94.2, -120.8, -270.1, -295.0], "fix_dv": [0.0, -0.4, 0.0, 0.0, -0.5], "rev_pk": [0.0, 0.0, 0.0, 0.0, 0.4], "cogs_pk": [0.0, 0.0, 0.0, 0.0, -0.3], "rev_bh": [0.0, 0.0, 0.0, 0.0, 18.4], "ckcb": [377.0, 178.5, 660.3, 714.5, 571.4], "ctkm": [7.4, 51.7, -75.4, -157.3, -132.8], "frontphu": [0.0, 0.0, 0.0, 0.0, 18.5]}}, "SL": {"name": "Sa La (hub)", "g": {"back": [93.3, 33.3, 699.4, 298.4, 198.5], "opex": [-180.2, -147.7, -218.4, -251.7, -244.1], "fin": [-107.8, 0.0, -138.2, -179.5, -231.1], "cogs_xe": [-6558.5, -3673.7, -18638.2, -18001.3, -13834.5], "rev_xe": [6848.0, 3844.6, 19329.9, 18553.7, 14281.7], "ge": [-129.3, -61.0, -55.9, -89.2, -54.5], "front_qt": [-22.7, -3.5, -112.9, 0.0, -7.5], "front_luongkpi": [-141.3, -158.4, -185.0, -441.1, -354.2], "fix_dv": [0.0, -0.1, -0.6, -0.4, -0.5], "rev_bh": [0.0, 0.0, 0.0, 0.0, 18.5], "ckcb": [273.8, 192.3, 852.6, 802.8, 629.9], "ctkm": [15.7, -21.4, -160.9, -250.4, -182.7], "frontphu": [0.0, 0.0, 0.0, 0.0, 18.5]}}, "HO": {"name": "Head Office", "g": {"fin": [-0.0, -788.2, -0.0, 0.0, -0.0], "rev_other": [-0.0, 0.0, 0.0, 0.0, 0.0], "ge": [-154.9, -78.9, -98.1, -105.2, -146.6], "opex": [-15.2, -13.1, -31.9, -0.0, -0.0], "fin_income": [0.6, 0.5, 0.6, 0.0, 0.4], "front_luongkpi": [-10.8, -12.8, 0.0, 0.0, 0.0], "rev_dv": [0.0, 0.0, -80.1, 0.0, 0.0], "back": [0.0, 0.0, 0.0, 14.0, 0.0], "rev_bh": [0.0, 0.0, 0.0, 0.0, 0.0], "ckcb": [0.0, 0.0, 0.0, 0.0, 0.0], "ctkm": [0.0, 0.0, 0.0, 0.0, 0.0], "frontphu": [0.0, 0.0, 0.0, 0.0, 0.0]}}}, "company": {"back": [730.1, 199.9, 6043.1, 1446.2, 1185.1], "opex": [-2017.9, -1941.8, -2310.1, -2516.0, -2648.2], "fin": [-784.6, -788.2, -756.3, -959.3, -1264.8], "ge": [-1699.5, -715.0, -692.3, -865.9, -716.6], "fix_dv": [-1478.9, -1546.9, -1498.4, -1536.5, -1703.7], "front_qt": [-58.7, -103.7, -859.0, -4.1, -55.5], "cogs_dv": [-3097.1, -2096.6, -2357.2, -2759.1, -2391.0], "rev_dv": [4718.7, 3455.2, 4102.3, 4361.4, 4342.3], "cogs_xe": [-43976.7, -40492.4, -110958.8, -94950.0, -75756.8], "rev_xe": [46050.2, 42302.5, 114924.6, 98065.4, 78148.8], "cogs_other": [-89.4, -24.1, -54.2, -49.7, -59.2], "back_dv": [120.1, 43.0, 90.9, 236.2, 70.2], "rev_other": [141.8, 78.1, 46.6, 346.6, 33.5], "dc_dv": [-37.5, -22.2, -33.5, -31.6, -30.5], "cogs_pk": [-24.1, -19.2, -17.2, -72.5, -50.5], "rev_pk": [34.4, 25.5, 22.4, 91.9, 66.0], "front_luongkpi": [-1079.3, -1118.9, -1609.4, -1889.9, -1772.0], "front_other": [-7.5, -11.5, 0.0, 0.0, 0.0], "rev_bh": [0.0, 19.0, 6.6, 115.2, 136.4], "cogs_xecu": [-1397.6, -141.1, -749.1, 0.0, 0.0], "rev_xecu": [1804.5, 202.7, 890.9, 0.0, 0.0], "fin_income": [0.6, 0.5, 0.6, 0.0, 0.4], "oi_mkt_hang": [161.2, 148.1, 402.2, 343.2, 273.5], "gp_khac": [0, 0, 0, 0, 0], "ckcb": [1937.3, 1746.9, 4679.1, 4015.3, 3241.1], "ctkm": [136.2, 63.2, -713.3, -899.9, -849.1], "frontphu": [469.6, 140.9, 146.0, 431.5, 126.2]}, "names": {"Q9": "Quận 9 (Thủ Đức)", "LA": "Long An (Tân An)", "QT": "Quang Trung", "BL": "Bến Lức", "SL": "Sa La (hub)", "HO": "Head Office"}, "lntt_official": [-1987.0, -2546.8, 4634.7, -628.5, -2192.7], "volXe": [106, 89, 256, 201, 160], "backPrograms": {"Hỗ trợ lãi vay": {"Q9": [186.66666666666666, 0.0, 100.0, 0.0, 0.0], "LA": [93.33333333333333, 0.0, 50.0, 0.0, 0.0], "BL": [93.33333333333333, 0.0, 50.0, 0.0, 0.0], "QT": [93.33333333333333, 0.0, 50.0, 0.0, 0.0], "SL": [93.33333333333333, 0.0, 50.0, 0.0, 0.0], "HO": [0.0, 0.0, 0.0, 0.0, 0.0]}, "Thưởng nhập sỉ": {"Q9": [0.0, 66.66666666666666, 0.0, 209.0909090909091, 287.014001], "LA": [0.0, 33.33333333333333, 0.0, 104.54545454545455, 98.636443], "BL": [0.0, 33.33333333333333, 0.0, 104.54545454545455, 127.839785], "QT": [0.0, 33.33333333333333, 0.0, 104.54545454545455, 146.67251499999998], "SL": [0.0, 33.33333333333333, 0.0, 104.54545454545455, 147.623294], "HO": [0.0, 0.0, 0.0, 0.0, 0.0]}, "Hỗ trợ marketing": {"LA": [50.909091000000004, 0.0, 82.181818, 0.0, 0.0], "BL": [50.18284, 0.0, 0.0, 0.0, 0.0], "Q9": [69.090909, 0.0, 0.0, 0.0, 0.0], "SL": [0.0, 0.0, 0.0, 0.0, 0.0], "QT": [0.0, 0.0, 0.0, 0.0, 0.0], "HO": [0.0, 0.0, 0.0, 0.0, 0.0]}, "Hoàn thành chỉ tiêu quý": {"QT": [0.0, 0.0, 91.992756, 0.0, 0.0], "SL": [0.0, 0.0, 91.992756, 0.0, 0.0], "LA": [0.0, 0.0, 183.985512, 0.0, 0.0], "BL": [0.0, 0.0, 275.978268, 0.0, 0.0], "Q9": [0.0, 0.0, 275.978268, 0.0, 0.0], "HO": [0.0, 0.0, 0.0, 0.0, 0.0]}, "Hoàn thành chỉ tiêu tổng dòng": {"QT": [0.0, 0.0, 111.64384, 0.0, 0.0], "SL": [0.0, 0.0, 111.64384, 0.0, 0.0], "LA": [0.0, 0.0, 223.28768, 0.0, 0.0], "BL": [0.0, 0.0, 334.93152, 0.0, 0.0], "Q9": [0.0, 0.0, 334.93152, 0.0, 0.0], "HO": [0.0, 0.0, 0.0, 0.0, 0.0]}, "Kích thích bán lẻ": {"QT": [0.0, 0.0, 268.032277, 0.0, 0.0], "SL": [0.0, 0.0, 268.032277, 0.0, 0.0], "LA": [0.0, 0.0, 536.064555, 0.0, 0.0], "BL": [0.0, 0.0, 804.096833, 0.0, 0.0], "Q9": [0.0, 0.0, 804.096833, 0.0, 0.0], "HO": [0.0, 0.0, 0.0, 0.0, 0.0]}, "Hỗ trợ mở mới (phân bổ DT)": {"SL": [0.0, 0.0, 177.68419199999997, 193.83739699999995, 50.843850999999994], "Q9": [0.0, 0.0, 362.2810980000001, 348.9384440000002, 261.110995], "LA": [0.0, 0.0, 54.27925900000001, 14.127487, 0.0], "BL": [0.0, 0.0, 195.52731599999993, 102.598832, 2.523182], "QT": [0.0, 0.0, 154.415982, 145.449896, 62.83963599999999], "HO": [0.0, 0.0, 0.0, 0.0, 0.0]}, "Hỗ trợ KH Vinclub": {"HO": [0.0, 0.0, 0.0, 14.044727, 0.0], "Q9": [0.0, 0.0, 0.0, 0.0, 0.0], "SL": [0.0, 0.0, 0.0, 0.0, 0.0], "BL": [0.0, 0.0, 0.0, 0.0, 0.0], "QT": [0.0, 0.0, 0.0, 0.0, 0.0], "LA": [0.0, 0.0, 0.0, 0.0, 0.0]}}};
+const SR=B.sr, C=B.company, NM=B.names;
+const MONTHS=[1,2,3,4,5];
+let showM=[5,4,3,2,1]; // kỳ gần nhất trái → phải (T5..T1)
+const fmt=n=>{n=Math.round(n);return (n<0?'−':'')+Math.abs(n).toLocaleString('vi-VN');};
+const fmtS=n=>{n=Math.round(n);return (n>=0?'+':'−')+Math.abs(n).toLocaleString('vi-VN');};
+const pctv=(v,d)=>d?((v/d*100).toFixed(1)+'%'):'';
+const g=(obj,k)=>obj[k]||[0,0,0,0,0];
+
+// filter tháng UI
+function renderFilter(){
+  let h='';
+  MONTHS.slice().reverse().forEach(m=>{
+    h+=`<button class="mbtn ${showM.includes(m)?'on':''}" onclick="toggleM(${m})">T${m}</button>`;
+  });
+  document.getElementById('mfilter').innerHTML=h;
+}
+function toggleM(m){
+  if(showM.includes(m)) showM=showM.filter(x=>x!==m);
+  else showM=[...showM,m].sort((a,b)=>b-a);
+  if(!showM.length) showM=[m];
+  renderFilter(); renderAll();
+}
+// header tháng (5..1, kỳ gần nhất trái) + 3 cột tổng kết vùng chọn
+function thMonths(){
+  let h='<th>Khoản mục</th>';
+  showM.forEach(m=>{h+=`<th class="mh">T${m}/26</th><th>%</th>`;});
+  const lbl=showM.length>1?`Σ ${showM.length}T`:'Σ';
+  h+=`<th class="sumh">${lbl}</th><th class="sumh">TB/th</th><th>%TB</th>`;
+  return '<thead><tr>'+h+'</tr></thead>';
+}
+// 1 dòng: nhãn + (giá trị, %) cho từng tháng hiện + (Σ, TB, %TB) vùng chọn
+function row(label,valArr,denArr,cls){
+  let h=`<tr class="${cls||''}"><td>${label}</td>`;
+  let sumV=0,sumD=0;
+  showM.forEach(m=>{
+    const i=m-1; const v=valArr[i]; const d=denArr?denArr[i]:0;
+    h+=`<td class="mv ${v<0?'neg':''}">${fmt(v)}</td><td class="mpc">${pctv(v,d)}</td>`;
+    sumV+=v; if(denArr)sumD+=d;
+  });
+  const n=showM.length, avgV=sumV/n;
+  h+=`<td class="sumv ${sumV<0?'neg':''}">${fmt(sumV)}</td>`;
+  h+=`<td class="sumv ${avgV<0?'neg':''}">${fmt(avgV)}</td>`;
+  h+=`<td class="mpc">${denArr?pctv(sumV,sumD):''}</td>`;
+  return h+'</tr>';
+}
+// dòng phân nhóm (sub-header in nghiêng) span hết bảng
+function rowGrp(label){
+  const span=1+showM.length*2+3;
+  return `<tr class="subgrp"><td colspan="${span}">${label}</td></tr>`;
+}
+
+// ===== TAB 1 CÔNG TY =====
+function renderCty(){
+  // tổng doanh thu mỗi tháng
+  const revTot=MONTHS.map((m,i)=>g(C,'rev_xe')[i]+g(C,'rev_dv')[i]+g(C,'rev_pk')[i]+g(C,'rev_bh')[i]+g(C,'rev_xecu')[i]+g(C,'rev_other')[i]);
+  // CM khối xe = front+back trên doanh thu xe
+  const cmXe=MONTHS.map((m,i)=>g(C,'rev_xe')[i]+g(C,'cogs_xe')[i]+g(C,'front_qt')[i]+g(C,'front_other')[i]+g(C,'front_luongkpi')[i]+g(C,'frontphu')[i]+g(C,'back')[i]);
+  const revXe=g(C,'rev_xe');
+  // KPI: tổng & trung bình vùng tháng đã chọn (xử lý lệch pha thưởng dồn cục)
+  const sumA=arr=>showM.reduce((a,m)=>a+arr[m-1],0);
+  const n=showM.length;
+  const sRev=sumA(revTot), sCMxe=sumA(cmXe), sRevXe=sumA(revXe), sLntt=sumA(B.lntt_official), sVol=showM.reduce((a,m)=>a+B.volXe[m-1],0);
+  const lblK=n>1?`Σ ${n} tháng`:`T${showM[0]}`;
+  let h=`<div class="kpis">
+   <div class="kpi"><div class="kl">DThu (${lblK})</div><div class="kv">${(sRev/1000).toFixed(1)}</div><div class="ks">tỷ · TB ${(sRev/n/1000).toFixed(1)} tỷ/th</div></div>
+   <div class="kpi"><div class="kl">LNTT (${lblK})</div><div class="kv ${sLntt>=0?'pos':'neg'}">${fmtS(sLntt)}</div><div class="ks">triệu · ${pctv(sLntt,sRev)} · TB ${fmtS(sLntt/n)}/th</div></div>
+   <div class="kpi"><div class="kl">Sản lượng xe (${lblK})</div><div class="kv">${sVol}</div><div class="ks">xe · TB ${Math.round(sVol/n)}/th</div></div>
+   <div class="kpi"><div class="kl">CM khối xe (${lblK})</div><div class="kv gold">${pctv(sCMxe,sRevXe)}</div><div class="ks">${fmt(sCMxe)} triệu (tổng)</div></div>
+  </div>`;
+
+  // Box A: tổng DThu 2 khối
+  h+=`<h2 class="sec"><span class="n">A</span> Tổng doanh thu · %trên tổng</h2><div class="tscroll"><table>${thMonths()}<tbody>
+   ${row('Doanh thu xe mới',g(C,'rev_xe'),revTot)}
+   ${row('Doanh thu dịch vụ',g(C,'rev_dv'),revTot)}
+   ${row('Doanh thu phụ kiện + bảo hiểm',MONTHS.map((m,i)=>g(C,'rev_pk')[i]+g(C,'rev_bh')[i]),revTot)}
+   ${row('Doanh thu khác + xe cũ',MONTHS.map((m,i)=>g(C,'rev_other')[i]+g(C,'rev_xecu')[i]),revTot)}
+   ${row('= Tổng doanh thu',revTot,revTot,'tot')}
+  </tbody></table></div>
+  <div class="note"><b>Lưu ý:</b> phụ kiện, bảo hiểm, xe cũ & doanh thu khác là <b>khai thác đi kèm bán xe</b> — lãi gộp của chúng được cộng vào front margin khối xe (khối B), đúng cấu trúc KH Q3 (frontCar + frontPK + frontBH). Bảng này hiển thị doanh thu gross để thấy quy mô; phần đóng góp lợi nhuận nằm ở khối xe.</div>`;
+
+  // Front margin = doanh thu − giá vốn − hoa hồng − lương KPI (gộp theo cấu trúc KH Q3)
+  const frontXe=MONTHS.map((m,i)=>g(C,'rev_xe')[i]+g(C,'cogs_xe')[i]+g(C,'front_qt')[i]+g(C,'front_other')[i]+g(C,'front_luongkpi')[i]+g(C,'frontphu')[i]);
+  // Box B: khối xe margin stack KH Q3 — 1 bảng, 2 khối cách tính Front margin
+  h+=`<h2 class="sec"><span class="n">B</span> Khối kinh doanh xe · margin stack (front + back) · %trên DThu xe</h2>
+  <div class="secnote">Front margin trình bày <b>hai cách tính song song</b> cùng ra một con số: theo <b>giá vốn</b> (kế toán) và theo <b>CKCB − CTKM</b> (chính sách hãng). Lãi gộp (DThu−giá vốn) = CKCB + CTKM. Back margin = toàn bộ thu nhập từ hãng (OI000001) — xem Tab ③ bóc theo chương trình.</div>
+  <div class="tscroll"><table>${thMonths()}<tbody>
+   ${row('Doanh thu xe',revXe,revXe)}
+   ${rowGrp('Cách 1 · tính theo giá vốn')}
+   ${row('− Giá vốn xe',g(C,'cogs_xe'),revXe,'sub')}
+   ${row('− Hoa hồng / lương KPI',MONTHS.map((m,i)=>g(C,'front_qt')[i]+g(C,'front_other')[i]+g(C,'front_luongkpi')[i]),revXe,'sub')}
+   ${rowGrp('Cách 2 · tính theo CKCB')}
+   ${row('+ CKCB (chiết khấu cơ bản 4-6% theo model)',g(C,'ckcb'),revXe,'sub')}
+   ${row('− CTKM (chương trình khuyến mãi / giảm giá)',g(C,'ctkm'),revXe,'sub')}
+   ${row('− Hoa hồng / lương KPI',MONTHS.map((m,i)=>g(C,'front_qt')[i]+g(C,'front_other')[i]+g(C,'front_luongkpi')[i]),revXe,'sub')}
+   ${rowGrp('Khai thác đi kèm bán xe (cộng vào cả 2 cách)')}
+   ${row('+ Phụ kiện / bảo hiểm / xe cũ',g(C,'frontphu'),revXe,'sub')}
+   ${row('= Front margin (cả 2 cách bằng nhau)',frontXe,revXe,'tot')}
+   ${row('+ Back margin (CKNM hãng)',g(C,'back'),revXe,'sub')}
+   ${row('= CM khối xe',cmXe,revXe,'tot')}
+   ${row('− Opex showroom (SE)',g(C,'opex'),revXe,'sub')}
+   ${row('= LN khối xe (trước gián tiếp)',MONTHS.map((m,i)=>cmXe[i]+g(C,'opex')[i]),revXe,'tot')}
+  </tbody></table></div>
+  <div class="note"><b>Đọc:</b> hai khối in nghiêng là hai cách tính ra cùng một Front margin. Cách 1 (giá vốn) là ngôn ngữ kế toán; cách 2 (CKCB−CTKM) là ngôn ngữ kinh doanh — CKCB là chiết khấu chuẩn hãng cho theo model, CTKM là phần khuyến mãi/giảm giá ăn vào (tự lộ ra như số dư). CTKM âm = bán dưới mức chuẩn để đẩy số. Các tầng chi tiết bên dưới chỉ dùng cách 2.</div>`;
+
+  // Box C: dịch vụ
+  const cmDV=MONTHS.map((m,i)=>g(C,'rev_dv')[i]+g(C,'cogs_dv')[i]+g(C,'dc_dv')[i]+g(C,'back_dv')[i]);
+  h+=`<h2 class="sec"><span class="n">C</span> Khối dịch vụ · %trên DThu DV</h2><div class="tscroll"><table>${thMonths()}<tbody>
+   ${row('Doanh thu dịch vụ',g(C,'rev_dv'),g(C,'rev_dv'))}
+   ${row('− Giá vốn DV',g(C,'cogs_dv'),g(C,'rev_dv'),'sub')}
+   ${row('+ Hỗ trợ DV từ hãng',g(C,'back_dv'),g(C,'rev_dv'),'sub')}
+   ${row('= CM dịch vụ',cmDV,g(C,'rev_dv'),'tot')}
+   ${row('− Fixed xưởng (SE300)',g(C,'fix_dv'),g(C,'rev_dv'),'sub')}
+   ${row('= LN khối DV',MONTHS.map((m,i)=>cmDV[i]+g(C,'fix_dv')[i]),g(C,'rev_dv'),'tot')}
+  </tbody></table></div>`;
+
+  // Box D: tầng công ty (không phân bổ chéo)
+  h+=`<h2 class="sec"><span class="n">D</span> Cấp công ty · chi phí chung kéo lên (không phân bổ chéo)</h2>
+  <div class="secnote">Gián tiếp + lãi vay + thu nhập MKT từ hãng + LN khác — giữ ở tầng công ty thay vì rải về khối/showroom.</div>
+  <div class="tscroll"><table>${thMonths()}<tbody>
+   ${row('− Chi phí gián tiếp (GE)',g(C,'ge'),revTot,'sub')}
+   ${row('− Lãi vay / floor plan (FE)',g(C,'fin'),revTot,'sub')}
+   ${row('+ Thu nhập MKT từ hãng',g(C,'oi_mkt_hang'),revTot,'sub')}
+   ${row('= LÃI TRƯỚC THUẾ (chính thức)',B.lntt_official,revTot,'tot')}
+  </tbody></table></div>
+  <div class="note"><b>Cross-check:</b> LNTT lấy thẳng số chính thức từ PL center Total, khớp với tái dựng từ BKCT. Tầng công ty giờ chỉ giữ chi phí KHÔNG gắn riêng khối nào: gián tiếp (GE), lãi vay (FE), thu nhập MKT từ hãng (OI000003 — không xuống sổ SR). Phụ kiện/bảo hiểm/xe cũ đã đưa vào front khối xe (khối B). <b>Back margin = toàn bộ OI000001</b> (mọi khoản hãng rót về qua TK 51181). Mọi tầng reconcile với sổ.</div>`;
+  document.getElementById('cty').innerHTML=h;
+}
+
+// ===== TAB 2 SHOWROOM (multi-select + conso, KHÔNG gồm Head Office) =====
+const SR_TAB_ORDER=['Q9','SL','LA','QT','BL'];  // HO loại khỏi tầng showroom (khác cấu trúc)
+let selSR=['Q9','SL','LA','QT','BL'];           // mặc định chọn hết → conso toàn mạng
+function toggleSRfix(s){
+  if(selSR.includes(s)){ if(selSR.length>1) selSR=selSR.filter(x=>x!==s); }
+  else selSR=SR_TAB_ORDER.filter(x=>selSR.includes(x)||x===s);
+  renderSRtab();
+}
+function selAllSR(on){ selSR = on ? SR_TAB_ORDER.slice() : [SR_TAB_ORDER[0]]; renderSRtab(); }
+// conso: cộng group g qua các SR được chọn → object {key:[T1..T5]}
+function consoG(){
+  const keys=new Set();
+  selSR.forEach(s=>{ if(SR[s]) Object.keys(SR[s].g).forEach(k=>keys.add(k)); });
+  const out={};
+  keys.forEach(k=>{ out[k]=[0,0,0,0,0];
+    selSR.forEach(s=>{ if(SR[s]&&SR[s].g[k]) for(let i=0;i<5;i++) out[k][i]+=SR[s].g[k][i]; });
+  });
+  return out;
+}
+function renderSRtab(){
+  let pick='<div class="srpick">';
+  SR_TAB_ORDER.forEach(s=>{if(SR[s])pick+=`<button class="srbtn ${selSR.includes(s)?'on':''}" onclick="toggleSRfix('${s}')">${NM[s]||s}</button>`;});
+  pick+=`<button class="srbtn allbtn" onclick="selAllSR(${selSR.length<SR_TAB_ORDER.length})">${selSR.length<SR_TAB_ORDER.length?'+ Tất cả':'− Bỏ chọn'}</button>`;
+  pick+='</div>';
+  const gg=consoG();
+  const nSel=selSR.length;
+  const consoLbl = nSel===SR_TAB_ORDER.length ? 'Toàn mạng (5 SR)' : nSel===1 ? NM[selSR[0]] : `Conso ${nSel} SR (${selSR.map(s=>s).join('+')})`;
+  const revXe=g(gg,'rev_xe');
+  const cmXe=MONTHS.map((m,i)=>g(gg,'rev_xe')[i]+g(gg,'cogs_xe')[i]+g(gg,'front_qt')[i]+g(gg,'front_other')[i]+g(gg,'front_luongkpi')[i]+g(gg,'frontphu')[i]+g(gg,'back')[i]);
+  const frontXe=MONTHS.map((m,i)=>g(gg,'rev_xe')[i]+g(gg,'cogs_xe')[i]+g(gg,'front_qt')[i]+g(gg,'front_other')[i]+g(gg,'front_luongkpi')[i]+g(gg,'frontphu')[i]);
+  const lnXe=MONTHS.map((m,i)=>cmXe[i]+g(gg,'opex')[i]);
+  const cmDV=MONTHS.map((m,i)=>g(gg,'rev_dv')[i]+g(gg,'cogs_dv')[i]+g(gg,'dc_dv')[i]+g(gg,'back_dv')[i]);
+  // KPI theo vùng tháng chọn (tổng)
+  const sumA=arr=>showM.reduce((a,m)=>a+arr[m-1],0);
+  const sRevXe=sumA(revXe), sCMxe=sumA(cmXe), sBack=sumA(g(gg,'back')), sLnXe=sumA(lnXe);
+  const lblK=showM.length>1?`Σ ${showM.length}T`:`T${showM[0]}`;
+  const hasXe=revXe.some(x=>Math.abs(x)>1);
+  let h=pick;
+  h+=`<div class="kpis">
+   <div class="kpi"><div class="kl">${consoLbl} · DThu xe (${lblK})</div><div class="kv">${(sRevXe/1000).toFixed(1)}</div><div class="ks">tỷ</div></div>
+   <div class="kpi"><div class="kl">CM khối xe (${lblK})</div><div class="kv gold">${hasXe?pctv(sCMxe,sRevXe):'—'}</div><div class="ks">${fmt(sCMxe)} triệu</div></div>
+   <div class="kpi"><div class="kl">Back margin (${lblK})</div><div class="kv">${fmt(sBack)}</div><div class="ks">triệu (CKNM)</div></div>
+   <div class="kpi"><div class="kl">LN khối xe (${lblK})</div><div class="kv ${sLnXe>=0?'pos':'neg'}">${fmtS(sLnXe)}</div><div class="ks">trước gián tiếp</div></div>
+  </div>`;
+  h+=`<h2 class="sec"><span class="n">②</span> Margin stack khối xe · ${consoLbl}</h2><div class="tscroll"><table>${thMonths()}<tbody>
+     ${row('Doanh thu xe',revXe,revXe)}
+     ${row('+ CKCB (4-6% theo model)',g(gg,'ckcb'),revXe,'sub')}
+     ${row('− CTKM (khuyến mãi/giảm giá)',g(gg,'ctkm'),revXe,'sub')}
+     ${row('− Hoa hồng / lương KPI',MONTHS.map((m,i)=>g(gg,'front_qt')[i]+g(gg,'front_other')[i]+g(gg,'front_luongkpi')[i]),revXe,'sub')}
+     ${row('+ Phụ kiện / bảo hiểm / xe cũ',g(gg,'frontphu'),revXe,'sub')}
+     ${row('= Front margin',frontXe,revXe,'tot')}
+     ${row('+ Back margin',g(gg,'back'),revXe,'sub')}
+     ${row('= CM khối xe',cmXe,revXe,'tot')}
+     ${row('− Opex showroom',g(gg,'opex'),revXe,'sub')}
+     ${row('= LN khối xe',lnXe,revXe,'tot')}
+    </tbody></table></div>`;
+  if(g(gg,'rev_dv').some(x=>Math.abs(x)>1)){
+    h+=`<h2 class="sec"><span class="n">+</span> Khối dịch vụ · ${consoLbl}</h2><div class="tscroll"><table>${thMonths()}<tbody>
+     ${row('Doanh thu DV',g(gg,'rev_dv'),g(gg,'rev_dv'))}
+     ${row('− Giá vốn DV',g(gg,'cogs_dv'),g(gg,'rev_dv'),'sub')}
+     ${row('= CM dịch vụ',cmDV,g(gg,'rev_dv'),'tot')}
+     ${row('− Fixed xưởng',g(gg,'fix_dv'),g(gg,'rev_dv'),'sub')}
+     ${row('= LN khối DV',MONTHS.map((m,i)=>cmDV[i]+g(gg,'fix_dv')[i]),g(gg,'rev_dv'),'tot')}
+    </tbody></table></div>`;
+  }
+  h+=`<div class="note"><b>Conso:</b> chọn nhiều showroom để hợp nhất — bảng cộng trực tiếp các SR đã chọn. Mỗi SR self-contained (lương, opex, back theo số thực BKCT); chi phí gián tiếp + lãi vay KHÔNG phân bổ về showroom (ở tầng công ty). <b>Head Office không hiện ở tầng này</b> vì cấu trúc khác hẳn (không bán xe). <b>Sa La tách riêng</b> nhờ BKCT.</div>`;
+
+  // ===== VIEW 2: SO SÁNH NGANG CÁC SHOWROOM (conso các tháng đã chọn) =====
+  const lblQ = showM.length>1?`Σ T${showM[showM.length-1]}–T${showM[0]}`:`T${showM[0]}/26`;
+  h+=`<h2 class="sec"><span class="n">⇄</span> So sánh ngang các showroom · ${lblQ}</h2>
+  <div class="secnote">Mỗi showroom một cột, margin stack là hàng — số liệu conso các tháng đã chọn. Để xếp hạng & nhìn ai mạnh/yếu ở từng tầng. Cột TỔNG = toàn mạng (đối chiếu tầng công ty).</div>`;
+  const sm=(gg,k)=>showM.reduce((a,m)=>a+g(gg,k)[m-1],0);
+  // tính P&L conso cho từng SR
+  const cols = SR_TAB_ORDER.filter(s=>SR[s]);
+  const pnl = {};
+  cols.forEach(s=>{const x=SR[s].g;
+    const rev=sm(x,'rev_xe'), cogs=sm(x,'cogs_xe'), ckcb=sm(x,'ckcb'), ctkm=sm(x,'ctkm'), comm=sm(x,'front_qt')+sm(x,'front_other')+sm(x,'front_luongkpi'), fphu=sm(x,'frontphu'), back=sm(x,'back'), opex=sm(x,'opex');
+    const front=rev+cogs+comm+fphu, cm=front+back, ln=cm+opex;
+    const revDV=sm(x,'rev_dv'), cogsDV=sm(x,'cogs_dv'), backDV=sm(x,'back_dv'), fixDV=sm(x,'fix_dv');
+    const cmDVx=revDV+cogsDV+backDV, lnDV=cmDVx+fixDV;
+    pnl[s]={rev,cogs,ckcb,ctkm,comm,fphu,front,back,cm,opex,ln,revDV,cmDVx,fixDV,lnDV};
+  });
+  // tổng toàn mạng
+  const T={}; ['rev','cogs','ckcb','ctkm','comm','fphu','front','back','cm','opex','ln','revDV','cmDVx','fixDV','lnDV'].forEach(k=>{T[k]=cols.reduce((a,s)=>a+pnl[s][k],0);});
+  // helper render 1 dòng so ngang: nhãn + giá trị mỗi SR + tổng; pctOf = mẫu số để hiện % (theo từng cột rev)
+  const hrow=(label,key,opt={})=>{
+    let r=`<tr class="${opt.cls||''}"><td>${label}</td>`;
+    cols.forEach(s=>{const v=pnl[s][key]; const den=opt.pct?pnl[s][opt.pct]:0;
+      const pc=den?` <span class="inpct">${(v/den*100).toFixed(1)}%</span>`:'';
+      r+=`<td class="${v<0?'neg':''}">${opt.sign?fmtS(v):fmt(v)}${pc}</td>`;});
+    const tv=T[key]; const tden=opt.pct?T[opt.pct]:0; const tpc=tden?` <span class="inpct">${(tv/tden*100).toFixed(1)}%</span>`:'';
+    r+=`<td class="sumv ${tv<0?'neg':''}">${opt.sign?fmtS(tv):fmt(tv)}${tpc}</td>`;
+    return r+'</tr>';
+  };
+  h+=`<div class="tscroll"><table><thead><tr><th>Khoản mục</th>`;
+  cols.forEach(s=>{h+=`<th class="mh">${s}</th>`;});
+  h+=`<th class="sumh">TỔNG</th></tr></thead><tbody>`;
+  h+=hrow('Doanh thu xe','rev');
+  h+=hrow('+ CKCB (4-6%/model)','ckcb',{cls:'sub',pct:'rev'});
+  h+=hrow('− CTKM (khuyến mãi)','ctkm',{cls:'sub',pct:'rev'});
+  h+=hrow('− Hoa hồng / lương KPI','comm',{cls:'sub'});
+  h+=hrow('+ Phụ kiện / bảo hiểm / xe cũ','fphu',{cls:'sub',pct:'rev'});
+  h+=hrow('= Front margin','front',{cls:'tot',pct:'rev'});
+  h+=hrow('+ Back margin','back',{cls:'sub',pct:'rev'});
+  h+=hrow('= CM khối xe','cm',{cls:'tot',pct:'rev'});
+  h+=hrow('− Opex showroom','opex',{cls:'sub'});
+  h+=hrow('= LN khối xe','ln',{cls:'tot',sign:true,pct:'rev'});
+  h+=hrow('Doanh thu DV','revDV',{cls:'grp'});
+  h+=hrow('= CM dịch vụ','cmDVx',{cls:'sub',pct:'revDV'});
+  h+=hrow('− Fixed xưởng','fixDV',{cls:'sub'});
+  h+=hrow('= LN khối DV','lnDV',{cls:'tot',sign:true});
+  // LN showroom = LN khối xe + LN khối DV (dòng chốt — cơ sở phân tích spoke vs hub)
+  cols.forEach(s=>{pnl[s].lnSR=pnl[s].ln+pnl[s].lnDV;});
+  T.lnSR=T.ln+T.lnDV;
+  h+=hrow('= LN SHOWROOM (xe + DV)','lnSR',{cls:'tot grand',sign:true,pct:'rev'});
+  h+=`</tbody></table></div>
+  <div class="note"><b>So ngang:</b> nhìn cùng một dòng qua các cột để xếp hạng — ví dụ %CM khối xe ai cao nhất, ai lỗ LN khối xe nặng nhất. <b>LN SHOWROOM</b> (vàng đậm) = LN khối xe + LN khối DV, là dòng chốt hiệu quả mỗi điểm bán. Đây cũng là cơ sở phân tích <b>spoke vs hub</b>: hub không có khối DV nên LN showroom = LN khối xe, cấu trúc nhẹ hơn (không gánh xưởng) nhưng cũng không có đệm doanh thu DV. Cột TỔNG đối chiếu thẳng tầng công ty (Tab ①). % nhỏ = tỷ lệ trên doanh thu cột đó.</div>`;
+  document.getElementById('sr').innerHTML=h;
+}
+
+// ===== TAB 3 CM =====
+function renderCMtab(){
+  const order=['Q9','SL','BL','QT','LA'];
+  const lblM=showM.length>1?`Σ T${showM[showM.length-1]}–T${showM[0]} (${showM.length} tháng)`:`T${showM[0]}/2026`;
+  let h=`<h2 class="sec"><span class="n">③</span> Cấu trúc %CM khối xe theo showroom · ${lblM}</h2>
+  <div class="secnote">CM xe % = (Front margin + Back) ÷ DThu xe, tính trên <b>tổng vùng tháng đã chọn</b>. Front = CKCB (4-6%/model) − CTKM − hoa hồng/KPI + khai thác phụ (PK/BH/xe cũ). Back = thu nhập từ hãng.</div>
+  <div class="tscroll"><table><thead><tr><th>Showroom</th><th class="mh">DThu xe (Σ)</th><th>CKCB %</th><th>CTKM %</th><th>Hoa hồng/KPI %</th><th>PK/BH/cũ %</th><th>Front %</th><th>Back %</th><th>CM xe %</th></tr></thead><tbody>`;
+  const sumM=(gg,k)=>showM.reduce((a,m)=>a+g(gg,k)[m-1],0);
+  let TrevX=0,Tckcb=0,Tctkm=0,Tcomm=0,Tphu=0,Tback=0;
+  order.forEach(s=>{
+    if(!SR[s])return; const gg=SR[s].g; const rev=sumM(gg,'rev_xe'); if(Math.abs(rev)<1)return;
+    const ckcb=sumM(gg,'ckcb'), ctkm=sumM(gg,'ctkm');
+    const comm=sumM(gg,'front_qt')+sumM(gg,'front_other')+sumM(gg,'front_luongkpi');
+    const phu=sumM(gg,'frontphu');
+    const front=ckcb+ctkm+comm+phu;
+    const back=sumM(gg,'back');
+    const cm=front+back;
+    TrevX+=rev;Tckcb+=ckcb;Tctkm+=ctkm;Tcomm+=comm;Tphu+=phu;Tback+=back;
+    h+=`<tr><td>${NM[s]}</td><td class="mv">${fmt(rev)}</td>
+     <td class="pos">${(ckcb/rev*100).toFixed(2)}%</td>
+     <td class="neg">${(ctkm/rev*100).toFixed(2)}%</td>
+     <td class="neg">${(comm/rev*100).toFixed(2)}%</td>
+     <td class="pos">${(phu/rev*100).toFixed(2)}%</td>
+     <td class="gold">${(front/rev*100).toFixed(2)}%</td>
+     <td class="pos">${(back/rev*100).toFixed(2)}%</td>
+     <td class="gold" style="font-weight:600">${(cm/rev*100).toFixed(2)}%</td></tr>`;
+  });
+  // GRAND TOTAL — cộng tất cả showroom, % tính trên Σ tuyệt đối (để đối chiếu tầng công ty)
+  const Tfront=Tckcb+Tctkm+Tcomm+Tphu, Tcm=Tfront+Tback, R=TrevX||1;
+  h+=`<tr class="tot"><td>TỔNG SHOWROOM (đối chiếu cty)</td><td class="mv">${fmt(TrevX)}</td>
+     <td>${(Tckcb/R*100).toFixed(2)}%</td>
+     <td>${(Tctkm/R*100).toFixed(2)}%</td>
+     <td>${(Tcomm/R*100).toFixed(2)}%</td>
+     <td>${(Tphu/R*100).toFixed(2)}%</td>
+     <td>${(Tfront/R*100).toFixed(2)}%</td>
+     <td>${(Tback/R*100).toFixed(2)}%</td>
+     <td style="font-weight:700">${(Tcm/R*100).toFixed(2)}%</td></tr>`;
+  h+=`</tbody></table></div>`;
+
+  // Back margin xu hướng 5 tháng theo SR
+  h+=`<h2 class="sec"><span class="n">▸</span> Back margin tuyệt đối theo tháng (triệu) · đòn bẩy CM lớn nhất</h2>
+  <div class="secnote">Back = toàn bộ thu nhập từ hãng. T3 cao vì <b>thưởng quý 1 hạch toán dồn vào tháng cuối quý</b> — chọn cả quý (T3-T5) ở filter để nhìn back bình quân, đúng bản chất kinh tế. Bảng ma trận bên dưới bóc back theo từng chương trình.</div>
+  <div class="tscroll"><table>${thMonthsSimple()}<tbody>`;
+  const Tback5=[0,0,0,0,0];
+  order.forEach(s=>{
+    if(!SR[s])return; const back=g(SR[s].g,'back'); if(!back.some(x=>Math.abs(x)>1))return;
+    for(let i=0;i<5;i++)Tback5[i]+=back[i];
+    h+=rowSimple(NM[s],back,'pos');
+  });
+  h+=rowSimpleTot('TỔNG SHOWROOM',Tback5);
+  h+=`</tbody></table></div>
+  <div class="note"><b>Đọc cấu trúc:</b> back margin chênh lệch mạnh giữa các showroom và giữa các tháng — Q9 (gồm sản lượng lớn) kích bậc rebate cao nhất. Front (hoa hồng + lương KPI) đồng đều hơn. Chính độ phi tuyến này khiến mô hình KH cảnh báo: mở hub tăng sản lượng nhưng hãng nâng target → nén rebate toàn hệ thống. <b>Dòng TỔNG SHOWROOM</b> để đối chiếu với back margin tầng công ty (Tab ①).</div>`;
+
+  // ===== MA TRẬN: chương trình thưởng (dòng) × showroom (cột) =====
+  h+=`<h2 class="sec"><span class="n">▸</span> Bản chất back margin: chương trình thưởng × showroom</h2>
+  <div class="secnote">Mỗi showroom lấy back từ chương trình nào? Dòng = chương trình hãng, cột = showroom · tổng vùng tháng đã chọn (triệu). Đây là cách hiểu back thực chất thay vì con số gộp.</div>`;
+  const PROG=B.backPrograms||{};
+  const psrOrder=['Q9','SL','BL','QT','LA'];
+  const sumProg=(sr_obj,sr)=>{const a=sr_obj[sr]||[0,0,0,0,0];return showM.reduce((x,m)=>x+(a[m-1]||0),0);};
+  // sắp chương trình theo tổng giảm dần
+  const progNames=Object.keys(PROG).sort((a,b)=>{
+    const ta=psrOrder.reduce((x,s)=>x+sumProg(PROG[b],s),0), tb=psrOrder.reduce((x,s)=>x+sumProg(PROG[a],s),0);
+    return ta-tb;
+  });
+  h+=`<div class="tscroll"><table><thead><tr><th>Chương trình thưởng</th>`;
+  psrOrder.forEach(s=>{h+=`<th class="mh">${s}</th>`;});
+  h+=`<th class="sumh">TỔNG</th><th>%</th></tr></thead><tbody>`;
+  const colTot={}; psrOrder.forEach(s=>colTot[s]=0); let grand=0;
+  // tính grand trước để ra %
+  progNames.forEach(p=>{psrOrder.forEach(s=>{grand+=sumProg(PROG[p],s);});});
+  progNames.forEach(p=>{
+    let rowTot=0;
+    h+=`<tr><td>${p}</td>`;
+    psrOrder.forEach(s=>{const v=sumProg(PROG[p],s); colTot[s]+=v; rowTot+=v;
+      h+=`<td class="mv ${v>0?'pos':''}">${v>0?fmt(v):'—'}</td>`;});
+    h+=`<td class="sumv">${fmt(rowTot)}</td><td class="mpc">${grand?(rowTot/grand*100).toFixed(1)+'%':''}</td></tr>`;
+  });
+  // dòng tổng cột
+  h+=`<tr class="tot"><td>TỔNG BACK</td>`;
+  let gt=0;
+  psrOrder.forEach(s=>{h+=`<td class="mv">${fmt(colTot[s])}</td>`; gt+=colTot[s];});
+  h+=`<td class="sumv">${fmt(gt)}</td><td class="mpc">100%</td></tr>`;
+  h+=`</tbody></table></div>
+  <div class="note"><b>Cách đọc:</b> "Kích thích bán lẻ" & "Hỗ trợ mở mới" là hai chương trình lớn nhất — Sa La (hub mới) ăn đậm hỗ trợ mở mới, đúng bản chất. "Thưởng nhập sỉ" & "Hoàn thành chỉ tiêu" gắn với sản lượng nên Q9 dẫn đầu. Khi mở thêm hub, phần "hỗ trợ mở mới" sẽ tăng tạm thời rồi hết — đây là back <b>không bền</b>, khác với thưởng sản lượng. Phân biệt được giúp dự báo back chính xác hơn trong mô hình KH.</div>`;
+  document.getElementById('cm').innerHTML=h;
+}
+function thMonthsSimple(){
+  let h='<th>Showroom</th>';
+  showM.forEach(m=>{h+=`<th class="mh">T${m}/26</th>`;});
+  const lbl=showM.length>1?`Σ ${showM.length}T`:'Σ';
+  h+=`<th class="sumh">${lbl}</th><th class="sumh">TB/th</th>`;
+  return '<thead><tr>'+h+'</tr></thead>';
+}
+// dòng cho bảng simple (chỉ giá trị, không %) — thêm Σ + TB
+function rowSimple(label,arr,cellCls){
+  let h=`<tr><td>${label}</td>`; let sum=0;
+  showM.forEach(m=>{const v=arr[m-1];sum+=v;h+=`<td class="mv ${cellCls||''}">${fmt(v)}</td>`;});
+  const avg=sum/showM.length;
+  h+=`<td class="sumv ${cellCls||''}">${fmt(sum)}</td><td class="sumv ${cellCls||''}">${fmt(avg)}</td>`;
+  return h+'</tr>';
+}
+// dòng TỔNG (đậm) cho bảng simple
+function rowSimpleTot(label,arr){
+  let h=`<tr class="tot"><td>${label}</td>`; let sum=0;
+  showM.forEach(m=>{const v=arr[m-1];sum+=v;h+=`<td class="mv">${fmt(v)}</td>`;});
+  const avg=sum/showM.length;
+  h+=`<td class="sumv">${fmt(sum)}</td><td class="sumv">${fmt(avg)}</td>`;
+  return h+'</tr>';
+}
+function renderXDVtab(){
+  const order=['Q9','LA','BL','SL','QT'];
+  const sumM=(gg,k)=>showM.reduce((a,m)=>a+g(gg,k)[m-1],0);
+  const lblM=showM.length>1?`Σ T${showM[showM.length-1]}–T${showM[0]} (${showM.length} tháng)`:`T${showM[0]}/2026`;
+  let h=`<h2 class="sec"><span class="n">④</span> P&L Xưởng dịch vụ theo showroom · ${lblM}</h2>
+  <div class="secnote">CM dịch vụ = DThu − giá vốn + hỗ trợ hãng. Fixed = chi phí xưởng (SE300). Số cộng trên <b>tổng vùng tháng đã chọn</b>.</div>
+  <div class="tscroll"><table><thead><tr><th>Showroom</th><th class="mh">DThu DV (Σ)</th><th>Giá vốn</th><th>CM</th><th>%CM</th><th>Fixed</th><th>LN</th></tr></thead><tbody>`;
+  let tR=0,tCM=0,tF=0;
+  order.forEach(s=>{
+    if(!SR[s])return; const gg=SR[s].g; const rev=sumM(gg,'rev_dv'); if(Math.abs(rev)<1)return;
+    const cogs=sumM(gg,'cogs_dv'), bk=sumM(gg,'back_dv'), fix=sumM(gg,'fix_dv');
+    const cm=rev+cogs+bk; const ln=cm+fix;
+    tR+=rev;tCM+=cm;tF+=fix;
+    h+=`<tr><td>${NM[s]}</td><td class="mv">${fmt(rev)}</td><td class="neg">${fmt(cogs)}</td>
+     <td class="gold">${fmt(cm)}</td><td class="mpc">${pctv(cm,rev)}</td>
+     <td class="neg">${fmt(fix)}</td><td class="${ln>=0?'pos':'neg'}">${fmtS(ln)}</td></tr>`;
+  });
+  h+=`<tr class="tot"><td>TỔNG XƯỞNG</td><td class="mv">${fmt(tR)}</td><td>${fmt(tR-tCM)}</td><td>${fmt(tCM)}</td><td class="mpc">${pctv(tCM,tR)}</td><td>${fmt(tF)}</td><td class="${(tCM+tF)>=0?'pos':'neg'}">${fmtS(tCM+tF)}</td></tr></tbody></table></div>`;
+
+  // xu hướng CM% xưởng 5 tháng
+  h+=`<h2 class="sec"><span class="n">▸</span> %CM xưởng theo tháng</h2><div class="tscroll"><table>${thMonthsSimple()}<tbody>`;
+  const TrevM=[0,0,0,0,0], TcmM=[0,0,0,0,0]; let TsRev=0,TsCM=0;
+  order.forEach(s=>{
+    if(!SR[s])return; const gg=SR[s].g; if(!g(gg,'rev_dv').some(x=>Math.abs(x)>1))return;
+    h+=`<tr><td>${NM[s]}</td>`;
+    let sRev=0,sCM=0;
+    showM.forEach(m=>{const i=m-1;const rev=g(gg,'rev_dv')[i];const cm=rev+g(gg,'cogs_dv')[i]+g(gg,'back_dv')[i];
+      sRev+=rev;sCM+=cm; TrevM[i]+=rev;TcmM[i]+=cm;
+      h+=`<td class="mv gold">${rev?(cm/rev*100).toFixed(1)+'%':'—'}</td>`;});
+    TsRev+=sRev;TsCM+=sCM;
+    h+=`<td class="sumv gold" colspan="2">${sRev?(sCM/sRev*100).toFixed(1)+'%':'—'}</td>`;
+    h+='</tr>';
+  });
+  // GRAND TOTAL: %CM xưởng toàn mạng mỗi tháng = Σcm/Σrev
+  h+=`<tr class="tot"><td>TỔNG XƯỞNG</td>`;
+  showM.forEach(m=>{const i=m-1;h+=`<td class="mv">${TrevM[i]?(TcmM[i]/TrevM[i]*100).toFixed(1)+'%':'—'}</td>`;});
+  h+=`<td class="sumv" colspan="2">${TsRev?(TsCM/TsRev*100).toFixed(1)+'%':'—'}</td></tr>`;
+  h+=`</tbody></table></div>
+  <div class="note"><b>Fixed XDV giờ là số thực:</b> nhờ BKCT, chi phí xưởng (SE300) tách đúng theo từng SR — không còn ước tỉ lệ như bản trước. LN xưởng là số reconcile với sổ. LA thường lỗ DV (CM mỏng không gánh nổi fixed) — khớp nhận định LA yếu cả hai khối.</div>`;
+  document.getElementById('xdv').innerHTML=h;
+}
+
+function renderAll(){renderCty();renderSRtab();renderCMtab();renderXDVtab();}
+document.querySelectorAll('.tab').forEach(t=>{t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');document.getElementById(t.dataset.v).classList.add('on');
+};});
+document.getElementById('foot').innerHTML='Nguồn: sổ giao dịch BKCT (20.374 dòng, T1–5/2026) · tái dựng theo khung KH Q3: margin stack front+back, không phân bổ chéo, lương KPI ở front, kỳ gần nhất bên trái · back margin = toàn bộ OI000001 (mọi khoản hãng rót về) bóc theo chương trình ở Tab ③ · LNTT chính thức từ PL center Total · grand total tầng showroom đối chiếu được lên tầng công ty · triệu đồng/tháng. Sa La tách riêng từ Q9.';
+renderFilter(); renderAll();
+</script></body></html>
