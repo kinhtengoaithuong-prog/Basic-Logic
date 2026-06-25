@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTV Membership ROI Simulator v2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;500;600&display=swap');
+
+:root {
+  --bg:     #0d0d0b;
+  --bg2:    #141412;
+  --bg3:    #1a1a17;
+  --bg4:    #222220;
+  --bg5:    #2a2a27;
+  --line:   rgba(255,255,255,0.07);
+  --line2:  rgba(255,255,255,0.12);
+  --t1:     #e6e3d8;
+  --t2:     #8a8880;
+  --t3:     #525050;
+  --teal:   #1D9E75;
+  --tealL:  #5DCAA5;
+  --tealD:  rgba(29,158,117,0.15);
+  --amber:  #bf7a10;
+  --amberL: #e8a030;
+  --amberD: rgba(191,122,16,0.15);
+  --red:    #b83c3c;
+  --redL:   #e06060;
+  --redD:   rgba(184,60,60,0.13);
+  --blue:   #2e72c4;
+  --blueL:  #60a0e8;
+  --blueD:  rgba(46,114,196,0.13);
+  --purple: #7060c8;
+  --purpleL:#9888e8;
+  --mono: 'DM Mono', monospace;
+  --sans: 'Syne', sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:13px;line-height:1.6;min-height:100vh}
+
+/* LAYOUT */
+.shell{display:grid;grid-template-columns:360px 1fr;min-height:100vh}
+@media(max-width:860px){.shell{grid-template-columns:1fr}}
+
+/* LEFT */
+.left{background:var(--bg2);border-right:0.5px solid var(--line2);padding:24px 20px 48px;position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bg5) transparent}
+.left::-webkit-scrollbar{width:4px}
+.left::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:2px}
+
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:22px;padding-bottom:18px;border-bottom:0.5px solid var(--line)}
+.brand-mark{width:30px;height:30px;border-radius:7px;background:var(--teal);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:500;color:#fff;letter-spacing:.03em}
+.brand-name{font-size:12px;font-weight:500;color:var(--t1)}
+.brand-sub{font-size:10px;color:var(--t3);letter-spacing:.07em;text-transform:uppercase;margin-top:1px}
+
+.grp{margin-bottom:4px}
+.grp-head{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:7px;cursor:pointer;user-select:none;margin-bottom:2px;transition:background .15s}
+.grp-head:hover{background:var(--bg3)}
+.grp-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.grp-label{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;flex:1}
+.grp-score{font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;transition:all .3s}
+.grp-arr{font-size:9px;color:var(--t3);transition:transform .2s}
+.grp-arr.open{transform:rotate(180deg)}
+.grp-body{padding:4px 4px 10px 12px}
+.grp-body.hide{display:none}
+
+.sf{margin-bottom:15px}
+.sf:last-child{margin-bottom:0}
+.sf-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px}
+.sf-name{font-size:11px;color:var(--t1)}
+.sf-val{font-family:var(--mono);font-size:11px;font-weight:500;min-width:70px;text-align:right;transition:color .25s}
+.sf-hint{font-size:10px;color:var(--t3);line-height:1.4;margin-bottom:5px}
+.sf-formula{font-family:var(--mono);font-size:9px;color:var(--t3);background:var(--bg4);border-radius:4px;padding:3px 7px;margin-bottom:5px;border-left:2px solid var(--line2);line-height:1.5}
+.sf-formula em{color:var(--t2);font-style:normal}
+
+input[type=range]{width:100%;height:3px;-webkit-appearance:none;appearance:none;background:var(--bg5);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--bg2);border:1.5px solid var(--t3);cursor:pointer;transition:border-color .15s,transform .15s}
+input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.2)}
+input[type=range].t::-webkit-slider-thumb{border-color:var(--teal)}
+input[type=range].b::-webkit-slider-thumb{border-color:var(--blue)}
+input[type=range].a::-webkit-slider-thumb{border-color:var(--amber)}
+input[type=range].p::-webkit-slider-thumb{border-color:var(--purple)}
+
+.divider{height:0.5px;background:var(--line);margin:6px 0 14px}
+
+/* RIGHT */
+.right{background:var(--bg);padding:24px 24px 60px;overflow-x:hidden}
+
+.rhead{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:18px;border-bottom:0.5px solid var(--line)}
+.rhead-left .rtitle{font-size:18px;font-weight:600;color:var(--t1)}
+.rhead-left .rsub{font-size:11px;color:var(--t3);margin-top:3px}
+.scenario-tag{font-family:var(--mono);font-size:10px;font-weight:500;padding:5px 12px;border-radius:16px;border:1px solid;transition:all .3s;margin-top:4px;display:inline-block}
+
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+@media(max-width:700px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--bg2);border:0.5px solid var(--line);border-radius:9px;padding:12px 14px;transition:border-color .3s}
+.kpi-label{font-size:9px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px}
+.kpi-val{font-family:var(--mono);font-size:17px;font-weight:500;color:var(--t1);line-height:1;transition:color .3s}
+.kpi-sub{font-size:10px;color:var(--t2);margin-top:3px;font-family:var(--mono);transition:color .3s}
+
+/* DUAL PERSP */
+.dual{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:700px){.dual{grid-template-columns:1fr}}
+.pcard{background:var(--bg2);border:0.5px solid var(--line);border-radius:10px;overflow:hidden}
+.pcard-head{padding:11px 14px;border-bottom:0.5px solid var(--line);display:flex;align-items:center;gap:8px}
+.pcard-dot{width:7px;height:7px;border-radius:50%}
+.pcard-title{font-size:11px;font-weight:500;color:var(--t1)}
+.pcard-sub{font-size:10px;color:var(--t3);margin-left:auto}
+.pcard-body{padding:12px 14px}
+.prow{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:0.5px solid var(--line)}
+.prow:last-child{border-bottom:none;padding-bottom:0}
+.prow-label{font-size:10px;color:var(--t2)}
+.prow-val{font-family:var(--mono);font-size:11px;font-weight:500;transition:color .3s}
+.prow-formula{font-family:var(--mono);font-size:9px;color:var(--t3);margin-top:1px;text-align:right}
+.ptotal{margin-top:10px;padding-top:10px;border-top:0.5px solid var(--line2);display:flex;justify-content:space-between;align-items:center}
+.ptotal-label{font-size:11px;font-weight:500;color:var(--t1)}
+.ptotal-val{font-family:var(--mono);font-size:16px;font-weight:500;transition:color .3s}
+
+/* WATERFALL */
+.wf-card{background:var(--bg2);border:0.5px solid var(--line);border-radius:10px;padding:14px;margin-bottom:16px}
+.card-label{font-size:9px;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.wf-rows{display:flex;flex-direction:column;gap:7px}
+.wf-row{display:flex;align-items:center;gap:8px}
+.wf-name{font-size:10px;color:var(--t2);min-width:180px;line-height:1.3}
+.wf-track{flex:1;height:7px;background:var(--bg4);border-radius:4px;overflow:hidden}
+.wf-fill{height:100%;border-radius:4px;transition:width .4s ease,background .4s;min-width:2px}
+.wf-num{font-family:var(--mono);font-size:10px;min-width:90px;text-align:right;transition:color .3s}
+
+/* BREAKEVEN */
+.be-card{background:var(--bg2);border:0.5px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px}
+.be-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:600px){.be-grid{grid-template-columns:repeat(2,1fr)}}
+.be-item{text-align:center;padding:10px 8px;background:var(--bg3);border-radius:8px}
+.be-val{font-family:var(--mono);font-size:18px;font-weight:500;transition:color .3s;line-height:1}
+.be-label{font-size:9px;color:var(--t3);margin-top:5px;line-height:1.4}
+
+.be-bars{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:0.5px solid var(--line)}
+.be-bar-row{display:flex;align-items:center;gap:8px}
+.be-bar-label{font-size:10px;color:var(--t2);min-width:100px}
+.be-bar-track{flex:1;height:8px;background:var(--bg4);border-radius:4px;position:relative;overflow:visible}
+.be-bar-fill{height:100%;border-radius:4px;transition:width .4s ease,background .4s}
+.be-bar-marker{position:absolute;top:-4px;width:2px;height:16px;background:var(--t2);border-radius:1px;transition:left .4s ease}
+.be-bar-info{font-family:var(--mono);font-size:10px;min-width:100px;text-align:right;color:var(--t2);transition:color .3s}
+
+/* CONFLICT ZONE */
+.conflict-card{background:var(--bg2);border:0.5px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px}
+.conflict-row{display:flex;align-items:flex-start;gap:12px;padding:8px 0;border-bottom:0.5px solid var(--line)}
+.conflict-row:last-child{border-bottom:none;padding-bottom:0}
+.conflict-side{font-size:10px;font-weight:500;min-width:64px;padding-top:1px}
+.conflict-bar-wrap{flex:1}
+.conflict-bar-track{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-bottom:3px}
+.conflict-bar-fill{height:100%;border-radius:3px;transition:width .4s,background .4s}
+.conflict-note{font-size:9px;color:var(--t3);line-height:1.4}
+.conflict-val{font-family:var(--mono);font-size:11px;font-weight:500;min-width:70px;text-align:right;transition:color .3s}
+
+/* VERDICT */
+.verdict{border-radius:10px;border:1px solid;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;transition:all .35s}
+.verdict-icon{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:500;flex-shrink:0;transition:all .35s}
+.verdict-body{}
+.verdict-tag{font-size:9px;letter-spacing:.09em;text-transform:uppercase;font-weight:500;margin-bottom:4px;transition:color .3s}
+.verdict-title{font-size:13px;font-weight:500;margin-bottom:4px;transition:color .3s;line-height:1.4}
+.verdict-sub{font-size:11px;color:var(--t2);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ═══ LEFT ═══ -->
+<div class="left">
+  <div class="brand">
+    <div class="brand-mark">M²</div>
+    <div>
+      <div class="brand-name">Membership ROI Simulator</div>
+      <div class="brand-sub">HTV — v2 · Dual Perspective</div>
+    </div>
+  </div>
+
+  <!-- GROUP 1: BASELINE -->
+  <div class="grp">
+    <div class="grp-head" onclick="tog(1)">
+      <div class="grp-dot" style="background:var(--t2)"></div>
+      <span class="grp-label" style="color:var(--t2)">Baseline</span>
+      <span class="grp-score" id="gs1" style="background:var(--bg4);color:var(--t2)">—</span>
+      <span class="grp-arr open" id="ga1">▾</span>
+    </div>
+    <div class="grp-body" id="gb1">
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">Số hội viên active (M)</span><span class="sf-val" id="vM" style="color:var(--t1)">5.000</span></div>
+        <div class="sf-hint">Tổng hội viên đang active — dùng để nhân toàn bộ các lever</div>
+        <input type="range" class="t" min="500" max="50000" value="5000" step="100" id="sM" oninput="run()">
+      </div>
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">Doanh thu DV/lần — P (tr.đ)</span><span class="sf-val" id="vP" style="color:var(--t1)">2.5</span></div>
+        <div class="sf-hint">Doanh thu trung bình mỗi lần sử dụng dịch vụ (bảo dưỡng, sửa chữa)</div>
+        <input type="range" class="t" min="0.5" max="15" value="2.5" step="0.1" id="sP" oninput="run()">
+      </div>
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">Tần suất DV baseline — F (lần/năm)</span><span class="sf-val" id="vF" style="color:var(--t1)">2.0</span></div>
+        <div class="sf-hint">Lần DV/năm của khách không hội viên — đây là mức "tự nhiên" không có chương trình</div>
+        <input type="range" class="t" min="0.5" max="6" value="2" step="0.1" id="sF" oninput="run()">
+      </div>
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">Margin DV Đại lý — gm (%)</span><span class="sf-val" id="vGM" style="color:var(--t1)">35%</span></div>
+        <div class="sf-hint">Gross margin trên doanh thu DV — dùng để tính lợi nhuận Đại lý thực nhận</div>
+        <input type="range" class="t" min="10" max="60" value="35" step="1" id="sGM" oninput="run()">
+      </div>
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">Mix DV margin cao — mix (%)</span><span class="sf-val" id="vMix" style="color:var(--t1)">50%</span></div>
+        <div class="sf-hint">% lần DV của hội viên là sửa chữa/DV cao cấp (margin ~50%) vs bảo dưỡng định kỳ (margin ~20%). Ảnh hưởng trực tiếp GP Đại lý.</div>
+        <div class="sf-formula"><em>gm_eff = mix×0.50 + (1−mix)×0.20</em> → margin thực tế Đại lý nhận</div>
+        <input type="range" class="t" min="0" max="100" value="50" step="1" id="sMix" oninput="run()">
+      </div>
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">Giá trị 1 xe mới — CarVal (tr.đ)</span><span class="sf-val" id="vCar" style="color:var(--t1)">800</span></div>
+        <div class="sf-hint">Doanh thu trung bình/xe — để tính giá trị lever chuyển đổi</div>
+        <input type="range" class="t" min="300" max="3000" value="800" step="50" id="sCar" oninput="run()">
+      </div>
+    </div>
+  </div>
+
+  <!-- GROUP 2: LEVER HIỆU QUẢ -->
+  <div class="grp">
+    <div class="grp-head" onclick="tog(2)">
+      <div class="grp-dot" style="background:var(--blueL)"></div>
+      <span class="grp-label" style="color:var(--blueL)">Lever hiệu quả</span>
+      <span class="grp-score" id="gs2" style="background:var(--blueD);color:var(--blueL)">—</span>
+      <span class="grp-arr open" id="ga2">▾</span>
+    </div>
+    <div class="grp-body" id="gb2">
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">Tỷ lệ quay lại incremental — r_inc (%)</span><span class="sf-val" id="vR" style="color:var(--blueL)">+30%</span></div>
+        <div class="sf-hint">Hội viên sử dụng DV nhiều hơn baseline bao nhiêu % — CHỈ phần do chương trình tạo ra, không tính phần tự nhiên</div>
+        <div class="sf-formula"><em>ΔDT_freq = M × P × F × r_inc</em></div>
+        <input type="range" class="b" min="-10" max="100" value="30" step="1" id="sR" oninput="run()">
+      </div>
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">Giá trị upsell/lần — u (%)</span><span class="sf-val" id="vU" style="color:var(--blueL)">+15%</span></div>
+        <div class="sf-hint">Hội viên chi thêm bao nhiêu % mỗi lần DV (phụ kiện, DV cao cấp, gói mở rộng)</div>
+        <div class="sf-formula"><em>ΔDT_upsell = M × P × F×(1+r_inc) × u</em></div>
+        <input type="range" class="b" min="0" max="50" value="15" step="1" id="sU" oninput="run()">
+      </div>
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">Chuyển đổi xe mới incremental — conv_inc (%)</span><span class="sf-val" id="vConv" style="color:var(--blueL)">8%</span></div>
+        <div class="sf-hint">% hội viên mua xe mới/năm CHỈ VÌ chương trình — không tính những người sẽ mua dù có hay không có hội viên</div>
+        <div class="sf-formula"><em>ΔDT_car = M × conv_inc × CarVal</em> ← lever lớn nhất HTV</div>
+        <input type="range" class="b" min="0" max="25" value="8" step="1" id="sConv" oninput="run()">
+      </div>
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">Tỷ lệ giới thiệu — ref (%)</span><span class="sf-val" id="vRef" style="color:var(--blueL)">12%</span></div>
+        <div class="sf-hint">% hội viên giới thiệu ít nhất 1 khách mới/năm</div>
+        <input type="range" class="b" min="0" max="40" value="12" step="1" id="sRef" oninput="run()">
+      </div>
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">Tỷ lệ chốt từ referral — close (%)</span><span class="sf-val" id="vClose" style="color:var(--blueL)">40%</span></div>
+        <div class="sf-hint">Trong số khách được giới thiệu, bao nhiêu % thực sự trở thành khách hàng dùng DV</div>
+        <div class="sf-formula"><em>ΔDT_ref = M × ref × close × P × F</em></div>
+        <input type="range" class="b" min="5" max="80" value="40" step="1" id="sClose" oninput="run()">
+      </div>
+    </div>
+  </div>
+
+  <!-- GROUP 3: CHI PHÍ & PHÂN BỔ -->
+  <div class="grp">
+    <div class="grp-head" onclick="tog(3)">
+      <div class="grp-dot" style="background:var(--amberL)"></div>
+      <span class="grp-label" style="color:var(--amberL)">Chi phí &amp; phân bổ</span>
+      <span class="grp-score" id="gs3" style="background:var(--amberD);color:var(--amberL)">—</span>
+      <span class="grp-arr open" id="ga3">▾</span>
+    </div>
+    <div class="grp-body" id="gb3">
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">Ưu đãi DV/lần — disc (%)</span><span class="sf-val" id="vDisc" style="color:var(--amberL)">10%</span></div>
+        <div class="sf-hint">% chiết khấu/tích điểm tính trên tổng doanh thu DV của hội viên</div>
+        <div class="sf-formula"><em>TotalDisc = M × P × F×(1+r_inc)×(1+u) × disc</em></div>
+        <input type="range" class="a" min="0" max="30" value="10" step="1" id="sDisc" oninput="run()">
+      </div>
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">HTV co-fund ưu đãi — htv_share (%)</span><span class="sf-val" id="vHShare" style="color:var(--amberL)">30%</span></div>
+        <div class="sf-hint">% tổng ưu đãi HTV chịu — phần còn lại Đại lý chịu. Đây là thông số chính trị quan trọng nhất với Đại lý.</div>
+        <div class="sf-formula"><em>CostDealer_disc = TotalDisc × (1 − htv_share)</em></div>
+        <input type="range" class="a" min="0" max="100" value="30" step="1" id="sHShare" oninput="run()">
+      </div>
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">Opex HTV/hội viên/năm (tr.đ)</span><span class="sf-val" id="vOpexH" style="color:var(--amberL)">0.30</span></div>
+        <div class="sf-hint">Chi phí hệ thống Membership, marketing, staff HTV trực tiếp chịu/hội viên</div>
+        <div class="sf-formula"><em>Opex_HTV = M × opex_htv</em></div>
+        <input type="range" class="a" min="0.05" max="2" value="0.3" step="0.05" id="sOpexH" oninput="run()">
+      </div>
+      <div class="sf">
+        <div class="sf-top"><span class="sf-name">Opex Đại lý/hội viên/năm (tr.đ)</span><span class="sf-val" id="vOpexD" style="color:var(--amberL)">0.15</span></div>
+        <div class="sf-hint">Chi phí vận hành tại Đại lý (nhân viên CSKH, hệ thống local) cho mỗi hội viên</div>
+        <div class="sf-formula"><em>Opex_Dealer = M × opex_dealer</em></div>
+        <input type="range" class="a" min="0.02" max="1" value="0.15" step="0.02" id="sOpexD" oninput="run()">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ RIGHT ═══ -->
+<div class="right">
+
+  <div class="rhead">
+    <div class="rhead-left">
+      <div class="rtitle">Phân tích hiệu quả chương trình hội viên</div>
+      <div class="rsub">Tất cả con số tính trên toàn bộ base hội viên · năm</div>
+      <div class="scenario-tag" id="stag">—</div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">Tổng DT tăng thêm</div>
+      <div class="kpi-val" id="kRevTotal">—</div>
+      <div class="kpi-sub" id="kRevPct">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Tổng chi phí</div>
+      <div class="kpi-val" id="kCostTotal">—</div>
+      <div class="kpi-sub" id="kCostPct">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Net HTV / năm</div>
+      <div class="kpi-val" id="kNetHTV">—</div>
+      <div class="kpi-sub" id="kRoiHTV">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Net Đại lý / năm</div>
+      <div class="kpi-val" id="kNetDL">—</div>
+      <div class="kpi-sub" id="kRoiDL">—</div>
+    </div>
+  </div>
+
+  <!-- DUAL PERSPECTIVE -->
+  <div class="dual">
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-dot" style="background:var(--blueL)"></div>
+        <span class="pcard-title">Góc nhìn HTV</span>
+        <span class="pcard-sub">volume · brand · loyalty</span>
+      </div>
+      <div class="pcard-body">
+        <div class="prow">
+          <span class="prow-label">ΔDT tần suất quay lại</span>
+          <div style="text-align:right">
+            <div class="prow-val" id="hFreq">—</div>
+            <div class="prow-formula">M×P×F×r_inc</div>
+          </div>
+        </div>
+        <div class="prow">
+          <span class="prow-label">ΔDT upsell/lần DV</span>
+          <div style="text-align:right">
+            <div class="prow-val" id="hUpsell">—</div>
+            <div class="prow-formula">M×P×F×(1+r_inc)×u</div>
+          </div>
+        </div>
+        <div class="prow">
+          <span class="prow-label">ΔDT xe mới incremental</span>
+          <div style="text-align:right">
+            <div class="prow-val" id="hCar">—</div>
+            <div class="prow-formula">M×conv_inc×CarVal</div>
+          </div>
+        </div>
+        <div class="prow">
+          <span class="prow-label">ΔDT referral (có close rate)</span>
+          <div style="text-align:right">
+            <div class="prow-val" id="hRef">—</div>
+            <div class="prow-formula">M×ref×close×P×F</div>
+          </div>
+        </div>
+        <div class="prow">
+          <span class="prow-label">Chi phí ưu đãi HTV chịu</span>
+          <div style="text-align:right">
+            <div class="prow-val" id="hDiscCost">—</div>
+            <div class="prow-formula">TotalDisc × htv_share</div>
+          </div>
+        </div>
+        <div class="prow">
+          <span class="prow-label">Opex HTV trực tiếp</span>
+          <div style="text-align:right">
+            <div class="prow-val" id="hOpex">—</div>
+            <div class="prow-formula">M × opex_htv</div>
+          </div>
+        </div>
+        <div class="ptotal">
+          <span class="ptotal-label">Net HTV</span>
+          <span class="ptotal-val" id="hNet">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-dot" style="background:var(--tealL)"></div>
+        <span class="pcard-title">Góc nhìn Đại lý</span>
+        <span class="pcard-sub">margin sau ưu đãi</span>
+      </div>
+      <div class="pcard-body">
+        <div class="prow">
+          <span class="prow-label">GP từ tần suất tăng thêm</span>
+          <div style="text-align:right">
+            <div class="prow-val" id="dFreqGP">—</div>
+            <div class="prow-formula">M×P×F×r_inc × gm_eff</div>
+          </div>
+        </div>
+        <div class="prow">
+          <span class="prow-label">GP từ upsell (gm_eff)</span>
+          <div style="text-align:right">
+            <div class="prow-val" id="dUpsellGP">—</div>
+            <div class="prow-formula">M×P×F×(1+r_inc)×u × gm_eff</div>
+          </div>
+        </div>
+        <div class="prow">
+          <span class="prow-label">Chi phí ưu đãi Đại lý chịu</span>
+          <div style="text-align:right">
+            <div class="prow-val" id="dDiscCost">—</div>
+            <div class="prow-formula">TotalDisc × (1−htv_share)</div>
+          </div>
+        </div>
+        <div class="prow">
+          <span class="prow-label">Opex Đại lý</span>
+          <div style="text-align:right">
+            <div class="prow-val" id="dOpex">—</div>
+            <div class="prow-formula">M × opex_dealer</div>
+          </div>
+        </div>
+        <div class="ptotal">
+          <span class="ptotal-label">Net Đại lý</span>
+          <span class="ptotal-val" id="dNet">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WATERFALL -->
+  <div class="wf-card">
+    <div class="card-label">Đóng góp từng lever — tất cả trên cùng thang đo</div>
+    <div class="wf-rows" id="wfRows"></div>
+  </div>
+
+  <!-- BREAKEVEN -->
+  <div class="be-card">
+    <div class="card-label">Phân tích breakeven</div>
+    <div class="be-grid">
+      <div class="be-item">
+        <div class="be-val" id="beR">—</div>
+        <div class="be-label">r_inc tối thiểu<br>HTV breakeven</div>
+      </div>
+      <div class="be-item">
+        <div class="be-val" id="beRD">—</div>
+        <div class="be-label">r_inc tối thiểu<br>Đại lý breakeven</div>
+      </div>
+      <div class="be-item">
+        <div class="be-val" id="beNPM">—</div>
+        <div class="be-label">Net value<br>/hội viên/năm (HTV)</div>
+      </div>
+    </div>
+    <div class="be-bars">
+      <div class="be-bar-row">
+        <span class="be-bar-label">HTV — r_inc hiện tại</span>
+        <div class="be-bar-track">
+          <div class="be-bar-fill" id="beBarH"></div>
+          <div class="be-bar-marker" id="beMarkH"></div>
+        </div>
+        <span class="be-bar-info" id="beInfoH">—</span>
+      </div>
+      <div class="be-bar-row">
+        <span class="be-bar-label">Đại lý — r_inc hiện tại</span>
+        <div class="be-bar-track">
+          <div class="be-bar-fill" id="beBarD"></div>
+          <div class="be-bar-marker" id="beMarkD"></div>
+        </div>
+        <span class="be-bar-info" id="beInfoD">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFLICT ZONE -->
+  <div class="conflict-card">
+    <div class="card-label">Vùng xung đột lợi ích — khoảng cách breakeven 2 bên</div>
+    <div class="wf-rows" id="conflictRows"></div>
+    <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid var(--line);font-size:10px;color:var(--t3);line-height:1.6" id="conflictNote">—</div>
+  </div>
+
+  <!-- VERDICT -->
+  <div class="verdict" id="verdict">
+    <div class="verdict-icon" id="vIcon">?</div>
+    <div class="verdict-body">
+      <div class="verdict-tag" id="vTag">—</div>
+      <div class="verdict-title" id="vTitle">—</div>
+      <div class="verdict-sub" id="vSub">—</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = (n, d=1) => {
+  const abs = Math.abs(n);
+  const s = n < 0 ? '−' : '';
+  if (abs >= 1000) return s + (abs/1000).toFixed(1) + ' tỷ';
+  if (abs >= 1)    return s + abs.toFixed(d) + ' tr';
+  return s + (abs*1000).toFixed(0) + ' nghìn';
+};
+const fmtPct = (n, d=1) => (n>=0?'+':'') + n.toFixed(d) + '%';
+const numFmt = n => n >= 10000 ? (n/1000).toFixed(0)+'K' : n.toLocaleString('vi-VN');
+const clamp  = (v,a,b) => Math.max(a,Math.min(b,v));
+const col    = (v, pos='var(--tealL)', neu='var(--amberL)', neg='var(--redL)') =>
+  v > 0.01 ? pos : v < -0.01 ? neg : neu;
+
+function tog(n) {
+  const b = $('gb'+n), a = $('ga'+n);
+  const h = b.classList.toggle('hide');
+  a.classList.toggle('open', !h);
+}
+
+function setBarBE(barId, markId, current, threshold, maxVal) {
+  const max = Math.max(maxVal, current * 1.3, threshold * 1.5, 5);
+  const fillW  = clamp(current   / max * 100, 0, 100);
+  const markW  = clamp(threshold / max * 100, 0, 100);
+  $(barId).style.width      = fillW + '%';
+  $(barId).style.background = current >= threshold ? 'var(--teal)' : 'var(--red)';
+  $(markId).style.left      = markW + '%';
+}
+
+function run() {
+  // ─── READ INPUTS ───────────────────────────────────────────
+  const M        = parseInt($('sM').value);
+  const P        = parseFloat($('sP').value);
+  const F        = parseFloat($('sF').value);
+  const gm       = parseInt($('sGM').value) / 100;
+  const mix      = parseInt($('sMix').value) / 100;
+  const CarVal   = parseInt($('sCar').value);
+  const r_inc    = parseInt($('sR').value) / 100;
+  const u        = parseInt($('sU').value) / 100;
+  const conv_inc = parseInt($('sConv').value) / 100;
+  const ref      = parseInt($('sRef').value) / 100;
+  const close    = parseInt($('sClose').value) / 100;
+  const disc     = parseInt($('sDisc').value) / 100;
+  const htv_share= parseInt($('sHShare').value) / 100;
+  const opexH    = parseFloat($('sOpexH').value);
+  const opexD    = parseFloat($('sOpexD').value);
+
+  // ─── DISPLAY SLIDER VALUES ─────────────────────────────────
+  $('vM').textContent    = numFmt(M);
+  $('vP').textContent    = P.toFixed(1);
+  $('vF').textContent    = F.toFixed(1);
+  $('vGM').textContent   = Math.round(gm*100) + '%';
+  $('vMix').textContent  = Math.round(mix*100) + '%';
+  $('vCar').textContent  = numFmt(CarVal);
+  $('vR').textContent    = fmtPct(r_inc*100, 0);
+  $('vU').textContent    = '+' + Math.round(u*100) + '%';
+  $('vConv').textContent = Math.round(conv_inc*100) + '%';
+  $('vRef').textContent  = Math.round(ref*100) + '%';
+  $('vClose').textContent= Math.round(close*100) + '%';
+  $('vDisc').textContent = Math.round(disc*100) + '%';
+  $('vHShare').textContent=Math.round(htv_share*100) + '%';
+  $('vOpexH').textContent= opexH.toFixed(2);
+  $('vOpexD').textContent= opexD.toFixed(2);
+
+  const rc = r_inc >= 0.15 ? 'var(--tealL)' : r_inc >= 0 ? 'var(--amberL)' : 'var(--redL)';
+  $('vR').style.color = rc;
+
+  // ─── CORE CALCULATIONS ────────────────────────────────────
+  // gm effective — weighted by mix (high-margin DV 50%, low-margin DV 20%)
+  const gm_eff = mix * 0.50 + (1 - mix) * 0.20;
+
+  // Revenue levers
+  const dt_freq   = M * P * F * r_inc;
+  const dt_upsell = M * P * F * (1 + r_inc) * u;
+  const dt_car    = M * conv_inc * CarVal;
+  const dt_ref    = M * ref * close * P * F;
+  const totalIncrRev = dt_freq + dt_upsell + dt_car + dt_ref;
+
+  // Total discount base = full DV revenue of members (baseline + incremental + upsell)
+  const totalDVRev    = M * P * F * (1 + r_inc) * (1 + u);
+  const totalDisc     = totalDVRev * disc;
+
+  // Cost splits
+  const costDiscHTV   = totalDisc * htv_share;
+  const costDiscDL    = totalDisc * (1 - htv_share);
+  const costOpexHTV   = M * opexH;
+  const costOpexDL    = M * opexD;
+  const totalCostHTV  = costDiscHTV  + costOpexHTV;
+  const totalCostDL   = costDiscDL   + costOpexDL;
+  const totalCost     = totalCostHTV + totalCostDL;
+
+  // Net values
+  const netHTV  = totalIncrRev - totalCostHTV;
+  const netDL   = (dt_freq + dt_upsell) * gm_eff - costDiscDL - costOpexDL;
+  const roiHTV  = totalCostHTV > 0 ? netHTV  / totalCostHTV  * 100 : 0;
+  const roiDL   = (costDiscDL + costOpexDL) > 0 ? netDL / (costDiscDL + costOpexDL) * 100 : 0;
+
+  // ─── KPI ──────────────────────────────────────────────────
+  $('kRevTotal').textContent = fmt(totalIncrRev) + ' đ';
+  $('kRevTotal').style.color = 'var(--tealL)';
+  $('kRevPct').textContent   = fmtPct(totalIncrRev / Math.max(M * P * F, 1) * 100) + ' vs baseline';
+  $('kCostTotal').textContent= fmt(totalCost) + ' đ';
+  $('kCostTotal').style.color= 'var(--amberL)';
+  $('kCostPct').textContent  = 'disc ' + fmtPct(-disc*100,0) + ' · HTV ' + Math.round(htv_share*100) + '%';
+
+  $('kNetHTV').textContent   = fmt(netHTV) + ' đ';
+  $('kNetHTV').style.color   = col(netHTV);
+  $('kRoiHTV').textContent   = 'ROI ' + fmtPct(roiHTV);
+  $('kRoiHTV').style.color   = col(roiHTV);
+
+  $('kNetDL').textContent    = fmt(netDL) + ' đ';
+  $('kNetDL').style.color    = col(netDL);
+  $('kRoiDL').textContent    = 'ROI ' + fmtPct(roiDL);
+  $('kRoiDL').style.color    = col(roiDL);
+
+  // ─── DUAL PERSPECTIVE ─────────────────────────────────────
+  const setRow = (id, val, positive=true) => {
+    $(id).textContent   = (val < 0 ? '−' : positive ? '+' : '−') + fmt(Math.abs(val)) + ' đ';
+    $(id).style.color   = positive ? 'var(--tealL)' : 'var(--amberL)';
+  };
+  setRow('hFreq',    dt_freq,      true);
+  setRow('hUpsell',  dt_upsell,    true);
+  setRow('hCar',     dt_car,       true);
+  setRow('hRef',     dt_ref,       true);
+  setRow('hDiscCost',costDiscHTV,  false);
+  setRow('hOpex',    costOpexHTV,  false);
+  $('hNet').textContent = (netHTV >= 0 ? '+' : '−') + fmt(Math.abs(netHTV)) + ' đ';
+  $('hNet').style.color = col(netHTV);
+
+  setRow('dFreqGP',  dt_freq  * gm_eff, true);
+  setRow('dUpsellGP',dt_upsell* gm_eff, true);
+  setRow('dDiscCost',costDiscDL,  false);
+  setRow('dOpex',    costOpexDL,  false);
+  $('dNet').textContent = (netDL >= 0 ? '+' : '−') + fmt(Math.abs(netDL)) + ' đ';
+  $('dNet').style.color = col(netDL);
+
+  // ─── WATERFALL ────────────────────────────────────────────
+  const wfData = [
+    { label: 'Tỷ lệ quay lại incremental (r_inc)',  val: dt_freq,           col: '#1D9E75' },
+    { label: 'Upsell / lần DV (u)',                  val: dt_upsell,         col: '#1D9E75' },
+    { label: 'Chuyển đổi xe mới incremental',        val: dt_car,            col: '#2e72c4' },
+    { label: 'Referral × close rate',                val: dt_ref,            col: '#2e72c4' },
+    { label: 'Chi phí ưu đãi HTV chịu',             val: -costDiscHTV,      col: '#bf7a10' },
+    { label: 'Chi phí ưu đãi Đại lý chịu',          val: -costDiscDL,       col: '#bf7a10' },
+    { label: 'Opex HTV + Đại lý',                   val: -(costOpexHTV+costOpexDL), col: '#805020' },
+  ];
+  const maxAbs = Math.max(...wfData.map(d => Math.abs(d.val)), 1);
+  $('wfRows').innerHTML = wfData.map(d => {
+    const w   = Math.max(Math.abs(d.val) / maxAbs * 100, 0.5).toFixed(1);
+    const nc  = d.val >= 0 ? 'var(--tealL)' : 'var(--amberL)';
+    const sign= d.val >= 0 ? '+' : '−';
+    return `<div class="wf-row">
+      <span class="wf-name">${d.label}</span>
+      <div class="wf-track"><div class="wf-fill" style="width:${w}%;background:${d.col};opacity:.85"></div></div>
+      <span class="wf-num" style="color:${nc}">${sign}${fmt(Math.abs(d.val))} đ</span>
+    </div>`;
+  }).join('');
+
+  // ─── BREAKEVEN ────────────────────────────────────────────
+  // HTV: solve netHTV = 0 for r_inc
+  // netHTV = dt_freq(r) + dt_upsell(r) + dt_car + dt_ref - costDiscHTV(r) - opexHTV
+  // Linearize around r_inc:
+  // ≈ M×P×F×r + M×P×F×(1+r)×u + dt_car + dt_ref − M×P×F×(1+r)×(1+u)×disc×htv_share − opexHTV
+  // Collect r terms:
+  const A_htv = M*P*F*(1 + u - (1+u)*disc*htv_share);
+  const B_htv = M*P*F*(u - (1+u)*disc*htv_share) + dt_car + dt_ref - costOpexHTV;
+  const r_be_htv = A_htv > 0 ? Math.max(-B_htv / A_htv * 100, 0) : NaN;
+
+  // Dealer: solve netDL = 0 for r_inc
+  // netDL ≈ M×P×F×r×gm_eff + M×P×F×(1+r)×u×gm_eff - costDiscDL(r) - opexDL
+  const A_dl = M*P*F*(gm_eff + u*gm_eff - (1+u)*disc*(1-htv_share));
+  const B_dl = M*P*F*(u*gm_eff - (1+u)*disc*(1-htv_share)) - costOpexDL;
+  const r_be_dl = A_dl > 0 ? Math.max(-B_dl / A_dl * 100, 0) : NaN;
+
+  const r_cur = r_inc * 100;
+  const netPerM = netHTV / M;
+
+  $('beR').textContent   = isNaN(r_be_htv) ? 'N/A' : r_be_htv < 0.1 ? 'Đã có lãi' : r_be_htv.toFixed(1) + '%';
+  $('beR').style.color   = (!isNaN(r_be_htv) && r_cur >= r_be_htv) ? 'var(--tealL)' : 'var(--redL)';
+  $('beRD').textContent  = isNaN(r_be_dl)  ? 'N/A' : r_be_dl  < 0.1 ? 'Đã có lãi' : r_be_dl.toFixed(1)  + '%';
+  $('beRD').style.color  = (!isNaN(r_be_dl)  && r_cur >= r_be_dl)  ? 'var(--tealL)' : 'var(--redL)';
+  $('beNPM').textContent = fmt(netPerM, 2) + ' đ';
+  $('beNPM').style.color = col(netPerM);
+
+  const rBeHSafe = isNaN(r_be_htv) ? 0 : r_be_htv;
+  const rBeDSafe = isNaN(r_be_dl)  ? 0 : r_be_dl;
+  const beMax    = Math.max(rBeHSafe, rBeDSafe, r_cur, 10) * 1.4;
+  setBarBE('beBarH','beMarkH', r_cur, rBeHSafe, beMax);
+  setBarBE('beBarD','beMarkD', r_cur, rBeDSafe, beMax);
+  $('beInfoH').textContent = r_cur.toFixed(0)+'% vs '+(rBeHSafe<0.1?'0':rBeHSafe.toFixed(1))+'%';
+  $('beInfoH').style.color = r_cur >= rBeHSafe ? 'var(--tealL)' : 'var(--redL)';
+  $('beInfoD').textContent = r_cur.toFixed(0)+'% vs '+(rBeDSafe<0.1?'0':rBeDSafe.toFixed(1))+'%';
+  $('beInfoD').style.color = r_cur >= rBeDSafe ? 'var(--tealL)' : 'var(--redL)';
+
+  // ─── CONFLICT ZONE ────────────────────────────────────────
+  const gap = rBeDSafe - rBeHSafe;
+  const conflictItems = [
+    { label: 'Ngưỡng breakeven HTV',    val: rBeHSafe < 0.1 ? 'Đã có lãi' : rBeHSafe.toFixed(1)+'%', w: clamp(rBeHSafe/Math.max(rBeDSafe,rBeHSafe,1)*100,0,100), c:'var(--blueL)' },
+    { label: 'Ngưỡng breakeven Đại lý', val: rBeDSafe < 0.1 ? 'Đã có lãi' : rBeDSafe.toFixed(1)+'%', w: 100, c:'var(--tealL)' },
+    { label: 'Tỷ lệ r_inc hiện tại',    val: r_cur.toFixed(0)+'%', w: clamp(r_cur/Math.max(rBeDSafe,rBeHSafe,1)*100,0,100), c: r_cur>=rBeDSafe?'var(--tealL)':r_cur>=rBeHSafe?'var(--amberL)':'var(--redL)' },
+  ];
+  $('conflictRows').innerHTML = conflictItems.map(d =>
+    `<div class="wf-row">
+      <span class="wf-name">${d.label}</span>
+      <div class="wf-track"><div class="wf-fill" style="width:${d.w.toFixed(1)}%;background:${d.c};opacity:.8"></div></div>
+      <span class="wf-num" style="color:${d.c}">${d.val}</span>
+    </div>`
+  ).join('');
+
+  let conflictNote = '';
+  if (gap > 2) {
+    conflictNote = `Khoảng cách ${gap.toFixed(1)}% — Đại lý cần r_inc cao hơn HTV ${gap.toFixed(1)} điểm % mới breakeven. Đây là vùng tension: chương trình có lãi với HTV nhưng Đại lý vẫn đang chịu lỗ. Giải pháp: tăng htv_share hoặc giảm disc.`;
+  } else if (gap < -2) {
+    conflictNote = `HTV cần r_inc cao hơn Đại lý — Đại lý breakeven trước HTV. HTV cần cải thiện lever xe mới (conv_inc) hoặc referral để bù lại phần chi phí hệ thống.`;
+  } else {
+    conflictNote = `Hai ngưỡng breakeven gần nhau — ít xung đột lợi ích. Cả hai bên cùng có lãi (hoặc cùng lỗ) ở mức r_inc tương đương. Đây là cấu trúc lý tưởng để duy trì đồng thuận.`;
+  }
+  $('conflictNote').textContent = conflictNote;
+
+  // ─── GROUP BADGES ─────────────────────────────────────────
+  const lvScore = clamp((r_cur/Math.max(rBeDSafe,1))*60 + conv_inc*200 + ref*close*100, 0, 100);
+  const costScore= clamp(100 - disc*200 + htv_share*50, 0, 100);
+  const setBadge = (id, score, dim, c) => {
+    $(id).textContent = Math.round(score) + '%';
+    $(id).style.background = dim; $(id).style.color = c;
+  };
+  setBadge('gs2', lvScore,   'var(--blueD)',  'var(--blueL)');
+  setBadge('gs3', costScore, 'var(--amberD)', 'var(--amberL)');
+
+  // ─── SCENARIO & VERDICT ───────────────────────────────────
+  const hOk = netHTV > 0, dOk = netDL > 0;
+  let sTag, vTag, vTitle, vSub, vBg, vBc, vTc, icon;
+
+  if (hOk && dOk) {
+    sTag='Kịch bản A'; vTag='Win-win — cả hai có lãi';
+    vTc='var(--tealL)'; vBg='rgba(29,158,117,0.08)'; vBc='rgba(29,158,117,0.3)'; icon='✓';
+    vTitle=`Net HTV ${fmt(netHTV)} đ/năm · Net Đại lý ${fmt(netDL)} đ/năm`;
+    vSub=`Chương trình có cơ sở kinh tế vững cho cả hai bên. ROI HTV ${fmtPct(roiHTV)} · ROI Đại lý ${fmtPct(roiDL)}. Đủ điều kiện chuyển sang bài toán 2: tối ưu thiết kế ưu đãi (tích điểm vs chiết khấu trực tiếp).`;
+  } else if (hOk && !dOk) {
+    sTag='Kịch bản B'; vTag='HTV có lãi — Đại lý đang chịu lỗ';
+    vTc='var(--amberL)'; vBg='rgba(191,122,16,0.08)'; vBc='rgba(191,122,16,0.3)'; icon='!';
+    vTitle=`HTV +${fmt(netHTV)} đ · Đại lý ${fmt(netDL)} đ/năm`;
+    vSub=`Đại lý đang bù lỗ ${fmt(Math.abs(netDL))} đ/năm. Rủi ro: Đại lý tự giảm ưu đãi hoặc không triển khai nghiêm túc. Đề xuất: tăng htv_share lên ≥${Math.min(Math.round(htv_share*100)+15, 80)}% hoặc giảm disc xuống ≤${Math.max(Math.round(disc*100)-3,3)}%.`;
+  } else if (!hOk && dOk) {
+    sTag='Kịch bản C'; vTag='Đại lý có lãi — HTV chưa thu hồi';
+    vTc='var(--blueL)'; vBg='rgba(46,114,196,0.08)'; vBc='rgba(46,114,196,0.3)'; icon='↑';
+    vTitle=`HTV ${fmt(netHTV)} đ · Đại lý +${fmt(netDL)} đ/năm`;
+    vSub=`HTV đang subsidize chương trình nhưng chưa thu về đủ. Cần tăng lever xe mới (conv_inc) hoặc referral để cải thiện ROI HTV. Hiện tại lever xe đóng góp ${fmt(dt_car)} đ — cần tăng thêm ${fmt(Math.abs(netHTV))} đ nữa để hòa vốn.`;
+  } else {
+    sTag='Kịch bản D'; vTag='Cả hai bên đang lỗ';
+    vTc='var(--redL)'; vBg='rgba(184,60,60,0.08)'; vBc='rgba(184,60,60,0.3)'; icon='×';
+    vTitle=`HTV ${fmt(netHTV)} đ · Đại lý ${fmt(netDL)} đ/năm`;
+    vSub=`Chương trình không có cơ sở kinh tế. Cần r_inc tối thiểu ${isNaN(r_be_htv)?'N/A':r_be_htv.toFixed(1)}% (HTV) và ${isNaN(r_be_dl)?'N/A':r_be_dl.toFixed(1)}% (Đại lý) để breakeven. Xem xét tái thiết kế hoàn toàn hoặc dừng chương trình.`;
+  }
+
+  $('stag').textContent=$('stag').textContent; // force
+  $('stag').textContent=sTag;
+  $('stag').style.background=vBg; $('stag').style.borderColor=vBc; $('stag').style.color=vTc;
+
+  const vd=$('verdict');
+  vd.style.background=vBg; vd.style.borderColor=vBc;
+  $('vIcon').textContent=icon; $('vIcon').style.color=vTc; $('vIcon').style.background=vBc;
+  $('vTag').textContent=vTag; $('vTag').style.color=vTc;
+  $('vTitle').textContent=vTitle; $('vTitle').style.color=vTc;
+  $('vSub').textContent=vSub;
+}
+
+run();
+</script>
+</body>
+</html>
