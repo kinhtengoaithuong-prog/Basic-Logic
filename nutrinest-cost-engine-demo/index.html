@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cost-to-Journal Engine · NutriNest · ideaLAB</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700&display=swap');
+:root{--ink:#0D1B2A;--navy:#1A2E4A;--steel:#2C4A6E;--plat:#C8A96E;--surface:#16263b;--surface2:#1d3450;--border:#2C4A6E;--border2:#3a5a82;--text:#E8EDF4;--sub:#9DB2CC;--dim:#5d7595;--green:#3BC871;--red:#E05555;--amber:#E0A23B;--teal:#46C4B8;--purple:#9B8CFF;--fh:'Outfit',sans-serif;--fm:'DM Mono',monospace;--fd:'DM Serif Display',serif;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fh);background:var(--ink);color:var(--text);line-height:1.55;font-size:14px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 0 50px}
+.hdr{background:linear-gradient(135deg,#0D1B2A,#16263b);border-bottom:1px solid var(--border);padding:22px 28px 0}
+.eyebrow{font-family:var(--fm);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--plat);margin-bottom:6px}
+.hdr h1{font-family:var(--fd);font-size:23px;font-weight:400;color:#fff}
+.hdr-sub{font-size:12.5px;color:var(--sub);margin-top:5px;max-width:760px;padding-bottom:16px}
+.tabs{display:flex;gap:2px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.tab{padding:9px 14px;font-size:12px;font-weight:500;color:var(--sub);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--fh);display:flex;align-items:center;gap:6px}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--plat);border-bottom-color:var(--plat)}
+.tab .code{font-family:var(--fm);font-size:9px;background:var(--surface2);padding:2px 6px;border-radius:4px;color:var(--sub)}
+.tab.active .code{background:rgba(200,169,110,.18);color:var(--plat)}
+.tab .dot{width:6px;height:6px;border-radius:50%;background:var(--dim)}
+.tab .dot.live{background:var(--green)}
+.ovbadge{background:var(--amber);color:var(--ink);font-size:9px;font-weight:700;border-radius:9px;padding:0 5px}
+/* layout 20/80 */
+.layout{display:grid;grid-template-columns:210px 1fr;gap:0;min-height:560px}
+@media(max-width:820px){.layout{grid-template-columns:1fr}}
+.side{border-right:1px solid var(--border);padding:16px 12px;background:#101f33}
+.side-grp{margin-bottom:20px}
+.side-grp .gl{font-family:var(--fm);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);padding:0 8px 8px}
+.navitem{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--sub);margin-bottom:2px;transition:all .12s}
+.navitem:hover{background:var(--surface);color:var(--text)}
+.navitem.active{background:rgba(200,169,110,.12);color:var(--plat);font-weight:500}
+.navitem .ic{font-family:var(--fd);font-size:14px;width:18px;text-align:center}
+.navitem .nbadge{margin-left:auto;font-family:var(--fm);font-size:9px;background:var(--amber);color:var(--ink);border-radius:8px;padding:1px 6px;font-weight:700}
+.navitem .ndot{margin-left:auto;width:7px;height:7px;border-radius:50%}
+.main{padding:0;min-width:0;overflow:hidden}
+.tbar{padding:14px 22px;display:flex;gap:9px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.btn{background:none;border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:7px 13px;font-family:var(--fh);font-size:12px;font-weight:500;cursor:pointer;transition:all .12s}
+.btn:hover{border-color:var(--plat);color:var(--plat)}
+.btn-gold{background:var(--plat);border-color:var(--plat);color:var(--ink);font-weight:600}
+.btn-gold:hover{background:#d9bd87}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-sm{padding:5px 9px;font-size:11px}
+.save{font-family:var(--fm);font-size:11px;color:var(--dim);margin-left:auto}
+.panel{padding:20px 22px}
+.panel h2{font-family:var(--fd);font-size:18px;font-weight:400;margin-bottom:3px}
+.panel .ph-sub{font-size:12.5px;color:var(--sub);margin-bottom:16px}
+.pill{font-family:var(--fm);font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border2);color:var(--sub)}
+.pill.pat{color:var(--purple);border-color:rgba(155,140,255,.4)}
+.banner{margin-bottom:14px;padding:11px 15px;border-radius:8px;font-size:12.5px;line-height:1.5}
+.banner.seed{background:rgba(224,162,59,.08);border:1px solid rgba(224,162,59,.3);color:#e8cfa0}
+.banner.seed b{color:var(--amber)}
+.banner.live{background:rgba(70,196,184,.08);border:1px solid rgba(70,196,184,.3);color:#a8e0d8}
+.banner.live b{color:var(--teal)}
+.banner.err{background:rgba(224,85,85,.08);border:1px solid rgba(224,85,85,.35);color:#f0b0b0}
+.banner.err b{color:var(--red)}
+.empty{text-align:center;padding:54px 20px;color:var(--sub)}
+.empty .big{font-size:15px;margin-bottom:8px}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px}
+@media(max-width:680px){.stat-row{grid-template-columns:1fr 1fr}}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px 14px}
+.stat .lab{font-family:var(--fm);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--sub)}
+.stat .val{font-family:var(--fd);font-size:20px;color:var(--plat);margin-top:3px}
+.stat .val.sm{font-size:13.5px}
+table.je{width:100%;border-collapse:collapse;font-size:12px}
+table.je th{font-family:var(--fm);font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--sub);text-align:right;padding:8px 10px;border-bottom:1px solid var(--border2);position:sticky;top:0;background:#13233a}
+table.je th.l{text-align:left}
+table.je td{padding:7px 10px;border-bottom:1px solid rgba(44,74,110,.4);text-align:right;font-family:var(--fm)}
+table.je td.l{text-align:left;font-family:var(--fh)}
+table.je tr:hover td{background:rgba(200,169,110,.05)}
+.dr{color:var(--teal)}.cr{color:var(--purple)}
+.grp td{background:rgba(200,169,110,.08)!important;color:var(--plat);font-size:9px;letter-spacing:1px;text-transform:uppercase;font-family:var(--fm)}
+.scroll{max-height:440px;overflow:auto;border:1px solid var(--border);border-radius:9px}
+.more{padding:8px 14px;font-size:11px;color:var(--dim);font-family:var(--fm)}
+/* rule */
+.rule-grid{display:flex;gap:28px;flex-wrap:wrap;margin-bottom:14px}
+.rl{font-family:var(--fm);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--sub);display:block}
+.rv{font-size:15px;margin-top:3px}.rv.pat{color:var(--purple);font-family:var(--fm);font-size:13px}
+.gl-in{width:74px;background:var(--ink);border:1px solid var(--border2);color:var(--teal);border-radius:5px;padding:4px 7px;font-family:var(--fm);font-size:12px}
+.gl-in:focus{outline:none;border-color:var(--plat)}
+.mono{font-family:var(--fm)}
+/* preview */
+.pv-note{padding:10px 14px;font-size:12px;color:var(--sub);background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;line-height:1.5}
+.ov-chip{background:rgba(224,162,59,.2);color:var(--amber);padding:1px 6px;border-radius:4px;font-size:11px}
+.rst-all{color:var(--amber);cursor:pointer;text-decoration:underline;margin-left:6px}
+table.je.pv td.cell{padding:4px 6px;position:relative}
+.pv-in{width:94px;background:transparent;border:1px solid transparent;color:var(--text);border-radius:4px;padding:4px 6px;font-family:var(--fm);font-size:12px;text-align:right}
+.pv-in:hover{border-color:var(--border2)}
+.pv-in:focus{outline:none;border-color:var(--plat);background:var(--ink)}
+.pv-in.ov{color:var(--amber);background:rgba(224,162,59,.1);border-color:rgba(224,162,59,.35);font-weight:500}
+.cell .rst{position:absolute;right:0;top:50%;transform:translateY(-50%);color:var(--amber);cursor:pointer;font-size:12px}
+td.rtot{color:var(--plat);font-weight:500}.ov-dot{color:var(--amber);font-size:9px}
+/* summary */
+.acct-wrap{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:680px){.acct-wrap{grid-template-columns:1fr}}
+.acct-side h4{font-family:var(--fm);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+.acct-side.drs h4{color:var(--teal)}.acct-side.crs h4{color:var(--purple)}
+table.acct{width:100%;border-collapse:collapse;font-size:12.5px}
+table.acct td{padding:7px 4px;border-bottom:1px solid rgba(44,74,110,.4);font-family:var(--fm)}
+table.acct td.amt{text-align:right}
+table.acct .tname{color:var(--sub);font-family:var(--fh);font-size:11.5px}
+table.acct tr.sub td{border-top:2px solid var(--border2);border-bottom:none;padding-top:9px;color:var(--plat);font-weight:500}
+.acct-bar{height:6px;border-radius:3px;margin-top:3px}
+.tk.drs{color:var(--teal)}.tk.crs{color:var(--purple)}
+.bal{margin-top:16px;padding:12px 16px;border-radius:8px;font-family:var(--fm);font-size:13px;display:flex;justify-content:space-between;background:rgba(59,200,113,.1);border:1px solid rgba(59,200,113,.3);color:var(--green)}
+/* preset */
+.preset-item{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:6px;font-size:12px;color:var(--sub);cursor:default;margin-bottom:3px;background:var(--surface);border:1px solid var(--border)}
+.preset-item .pn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.preset-item .pa{color:var(--teal);cursor:pointer;font-size:11px}
+.preset-item .pd{color:var(--red);cursor:pointer;font-size:13px}
+.preset-empty{font-size:11px;color:var(--dim);padding:6px 9px;font-style:italic}
+.mini{width:100%;background:var(--ink);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:6px 9px;font-family:var(--fh);font-size:12px;margin-bottom:6px}
+.mini:focus{outline:none;border-color:var(--plat)}
+.foot{padding:14px 22px 0;font-size:11px;color:var(--dim);font-family:var(--fm)}
+.hidden{display:none}
+</style></head><body><div class="wrap">
+<div class="hdr">
+  <div class="eyebrow">ideaLAB · Cost-to-Journal Engine</div>
+  <h1>Tự động hoá phân bổ chi phí → bút toán · NutriNest</h1>
+  <div class="hdr-sub">Một engine dùng chung cho 6 quy trình. Mỗi tab một quy trình; mỗi quy trình đi qua 5 bước ở menu trái. Cấu hình định khoản lưu thành preset tái dùng.</div>
+  <div class="tabs" id="tabs"></div>
+</div>
+<div class="layout">
+  <div class="side" id="side"></div>
+  <div class="main" id="main"></div>
+</div>
+<script>
+
+const TAB_CONFIGS=[
+  {key:"gt",code:"F1",name:"Lương kênh GT",pattern:"manual_table",
+   desc:"Lương + bảo hiểm rải xuống từng NPP theo số lần phân bổ.",
+   sheet_hint:"Data import",dim_label:"Nhà phân phối",
+   components:[
+    {id:"luong",label:"Lương nhân viên",field:"luong",debit:"641101",credit:"334101",ce:"A0101"},
+    {id:"thuong",label:"Thưởng lễ 08/3",field:"thuong",debit:"641101",credit:"334101",ce:"A0503"},
+    {id:"bhxh",label:"BHXH (Cty 17.5%)",field:"bhxh",debit:"641101",credit:"338301",ce:"A0202"},
+    {id:"bhyt",label:"BHYT (Cty 3%)",field:"bhyt",debit:"641101",credit:"338401",ce:"A0201"},
+    {id:"bhtn",label:"BHTN (Cty 1%)",field:"bhtn",debit:"641101",credit:"338601",ce:"A0203"},
+    {id:"kpcd",label:"KPCĐ (Cty 2%)",field:"kpcd",debit:"641101",credit:"338201",ce:"A0301"}],
+   colmap:{customer:["customer","mã kh"],name:["tên khách","tên kh"],dept:["department"],
+    luong:["cp lương","lương"],thuong:["thưởng"],bhxh:["bhxh"],bhyt:["bhyt"],bhtn:["bhtn"],kpcd:["kpcđ","kpcd","công đoàn"]}},
+  {key:"mt",code:"F2",name:"Lương kênh MT",pattern:"driver_weighted",
+   desc:"Lương phân bổ theo doanh số từng chuỗi siêu thị (MT).",
+   sheet_hint:"Data import",dim_label:"Chuỗi MT",
+   components:[
+    {id:"luong",label:"Lương nhân viên",field:"luong",debit:"641102",credit:"334101",ce:"A0101"},
+    {id:"bhxh",label:"BHXH (Cty 17.5%)",field:"bhxh",debit:"641102",credit:"338301",ce:"A0202"},
+    {id:"bhyt",label:"BHYT (Cty 3%)",field:"bhyt",debit:"641102",credit:"338401",ce:"A0201"},
+    {id:"bhtn",label:"BHTN (Cty 1%)",field:"bhtn",debit:"641102",credit:"338601",ce:"A0203"},
+    {id:"kpcd",label:"KPCĐ (Cty 2%)",field:"kpcd",debit:"641102",credit:"338201",ce:"A0301"}],
+   colmap:{customer:["customer","mã chuỗi","chuỗi"],name:["tên chuỗi","tên kh"],dept:["department"],
+    luong:["lương"],bhxh:["bhxh"],bhyt:["bhyt"],bhtn:["bhtn"],kpcd:["kpcđ","kpcd"]}},
+  {key:"ecom",code:"F3",name:"Lương Ecom/SR/Horeca/XK",pattern:"fixed_pct",
+   desc:"Lương 4 kênh bán phân bổ theo tỷ lệ cố định đã thống nhất.",
+   sheet_hint:"Data import",dim_label:"Kênh bán",
+   components:[
+    {id:"luong",label:"Lương nhân viên",field:"luong",debit:"641103",credit:"334101",ce:"A0101"},
+    {id:"bhxh",label:"BHXH (Cty 17.5%)",field:"bhxh",debit:"641103",credit:"338301",ce:"A0202"},
+    {id:"bhyt",label:"BHYT (Cty 3%)",field:"bhyt",debit:"641103",credit:"338401",ce:"A0201"},
+    {id:"bhtn",label:"BHTN (Cty 1%)",field:"bhtn",debit:"641103",credit:"338601",ce:"A0203"},
+    {id:"kpcd",label:"KPCĐ (Cty 2%)",field:"kpcd",debit:"641103",credit:"338201",ce:"A0301"}],
+   colmap:{customer:["customer","mã kênh","kênh"],name:["tên kênh","tên kh"],dept:["department"],
+    luong:["lương"],bhxh:["bhxh"],bhyt:["bhyt"],bhtn:["bhtn"],kpcd:["kpcđ","kpcd"]}},
+  {key:"bonus",code:"F4",name:"Trả thưởng GT + Horeca",pattern:"direct_map",
+   desc:"Thưởng gán trực tiếp cho từng NPP/khách thụ hưởng.",
+   sheet_hint:"Data import",dim_label:"NPP / Khách",
+   components:[
+    {id:"thuong",label:"Tiền thưởng",field:"thuong",debit:"641704",credit:"331",ce:"A0505"}],
+   colmap:{customer:["customer","mã kh"],name:["tên khách","tên kh"],dept:["department"],
+    thuong:["thưởng","số tiền","tiền thưởng"]}},
+  {key:"travel",code:"F5",name:"Công tác phí ASM",pattern:"manual_table",
+   desc:"Công tác phí & xăng xe ASM rải theo NPP phụ trách.",
+   sheet_hint:"Data import",dim_label:"Nhà phân phối",
+   components:[
+    {id:"ctp",label:"Công tác phí",field:"ctp",debit:"641801",credit:"331",ce:"A0801"},
+    {id:"xang",label:"Xăng xe",field:"xang",debit:"641802",credit:"331",ce:"A0802"}],
+   colmap:{customer:["customer","mã npp","npp"],name:["tên npp","tên kh"],dept:["department"],
+    ctp:["công tác","ctp"],xang:["xăng","nhiên liệu"]}},
+  {key:"ship",code:"F6",name:"Phí giao hàng",pattern:"driver_weighted",
+   desc:"Phí giao hàng (12 NCC) phân bổ theo doanh số từng NPP nhận hàng.",
+   sheet_hint:"Data import",dim_label:"Nhà phân phối",
+   components:[
+    {id:"ship",label:"Phí giao hàng",field:"ship",debit:"641701",credit:"331",ce:"A0701"},
+    {id:"vat",label:"VAT đầu vào",field:"vat",debit:"1331",credit:"331",ce:""}],
+   colmap:{customer:["customer","mã npp","npp"],name:["tên npp","tên kh"],dept:["department"],
+    ship:["phí giao","phí ship","cước"],vat:["vat","thuế gtgt"]}}
+];
+const SEED_GT=[{"customer": "C00001", "name": "CÔNG TY CP XNK LAGER BEER VIỆT NAM", "dept": "D06", "luong": 25869712, "thuong": 100000, "bhxh": 2203857, "bhyt": 377804, "bhtn": 125935, "kpcd": 251869}, {"customer": "C00002", "name": "CTY TNHH DV & TM PHÚ MINH CƯỜNG", "dept": "D06", "luong": 12791712, "thuong": 100000, "bhxh": 1278107, "bhyt": 219104, "bhtn": 73035, "kpcd": 146069}, {"customer": "C00003", "name": "CÔNG TY TNHH THƯƠNG MẠI XUẤT NHẬP KHẨU QAH", "dept": "D06", "luong": 16853676, "thuong": 100000, "bhxh": 2226607, "bhyt": 381704, "bhtn": 127235, "kpcd": 254469}, {"customer": "C00004", "name": "HỘ KINH DOANH ĐÀO THỊ LAN THU", "dept": "D06", "luong": 14204635, "thuong": 100000, "bhxh": 1255357, "bhyt": 215204, "bhtn": 71735, "kpcd": 143469}, {"customer": "C00005", "name": "CÔNG TY TNHH THƯƠNG MẠI ÁNH NHÂN", "dept": "D06", "luong": 11973017, "thuong": 0, "bhxh": 153862, "bhyt": 26376, "bhtn": 8792, "kpcd": 17584}, {"customer": "C00006", "name": "HỘ KINH DOANH NGỌC ANH BẮC NINH", "dept": "D06", "luong": 17307196, "thuong": 100000, "bhxh": 2121423, "bhyt": 363672, "bhtn": 121224, "kpcd": 242448}, {"customer": "C00008", "name": "CÔNG TY TNHH TM HÙNG THẮNG", "dept": "D06", "luong": 43943887, "thuong": 0, "bhxh": 3175107, "bhyt": 544304, "bhtn": 181435, "kpcd": 362869}, {"customer": "C00011", "name": "CÔNG TY TNHH TM ANH ANH", "dept": "D06", "luong": 23703786, "thuong": 0, "bhxh": 2536487, "bhyt": 434826, "bhtn": 144942, "kpcd": 289884}, {"customer": "C00017", "name": "HỘ KINH DOANH TRẦN OANH", "dept": "D06", "luong": 11782632, "thuong": 100000, "bhxh": 1587987, "bhyt": 272226, "bhtn": 90742, "kpcd": 181484}, {"customer": "C00020", "name": "CÔNG TY TNHH MTV HẢI AN MC", "dept": "D06", "luong": 8130709, "thuong": 100000, "bhxh": 1102362, "bhyt": 188976, "bhtn": 62992, "kpcd": 125984}, {"customer": "C00022", "name": "CÔNG TY TNHH XNK E&B VIỆT NAM", "dept": "D06", "luong": 27801863, "thuong": 200000, "bhxh": 3022112, "bhyt": 518076, "bhtn": 172692, "kpcd": 345384}, {"customer": "C00024", "name": "CÔNG TY TNHH SX&TM DỊCH VỤ ANH TÙNG", "dept": "D06", "luong": 40281787, "thuong": 100000, "bhxh": 3022112, "bhyt": 518076, "bhtn": 172692, "kpcd": 345384}, {"customer": "C00025", "name": "CÔNG TY TNHH PHÁT TRIỂN ĐẦU TƯ THƯƠNG MẠI VÀ DỊCH VỤ QUANG ANH", "dept": "D06", "luong": 28917498, "thuong": 100000, "bhxh": 3022112, "bhyt": 518076, "bhtn": 172692, "kpcd": 345384}, {"customer": "C00029", "name": "HỘ KINH DOANH NGUYỄN THANH TÙNG", "dept": "D06", "luong": 47562965, "thuong": 300000, "bhxh": 4018423, "bhyt": 688872, "bhtn": 229624, "kpcd": 459248}, {"customer": "C00035", "name": "CÔNG TY TNHH DV&TM TUẤN HÀ", "dept": "D06", "luong": 23828350, "thuong": 200000, "bhxh": 3069923, "bhyt": 526272, "bhtn": 175424, "kpcd": 350848}, {"customer": "C00042", "name": "HỘ KINH DOANH NGUYỄN THẾ THÁM", "dept": "D06", "luong": 24253737, "thuong": 200000, "bhxh": 3094967, "bhyt": 530566, "bhtn": 176855, "kpcd": 353710}, {"customer": "C00043", "name": "CÔNG TY TNHH NÔNG NGHIỆP HỢP TÍN THÀNH", "dept": "D06", "luong": 15588102, "thuong": 100000, "bhxh": 2146467, "bhyt": 367966, "bhtn": 122655, "kpcd": 245310}, {"customer": "C00046", "name": "CÔNG TY TNHH LINH TRUNG.CO", "dept": "D06", "luong": 43488794, "thuong": 200000, "bhxh": 3094967, "bhyt": 530566, "bhtn": 176855, "kpcd": 353710}, {"customer": "C00047", "name": "HỘ KINH DOANH QUANG KHẢI", "dept": "D06", "luong": 42336544, "thuong": 0, "bhxh": 3002497, "bhyt": 514714, "bhtn": 171571, "kpcd": 343143}, {"customer": "C00050", "name": "CTY TNHH MTV THIỆN HƯNG THỊNH", "dept": "D06", "luong": 38636680, "thuong": 100000, "bhxh": 3950997, "bhyt": 677314, "bhtn": 225771, "kpcd": 451543}, {"customer": "C00053", "name": "HỘ KINH DOANH - NHÀ PHÂN PHỐI NHƯ Ý", "dept": "D06", "luong": 19860968, "thuong": 0, "bhxh": 1568372, "bhyt": 268864, "bhtn": 89621, "kpcd": 179243}, {"customer": "C00054", "name": "CÔNG TY TNHH NGUYÊN HÙNG", "dept": "D06", "luong": 16548193, "thuong": 0, "bhxh": 1568372, "bhyt": 268864, "bhtn": 89621, "kpcd": 179243}, {"customer": "C00055", "name": "HỘ KINH DOANH NHÀ PHÂN PHỐI THIÊN PHƯƠNG", "dept": "D06", "luong": 35351814, "thuong": 100000, "bhxh": 2516872, "bhyt": 431464, "bhtn": 143821, "kpcd": 287643}, {"customer": "C00060", "name": "HỘ KINH DOANH CỬA HÀNG VÂN TRANG", "dept": "D06", "luong": 19494017, "thuong": 0, "bhxh": 1568372, "bhyt": 268864, "bhtn": 89621, "kpcd": 179243}, {"customer": "C00061", "name": "DOANH NGHIỆP TN THƯƠNG MẠI DỊCH VỤ NGUYỄN TRƯỜNG", "dept": "D06", "luong": 16462890, "thuong": 0, "bhxh": 1568372, "bhyt": 268864, "bhtn": 89621, "kpcd": 179243}, {"customer": "C00062", "name": "CÔNG TY TNHH MTV THÙY DUNG GIA LAI", "dept": "D06", "luong": 49482867, "thuong": 411111, "bhxh": 3998944, "bhyt": 685533, "bhtn": 228511, "kpcd": 457022}, {"customer": "C00063", "name": "DNTN ĐẶNG THÁI", "dept": "D06", "luong": 30589558, "thuong": 261111, "bhxh": 2564819, "bhyt": 439683, "bhtn": 146561, "kpcd": 293122}, {"customer": "C00067", "name": "CTY TNHH TM - DV NHẬT TIẾN CS", "dept": "D06", "luong": 16773327, "thuong": 161111, "bhxh": 1616319, "bhyt": 277083, "bhtn": 92361, "kpcd": 184722}, {"customer": "C00071", "name": "CÔNG TY TNHH MTV DV & TM TRIỆU ĐẠT (NPP TRIỆU ĐẠT)", "dept": "D06", "luong": 13298075, "thuong": 0, "bhxh": 1587987, "bhyt": 272226, "bhtn": 90742, "kpcd": 181484}, {"customer": "C00077", "name": "CTY TNHH NPP HỒNG HẠNH", "dept": "D06", "luong": 28088538, "thuong": 0, "bhxh": 3022112, "bhyt": 518076, "bhtn": 172692, "kpcd": 345384}, {"customer": "C00078", "name": "CTY TNHH TM BẠCH MAI", "dept": "D06", "luong": 29288536, "thuong": 200000, "bhxh": 3022112, "bhyt": 518076, "bhtn": 172692, "kpcd": 345384}, {"customer": "C00099", "name": "CTY TNHH TM DV ĐT SƠN VINH", "dept": "D06", "luong": 35489850, "thuong": 100000, "bhxh": 2894617, "bhyt": 496220, "bhtn": 165407, "kpcd": 330813}, {"customer": "C00101", "name": "CTY TNHH XUẤT NHẬP KHẨU H&P", "dept": "D06", "luong": 68273542, "thuong": 400000, "bhxh": 3843117, "bhyt": 658820, "bhtn": 219607, "kpcd": 439213}, {"customer": "C00102", "name": "CN CTY CP XNK & ĐT CHỢ LỚN - TTTM CHOLIMEX", "dept": "D06", "luong": 49254619, "thuong": 100000, "bhxh": 3843117, "bhyt": 658820, "bhtn": 219607, "kpcd": 439213}, {"customer": "C00103", "name": "HKD CH YẾN - SÂM AN PHÚC", "dept": "D06", "luong": 34713003, "thuong": 0, "bhxh": 2408992, "bhyt": 412970, "bhtn": 137657, "kpcd": 275313}, {"customer": "C00105", "name": "CTY TNHH SỨC SỐNG VÀNG", "dept": "D06", "luong": 60276232, "thuong": 0, "bhxh": 1946117, "bhyt": 333620, "bhtn": 111207, "kpcd": 222413}, {"customer": "C00107", "name": "CÔNG TY TNHH THƯƠNG MẠI TRÍ VIỆT", "dept": "D06", "luong": 33868003, "thuong": 100000, "bhxh": 2179858, "bhyt": 373690, "bhtn": 124563, "kpcd": 249127}, {"customer": "C00108", "name": "CTY TNHH MTV V&C NGỌC CHÂU ", "dept": "D06", "luong": 34693465, "thuong": 0, "bhxh": 2179858, "bhyt": 373690, "bhtn": 124563, "kpcd": 249127}, {"customer": "C00125", "name": "CÔNG TY TNHH THƯƠNG MẠI SHIBA", "dept": "D06", "luong": 9160079, "thuong": 0, "bhxh": 997617, "bhyt": 171020, "bhtn": 57007, "kpcd": 114013}, {"customer": "C00127", "name": "HỘ KINH DOANH NHÀ PHÂN PHỐI HẢI ANH", "dept": "D06", "luong": 556233, "thuong": 0, "bhxh": 26367, "bhyt": 4520, "bhtn": 1507, "kpcd": 3013}, {"customer": "C00154", "name": "HỘ KINH DOANH PHẠM THỊ NHUNG", "dept": "D06", "luong": 10596344, "thuong": 100000, "bhxh": 2073612, "bhyt": 355476, "bhtn": 118492, "kpcd": 236984}, {"customer": "C00155", "name": "HỘ KINH DOANH PHAN CHÂU TUẤN", "dept": "D06", "luong": 21706387, "thuong": 100000, "bhxh": 1460492, "bhyt": 250370, "bhtn": 83457, "kpcd": 166913}, {"customer": "C01477", "name": "CTY TNHH TM NGỌC PHƯƠNG ANH", "dept": "D06", "luong": 28453276, "thuong": 0, "bhxh": 3002497, "bhyt": 514714, "bhtn": 171571, "kpcd": 343143}, {"customer": "C01503", "name": "HỘ KINH DOANH NHÀ PHÂN PHỐI TẬP MAI", "dept": "D06", "luong": 556233, "thuong": 0, "bhxh": 26367, "bhyt": 4520, "bhtn": 1507, "kpcd": 3013}, {"customer": "C01509", "name": "CÔNG TY TNHH ATV KHÁNH HÒA", "dept": "D06", "luong": 12792044, "thuong": 0, "bhxh": 1082747, "bhyt": 185614, "bhtn": 61871, "kpcd": 123743}, {"customer": "C01507", "name": "CÔNG TY TNHH SONG LONG VĨNH PHÁT", "dept": "D06", "luong": 556233, "thuong": 0, "bhxh": 26367, "bhyt": 4520, "bhtn": 1507, "kpcd": 3013}, {"customer": "C01513", "name": "CÔNG TY TNHH ĐẦU TƯ KINH DOANH THƯƠNG MẠI MẠNH THẮNG", "dept": "D06", "luong": 2824503, "thuong": 0, "bhxh": 201673, "bhyt": 34572, "bhtn": 11524, "kpcd": 23048}, {"customer": "C01515", "name": "CÔNG TY TNHH TM MTV HOÀNG KIM", "dept": "D06", "luong": 12658737, "thuong": 0, "bhxh": 1946117, "bhyt": 333620, "bhtn": 111207, "kpcd": 222413}, {"customer": "C01530", "name": "CÔNG TY TNHH PHÂN PHỐI HẢI SƠN", "dept": "D06", "luong": 20510968, "thuong": 0, "bhxh": 1568372, "bhyt": 268864, "bhtn": 89621, "kpcd": 179243}, {"customer": "C01531", "name": "CÔNG TY TRÁCH NHIỆM HỮU HẠN THƯƠNG MẠI DỊCH VỤ MỸ KIM TG", "dept": "D06", "luong": 53151773, "thuong": 100000, "bhxh": 4076858, "bhyt": 698890, "bhtn": 232963, "kpcd": 465927}, {"customer": "C00036", "name": "HỘ KINH DOANH PHẠM TUẤN QUỲNH", "dept": "D06", "luong": 2824503, "thuong": 0, "bhxh": 201673, "bhyt": 34572, "bhtn": 11524, "kpcd": 23048}, {"customer": "C01541", "name": "CÔNG TY TNHH ĐẦU TƯ DỊCH VỤ VÀ THƯƠNG MẠI TUẤN TÚ", "dept": "D06", "luong": 36303787, "thuong": 100000, "bhxh": 3022112, "bhyt": 518076, "bhtn": 172692, "kpcd": 345384}, {"customer": "C01542", "name": "CÔNG TY TNHH QA PHARMA", "dept": "D06", "luong": 45907333, "thuong": 200000, "bhxh": 3094967, "bhyt": 530566, "bhtn": 176855, "kpcd": 353710}, {"customer": "C01540", "name": "CÔNG TY TNHH TÂM BÌNH AN KHÊ", "dept": "D06", "luong": 16623328, "thuong": 61111, "bhxh": 1616319, "bhyt": 277083, "bhtn": 92361, "kpcd": 184722}, {"customer": "C01617", "name": "CÔNG TY TNHH THỰC PHẨM HUỲNH TẤN PHÁT", "dept": "D06", "luong": 55757235, "thuong": 100000, "bhxh": 4076858, "bhyt": 698890, "bhtn": 232963, "kpcd": 465927}, {"customer": "C01614", "name": "CÔNG TY TNHH MTV TRUNG NHẬT HUY", "dept": "D06", "luong": 44793081, "thuong": 200000, "bhxh": 4076858, "bhyt": 698890, "bhtn": 232963, "kpcd": 465927}, {"customer": "C01616", "name": "CÔNG TY TNHH PHÚC NGỌC 2020", "dept": "D06", "luong": 35106080, "thuong": 0, "bhxh": 2179858, "bhyt": 373690, "bhtn": 124563, "kpcd": 249127}, {"customer": "C01608", "name": "HỘ KINH DOANH ĐINH CHÍ DỮ", "dept": "D06", "luong": 13888926, "thuong": 100000, "bhxh": 997617, "bhyt": 171020, "bhtn": 57007, "kpcd": 114013}, {"customer": "C01622", "name": "CÔNG TY TNHH MỘT THÀNH VIÊN PT PHƯỚC TÍN", "dept": "D06", "luong": 43776352, "thuong": 100000, "bhxh": 3950997, "bhyt": 677314, "bhtn": 225771, "kpcd": 451543}, {"customer": "C01620", "name": "CÔNG TY TNHH PHÂN PHỐI MINH TOÀN", "dept": "D06", "luong": 13313711, "thuong": 111111, "bhxh": 1130694, "bhyt": 193833, "bhtn": 64611, "kpcd": 129222}, {"customer": "C01626", "name": "CÔNG TY TNHH THƯƠNG MẠI VÀ XUẤT NHẬP KHẨU NGỌC PHÁT", "dept": "D06", "luong": 16659119, "thuong": 0, "bhxh": 2121423, "bhyt": 363672, "bhtn": 121224, "kpcd": 242448}, {"customer": "C01615", "name": "CÔNG TY TNHH MỘT THÀNH VIÊN ĐỨC THANH PDP", "dept": "D06", "luong": 20981020, "thuong": 111111, "bhxh": 2101944, "bhyt": 360333, "bhtn": 120111, "kpcd": 240222}, {"customer": "C01624", "name": "CÔNG TY TNHH TM DV HẠNH NGUYÊN", "dept": "D06", "luong": 32448328, "thuong": 211111, "bhxh": 3050444, "bhyt": 522933, "bhtn": 174311, "kpcd": 348622}, {"customer": "C01827", "name": "CÔNG TY TNHH TÚ QUYÊN KHANG", "dept": "D06", "luong": 30985463, "thuong": 0, "bhxh": 1946117, "bhyt": 333620, "bhtn": 111207, "kpcd": 222413}, {"customer": "C01785", "name": "CÔNG TY TNHH MTV AN DUYÊN", "dept": "D06", "luong": 9465460, "thuong": 0, "bhxh": 1587987, "bhyt": 272226, "bhtn": 90742, "kpcd": 181484}, {"customer": "C01832", "name": "CÔNG TY TNHH XUÂN PHÚC BP", "dept": "D06", "luong": 14378922, "thuong": 0, "bhxh": 153862, "bhyt": 26376, "bhtn": 8792, "kpcd": 17584}, {"customer": "C01644", "name": "CÔNG TY TNHH THƯƠNG MẠI QUÂN LỘC PHÁT", "dept": "D06", "luong": 40484922, "thuong": 100000, "bhxh": 3022112, "bhyt": 518076, "bhtn": 172692, "kpcd": 345384}, {"customer": "C00092", "name": "CÔNG TY TNHH TM DV PHÂN PHỐI THỰC PHẨM NGÔ GIA", "dept": "D06", "luong": 12015460, "thuong": 0, "bhxh": 2073612, "bhyt": 355476, "bhtn": 118492, "kpcd": 236984}, {"customer": "C01636", "name": "CÔNG TY TNHH DUYÊN HÙNG AG", "dept": "D06", "luong": 29067772, "thuong": 100000, "bhxh": 1946117, "bhyt": 333620, "bhtn": 111207, "kpcd": 222413}, {"customer": "C01642", "name": "CÔNG TY TNHH TM HỒNG THẮM", "dept": "D06", "luong": 14522494, "thuong": 0, "bhxh": 997617, "bhyt": 171020, "bhtn": 57007, "kpcd": 114013}, {"customer": "C01850", "name": "CÔNG TY TNHH THƯƠNG MẠI DƯỢC THANH BÌNH", "dept": "D06", "luong": 31031170, "thuong": 300000, "bhxh": 3022112, "bhyt": 518076, "bhtn": 172692, "kpcd": 345384}, {"customer": "C01857", "name": "CÔNG TY CỔ PHẦN DỊCH VỤ THƯƠNG MẠI PHONG QUYÊN", "dept": "D06", "luong": 21836478, "thuong": 100000, "bhxh": 2073612, "bhyt": 355476, "bhtn": 118492, "kpcd": 236984}, {"customer": "C01848", "name": "CÔNG TY TNHH MỘT THÀNH VIÊN THƯƠNG MẠI DỊCH VỤ SẢN XUẤT HÙNG MẠNH", "dept": "D06", "luong": 23998153, "thuong": 0, "bhxh": 3022112, "bhyt": 518076, "bhtn": 172692, "kpcd": 345384}, {"customer": "C01853", "name": "CÔNG TY TNHH SẢN XUẤT THƯƠNG MẠI PHÚ GIANG", "dept": "D06", "luong": 19515460, "thuong": 0, "bhxh": 153862, "bhyt": 26376, "bhtn": 8792, "kpcd": 17584}, {"customer": "C01849", "name": "CÔNG TY TNHH MTV TM DV ĐT KHANG THỊNH", "dept": "D06", "luong": 556233, "thuong": 0, "bhxh": 26367, "bhyt": 4520, "bhtn": 1507, "kpcd": 3013}, {"customer": "C01621", "name": "HỘ KINH DOANH NGÔ THỊ QUÝ", "dept": "D06", "luong": 13399503, "thuong": 0, "bhxh": 201673, "bhyt": 34572, "bhtn": 11524, "kpcd": 23048}, {"customer": "C01852", "name": "CÔNG TY TNHH THƯƠNG MẠI KL NAM KHÁNH", "dept": "D06", "luong": 13493870, "thuong": 100000, "bhxh": 1175217, "bhyt": 201466, "bhtn": 67155, "kpcd": 134310}, {"customer": "C01870", "name": "CÔNG TY TNHH THƯƠNG MẠI & DỊCH VỤ TOÀN PHÁT LĐ", "dept": "D06", "luong": 30342558, "thuong": 211111, "bhxh": 2101944, "bhyt": 360333, "bhtn": 120111, "kpcd": 240222}, {"customer": "C01843", "name": "CÔNG TY TNHH PHÂN PHỐI VÀ DỊCH VỤ HÀ LINH", "dept": "D06", "luong": 12716812, "thuong": 0, "bhxh": 201673, "bhyt": 34572, "bhtn": 11524, "kpcd": 23048}, {"customer": "C01879", "name": "CÔNG TY TNHH THƯƠNG MẠI VÀ DỊCH VỤ 3T&3B", "dept": "D06", "luong": 13678486, "thuong": 0, "bhxh": 226717, "bhyt": 38866, "bhtn": 12955, "kpcd": 25910}, {"customer": "C01855", "name": "CÔNG TY TNHH GIA PHÚC LA GI", "dept": "D06", "luong": 8060967, "thuong": 0, "bhxh": 619872, "bhyt": 106264, "bhtn": 35421, "kpcd": 70843}, {"customer": "C01877", "name": "CÔNG TY TNHH TRƯỜNG TÂM PHÁT", "dept": "D06", "luong": 38724308, "thuong": 100000, "bhxh": 3022112, "bhyt": 518076, "bhtn": 172692, "kpcd": 345384}, {"customer": "C01613", "name": "CÔNG TY TNHH PNT MAI VÀNG", "dept": "D06", "luong": 31158943, "thuong": 261111, "bhxh": 2564819, "bhyt": 439683, "bhtn": 146561, "kpcd": 293122}, {"customer": "Grand Total", "name": "", "dept": "D06", "luong": 2159147919, "thuong": 7200000, "bhxh": 178969000, "bhyt": 30680400, "bhtn": 10226800, "kpcd": 20453600}];
+
+</script>
+<script>
+const LS_KEY='idealab_nutrinest_v3';
+const PRESET_KEY='idealab_presets_v1';
+let activeKey='gt';
+let activeSec='data';   // data | rule | preview | je | summary | preset
+const STATE={};
+TAB_CONFIGS.forEach(c=>STATE[c.key]={data:[],src:{label:'Chưa có dữ liệu',type:'empty'},overrides:{},rule:clone({pattern:c.pattern,components:c.components,colmap:c.colmap})});
+STATE.gt.data=cleanRecords(SEED_GT,cfgOf('gt'));
+STATE.gt.src={label:'Dữ liệu mẫu GT thật (Data import 02/2026)',type:'seed'};
+let PRESETS=[];  // {id,name,pattern,components,colmap,ts}
+
+function clone(o){return JSON.parse(JSON.stringify(o));}
+const fmt=n=>Math.round(n||0).toLocaleString('vi-VN');
+const ACCT_NAMES={"641101":"CP nhân viên BH (GT)","641102":"CP nhân viên BH (MT)","641103":"CP nhân viên BH (kênh khác)","641701":"CP vận chuyển","641704":"CP khuyến mại/thưởng","641801":"CP công tác","641802":"CP nhiên liệu","334101":"Phải trả người lao động","338301":"BHXH phải nộp","338401":"BHYT phải nộp","338601":"BHTN phải nộp","338201":"KPCĐ phải nộp","331":"Phải trả người bán","1331":"Thuế GTGT được khấu trừ"};
+function cfgOf(k){return TAB_CONFIGS.find(c=>c.key===k);}
+function curComps(k){return STATE[k].rule.components;}
+
+function cleanRecords(arr,cfg){
+  const fields=cfg.components.map(c=>c.field);
+  return (arr||[]).filter(r=>{
+    if(!r)return false;const c=(r.customer||'').toString().trim();
+    if(!c||/total|tổng|grand/i.test(c))return false;
+    return fields.reduce((s,f)=>s+(+r[f]||0),0)>0;
+  });
+}
+
+// OVERRIDE
+function ovKey(c,f){return c+'|'+f;}
+function effective(key,rec,field){const ov=STATE[key].overrides,k=ovKey(rec.customer,field);return (k in ov)?ov[k]:(+rec[field]||0);}
+function isOverridden(key,c,f){return ovKey(c,f) in STATE[key].overrides;}
+function setOverride(c,f,v){STATE[activeKey].overrides[ovKey(c,f)]=Math.round(parseFloat((v||'').toString().replace(/[^\d.-]/g,''))||0);renderMain();autosave();}
+function resetCell(c,f){delete STATE[activeKey].overrides[ovKey(c,f)];renderMain();autosave();}
+function resetAllOv(){STATE[activeKey].overrides={};renderMain();autosave();}
+function ovCount(key){return Object.keys(STATE[key].overrides).length;}
+
+// ENGINE
+function buildJournal(key){
+  const S=STATE[key],lines=[];
+  S.data.forEach(rec=>{curComps(key).forEach(m=>{
+    const v=effective(key,rec,m.field);if(Math.abs(v)<0.5)return;
+    lines.push({label:m.label,dim:rec.name||rec.customer,cust:rec.customer,debit:m.debit,credit:m.credit,ce:m.ce||'',amount:v,field:m.field});
+  });});
+  return {lines,tot:lines.reduce((s,l)=>s+l.amount,0)};
+}
+
+// AUTOSAVE
+function autosave(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify({state:STATE,active:activeKey,sec:activeSec,ts:Date.now()}));flagSave('✓ Đã tự lưu '+new Date().toLocaleTimeString('vi-VN'));}
+  catch(e){flagSave('⚠ Tự lưu tắt — dùng 💾');}
+}
+function tryRestore(){
+  try{const raw=localStorage.getItem(LS_KEY);if(raw){const st=JSON.parse(raw);
+    if(st&&st.state){Object.keys(st.state).forEach(k=>{if(STATE[k])STATE[k]=st.state[k];});if(st.active)activeKey=st.active;if(st.sec)activeSec=st.sec;flagSave('↺ Khôi phục '+new Date(st.ts).toLocaleString('vi-VN'));}}}catch(e){}
+  try{const p=localStorage.getItem(PRESET_KEY);if(p)PRESETS=JSON.parse(p)||[];}catch(e){}
+}
+function savePresets(){try{localStorage.setItem(PRESET_KEY,JSON.stringify(PRESETS));}catch(e){}}
+function flagSave(m){const el=document.getElementById('saveStatus');if(el)el.textContent=m;}
+
+// PRESET library (config thuần: pattern + components + colmap)
+function snapshotConfig(key){const S=STATE[key];return{pattern:S.rule.pattern,components:clone(S.rule.components),colmap:clone(S.rule.colmap||cfgOf(key).colmap)};}
+function saveCurrentPreset(){
+  const nameEl=document.getElementById('presetName');
+  const name=(nameEl&&nameEl.value||'').trim()||(cfgOf(activeKey).name+' '+new Date().toLocaleDateString('vi-VN'));
+  const snap=snapshotConfig(activeKey);
+  PRESETS.push({id:'p'+Date.now(),name,...snap,ts:Date.now()});
+  savePresets();renderMain();flagSave('✓ Đã lưu preset “'+name+'”');
+}
+function applyPreset(id){
+  const p=PRESETS.find(x=>x.id===id);if(!p)return;
+  STATE[activeKey].rule={pattern:p.pattern,components:clone(p.components),colmap:clone(p.colmap)};
+  renderAll();autosave();flagSave('✓ Đã áp preset “'+p.name+'” vào '+cfgOf(activeKey).name);
+}
+function deletePreset(id){PRESETS=PRESETS.filter(x=>x.id!==id);savePresets();renderMain();}
+function exportPresets(){
+  const blob=new Blob([JSON.stringify({presets:PRESETS,ts:Date.now()},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='idealab_presets_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);
+  flagSave('💾 Đã xuất '+PRESETS.length+' preset');
+}
+function pickPresetFile(){document.getElementById('presetInput').click();}
+function onPresetFile(ev){
+  const file=ev.target.files[0];if(!file)return;const reader=new FileReader();
+  reader.onload=e=>{try{const j=JSON.parse(e.target.result);const arr=j.presets||j;if(!Array.isArray(arr))throw new Error('Sai định dạng');
+    const ids=new Set(PRESETS.map(p=>p.id));arr.forEach(p=>{if(!ids.has(p.id))PRESETS.push(p);});savePresets();renderMain();flagSave('✓ Nhập '+arr.length+' preset');
+  }catch(err){flagSave('✗ Lỗi nhập preset: '+err.message);}};
+  reader.readAsText(file);ev.target.value='';
+}
+
+// TABS + NAV
+function renderTabs(){
+  document.getElementById('tabs').innerHTML=TAB_CONFIGS.map(c=>{
+    const has=STATE[c.key].data.length>0,ov=ovCount(c.key);
+    return `<button class="tab ${c.key===activeKey?'active':''}" onclick="switchTab('${c.key}')"><span class="dot ${has?'live':''}"></span><span class="code">${c.code}</span>${c.name}${ov?`<span class="ovbadge">${ov}</span>`:''}</button>`;
+  }).join('');
+}
+function switchTab(k){activeKey=k;renderAll();autosave();}
+function gotoSec(s){activeSec=s;renderSide();renderMain();autosave();}
+
+function renderSide(){
+  const S=STATE[activeKey],has=S.data.length>0,J=has?buildJournal(activeKey):{lines:[]};
+  const items=[
+    {s:'data',ic:'①',t:'Dữ liệu nguồn',badge:has?S.data.length:''},
+    {s:'rule',ic:'②',t:'Cấu hình & định khoản'},
+    {s:'preview',ic:'③',t:'Preview (sửa tay)',ov:ovCount(activeKey)},
+    {s:'je',ic:'④',t:'Journal Entry',badge:has?J.lines.length:''},
+    {s:'summary',ic:'⑤',t:'Summary tài khoản'}
+  ];
+  let nav=items.map(it=>`<div class="navitem ${activeSec===it.s?'active':''}" onclick="gotoSec('${it.s}')">
+    <span class="ic">${it.ic}</span><span>${it.t}</span>${it.ov?`<span class="nbadge">${it.ov}</span>`:(it.badge?`<span style="margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--dim)">${it.badge}</span>`:'')}</div>`).join('');
+  // preset section
+  let plist=PRESETS.length?PRESETS.map(p=>`<div class="preset-item"><span class="pn" title="${p.name} · ${p.pattern}">${p.name}</span><span class="pa" onclick="applyPreset('${p.id}')" title="Áp vào tab hiện tại">áp</span><span class="pd" onclick="deletePreset('${p.id}')" title="Xoá">×</span></div>`).join(''):'<div class="preset-empty">Chưa có preset nào</div>';
+  document.getElementById('side').innerHTML=`
+    <div class="side-grp"><div class="gl">5 bước quy trình</div>${nav}</div>
+    <div class="side-grp"><div class="gl">⬇ Preset cấu hình</div>
+      <div class="navitem ${activeSec==='preset'?'active':''}" onclick="gotoSec('preset')"><span class="ic">⚙</span><span>Quản lý preset</span><span style="margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--dim)">${PRESETS.length}</span></div>
+      ${plist}
+    </div>`;
+}
+
+// IMPORT
+function pickFile(){document.getElementById('fileInput').click();}
+function onFilePicked(ev){
+  const file=ev.target.files[0];if(!file)return;const cfg=cfgOf(activeKey);const reader=new FileReader();
+  reader.onload=e=>{try{const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+    const recs=cleanRecords(parseSheet(wb,cfg),cfg);
+    if(!recs.length){flagSave('✗ Không thấy dòng hợp lệ');renderMain('Không thấy dòng hợp lệ trong file. Cần cột mã đối tượng và ít nhất một cấu phần.');return;}
+    STATE[activeKey].data=recs;STATE[activeKey].src={label:file.name+' · '+recs.length+' dòng',type:'upload'};STATE[activeKey].overrides={};
+    activeSec='data';renderAll();autosave();
+  }catch(err){renderMain('Lỗi đọc file: '+err.message);}};
+  reader.readAsArrayBuffer(file);ev.target.value='';
+}
+function parseSheet(wb,cfg){
+  const cm=STATE[activeKey].rule.colmap||cfg.colmap;
+  const names=wb.SheetNames;
+  let target=names.find(n=>new RegExp(cfg.sheet_hint+'$','i').test(n.trim()))||names.find(n=>new RegExp(cfg.sheet_hint,'i').test(n))||names[0];
+  const rows=XLSX.utils.sheet_to_json(wb.Sheets[target],{header:1,raw:true,defval:null});
+  const custKeys=cm.customer;let hi=-1;
+  for(let i=0;i<Math.min(rows.length,25);i++){const line=(rows[i]||[]).map(c=>(c==null?'':c.toString().toLowerCase()));if(line.some(c=>custKeys.some(k=>c.includes(k)))){hi=i;break;}}
+  if(hi<0)throw new Error('Không định vị được dòng tiêu đề (cột: '+custKeys.join('/')+').');
+  const head=rows[hi].map(c=>(c==null?'':c.toString().toLowerCase()));
+  const find=keys=>head.findIndex(h=>keys.some(k=>h.includes(k)));
+  const ci={};Object.keys(cm).forEach(f=>ci[f]=find(cm[f]));
+  const num=v=>{if(v==null)return 0;if(typeof v==='number')return v;const n=parseFloat(v.toString().replace(/[^\d.-]/g,''));return isNaN(n)?0:n;};
+  const out=[];
+  for(let i=hi+1;i<rows.length;i++){const r=rows[i];if(!r)continue;const cust=ci.customer>=0?r[ci.customer]:null;if(!cust)continue;
+    const rec={customer:(cust||'').toString().trim(),name:(ci.name>=0?r[ci.name]:'')||'',dept:(ci.dept>=0?r[ci.dept]:'')||''};
+    cfg.components.forEach(m=>{rec[m.field]=Math.round(num(ci[m.field]>=0?r[ci[m.field]]:0));});out.push(rec);}
+  return out;
+}
+
+// STATE save/load/clear
+function saveStateFile(){const blob=new Blob([JSON.stringify({state:STATE,active:activeKey,ts:Date.now()},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nutrinest_state_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);flagSave('💾 Đã lưu trạng thái');}
+function pickState(){document.getElementById('stateInput').click();}
+function onStatePicked(ev){const file=ev.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const st=JSON.parse(e.target.result);if(!st||!st.state)throw new Error('File không hợp lệ');Object.keys(st.state).forEach(k=>{if(STATE[k])STATE[k]=st.state[k];});if(st.active)activeKey=st.active;renderAll();autosave();}catch(err){renderMain('File trạng thái lỗi: '+err.message);}};reader.readAsText(file);ev.target.value='';}
+function clearTab(){const c=cfgOf(activeKey);STATE[activeKey]={data:[],src:{label:'Chưa có dữ liệu',type:'empty'},overrides:{},rule:clone({pattern:c.pattern,components:c.components,colmap:c.colmap})};activeSec='data';renderAll();autosave();}
+function editGL(i,side,val){curComps(activeKey)[i][side]=val.trim();renderMain();autosave();}
+
+// EXPORT
+function exportXlsx(){const cfg=cfgOf(activeKey),J=buildJournal(activeKey);if(!J.lines.length){flagSave('✗ Chưa có dữ liệu');return;}
+  const data=[['NutriNest — '+cfg.code+' '+cfg.name+' — JE'],[STATE[activeKey].src.label],[ovCount(activeKey)?('Có '+ovCount(activeKey)+' ô điều chỉnh tay'):'Không điều chỉnh tay'],[],['Cấu phần',cfg.dim_label,'Mã','Nợ','Có','CE','Số tiền','Sửa tay?']];
+  J.lines.forEach(l=>data.push([l.label,l.dim,l.cust,l.debit,l.credit,l.ce,Math.round(l.amount),isOverridden(activeKey,l.cust,l.field)?'CÓ':'']));
+  data.push(['','','','','','TỔNG',Math.round(J.tot),'']);
+  const drA={},crA={};J.lines.forEach(l=>{drA[l.debit]=(drA[l.debit]||0)+l.amount;crA[l.credit]=(crA[l.credit]||0)+l.amount;});
+  data.push([],['TÁC ĐỘNG ĐẦU TÀI KHOẢN'],['Đầu TK','Tên','Bên','','','','Số tiền']);
+  Object.keys(drA).sort().forEach(k=>data.push([k,ACCT_NAMES[k]||'','Nợ','','','',Math.round(drA[k])]));
+  Object.keys(crA).sort().forEach(k=>data.push([k,ACCT_NAMES[k]||'','Có','','','',Math.round(crA[k])]));
+  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(data);ws['!cols']=[{wch:22},{wch:32},{wch:10},{wch:8},{wch:8},{wch:7},{wch:15},{wch:11}];
+  XLSX.utils.book_append_sheet(wb,ws,cfg.code);XLSX.writeFile(wb,'JE_NutriNest_'+cfg.code+'.xlsx');
+}
+
+// ───── RENDER ─────
+function renderAll(){renderTabs();renderSide();renderMain();}
+function tbar(){const S=STATE[activeKey],cfg=cfgOf(activeKey);
+  return `<div class="tbar">
+    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="onFilePicked(event)"/>
+    <input type="file" id="stateInput" accept=".json" style="display:none" onchange="onStatePicked(event)"/>
+    <input type="file" id="presetInput" accept=".json" style="display:none" onchange="onPresetFile(event)"/>
+    <button class="btn btn-gold" onclick="pickFile()">⬆ Nạp file — ${cfg.name}</button>
+    <button class="btn" onclick="exportXlsx()" ${S.data.length?'':'disabled'}>⬇ Export JE</button>
+    <button class="btn" onclick="saveStateFile()">💾 Lưu</button>
+    <button class="btn" onclick="pickState()">📂 Nạp lại</button>
+    <button class="btn" onclick="clearTab()" ${S.data.length?'':'disabled'}>🗑 Xoá</button>
+    <span class="save" id="saveStatus"></span></div>`;
+}
+function renderMain(errMsg){
+  const cfg=cfgOf(activeKey),S=STATE[activeKey];
+  let inner='';
+  if(activeSec==='preset'){inner=panelPreset(cfg,S);}
+  else if(!S.data.length){
+    inner=`<div class="panel"><div class="empty"><div class="big">Tab <b style="color:var(--plat)">${cfg.name}</b> chưa có dữ liệu</div><div style="font-size:12.5px">Bấm <b style="color:var(--plat)">"Nạp file"</b> ở trên. Engine sẽ đọc → phân bổ (<b style="color:var(--purple)">${cfg.pattern}</b>) → sinh bút toán → tác động tài khoản.</div></div></div>`;
+  }else{
+    const J=buildJournal(activeKey);
+    if(activeSec==='data')inner=panelData(cfg,S);
+    else if(activeSec==='rule')inner=panelRule(cfg,S);
+    else if(activeSec==='preview')inner=panelPreview(cfg,S);
+    else if(activeSec==='je')inner=panelJE(cfg,J);
+    else if(activeSec==='summary')inner=panelSummary(cfg,J);
+  }
+  const err=errMsg?`<div class="banner err"><b>✗</b> ${errMsg}</div>`:'';
+  document.getElementById('main').innerHTML=tbar()+'<div class="panel">'+err+inner+'</div>';
+  renderSide();
+}
+
+function srcBanner(S){return S.src.type==='upload'?`<div class="banner live"><b>✓ File bạn nạp:</b> ${S.src.label}.</div>`:S.src.type==='seed'?`<div class="banner seed"><b>Dữ liệu mẫu:</b> ${S.src.label}.</div>`:'';}
+
+function panelData(cfg,S){
+  const ths=cfg.components.map(m=>`<th>${m.label.split(' ')[0]}</th>`).join('');
+  const rows=S.data.slice(0,300).map(r=>`<tr><td class="l">${r.customer}</td><td class="l" style="color:var(--sub)">${r.name||''}</td><td class="l">${r.dept||''}</td>${cfg.components.map(m=>`<td>${fmt(r[m.field])}</td>`).join('')}</tr>`).join('');
+  return `<h2>① Dữ liệu nguồn</h2><div class="ph-sub">${S.data.length} ${cfg.dim_label} · engine đã đọc & làm sạch (loại dòng tổng/rỗng).</div>${srcBanner(S)}
+    <div class="scroll"><table class="je"><thead><tr><th class="l">Mã</th><th class="l">Tên</th><th class="l">Dept</th>${ths}</tr></thead><tbody>${rows}</tbody></table></div>
+    ${S.data.length>300?`<div class="more">+ ${S.data.length-300} dòng nữa…</div>`:''}`;
+}
+function panelRule(cfg,S){
+  const rows=curComps(activeKey).map((m,i)=>`<tr><td class="l">${m.label}</td><td class="l mono" style="color:var(--dim)">${m.field}</td><td><input class="gl-in" value="${m.debit}" onchange="editGL(${i},'debit',this.value)"/></td><td><input class="gl-in" value="${m.credit}" onchange="editGL(${i},'credit',this.value)"/></td><td class="l mono" style="color:var(--dim)">${m.ce||'—'}</td></tr>`).join('');
+  return `<h2>② Cấu hình quy tắc & định khoản</h2><div class="ph-sub">Sửa mã Nợ/Có cho khớp sổ NutriNest — áp dụng ngay vào bút toán. Lưu lại thành preset ở menu trái để tái dùng.</div>
+    <div class="rule-grid"><div><span class="rl">Pattern phân bổ</span><div class="rv pat">${cfg.pattern}</div></div><div><span class="rl">Đối tượng</span><div class="rv">${cfg.dim_label}</div></div><div><span class="rl">Số cấu phần</span><div class="rv">${curComps(activeKey).length}</div></div></div>
+    <table class="je"><thead><tr><th class="l">Cấu phần</th><th class="l">Field</th><th class="l">Nợ</th><th class="l">Có</th><th class="l">CE</th></tr></thead><tbody>${rows}</tbody></table>
+    <div style="margin-top:14px;display:flex;gap:8px;align-items:center"><input class="mini" id="presetName" placeholder="Đặt tên preset (vd: GT chuẩn MISA)" style="max-width:280px;margin:0"/><button class="btn btn-gold btn-sm" onclick="saveCurrentPreset()">⊕ Lưu cấu hình thành preset</button></div>`;
+}
+function panelPreview(cfg,S){
+  const comps=curComps(activeKey);const nOv=ovCount(activeKey);
+  const ths=comps.map(m=>`<th>${m.label.split(' ')[0]}</th>`).join('');
+  const rows=S.data.slice(0,300).map(r=>{
+    const tds=comps.map(m=>{const base=+r[m.field]||0,eff=effective(activeKey,r,m.field),ov=isOverridden(activeKey,r.customer,m.field);
+      return `<td class="cell"><input class="pv-in ${ov?'ov':''}" value="${eff}" onchange="setOverride('${(r.customer||'').replace(/'/g,'')}','${m.field}',this.value)" title="${ov?('Gốc: '+fmt(base)):'Số engine tính'}"/>${ov?`<span class="rst" title="Về gốc ${fmt(base)}" onclick="resetCell('${(r.customer||'').replace(/'/g,'')}','${m.field}')">↺</span>`:''}</td>`;
+    }).join('');
+    const rtot=comps.reduce((s,m)=>s+effective(activeKey,r,m.field),0);
+    return `<tr><td class="l">${r.customer}</td><td class="l" style="color:var(--sub)">${(r.name||'').slice(0,26)}</td>${tds}<td class="rtot">${fmt(rtot)}</td></tr>`;
+  }).join('');
+  return `<h2>③ Preview phân bổ — sửa tay được</h2><div class="ph-sub">Số gốc engine giữ nguyên; chỉnh tay lưu thành lớp đè.</div>
+    <div class="pv-note">Ô <span class="ov-chip">vàng</span> = đã đè. ${nOv?`<b style="color:var(--amber)">${nOv} ô đang đè.</b> <span class="rst-all" onclick="resetAllOv()">↺ Về gốc tất cả</span>`:'Chưa có ô nào bị đè.'}</div>
+    <div class="scroll"><table class="je pv"><thead><tr><th class="l">Mã</th><th class="l">${cfg.dim_label}</th>${ths}<th>Tổng dòng</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${S.data.length>300?`<div class="more">+ ${S.data.length-300} dòng nữa…</div>`:''}`;
+}
+function panelJE(cfg,J){
+  const g={};J.lines.forEach(l=>(g[l.label]=g[l.label]||[]).push(l));
+  let h='<thead><tr><th class="l">Cấu phần / '+cfg.dim_label+'</th><th class="l">Mã</th><th>Nợ</th><th>Có</th><th>CE</th><th>Số tiền</th></tr></thead><tbody>';
+  Object.keys(g).forEach(lab=>{const rows=g[lab],sub=rows.reduce((s,l)=>s+l.amount,0);
+    h+=`<tr class="grp"><td class="l" colspan="5">${lab} — ${rows.length} ${cfg.dim_label}</td><td>${fmt(sub)}</td></tr>`;
+    rows.forEach(l=>{const ov=isOverridden(activeKey,l.cust,l.field);h+=`<tr><td class="l" style="color:var(--sub)">${l.dim}${ov?' <span class="ov-dot">●</span>':''}</td><td class="l">${l.cust}</td><td class="dr">${l.debit}</td><td class="cr">${l.credit}</td><td style="color:var(--dim)">${l.ce}</td><td>${fmt(l.amount)}</td></tr>`;});});
+  return `<h2>④ Journal Entry đầu ra</h2><div class="ph-sub">${J.lines.length} dòng · tổng ${fmt(J.tot)} đ · ● = có điều chỉnh tay.</div><div class="scroll"><table class="je">${h}</tbody></table></div>`;
+}
+function panelSummary(cfg,J){
+  const dr={},cr={};J.lines.forEach(l=>{dr[l.debit]=(dr[l.debit]||0)+l.amount;cr[l.credit]=(cr[l.credit]||0)+l.amount;});
+  const drT=Object.values(dr).reduce((s,v)=>s+v,0),crT=Object.values(cr).reduce((s,v)=>s+v,0),mx=Math.max(...Object.values(dr),...Object.values(cr),1);
+  const side=(obj,cls,col)=>{const ks=Object.keys(obj).sort((a,b)=>obj[b]-obj[a]);let h=ks.map(k=>`<tr><td class="tk ${cls}">${k}<div class="tname">${ACCT_NAMES[k]||''}</div><div class="acct-bar" style="width:${Math.round(obj[k]/mx*100)}%;background:${col}"></div></td><td class="amt">${fmt(obj[k])}</td></tr>`).join('');h+=`<tr class="sub"><td>Tổng ${cls==='drs'?'Nợ':'Có'}</td><td class="amt">${fmt(Object.values(obj).reduce((s,v)=>s+v,0))}</td></tr>`;return h;};
+  const stat=`<div class="stat-row"><div class="stat"><div class="lab">${cfg.dim_label}</div><div class="val">${STATE[activeKey].data.length}</div></div><div class="stat"><div class="lab">Dòng JE</div><div class="val">${J.lines.length}</div></div><div class="stat"><div class="lab">Tổng phát sinh</div><div class="val sm">${fmt(J.tot)} đ</div></div><div class="stat"><div class="lab">Ô đã đè</div><div class="val">${ovCount(activeKey)}</div></div></div>`;
+  return `<h2>⑤ Summary — tác động đầu tài khoản</h2><div class="ph-sub">Tổng hợp từ bút toán (đã gồm điều chỉnh tay).</div>${stat}
+    <div class="acct-wrap"><div class="acct-side drs"><h4>▸ Bên Nợ — chi phí ghi nhận</h4><table class="acct"><tbody>${side(dr,'drs','rgba(70,196,184,.35)')}</tbody></table></div><div class="acct-side crs"><h4>◂ Bên Có — nghĩa vụ phải trả</h4><table class="acct"><tbody>${side(cr,'crs','rgba(155,140,255,.35)')}</tbody></table></div></div>
+    <div class="bal"><span>✓ ΣNợ = ΣCó</span><span>${fmt(drT)} = ${fmt(crT)} đ · lệch ${fmt(Math.abs(drT-crT))}</span></div>`;
+}
+function panelPreset(cfg,S){
+  const list=PRESETS.length?PRESETS.map(p=>{
+    const comps=p.components.map(c=>`${c.field}→${c.debit}/${c.credit}`).join(' · ');
+    return `<tr><td class="l">${p.name}</td><td class="l mono" style="color:var(--purple)">${p.pattern}</td><td class="l" style="color:var(--sub);font-size:11px">${comps}</td><td class="l">${new Date(p.ts).toLocaleDateString('vi-VN')}</td><td class="l"><span class="pa" style="color:var(--teal);cursor:pointer" onclick="applyPreset('${p.id}')">áp vào ${cfg.code}</span> · <span class="pd" style="color:var(--red);cursor:pointer" onclick="deletePreset('${p.id}')">xoá</span></td></tr>`;
+  }).join(''):'<tr><td colspan="5" style="color:var(--dim);padding:18px;text-align:center">Chưa có preset. Vào ② Cấu hình → "Lưu cấu hình thành preset".</td></tr>';
+  return `<h2>⚙ Quản lý preset cấu hình</h2><div class="ph-sub">Preset lưu cấu hình thuần (pattern + định khoản + cách map cột) — không kèm dữ liệu hay điều chỉnh tay. Tái dùng across kỳ và across khách.</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <input class="mini" id="presetName" placeholder="Tên preset từ cấu hình tab ${cfg.code} hiện tại" style="max-width:320px;margin:0"/>
+      <button class="btn btn-gold btn-sm" onclick="saveCurrentPreset()">⊕ Lưu cấu hình tab ${cfg.code}</button>
+      <button class="btn btn-sm" onclick="exportPresets()">⬇ Xuất tất cả (.json)</button>
+      <button class="btn btn-sm" onclick="pickPresetFile()">⬆ Nhập preset (.json)</button>
+    </div>
+    <div class="scroll"><table class="je"><thead><tr><th class="l">Tên preset</th><th class="l">Pattern</th><th class="l">Định khoản</th><th class="l">Ngày</th><th class="l">Thao tác</th></tr></thead><tbody>${list}</tbody></table></div>`;
+}
+
+tryRestore();renderAll();autosave();
+
+</script>
+</body></html>
