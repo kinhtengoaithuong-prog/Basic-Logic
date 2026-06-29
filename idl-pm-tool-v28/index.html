@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture Builder — L0 / DB / DM / Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:wght@400;500;600&family=Outfit:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap&subset=latin,latin-ext,vietnamese" rel="stylesheet">
+<style>
+  :root{
+    --ink:#f4f2ec; --navy-900:#ffffff; --navy-800:#faf8f3; --navy-700:#f0ede5;
+    --navy-600:#e6e2d8; --navy-500:#d8d3c6; --line:#ddd8cc; --line-soft:#e8e4da;
+    --plat:#2a2e38; --plat-dim:#5a6173; --plat-mute:#8b91a3;
+    --gold:#a8842e; --gold-dim:#8a6d22;
+    --p0:#0e8fa8; --p1:#1f8a6b; --p2:#5b51c4; --p3:#c23a68; --hi:#d63a39;
+    --radius:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink); color:var(--plat); font-family:'Outfit',sans-serif; font-weight:300;
+    height:100vh; overflow:hidden; display:flex; flex-direction:column;}
+  .topbar{display:flex; align-items:center; gap:10px; padding:11px 18px; background:var(--navy-900);
+    border-bottom:1px solid var(--line); flex-shrink:0;}
+  .topbar h1{font-family:'Noto Serif Display',serif; font-weight:500; font-size:17px; color:var(--plat);}
+  .topbar h1 span{color:var(--gold); font-size:12px; font-weight:400; margin-left:6px;}
+  .topbar .spacer{flex:1}
+  .btn{font-family:'Outfit',sans-serif; font-size:13px; font-weight:400; background:var(--navy-700);
+    color:var(--plat); border:1px solid var(--line); padding:7px 12px; border-radius:var(--radius);
+    cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:5px; white-space:nowrap;}
+  .btn:hover{background:var(--navy-600); border-color:var(--navy-500)}
+  .btn.gold{background:linear-gradient(180deg,var(--gold),var(--gold-dim)); color:#fff; border:none; font-weight:500;}
+  .btn.gold:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent}
+  .conn-switch{display:flex; align-items:center; gap:4px; margin-right:6px; padding-right:10px; border-right:1px solid var(--line);}
+  .project-bar{display:flex; align-items:center; gap:8px; padding:8px 18px; background:var(--navy-800); border-bottom:1px solid var(--line); flex-shrink:0; font-size:12px;}
+  .project-bar .pb-label{font-size:11px; color:var(--plat-mute); text-transform:uppercase; letter-spacing:.4px;}
+  .project-bar select{background:var(--navy-900); color:var(--plat); border:1px solid var(--line); border-radius:6px; padding:6px 9px; font-family:'Outfit',sans-serif; font-size:12.5px; min-width:170px;}
+  .btn.sm{padding:5px 10px; font-size:12px;}
+  .pb-status{margin-left:auto; font-size:11.5px; color:var(--plat-mute); font-family:'DM Mono',monospace;}
+  .cs-btn{width:30px; height:30px; display:flex; align-items:center; justify-content:center; background:var(--navy-700);
+    color:var(--plat-dim); border:1px solid var(--line); border-radius:6px; cursor:pointer; font-size:16px; transition:all .15s;}
+  .cs-btn:hover{background:var(--navy-600)}
+  .cs-btn.active{background:var(--gold); color:#fff; border-color:var(--gold-dim);}
+  .main{display:flex; flex:1; min-height:0;}
+  .sidebar{width:320px; flex-shrink:0; background:var(--navy-900); border-right:1px solid var(--line); overflow-y:auto; padding:16px;}
+  .sidebar::-webkit-scrollbar{width:8px}
+  .sidebar::-webkit-scrollbar-thumb{background:var(--navy-600); border-radius:4px}
+  .resizer{width:6px; flex-shrink:0; cursor:col-resize; background:var(--line-soft); transition:background .15s; position:relative;}
+  .resizer:hover, .resizer.active{background:var(--gold)}
+  .resizer::after{content:'⋮'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:var(--plat-mute); font-size:14px; pointer-events:none;}
+  .panel-title{font-family:'Noto Serif Display',serif; font-size:14px; font-weight:500; color:var(--gold);
+    margin-bottom:12px; padding-bottom:7px; border-bottom:1px solid var(--line-soft);}
+  .add-trigger{width:100%; justify-content:center; margin-bottom:14px;}
+  .form-wrap{display:none; background:var(--navy-800); border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:16px;}
+  .form-wrap.open{display:block}
+  .field{margin-bottom:10px}
+  .field label{display:block; font-size:10.5px; font-weight:400; color:var(--plat-dim); margin-bottom:4px; letter-spacing:.3px; text-transform:uppercase;}
+  .field input, .field select{width:100%; background:var(--navy-900); color:var(--plat); border:1px solid var(--line);
+    border-radius:6px; padding:7px 9px; font-family:'Outfit',sans-serif; font-size:13px; font-weight:300;}
+  .field input:focus, .field select:focus{outline:none; border-color:var(--gold-dim);}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .tier-specific{border-top:1px dashed var(--line); margin-top:10px; padding-top:10px;}
+  .tier-specific-label{font-size:10px; color:var(--gold); text-transform:uppercase; letter-spacing:.4px; margin-bottom:8px;}
+  .deps-box{max-height:120px; overflow-y:auto; background:var(--navy-900); border:1px solid var(--line); border-radius:6px; padding:5px;}
+  .deps-box::-webkit-scrollbar{width:6px}
+  .deps-box::-webkit-scrollbar-thumb{background:var(--navy-600); border-radius:3px}
+  .dep-item{display:flex; align-items:center; gap:6px; padding:4px 5px; border-radius:4px; font-size:12px; cursor:pointer;}
+  .dep-item:hover{background:var(--navy-700)}
+  .dep-item input{width:auto; margin:0}
+  .dep-empty{font-size:11.5px; color:var(--plat-mute); padding:5px; font-style:italic;}
+  .form-actions{display:flex; gap:7px; margin-top:12px;}
+  .form-actions .btn{flex:1; justify-content:center; font-size:12.5px; padding:7px 8px;}
+  .hint{font-size:10.5px; color:var(--plat-mute); margin-top:5px; line-height:1.5;}
+  .combo-wrap{position:relative;}
+  .combo-list{position:absolute; top:100%; left:0; right:0; z-index:30; background:var(--navy-900); border:1px solid var(--line);
+    border-radius:6px; margin-top:2px; max-height:120px; overflow-y:auto; display:none;}
+  .combo-list.show{display:block}
+  .combo-opt{padding:6px 9px; font-size:12.5px; cursor:pointer;}
+  .combo-opt:hover{background:var(--navy-700)}
+  .combo-head{padding:5px 9px 3px; font-size:9.5px; color:var(--plat-mute); text-transform:uppercase; letter-spacing:.4px;}
+  .combo-new{padding:7px 9px; font-size:12px; cursor:pointer; color:var(--gold); border-top:1px solid var(--line-soft); background:var(--navy-800);}
+  .combo-new:hover{background:var(--navy-700)}
+  .acc-group{margin-bottom:6px; border:1px solid var(--line-soft); border-radius:7px; overflow:hidden;}
+  .acc-head{display:flex; align-items:center; gap:8px; padding:9px 11px; cursor:pointer; background:var(--navy-800); font-size:12.5px; font-weight:400; transition:background .15s;}
+  .acc-head:hover{background:var(--navy-700)}
+  .acc-caret{transition:transform .2s; font-size:10px; color:var(--plat-mute);}
+  .acc-group.open .acc-caret{transform:rotate(90deg)}
+  .acc-tier-name{flex:1; color:var(--plat);}
+  .acc-count{font-size:11px; color:var(--plat-mute); background:var(--navy-700); padding:1px 7px; border-radius:9px;}
+  .acc-body{display:none; padding:5px;}
+  .acc-group.open .acc-body{display:block}
+  .acc-sub{margin:4px 2px; border-color:var(--line);}
+  .acc-subhead{background:var(--navy-900); padding:7px 9px; font-size:11.5px;}
+  .acc-subhead:hover{background:var(--navy-700)}
+  .acc-sub .acc-tier-name{color:var(--plat-dim);}
+  .cfg-panel{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:18px;}
+  .cfg-chip{display:flex; align-items:center; gap:5px; padding:5px 10px; border-radius:14px; border:1px solid var(--line); background:var(--navy-900); cursor:pointer; font-size:11.5px; color:var(--plat-dim); transition:all .12s; user-select:none;}
+  .cfg-chip:hover{border-color:var(--navy-500)}
+  .cfg-chip.on{background:var(--bg-accent,#eef0f7); border-color:var(--gold-dim); color:var(--plat);}
+  .cfg-chip .dot{width:7px; height:7px; border-radius:50%; background:var(--line-soft);}
+  .cfg-chip.on .dot{background:var(--gold);}
+  .nl-item{display:flex; align-items:center; gap:7px; padding:6px 8px; border-radius:5px; background:var(--navy-900);
+    border:1px solid var(--line-soft); margin-bottom:4px; cursor:pointer; transition:all .15s; font-size:12px;}
+  .nl-item:hover{border-color:var(--navy-500)}
+  .nl-item.sel{border-color:var(--gold-dim); background:var(--navy-800)}
+  .nl-dot{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+  .nl-name{flex:1; color:var(--plat); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .nl-zone{font-size:9.5px; color:var(--plat-mute); padding:1px 5px; border-radius:8px; background:var(--navy-700); flex-shrink:0;}
+  .canvas-wrap{flex:1; position:relative; overflow:hidden; display:flex; flex-direction:column; background:radial-gradient(circle at 1px 1px, var(--line-soft) 1px, transparent 0) 0 0/26px 26px, var(--ink);}
+  #viewArea{background:radial-gradient(circle at 1px 1px, var(--line-soft) 1px, transparent 0) 0 0/26px 26px, var(--ink);}
+  .canvas-toolbar{position:absolute; top:14px; right:14px; z-index:20; display:flex; gap:6px; background:var(--navy-900); padding:6px; border-radius:var(--radius); border:1px solid var(--line);}
+  .ct-btn{width:30px; height:30px; display:flex; align-items:center; justify-content:center; background:var(--navy-700); border:1px solid var(--line); border-radius:6px; cursor:pointer; color:var(--plat); font-size:15px;}
+  .ct-btn:hover{background:var(--navy-600)}
+  #zoomLabel{display:flex; align-items:center; padding:0 7px; font-size:12px; color:var(--plat-dim); min-width:44px; justify-content:center; cursor:pointer;}
+  .legend{position:absolute; bottom:14px; left:14px; z-index:20; background:var(--navy-900); border:1px solid var(--line); border-radius:var(--radius); padding:11px 13px; font-size:11px;}
+  .legend-row{display:flex; align-items:center; gap:7px; margin-bottom:5px;}
+  .legend-row:last-child{margin-bottom:0}
+  .legend-sw{width:20px; height:12px; border-radius:3px; flex-shrink:0;}
+  #svg{width:100%; height:100%; cursor:grab;}
+  #svg.panning{cursor:grabbing;}
+  .tier-label{font-family:'Noto Serif Display',serif; font-size:14px; font-weight:500; fill:var(--gold);}
+  .tier-sub{font-family:'Outfit',sans-serif; font-size:10.5px; fill:var(--plat-mute);}
+  .zone-label{font-family:'Outfit',sans-serif; font-size:11px; font-weight:500; fill:var(--plat-dim);}
+  .node-g{cursor:move;}
+  .node-rect{transition:filter .15s;}
+  .node-g:hover .node-rect{filter:brightness(1.06);}
+  .node-g.selected .node-rect{stroke-width:2.5 !important;}
+  .node-title{font-family:'Outfit',sans-serif; font-size:12.5px; font-weight:500;}
+  .node-subtitle{font-family:'Outfit',sans-serif; font-size:10px; font-weight:300;}
+  .node-foot{font-family:'DM Mono',monospace; font-size:9px;}
+  .node-badge-txt{font-family:'DM Mono',monospace; font-size:9px;}
+  /* list view */
+  #listView{display:none; flex:1; overflow:auto; padding:18px; background:var(--ink);}
+  #ganttView{display:none; flex:1; overflow:auto; padding:0; background:var(--ink);}
+  #ganttView::-webkit-scrollbar{width:9px;height:9px}
+  #ganttView::-webkit-scrollbar-thumb{background:var(--navy-600);border-radius:4px}
+  .gantt-empty{padding:40px; text-align:center; color:var(--plat-mute); font-size:13px;}
+  .g-scale{display:inline-flex; border:1px solid var(--line); border-radius:6px; overflow:hidden;}
+  .gs-btn{padding:4px 11px; background:var(--navy-900); color:var(--plat-dim); border:none; border-right:1px solid var(--line); cursor:pointer; font-family:'Outfit',sans-serif; font-size:12px;}
+  .gs-btn:last-child{border-right:none}
+  .gs-btn:hover{background:var(--navy-700)}
+  .gs-btn.active{background:var(--gold); color:#fff;}
+  #financeView{display:none; flex:1; overflow:auto; background:var(--ink);}
+  #financeView::-webkit-scrollbar{width:9px;height:9px}
+  #financeView::-webkit-scrollbar-thumb{background:var(--navy-600);border-radius:4px}
+  .fn-cards{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px;}
+  .fn-card{background:var(--navy-900); border:1px solid var(--line); border-radius:10px; padding:14px 16px;}
+  .fn-card-label{font-size:10.5px; color:var(--plat-mute); text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px;}
+  .fn-card-val{font-family:'Noto Serif Display',serif; font-size:21px; font-weight:600;}
+  .fn-card-sub{font-size:11px; color:var(--plat-dim); margin-top:3px; font-family:'DM Mono',monospace;}
+  .fn-bars{background:var(--navy-900); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:16px;}
+  .fn-bar-row{display:flex; align-items:center; gap:12px; margin-bottom:8px; font-size:12px;}
+  .fn-bar-row:last-child{margin-bottom:0}
+  .fn-bar-label{width:130px; flex-shrink:0; color:var(--plat-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .fn-bar-track{flex:1; height:14px; background:var(--navy-700); border-radius:7px; overflow:hidden;}
+  .fn-bar-charge{height:100%; background:linear-gradient(90deg,#6b61cf,#473da3); border-radius:7px;}
+  .fn-bar-vals{width:280px; flex-shrink:0; text-align:right; font-family:'DM Mono',monospace; font-size:11px; color:var(--plat-dim);}
+  .fn-table{margin-top:0}
+  .fn-num{text-align:right; font-family:'DM Mono',monospace; white-space:nowrap;}
+  .fn-name{font-weight:500; color:var(--plat);}
+  .fn-group td{background:var(--navy-700)!important; font-weight:600; color:var(--gold); font-size:11px; text-transform:uppercase; letter-spacing:.4px;}
+  .fn-subtotal td{background:var(--navy-800)!important; font-weight:500; border-top:1px solid var(--line);}
+  #listView::-webkit-scrollbar{width:9px;height:9px}
+  #listView::-webkit-scrollbar-thumb{background:var(--navy-600);border-radius:4px}
+  .lv-table{width:100%; border-collapse:collapse; font-size:12px; background:var(--navy-900); border-radius:8px; overflow:hidden;}
+  .lv-table th{background:var(--navy-800); color:var(--plat-dim); text-align:left; padding:9px 10px; font-weight:500; font-size:10.5px; text-transform:uppercase; letter-spacing:.3px; position:sticky; top:0; border-bottom:1px solid var(--line);}
+  .lv-table td{padding:8px 10px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+  .lv-table tr:hover td{background:var(--navy-800);}
+  .lv-tier-row td{background:var(--navy-700)!important; font-weight:500; color:var(--gold); font-size:11px; text-transform:uppercase; letter-spacing:.4px;}
+  .lv-total-row td{background:var(--navy-800)!important; font-weight:500; border-top:2px solid var(--gold);}
+  .lv-pill{display:inline-block; padding:1px 7px; border-radius:9px; font-size:10px; font-weight:500;}
+  .lv-link{color:var(--gold); text-decoration:none; font-size:11px;}
+  .lv-link:hover{text-decoration:underline;}
+  .lv-name{font-weight:500; color:var(--plat);}
+  /* filter panel */
+  .filter-bar{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:9px 18px; background:var(--navy-800); border-bottom:1px solid var(--line); font-size:12px;}
+  .filter-group{display:flex; align-items:center; gap:5px;}
+  .filter-group > span{font-size:10.5px; color:var(--plat-mute); text-transform:uppercase; letter-spacing:.3px;}
+  .fchip{padding:3px 9px; border-radius:12px; border:1px solid var(--line); background:var(--navy-900); cursor:pointer; font-size:11px; color:var(--plat-dim); transition:all .12s; user-select:none;}
+  .fchip:hover{border-color:var(--navy-500)}
+  .fchip.on{background:var(--gold); color:#fff; border-color:var(--gold-dim);}
+  .filter-reset{font-size:11px; color:var(--plat-mute); cursor:pointer; text-decoration:underline;}
+  .filter-count{font-size:11px; color:var(--plat-dim); margin-left:auto;}
+  .filter-modetoggle{cursor:pointer; color:var(--gold); font-size:11px; padding:2px 9px; border:1px solid var(--gold-dim); border-radius:5px; user-select:none;}
+  .filter-modetoggle:hover{background:rgba(168,132,46,0.12)}
+  .lv-dim{opacity:0.34;}
+  .lv-dim:hover{opacity:0.75;}
+  .view-toggle{display:flex; gap:0; border:1px solid var(--line); border-radius:7px; overflow:hidden; margin-right:6px;}
+  .vt-btn{padding:6px 12px; background:var(--navy-700); color:var(--plat-dim); border:none; cursor:pointer; font-size:12.5px; font-family:'Outfit',sans-serif;}
+  .vt-btn.active{background:var(--gold); color:#fff;}
+  /* links editor in form */
+  .links-list{margin-bottom:6px;}
+  .link-row{display:flex; gap:5px; margin-bottom:5px; align-items:center;}
+  .link-row input{flex:1; font-size:12px; padding:6px 8px;}
+  .link-row input.lbl{flex:0 0 90px;}
+  .link-del{cursor:pointer; color:var(--p3); font-size:14px; padding:0 4px;}
+  .link-add{font-size:11.5px; color:var(--gold); cursor:pointer; display:inline-flex; align-items:center; gap:4px;}
+  .conn{fill:none; stroke-width:1.4; opacity:.5;}
+  .empty-hint{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; color:var(--plat-mute); font-size:14px; pointer-events:none;}
+  .modal-bg{position:fixed; inset:0; background:rgba(40,35,25,.35); z-index:100; display:none; align-items:center; justify-content:center;}
+  .modal-bg.show{display:flex}
+  .modal{background:var(--navy-900); border:1px solid var(--line); border-radius:12px; padding:22px; width:480px; max-width:90vw;}
+  .modal h3{font-family:'Noto Serif Display',serif; font-weight:500; color:var(--gold); margin-bottom:12px;}
+  .modal textarea{width:100%; min-height:200px; background:var(--navy-800); color:var(--plat); border:1px solid var(--line); border-radius:6px; padding:10px; font-family:'DM Mono',monospace; font-size:12px; resize:vertical;}
+  .modal-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:14px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Architecture Builder <span>L0 · DB · DM · Dashboard</span></h1>
+  <input id="clientInput" placeholder="Tên khách hàng..." oninput="setClient(this.value)"
+    style="background:var(--navy-800);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--plat);width:180px;margin-left:8px">
+  <div class="spacer"></div>
+  <div class="view-toggle">
+    <button class="vt-btn active" id="vtCanvas" onclick="setViewMode('canvas')">⊞ Canvas</button>
+    <button class="vt-btn" id="vtList" onclick="setViewMode('list')">☰ List</button>
+    <button class="vt-btn" id="vtGantt" onclick="setViewMode('gantt')">▭ Gantt</button>
+    <button class="vt-btn" id="vtFinance" onclick="setViewMode('finance')">₫ Finance</button>
+  </div>
+  <div class="conn-switch">
+    <span style="font-size:11px;color:var(--plat-mute);margin-right:3px">Canh:</span>
+    <button class="cs-btn va-btn active" onclick="setVAlign('top',this)" title="Canh trên">⤒</button>
+    <button class="cs-btn va-btn" onclick="setVAlign('center',this)" title="Canh giữa">⊟</button>
+    <button class="cs-btn va-btn" onclick="setVAlign('bottom',this)" title="Canh dưới">⤓</button>
+  </div>
+  <div class="conn-switch">
+    <span style="font-size:11px;color:var(--plat-mute);margin-right:3px">Đường:</span>
+    <button class="cs-btn active" data-cs="ortho" onclick="setConnStyle('ortho',this)" title="Gấp khúc">⌐</button>
+    <button class="cs-btn" data-cs="curve" onclick="setConnStyle('curve',this)" title="Cong">∿</button>
+    <button class="cs-btn" data-cs="straight" onclick="setConnStyle('straight',this)" title="Thẳng">╱</button>
+  </div>
+  <button class="btn ghost" onclick="seedDemo()">↺ Seed</button>
+  <button class="btn" onclick="autoLayout()">⊞ Sắp xếp</button>
+  <button class="btn" onclick="exportWord()">📄 Word</button>
+  <button class="btn gold" onclick="exportSVG()">⬇ SVG</button>
+</div>
+
+<div class="project-bar">
+  <span class="pb-label">Dự án:</span>
+  <select id="projectSelect" onchange="onSelectProject(this.value)"><option value="">— Chọn dự án —</option></select>
+  <button class="btn sm" onclick="newProject()">＋ Mới</button>
+  <button class="btn sm gold" onclick="openCurrentAsProject()">💾 Lưu</button>
+  <button class="btn sm" onclick="saveProjectFile()">⬇ Lưu ra file</button>
+  <button class="btn sm" onclick="document.getElementById('openFileInput').click()">📂 Mở file</button>
+  <input type="file" id="openFileInput" accept=".json,.arch.json" style="display:none" onchange="openProjectFile(this)">
+  <button class="btn sm ghost" onclick="confirmDeleteProject()">🗑 Xóa</button>
+  <span class="pb-status" id="saveStatus">Chưa lưu dự án</span>
+</div>
+
+<div class="main">
+  <div class="sidebar" id="sidebar">
+    <button class="btn gold add-trigger" onclick="toggleForm()" id="addTrigger">＋ Thêm node</button>
+    <div class="form-wrap" id="formWrap">
+      <div class="panel-title" id="formTitle" style="margin-bottom:10px">Node mới</div>
+      <div class="field">
+        <label>Tầng</label>
+        <select id="f-tier" onchange="onTierChange()">
+          <option value="L0">Tầng 0 — Giao thức nhập liệu</option>
+          <option value="DB">Tầng 1 — Data Source</option>
+          <option value="DM">Tầng 2 — Data Model</option>
+          <option value="Dashboard">Tầng 3 — Dashboard</option>
+        </select>
+      </div>
+      <div class="field"><label>Tên node</label><input id="f-name" placeholder="VD: eCOM model"></div>
+      <div class="field"><label>Mô tả ngắn</label><input id="f-sub" placeholder="VD: Sale · Ops · CX"></div>
+      <div class="row2">
+        <div class="field"><label>Phase</label><select id="f-phase"><option value="0">Phase 0</option><option value="1">Phase 1</option><option value="2" selected>Phase 2</option><option value="3">Phase 3</option></select></div>
+        <div class="field"><label>Ưu tiên</label><select id="f-prio"><option value="high">High</option><option value="med" selected>Medium</option><option value="low">Low</option></select></div>
+      </div>
+      <div class="field"><label>Trạng thái</label><select id="f-status"><option value="done">Done</option><option value="prog">In-progress</option><option value="plan" selected>Planned</option></select></div>
+      <div id="tierFields"></div>
+
+      <div class="tier-specific">
+        <div class="tier-specific-label">⏱ Effort & Cost</div>
+        <div class="row2">
+          <div class="field"><label>Effort level</label>
+            <select id="f-effort"><option value="">—</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option></select>
+          </div>
+          <div class="field"><label>Man-day</label><input id="f-manday" type="number" min="0" step="0.5" value="0" oninput="recalcAcceptance()"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Bill rate/ngày</label><input id="f-rate" type="number" min="0" step="100000" value="2000000" oninput="recalcAcceptance()"></div>
+          <div class="field"><label>Charge khách (nghiệm thu)</label><input id="f-acceptance" type="number" min="0" oninput="markAcceptanceManual()"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Cost rate/ngày</label><input id="f-costrate" type="number" min="0" step="100000" value="1000000" oninput="recalcMargin()"></div>
+          <div class="field"><label>Lợi nhuận (ước tính)</label><input id="f-margin" type="text" readonly style="background:var(--navy-800);color:var(--p1)"></div>
+        </div>
+        <div class="hint" id="acceptHint">Charge tự tính = man-day × bill rate. Lợi nhuận = charge − man-day × cost rate.</div>
+      </div>
+
+      <div class="tier-specific">
+        <div class="tier-specific-label">📅 Timeline</div>
+        <div class="row2">
+          <div class="field"><label>Bắt đầu</label><input id="f-start" type="date" oninput="updateDurHint()"></div>
+          <div class="field"><label>Kết thúc</label><input id="f-end" type="date" oninput="updateDurHint()"></div>
+        </div>
+        <div class="hint" id="durHint">Nhập ngày để hiện trên Gantt.</div>
+      </div>
+
+      <div class="tier-specific">
+        <div class="tier-specific-label">📎 Tài liệu đính kèm</div>
+        <div class="links-list" id="f-links"></div>
+        <span class="link-add" onclick="addLinkRow()">＋ Thêm link</span>
+      </div>
+
+      <div class="field" style="margin-top:10px">
+        <label>Phụ thuộc vào (tầng trên / cùng tầng)</label>
+        <div class="deps-box" id="f-deps"></div>
+        <div class="hint">Connector tự vẽ theo lựa chọn.</div>
+      </div>
+      <div class="form-actions">
+        <button class="btn gold" id="saveBtn" onclick="saveNode()">＋ Thêm</button>
+        <button class="btn" id="dupBtn" onclick="duplicateNode()" style="display:none" title="Nhân bản node này">⧉ Nhân bản</button>
+        <button class="btn" id="delBtn" onclick="deleteNode()" style="display:none">🗑</button>
+        <button class="btn ghost" onclick="closeForm()">Đóng</button>
+      </div>
+    </div>
+    <div class="panel-title">Hiển thị trên node</div>
+    <div class="cfg-panel" id="cfgPanel"></div>
+
+    <div class="panel-title">Danh sách node (<span id="nodeCount">0</span>)</div>
+    <div id="nodeList"></div>
+  </div>
+
+  <div class="resizer" id="resizer"></div>
+
+  <div class="canvas-wrap">
+    <div class="filter-bar" id="filterBar"></div>
+    <div style="position:relative;flex:1;overflow:hidden" id="viewArea">
+      <div class="canvas-toolbar">
+        <div class="ct-btn" onclick="zoomBy(0.87)" title="Thu nhỏ">－</div>
+        <div id="zoomLabel" onclick="resetView()" title="Về 100%">100%</div>
+        <div class="ct-btn" onclick="zoomBy(1.15)" title="Phóng to">＋</div>
+        <div class="ct-btn" onclick="resetView()" title="Về giữa">⊙</div>
+      </div>
+      <div class="legend">
+        <div style="font-size:9.5px;color:var(--plat-mute);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Trạng thái</div>
+        <div class="legend-row"><span class="legend-sw" style="background:#d63a39"></span> Chưa làm</div>
+        <div class="legend-row"><span class="legend-sw" style="background:#f0a821"></span> Đang làm</div>
+        <div class="legend-row"><span class="legend-sw" style="background:#1f8a6b"></span> Hoàn thành</div>
+        <div style="height:7px"></div>
+        <div class="legend-row"><span class="legend-sw" style="background:transparent;border:2px solid var(--hi)"></span> Ưu tiên cao</div>
+      </div>
+      <div class="empty-hint" id="emptyHint">Chưa có node. Nhấn “Seed” để bắt đầu.</div>
+      <svg id="svg"></svg>
+      <div id="listView"></div>
+      <div id="ganttView"></div>
+      <div id="financeView"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="importModal">
+  <div class="modal">
+    <h3>Import JSON</h3>
+    <textarea id="importText" placeholder="Dán JSON đã export..."></textarea>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeImport()">Hủy</button>
+      <button class="btn gold" onclick="doImport()">Nạp dữ liệu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TIERS=['L0','DB','DM','Dashboard'];
+const TIER_META={
+  L0:{idx:0,label:'Tầng 0 — Giao thức nhập liệu',sub:'Cách dữ liệu vào hệ thống'},
+  DB:{idx:1,label:'Tầng 1 — Data Sources',sub:'Hệ thống nguồn'},
+  DM:{idx:2,label:'Tầng 2 — Data Model',sub:'Logic nghiệp vụ · measures'},
+  Dashboard:{idx:3,label:'Tầng 3 — Dashboard',sub:'Báo cáo người dùng cuối'}
+};
+const PHASE_COLOR={
+  '0':{fill:'#d6f0f5',stroke:'#1ba0bb',accent:'#0e8fa8',text:'#0a6f83'},
+  '1':{fill:'#dcf0e8',stroke:'#2f9d7c',accent:'#1f8a6b',text:'#176b53'},
+  '2':{fill:'#e8e6f7',stroke:'#6b61cf',accent:'#5b51c4',text:'#473da3'},
+  '3':{fill:'#f8e3ea',stroke:'#c95a82',accent:'#c23a68',text:'#9e2c52'}
+};
+const STATUS_META={
+  plan:{txt:'○', color:'#ffffff', bg:'#d63a39', label:'Planned', dot:'#d63a39'},
+  prog:{txt:'◐', color:'#5a3d08', bg:'#f0a821', label:'In-prog', dot:'#e89414'},
+  done:{txt:'✓', color:'#ffffff', bg:'#1f8a6b', label:'Done', dot:'#1f8a6b'}
+};
+const TIER_FIELDS={
+  L0:[{key:'method',label:'Giao thức',seed:['Manual input','Import','AI interface']}],
+  DB:[{key:'sourceType',label:'Loại nguồn',seed:['ERP','DMS','WMS','API','File','Database']},
+      {key:'connType',label:'Kiểu kết nối',seed:['Read-only','Replica','API','Manual']}],
+  DM:[{key:'modelType',label:'Loại model',seed:['Measure','Foundation','Logic']}],
+  Dashboard:[{key:'dept',label:'Phòng ban',seed:['Finance','Sales','SCM','eCOM','MT','GT','Operation']},
+             {key:'keyUser',label:'Key user',seed:['CEO','COO','CFO','Sales Dir','eCOM Lead','SCM Mgr']}]
+};
+
+let nodes=[], nextId=1, selectedId=null, selectedTier=null;
+let view={x:20,y:20,k:0.78}, connStyle='ortho', openGroups={};
+let vAlign='top';
+let viewMode='canvas';   // 'canvas' | 'list'
+let ganttShowDeps=false; // nút bật/tắt toàn cục dependency
+let ganttSelId=null;     // node click chọn để highlight chuỗi
+let ganttGeo=null;       // {minD, DAY_W, LABEL_W} để quy đổi px↔ngày khi kéo
+let ganttScale='day';    // 'day' | 'week' | 'month' | 'year'
+let financeGroup='tier'; // 'tier' | 'phase'
+let filterMode='dim';    // 'dim' = làm mờ phần bị lọc | 'hide' = ẩn hẳn
+let DEFAULT_RATE=2000000; // bill rate mặc định/ngày (giá bán)
+let DEFAULT_COST_RATE=1000000; // cost rate mặc định/ngày (chi phí nội bộ)
+let projectClient='';
+let showCfg={phase:true, status:true, meta:true, effort:true, cost:true, links:true};
+
+/* ===== PROJECT STORAGE (localStorage) ===== */
+const LS_INDEX='arch_projects';
+const LS_PREFIX='arch_proj::';
+let currentProject=''; // tên khách đang mở
+let lastSaved=null;
+function lsAvailable(){
+  try{const k='__t';localStorage.setItem(k,'1');localStorage.removeItem(k);return true;}catch(e){return false;}
+}
+function projectPayload(){
+  return {client:projectClient, showCfg, COL_W, vAlign, nodes, nextId, savedAt:new Date().toISOString()};
+}
+function loadPayload(d){
+  nodes=d.nodes||[];
+  // backfill các field mới cho node cũ
+  nodes.forEach(n=>{
+    if(n.costRate===undefined) n.costRate=DEFAULT_COST_RATE;
+    if(n.startDate===undefined) n.startDate='';
+    if(n.endDate===undefined) n.endDate='';
+  });
+  nextId=d.nextId||(Math.max(0,...nodes.map(n=>n.id))+1);
+  projectClient=d.client||'';
+  if(d.showCfg) showCfg=Object.assign({phase:true,status:true,meta:true,effort:true,cost:true,links:true},d.showCfg);
+  if(d.COL_W) COL_W=Object.assign({L0:230,DB:240,DM:300,Dashboard:340},d.COL_W);
+  if(d.vAlign) vAlign=d.vAlign;
+  document.getElementById('clientInput').value=projectClient;
+}
+function getProjectIndex(){
+  try{return JSON.parse(localStorage.getItem(LS_INDEX)||'[]');}catch(e){return [];}
+}
+function setProjectIndex(arr){
+  try{localStorage.setItem(LS_INDEX,JSON.stringify(arr));}catch(e){}
+}
+function saveProjectToLS(name){
+  if(!lsAvailable()||!name) return false;
+  const payload=projectPayload();
+  try{
+    localStorage.setItem(LS_PREFIX+name, JSON.stringify(payload));
+    let idx=getProjectIndex().filter(p=>p.client!==name);
+    idx.unshift({client:name, updatedAt:payload.savedAt});
+    setProjectIndex(idx);
+    lastSaved=new Date();
+    updateSaveStatus();
+    return true;
+  }catch(e){console.warn('save failed',e);return false;}
+}
+let saveTimer=null;
+function autoSave(){
+  if(!currentProject) { updateSaveStatus(); return; }
+  if(saveTimer) clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>saveProjectToLS(currentProject),400);
+}
+function loadProjectFromLS(name){
+  try{
+    const raw=localStorage.getItem(LS_PREFIX+name);
+    if(!raw) return false;
+    loadPayload(JSON.parse(raw));
+    currentProject=name;
+    TIERS.forEach(t=>openGroups[t]=false);
+    autoLayout(); renderCfgPanel(); resetView(); renderProjectBar();
+    updateSaveStatus();
+    return true;
+  }catch(e){alert('Lỗi mở dự án: '+e.message);return false;}
+}
+function deleteProjectFromLS(name){
+  try{
+    localStorage.removeItem(LS_PREFIX+name);
+    setProjectIndex(getProjectIndex().filter(p=>p.client!==name));
+    if(currentProject===name) currentProject='';
+    renderProjectBar(); updateSaveStatus();
+  }catch(e){}
+}
+function newProject(){
+  const name=(prompt('Tên khách hàng / dự án mới:')||'').trim();
+  if(!name) return;
+  const idx=getProjectIndex();
+  if(idx.some(p=>p.client===name) && !confirm('Đã có dự án "'+name+'". Ghi đè?')) return;
+  nodes=[]; nextId=1; projectClient=name;
+  document.getElementById('clientInput').value=name;
+  currentProject=name;
+  autoLayout(); saveProjectToLS(name); renderProjectBar();
+}
+function openCurrentAsProject(){
+  // "lưu" dữ liệu hiện tại thành 1 project theo tên khách đang nhập
+  const name=(projectClient||'').trim();
+  if(!name){alert('Nhập tên khách hàng trước khi lưu.');document.getElementById('clientInput').focus();return;}
+  const idx=getProjectIndex();
+  if(idx.some(p=>p.client===name) && name!==currentProject && !confirm('Đã có dự án "'+name+'". Ghi đè?')) return;
+  currentProject=name;
+  saveProjectToLS(name); renderProjectBar();
+}
+function updateSaveStatus(){
+  const el=document.getElementById('saveStatus'); if(!el) return;
+  if(!lsAvailable()){ el.textContent='⚠ localStorage bị chặn (chỉ chạy khi deploy)'; el.style.color='var(--p3)'; return; }
+  if(!currentProject){ el.textContent='Chưa lưu dự án — bấm “Lưu”'; el.style.color='var(--plat-mute)'; return; }
+  const t=lastSaved?lastSaved.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'';
+  el.textContent='✓ '+currentProject+(t?' · đã lưu '+t:''); el.style.color='var(--p1)';
+}
+function renderProjectBar(){
+  const sel=document.getElementById('projectSelect'); if(!sel) return;
+  const idx=getProjectIndex();
+  sel.innerHTML='<option value="">— Chọn dự án —</option>'+
+    idx.map(p=>`<option value="${esc(p.client)}"${p.client===currentProject?' selected':''}>${esc(p.client)}</option>`).join('');
+}
+function onSelectProject(v){ if(v) loadProjectFromLS(v); }
+function confirmDeleteProject(){
+  if(!currentProject){alert('Chưa có dự án nào đang mở.');return;}
+  if(confirm('Xóa dự án "'+currentProject+'" khỏi danh sách (chỉ trong trình duyệt này)?')) deleteProjectFromLS(currentProject);
+}
+
+/* save project to FILE (.arch.json) — đơn vị trao đổi */
+function saveProjectFile(){
+  const name=(projectClient||currentProject||'duan').trim();
+  const data=JSON.stringify(projectPayload(),null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=name.replace(/[^\w\sÀ-ỹ-]/g,'').replace(/\s+/g,'_')+'.arch.json';
+  a.click();
+}
+/* open project from FILE */
+function openProjectFile(input){
+  const file=input.files&&input.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      loadPayload(d);
+      const name=projectClient.trim();
+      currentProject=name;
+      TIERS.forEach(t=>openGroups[t]=false);
+      autoLayout(); renderCfgPanel(); resetView();
+      if(name && lsAvailable()){ saveProjectToLS(name); } // ghi đè nếu trùng tên
+      renderProjectBar(); updateSaveStatus();
+    }catch(e){alert('File không hợp lệ: '+e.message);}
+  };
+  r.readAsText(file);
+  input.value='';
+} // đơn giá mặc định/ngày (VND)
+let filters={tier:new Set(), phase:new Set(), status:new Set(), prio:new Set(), dept:new Set()};
+// Filter trạng thái/phase/ưu tiên — áp cho mọi node kể cả trong chuỗi
+function passStatusPhasePrio(n){
+  if(filters.phase.size && !filters.phase.has(n.phase)) return false;
+  if(filters.status.size && !filters.status.has(n.status)) return false;
+  if(filters.prio.size && !filters.prio.has(n.prio)) return false;
+  return true;
+}
+// Filter cơ bản gồm cả tier (dùng khi KHÔNG lọc dept)
+function passNonDept(n){
+  if(filters.tier.size && !filters.tier.has(n.tier)) return false;
+  return passStatusPhasePrio(n);
+}
+function passDept(n){
+  if(!filters.dept.size) return true;
+  const d=n.dept||'(chưa nhóm)';
+  return filters.dept.has(d);
+}
+function ancestorsOf(id, acc){
+  acc=acc||new Set();
+  const n=nodes.find(x=>x.id===id);
+  if(!n) return acc;
+  n.deps.forEach(dep=>{ if(!acc.has(dep)){ acc.add(dep); ancestorsOf(dep,acc); } });
+  return acc;
+}
+// node có KHỚP filter hiện tại không (để quyết tô rõ hay mờ)
+function passesActiveFilter(n){
+  if(!filters.dept.size){
+    return passNonDept(n);
+  }
+  // dept active: chỉ node trong chuỗi của dashboard-khớp-dept + qua status/phase/prio
+  const shownDash = nodes.filter(d=>d.tier==='Dashboard' && passDept(d) && passStatusPhasePrio(d));
+  const chain=new Set();
+  shownDash.forEach(d=>{ chain.add(d.id); ancestorsOf(d.id, chain); });
+  if(!chain.has(n.id)) return false;
+  if(n.tier==='Dashboard') return true;
+  return passStatusPhasePrio(n);
+}
+function anyFilterActive(){ return Object.values(filters).some(s=>s.size>0); }
+// node để HIỂN THỊ: chế độ 'hide' chỉ node khớp; chế độ 'dim' tất cả node
+// (dept active vẫn chỉ trong phạm vi chuỗi — vì ngoài chuỗi là thật sự ngoài scope)
+function displayNodes(){
+  if(filterMode==='hide' || !anyFilterActive()) return nodes.filter(passesActiveFilter);
+  // dim mode
+  if(!filters.dept.size) return nodes.slice(); // hiện tất cả, dim phần không khớp
+  // dept active: hiện toàn bộ chuỗi của các dashboard-khớp-dept, dim phần không qua status/phase/prio
+  const shownDash = nodes.filter(d=>d.tier==='Dashboard' && passDept(d));
+  const chain=new Set();
+  shownDash.forEach(d=>{ chain.add(d.id); ancestorsOf(d.id, chain); });
+  return nodes.filter(n=>chain.has(n.id));
+}
+// giữ tương thích: visibleNodes = node hiển thị
+function visibleNodes(){ return displayNodes(); }  // 'top' | 'center' | 'bottom'
+const NODE_W=176, ROW_GAP=22, COL_GAP=18, ZONE_GAP=34, ZONE_PAD=14;
+function currentNodeH(){
+  let h=34; // title row
+  if(showCfg.meta) h+=15;
+  if(showCfg.effort||showCfg.cost) h+=14;
+  // compact (no meta/foot) but with badges needs room for badge row + title
+  if(!showCfg.meta && !(showCfg.effort||showCfg.cost) && (showCfg.phase||showCfg.status)) h=42;
+  return h+8;
+}
+let NODE_H=68;
+// per-tier column width (kéo được)
+let COL_W={L0:230, DB:240, DM:300, Dashboard:340};
+function colStartX(tier){
+  let x=60;
+  for(const t of TIERS){ if(t===tier) break; x+=COL_W[t]; }
+  return x;
+}
+function colsInWidth(w){return Math.max(1, Math.floor((w-ZONE_PAD*2+COL_GAP)/(NODE_W+COL_GAP)));}
+// Trần độ rộng = đủ xếp hết box của tầng trên 1 hàng (theo số box thực tế).
+// Dashboard: dùng zone đông box nhất, vì các zone xếp dọc.
+function widthForCols(cols){return cols*(NODE_W+COL_GAP)-COL_GAP+ZONE_PAD*2;}
+function maxWidthForTier(tier){
+  const list=nodes.filter(n=>n.tier===tier);
+  if(!list.length) return 560;
+  let maxBoxes;
+  if(tier==='Dashboard'){
+    const byDept={};
+    list.forEach(n=>{const d=n.dept||'(chưa nhóm)';byDept[d]=(byDept[d]||0)+1;});
+    maxBoxes=Math.max(...Object.values(byDept));
+  } else {
+    maxBoxes=list.length;
+  }
+  return widthForCols(maxBoxes);
+}
+
+function priorValues(key){
+  const set=new Set();
+  Object.values(TIER_FIELDS).flat().forEach(f=>{if(f.key===key&&f.seed)f.seed.forEach(v=>set.add(v));});
+  nodes.forEach(n=>{if(n[key])set.add(n[key]);});
+  return [...set];
+}
+
+function seedDemo(){
+  nodes=[];nextId=1;
+  const add=(o)=>{const n={id:nextId++,sub:'',phase:'2',status:'plan',prio:'med',deps:[],x:0,y:0,
+    effortLevel:'',manday:0,rate:DEFAULT_RATE,costRate:DEFAULT_COST_RATE,acceptanceValue:0,acceptanceManual:false,links:[],startDate:'',endDate:'',...o};nodes.push(n);return n.id;};
+  const mManual=add({name:'Manual input',sub:'Nhập tay',tier:'L0',phase:'2',status:'plan',prio:'med',method:'Manual input',effortLevel:'M',manday:5});
+  const mImport=add({name:'Import',sub:'File / batch',tier:'L0',phase:'2',status:'plan',prio:'med',method:'Import',effortLevel:'M',manday:5});
+  const mAI=add({name:'AI interface',sub:'NL → cấu trúc',tier:'L0',phase:'2',status:'plan',prio:'high',method:'AI interface',effortLevel:'L',manday:10});
+  const sap=add({name:'SAP HANA',sub:'Read-only · AWS',tier:'DB',phase:'1',status:'done',prio:'high',sourceType:'ERP',connType:'Read-only',deps:[mImport],effortLevel:'L',manday:8,startDate:'2026-01-06',endDate:'2026-01-17',links:[{label:'Đề xuất kết nối',url:'https://example.com/sap-connect'}]});
+  const dms=add({name:'DMS (MobiWork)',sub:'Replica',tier:'DB',phase:'1',status:'done',prio:'high',sourceType:'DMS',connType:'Replica',deps:[mImport],effortLevel:'M',manday:6,startDate:'2026-01-06',endDate:'2026-01-14'});
+  const wms=add({name:'WMS (SmartLog)',sub:'API · MySQL',tier:'DB',phase:'1',status:'done',prio:'high',sourceType:'WMS',connType:'API',deps:[mImport],effortLevel:'M',manday:6,startDate:'2026-01-15',endDate:'2026-01-23'});
+  const salesM=add({name:'Sales model',sub:'GT/MT',tier:'DM',phase:'1',status:'done',prio:'high',modelType:'Measure',deps:[sap,dms],effortLevel:'L',manday:10,startDate:'2026-01-20',endDate:'2026-02-03'});
+  const ecomM=add({name:'eCOM model',sub:'Sale·Ops·CX',tier:'DM',phase:'2',status:'plan',prio:'high',modelType:'Measure',deps:[dms,wms],effortLevel:'XL',manday:15,startDate:'2026-02-04',endDate:'2026-02-24'});
+  const finFnd=add({name:'Data Foundation',sub:'Prerequisite',tier:'DM',phase:'2',status:'plan',prio:'high',modelType:'Foundation',deps:[sap],effortLevel:'L',manday:8,startDate:'2026-02-04',endDate:'2026-02-13'});
+  const finM=add({name:'Financial model',sub:'P&L · BS',tier:'DM',phase:'2',status:'plan',prio:'high',modelType:'Logic',deps:[sap,finFnd],effortLevel:'XL',manday:15,startDate:'2026-02-16',endDate:'2026-03-06'});
+  add({name:'Sale all channel',tier:'Dashboard',phase:'1',status:'done',prio:'high',dept:'Sales',keyUser:'CEO',deps:[salesM],effortLevel:'M',manday:5,startDate:'2026-02-04',endDate:'2026-02-11'});
+  add({name:'BC GT (ASM+DIR)',tier:'Dashboard',phase:'1',status:'done',prio:'high',dept:'GT',keyUser:'Sales Dir',deps:[salesM],effortLevel:'M',manday:5,startDate:'2026-02-04',endDate:'2026-02-11'});
+  add({name:'BC kênh MT sale',sub:'P1 dở→P2',tier:'Dashboard',phase:'2',status:'prog',prio:'high',dept:'MT',keyUser:'Sales Dir',deps:[salesM],effortLevel:'M',manday:4,startDate:'2026-02-12',endDate:'2026-02-18',links:[{label:'User requirement',url:'https://example.com/mt-req'}]});
+  add({name:'MT operation',tier:'Dashboard',phase:'2',status:'plan',prio:'high',dept:'MT',keyUser:'COO',deps:[salesM],effortLevel:'M',manday:5,startDate:'2026-02-19',endDate:'2026-02-26'});
+  add({name:'BC kênh eCOM',tier:'Dashboard',phase:'2',status:'plan',prio:'high',dept:'eCOM',keyUser:'eCOM Lead',deps:[ecomM],effortLevel:'M',manday:5,startDate:'2026-02-25',endDate:'2026-03-04'});
+  add({name:'eCOM operation',tier:'Dashboard',phase:'2',status:'plan',prio:'high',dept:'eCOM',keyUser:'eCOM Lead',deps:[ecomM],effortLevel:'M',manday:5});
+  add({name:'eCOM customer',tier:'Dashboard',phase:'2',status:'plan',prio:'high',dept:'eCOM',keyUser:'eCOM Lead',deps:[ecomM],effortLevel:'M',manday:5});
+  add({name:'eCOM recon',tier:'Dashboard',phase:'2',status:'plan',prio:'high',dept:'eCOM',keyUser:'CFO',deps:[ecomM],effortLevel:'L',manday:8});
+  add({name:'Monthly P&L',sub:'Đóng T+10',tier:'Dashboard',phase:'2',status:'plan',prio:'high',dept:'Finance',keyUser:'CFO',deps:[finM],effortLevel:'L',manday:8});
+  add({name:'Quarterly BS',tier:'Dashboard',phase:'2',status:'plan',prio:'high',dept:'Finance',keyUser:'CFO',deps:[finM],effortLevel:'L',manday:8});
+  add({name:'KTQT',tier:'Dashboard',phase:'1',status:'done',prio:'high',dept:'Finance',keyUser:'CFO',deps:[salesM],effortLevel:'M',manday:5});
+  add({name:'Management index',sub:'Tham chiếu BS',tier:'Dashboard',phase:'2',status:'plan',prio:'med',dept:'Finance',keyUser:'CEO',deps:[finM],effortLevel:'S',manday:3});
+  add({name:'SKU velocity',sub:'Category',tier:'Dashboard',phase:'2',status:'plan',prio:'med',dept:'SCM',keyUser:'SCM Mgr',deps:[salesM],effortLevel:'M',manday:4});
+  // compute acceptance values from manday × rate
+  nodes.forEach(n=>{ if(!n.acceptanceManual) n.acceptanceValue=(n.manday||0)*(n.rate||DEFAULT_RATE); });
+  TIERS.forEach(t=>openGroups[t]=false);
+  autoLayout(); closeForm();
+}
+
+function autoLayout(){
+  NODE_H=currentNodeH();
+  const vis=visibleNodes();
+  const titleY = projectClient ? 64 : 0;  // chừa chỗ cho title khách hàng
+  TIERS.forEach(tier=>{
+    const colX=colStartX(tier);
+    const cols=colsInWidth(COL_W[tier]);
+    const stepX=NODE_W+COL_GAP, stepY=NODE_H+ROW_GAP;
+    const list=vis.filter(n=>n.tier===tier);
+    if(tier==='Dashboard'){
+      const byDept={};
+      list.forEach(n=>{const d=n.dept||'(chưa nhóm)';(byDept[d]=byDept[d]||[]).push(n);});
+      let y=104+titleY;
+      Object.keys(byDept).forEach(dept=>{
+        y+=24; // zone label
+        const zlist=byDept[dept];
+        zlist.forEach((n,i)=>{
+          const c=i%cols, r=Math.floor(i/cols);
+          n.x=colX+c*stepX; n.y=y+r*stepY;
+        });
+        const rows=Math.ceil(zlist.length/cols);
+        y += rows*stepY - ROW_GAP + ZONE_GAP;
+      });
+    } else {
+      let y=90+titleY;
+      list.forEach((n,i)=>{
+        const c=i%cols, r=Math.floor(i/cols);
+        n.x=colX+c*stepX; n.y=y+r*stepY;
+      });
+    }
+  });
+  applyVAlign();
+  render();
+  renderFilterBar();
+  autoSave();
+}
+
+// Canh các tầng theo trục dọc (top / center / bottom) dựa trên chiều cao nội dung mỗi tầng
+function applyVAlign(){
+  const tops={}, bots={};
+  const padOf=t=> t==='Dashboard'?78:54;
+  const vis=visibleNodes();
+  TIERS.forEach(tier=>{
+    const list=vis.filter(n=>n.tier===tier);
+    if(!list.length)return;
+    tops[tier]=Math.min(...list.map(n=>n.y)) - padOf(tier);   // band top
+    bots[tier]=Math.max(...list.map(n=>n.y+NODE_H)) + 20;     // band bottom
+  });
+  const present=TIERS.filter(t=>tops[t]!==undefined);
+  if(!present.length)return;
+  const globalTop=Math.min(...present.map(t=>tops[t]));
+  const globalBot=Math.max(...present.map(t=>bots[t]));
+  present.forEach(tier=>{
+    const h=bots[tier]-tops[tier];
+    let targetTop;
+    if(vAlign==='top') targetTop=globalTop;
+    else if(vAlign==='bottom') targetTop=globalBot-h;
+    else targetTop=globalTop+((globalBot-globalTop)-h)/2;
+    const dy=targetTop-tops[tier];
+    if(dy) vis.filter(n=>n.tier===tier).forEach(n=>n.y+=dy);
+  });
+}
+function setVAlign(a,btn){
+  vAlign=a;
+  document.querySelectorAll('.va-btn').forEach(b=>b.classList.toggle('active',b===btn));
+  autoLayout();
+}
+
+function render(){
+  if(viewMode==='list'){ renderList(); renderNodeList(); renderDepsBox(); return; }
+  if(viewMode==='gantt'){ renderGantt(); renderNodeList(); renderDepsBox(); return; }
+  if(viewMode==='finance'){ renderFinance(); renderNodeList(); renderDepsBox(); return; }
+  document.getElementById('listView').style.display='none';
+  document.getElementById('ganttView').style.display='none';
+  document.getElementById('financeView').style.display='none';
+  document.getElementById('svg').style.display='block';
+  document.querySelector('.canvas-toolbar').style.display='flex';
+  const svg=document.getElementById('svg');
+  const vis=visibleNodes();
+  const visIds=new Set(vis.map(n=>n.id));
+  document.getElementById('emptyHint').style.display=vis.length?'none':'block';
+  let s=`<g transform="translate(${view.x},${view.y}) scale(${view.k})">`;
+  if(projectClient){
+    s+=`<text x="60" y="40" font-family="'Noto Serif Display',serif" font-size="28" font-weight="600" fill="#a8842e">${esc(projectClient)}</text>`;
+  }
+  TIERS.forEach(tier=>{
+    const list=vis.filter(n=>n.tier===tier);
+    if(!list.length)return;
+    const colX=colStartX(tier);
+    const ys=list.map(n=>n.y);
+    const topPad = tier==='Dashboard' ? 78 : 54;
+    const y0=Math.min(...ys)-topPad, y1=Math.max(...ys)+NODE_H+20;
+    const bx=colX-16, bw=COL_W[tier]-8;
+    const isSel = tier===selectedTier;
+    s+=`<rect class="tier-band" data-tier="${tier}" x="${bx}" y="${y0}" width="${bw}" height="${y1-y0}" rx="14"
+         fill="${isSel?'#a8842e':'transparent'}" fill-opacity="${isSel?0.05:0}"
+         stroke="${isSel?'#a8842e':'#ddd8cc'}" stroke-width="${isSel?1.4:1}" stroke-dasharray="${isSel?'none':'5 4'}" style="cursor:pointer"/>`;
+    s+=`<text class="tier-label tier-band" data-tier="${tier}" x="${colX-8}" y="${y0+24}" style="cursor:pointer">${TIER_META[tier].label}</text>`;
+    s+=`<text class="tier-sub" x="${colX-8}" y="${y0+40}" style="pointer-events:none">${TIER_META[tier].sub}</text>`;
+    if(isSel){
+      const hx=bx+bw;
+      s+=`<g class="col-resizer" data-tier="${tier}" style="cursor:col-resize">
+        <rect x="${hx-6}" y="${y0}" width="12" height="${y1-y0}" fill="transparent"/>
+        <line x1="${hx}" y1="${y0+4}" x2="${hx}" y2="${y1-4}" stroke="#a8842e" stroke-width="3"/>
+        <rect x="${hx-4}" y="${(y0+y1)/2-16}" width="8" height="32" rx="3" fill="#a8842e"/>
+        <text x="${hx}" y="${(y0+y1)/2+4}" text-anchor="middle" font-size="10" fill="#fff" font-family="monospace" style="pointer-events:none">↔</text>
+      </g>`;
+    }
+  });
+  const dashList=vis.filter(n=>n.tier==='Dashboard');
+  if(dashList.length){
+    const colX=colStartX('Dashboard');
+    const zoneW=COL_W.Dashboard-24;
+    const byDept={};
+    dashList.forEach(n=>{const d=n.dept||'(chưa nhóm)';(byDept[d]=byDept[d]||[]).push(n);});
+    Object.keys(byDept).forEach(dept=>{
+      const zs=byDept[dept]; const ys=zs.map(n=>n.y);
+      const zy0=Math.min(...ys)-22, zy1=Math.max(...ys)+NODE_H+8;
+      s+=`<rect x="${colX-8}" y="${zy0}" width="${zoneW}" height="${zy1-zy0}" rx="9" fill="#9e2c52" fill-opacity="0.04" stroke="#c95a82" stroke-width="0.6" stroke-dasharray="3 3"/>`;
+      s+=`<text class="zone-label" x="${colX}" y="${zy0+15}">▸ ${esc(dept)}</text>`;
+    });
+  }
+  vis.forEach(n=>{
+    n.deps.forEach(depId=>{
+      if(!visIds.has(depId))return;
+      const d=nodes.find(x=>x.id===depId);if(!d)return;
+      const dimConn = filterMode==='dim' && anyFilterActive() && (!passesActiveFilter(n)||!passesActiveFilter(d));
+      const col=PHASE_COLOR[n.phase].accent;
+      const sameTier=d.tier===n.tier;
+      let x1,y1,x2,y2,path,ah,dash='';
+      if(sameTier){
+        const below=d.y<n.y;
+        x1=d.x+NODE_W/2;x2=n.x+NODE_W/2;
+        y1=below?d.y+NODE_H:d.y; y2=below?n.y:n.y+NODE_H;
+        if(connStyle==='straight'){path=`M${x1},${y1} L${x2},${y2}`;}
+        else if(connStyle==='curve'){const dy=(y2-y1)*0.5;path=`M${x1},${y1} C${x1},${y1+dy} ${x2},${y2-dy} ${x2},${y2}`;}
+        else{const m=y1+(y2-y1)/2;path=`M${x1},${y1} L${x1},${m} L${x2},${m} L${x2},${y2}`;}
+        ah=`M${x2-4},${y2+(below?-7:7)} L${x2},${y2+(below?-1:1)} L${x2+4},${y2+(below?-7:7)}`;
+        dash=' stroke-dasharray="4 3"';
+      } else {
+        x1=d.x+NODE_W;y1=d.y+NODE_H/2;x2=n.x;y2=n.y+NODE_H/2;
+        if(connStyle==='straight'){path=`M${x1},${y1} L${x2},${y2}`;}
+        else if(connStyle==='curve'){const dx=(x2-x1)*0.5;path=`M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}`;}
+        else{const m=x1+(x2-x1)/2;path=`M${x1},${y1} L${m},${y1} L${m},${y2} L${x2},${y2}`;}
+        ah=`M${x2-7},${y2-4} L${x2-1},${y2} L${x2-7},${y2+4}`;
+      }
+      s+=`<path class="conn" stroke="${col}"${dash} d="${path}"${dimConn?' opacity="0.18"':''}/>`;
+      s+=`<path d="${ah}" fill="none" stroke="${col}" stroke-width="1.4" opacity="${dimConn?0.13:0.7}"/>`;
+    });
+  });
+  vis.forEach(n=>{
+    const pc=PHASE_COLOR[n.phase], st=STATUS_META[n.status];
+    const isHi=n.prio==='high';
+    const strokeC=isHi?'#d63a39':pc.stroke;
+    const sel=n.id===selectedId?' selected':'';
+    let meta='';
+    if(n.tier==='Dashboard'&&n.keyUser) meta='◦ '+n.keyUser+(n.sub?(' · '+n.sub):'');
+    else if(n.tier==='DB'&&n.connType) meta=n.connType+(n.sub?(' · '+n.sub):'');
+    else if(n.tier==='DM'&&n.modelType) meta=n.modelType+(n.sub?(' · '+n.sub):'');
+    else if(n.tier==='L0'&&n.method) meta=n.sub||n.method;
+    else meta=n.sub||'';
+    const showMeta = showCfg.meta && meta;
+    const foot=[];
+    if(showCfg.effort){ if(n.effortLevel) foot.push(n.effortLevel); if(n.manday) foot.push(n.manday+'d'); }
+    if(showCfg.cost && n.acceptanceValue) foot.push(fmtMoneyShort(n.acceptanceValue));
+    const showFoot = (showCfg.effort||showCfg.cost) && foot.length>0;
+    const dimmed = filterMode==='dim' && anyFilterActive() && !passesActiveFilter(n);
+    s+=`<g class="node-g${sel}" data-id="${n.id}" transform="translate(${n.x},${n.y})"${dimmed?' opacity="0.28"':''}>`;
+    s+=`<rect class="node-rect" width="${NODE_W}" height="${NODE_H}" rx="8" fill="${pc.fill}" stroke="${strokeC}" stroke-width="${isHi?2:1}"/>`;
+    if(showCfg.status){
+      s+=`<rect x="${NODE_W-30}" y="7" width="22" height="15" rx="7" fill="${st.bg}"/>`;
+      s+=`<text class="node-badge-txt" x="${NODE_W-19}" y="18" text-anchor="middle" fill="${st.color}">${st.txt}</text>`;
+    }
+    if(showCfg.phase){
+      const plabel=n.phase==='0'?'L0':'P'+n.phase;
+      s+=`<rect x="8" y="7" width="30" height="15" rx="7" fill="#ffffff" stroke="${pc.accent}" stroke-width=".7"/>`;
+      s+=`<text class="node-badge-txt" x="23" y="18" text-anchor="middle" fill="${pc.text}">${plabel}</text>`;
+    }
+    if(showCfg.links && n.links && n.links.length){
+      s+=`<text x="${NODE_W-38}" y="18" text-anchor="middle" font-size="11" fill="${pc.accent}">🔗</text>`;
+    }
+    const compact = !showMeta && !showFoot;
+    const hasBadge = showCfg.phase||showCfg.status;
+    const titleY = compact ? (hasBadge ? NODE_H/2+9 : NODE_H/2+4) : 34;
+    s+=`<text class="node-title" x="11" y="${titleY}" fill="${pc.text}">${esc(trim(n.name,22))}</text>`;
+    let cy=34;
+    if(showMeta){ cy+=15; s+=`<text class="node-subtitle" x="11" y="${cy}" fill="${pc.text}" fill-opacity=".68">${esc(trim(meta,26))}</text>`; }
+    if(showFoot){ cy+=14; s+=`<text class="node-foot" x="11" y="${cy}" fill="${pc.text}" fill-opacity=".55">${esc(foot.join(' · '))}</text>`; }
+    s+=`</g>`;
+  });
+  s+=`</g>`;
+  svg.innerHTML=s;
+  attachDrag(); renderNodeList(); renderDepsBox();
+}
+function fmtMoneyShort(v){
+  if(!v) return '';
+  if(v>=1e9) return (v/1e9).toFixed(v%1e9?1:0)+'B';
+  if(v>=1e6) return (v/1e6).toFixed(v%1e6?1:0)+'tr';
+  if(v>=1e3) return Math.round(v/1e3)+'k';
+  return ''+v;
+}
+function fmtMoney(v){return (v||0).toLocaleString('vi-VN');}
+
+function setClient(v){projectClient=v; if(viewMode==='canvas') render(); autoSave();}
+function setViewMode(m){
+  viewMode=m;
+  document.getElementById('vtCanvas').classList.toggle('active',m==='canvas');
+  document.getElementById('vtList').classList.toggle('active',m==='list');
+  document.getElementById('vtGantt').classList.toggle('active',m==='gantt');
+  document.getElementById('vtFinance').classList.toggle('active',m==='finance');
+  render();
+}
+
+function renderFilterBar(){
+  const bar=document.getElementById('filterBar');
+  const dims=[
+    {key:'tier', label:'Tầng', opts:TIERS, fmt:t=>TIER_META[t].label.replace(/Tầng \d+ — /,'')},
+    {key:'phase', label:'Phase', opts:['0','1','2','3'], fmt:p=>p==='0'?'L0':'P'+p},
+    {key:'status', label:'Trạng thái', opts:['done','prog','plan'], fmt:s=>STATUS_META[s].label},
+    {key:'prio', label:'Ưu tiên', opts:['high','med','low'], fmt:p=>({high:'Cao',med:'TB',low:'Thấp'}[p])},
+  ];
+  // dept dims from data
+  const depts=[...new Set(nodes.filter(n=>n.tier==='Dashboard').map(n=>n.dept||'(chưa nhóm)'))];
+  let h='';
+  dims.forEach(d=>{
+    h+=`<div class="filter-group"><span>${d.label}</span>`;
+    d.opts.forEach(o=>{
+      const on=filters[d.key].has(o);
+      h+=`<span class="fchip${on?' on':''}" onclick="toggleFilter('${d.key}','${o}')">${esc(d.fmt(o))}</span>`;
+    });
+    h+=`</div>`;
+  });
+  if(depts.length){
+    h+=`<div class="filter-group"><span>Phòng ban</span>`;
+    depts.forEach(o=>{
+      const on=filters.dept.has(o);
+      h+=`<span class="fchip${on?' on':''}" onclick="toggleFilter('dept','${esc(o).replace(/'/g,"\\'")}')">${esc(o)}</span>`;
+    });
+    h+=`</div>`;
+  }
+  const anyFilter=Object.values(filters).some(s=>s.size);
+  const matchCount=nodes.filter(passesActiveFilter).length, tot=nodes.length;
+  h+=`<span class="filter-count">Khớp ${matchCount}/${tot}</span>`;
+  if(anyFilter){
+    h+=`<span class="filter-modetoggle" onclick="toggleFilterMode()" title="Chuyển giữa làm mờ và ẩn phần bị lọc">${filterMode==='dim'?'◐ Làm mờ':'◑ Ẩn hẳn'}</span>`;
+    h+=`<span class="filter-reset" onclick="clearFilters()">✕ Xóa lọc</span>`;
+  }
+  bar.innerHTML=h;
+}
+function toggleFilterMode(){
+  filterMode = filterMode==='dim'?'hide':'dim';
+  if(viewMode==='canvas') autoLayout(); else render();
+  renderFilterBar();
+}
+function toggleFilter(key,val){
+  if(filters[key].has(val)) filters[key].delete(val); else filters[key].add(val);
+  selectedTier=null;
+  autoLayout();
+  renderFilterBar();
+}
+function clearFilters(){
+  Object.values(filters).forEach(s=>s.clear());
+  autoLayout(); renderFilterBar();
+}
+
+const CFG_ITEMS=[
+  {key:'phase', label:'Phase'},
+  {key:'status', label:'Trạng thái'},
+  {key:'meta', label:'Key user / loại'},
+  {key:'effort', label:'Effort + man-day'},
+  {key:'cost', label:'Chi phí'},
+  {key:'links', label:'Link 🔗'},
+];
+function renderCfgPanel(){
+  const el=document.getElementById('cfgPanel');
+  if(!el) return;
+  el.innerHTML=CFG_ITEMS.map(it=>`<span class="cfg-chip${showCfg[it.key]?' on':''}" onclick="toggleCfg('${it.key}')">
+    <span class="dot"></span>${it.label}</span>`).join('');
+}
+function toggleCfg(key){
+  showCfg[key]=!showCfg[key];
+  renderCfgPanel();
+  if(viewMode==='canvas') autoLayout(); else autoSave();
+}
+
+function renderList(){
+  document.getElementById('svg').style.display='none';
+  document.getElementById('ganttView').style.display='none';
+  document.getElementById('financeView').style.display='none';
+  document.getElementById('emptyHint').style.display='none';
+  document.querySelector('.canvas-toolbar').style.display='none';
+  document.querySelector('.legend').style.display='none';
+  const lv=document.getElementById('listView');
+  lv.style.display='block';
+  const vis=visibleNodes();
+  const nameById=id=>{const n=nodes.find(x=>x.id===id);return n?n.name:'?';};
+  const STATUS_LABEL={done:'Done',prog:'Đang làm',plan:'Dự kiến'};
+  const PRIO_LABEL={high:'Cao',med:'TB',low:'Thấp'};
+  let totManday=0, totValue=0;
+  let h=`<table class="lv-table"><thead><tr>
+    <th>Tên</th><th>Mô tả</th><th>Phase</th><th>Trạng thái</th><th>Ưu tiên</th>
+    <th>Effort</th><th>Man-day</th><th>Giá trị nghiệm thu</th><th>Phụ thuộc</th><th>Tài liệu</th>
+  </tr></thead><tbody>`;
+  TIERS.forEach(tier=>{
+    const list=vis.filter(n=>n.tier===tier);
+    if(!list.length)return;
+    h+=`<tr class="lv-tier-row"><td colspan="10">${TIER_META[tier].label} · ${list.length}</td></tr>`;
+    list.forEach(n=>{
+      totManday+=(+n.manday||0); totValue+=(+n.acceptanceValue||0);
+      const pc=PHASE_COLOR[n.phase], st=STATUS_META[n.status];
+      const links=(n.links||[]).map(l=>`<a class="lv-link" href="${esc(l.url)}" target="_blank">${esc(l.label||'link')}</a>`).join('<br>');
+      const dimmed = filterMode==='dim' && anyFilterActive() && !passesActiveFilter(n);
+      h+=`<tr onclick="editNode(${n.id})" style="cursor:pointer"${dimmed?' class="lv-dim"':''}>
+        <td class="lv-name">${esc(n.name)}</td>
+        <td style="color:var(--plat-dim)">${esc(n.sub||'')}</td>
+        <td><span class="lv-pill" style="background:${pc.fill};color:${pc.text}">${n.phase==='0'?'L0':'P'+n.phase}</span></td>
+        <td><span class="lv-pill" style="background:${st.bg};color:${st.color}">${STATUS_LABEL[n.status]}</span></td>
+        <td>${PRIO_LABEL[n.prio]}</td>
+        <td>${esc(n.effortLevel||'—')}</td>
+        <td>${n.manday||'—'}</td>
+        <td style="white-space:nowrap">${n.acceptanceValue?fmtMoney(n.acceptanceValue)+(n.acceptanceManual?' ✎':''):'—'}</td>
+        <td style="color:var(--plat-dim);font-size:11px">${n.deps.length?n.deps.map(nameById).join(', '):'—'}</td>
+        <td>${links||'—'}</td>
+      </tr>`;
+    });
+  });
+  h+=`<tr class="lv-total-row"><td colspan="6" style="text-align:right">TỔNG (theo lọc hiện tại):</td>
+    <td>${totManday}</td><td style="white-space:nowrap">${fmtMoney(totValue)} đ</td><td colspan="2"></td></tr>`;
+  h+=`</tbody></table>`;
+  lv.innerHTML=h;
+}
+
+function renderGantt(){
+  document.getElementById('svg').style.display='none';
+  document.getElementById('listView').style.display='none';
+  document.getElementById('financeView').style.display='none';
+  document.getElementById('emptyHint').style.display='none';
+  document.querySelector('.canvas-toolbar').style.display='none';
+  document.querySelector('.legend').style.display='none';
+  const gv=document.getElementById('ganttView');
+  gv.style.display='block';
+  const vis=visibleNodes().filter(n=>n.startDate&&n.endDate&&parseDate(n.startDate)&&parseDate(n.endDate));
+  if(!vis.length){
+    gv.innerHTML='<div class="gantt-empty">Chưa có node nào có ngày bắt đầu & kết thúc.<br>Mở một node và nhập Timeline để hiện trên Gantt.</div>';
+    return;
+  }
+  // date range
+  let minD=null,maxD=null;
+  vis.forEach(n=>{const s=parseDate(n.startDate),e=parseDate(n.endDate);if(!minD||s<minD)minD=s;if(!maxD||e>maxD)maxD=e;});
+  // pad a couple days
+  minD=new Date(minD.getTime()-86400000); maxD=new Date(maxD.getTime()+86400000);
+  const totalDays=daysBetween(minD,maxD)+1;
+  // ===== time scale: px mỗi ngày + kiểu header theo đơn vị =====
+  const SCALE={ day:26, week:8, month:3, year:0.85 };
+  const DAY_W=SCALE[ganttScale]||26;
+  const ROW_H=30, LABEL_W=210, HEAD_H=46;
+  const W=LABEL_W+totalDays*DAY_W;
+  ganttGeo={minD:new Date(minD), DAY_W, LABEL_W};
+  const STATUS_BAR={plan:'#d63a39',prog:'#f0a821',done:'#1f8a6b'};
+  const today=new Date(); today.setHours(0,0,0,0);
+  const xOf=d=>LABEL_W+daysBetween(minD,d)*DAY_W;
+
+  // rows grouped by tier
+  const rows=[];
+  TIERS.forEach(tier=>{
+    const list=vis.filter(n=>n.tier===tier).sort((a,b)=>parseDate(a.startDate)-parseDate(b.startDate));
+    if(!list.length) return;
+    rows.push({type:'group',label:TIER_META[tier].label});
+    list.forEach(n=>rows.push({type:'task',n}));
+  });
+  const bodyH=rows.length*ROW_H;
+  const H=HEAD_H+bodyH+10;
+  const VN_MONTH=m=>'Th'+(m+1);
+
+  // ===== header (top band) + grid (sub ticks) theo scale =====
+  let head='', grid='';
+  function band(x0,x1,label){
+    const w=x1-x0;
+    head+=`<rect x="${x0}" y="0" width="${w}" height="22" fill="#f0ede5" stroke="#ddd8cc" stroke-width="0.5"/>`;
+    if(w>26) head+=`<text x="${x0+6}" y="15" font-family="'Outfit'" font-size="10.5" font-weight="500" fill="#5a6173">${label}</text>`;
+  }
+  function tick(x,label,col){
+    grid+=`<line x1="${x}" y1="22" x2="${x}" y2="${HEAD_H+bodyH}" stroke="#e8e4da" stroke-width="0.5"/>`;
+    if(label) grid+=`<text x="${x+2}" y="38" font-family="'DM Mono'" font-size="9" fill="${col||'#8b91a3'}">${label}</text>`;
+  }
+
+  if(ganttScale==='day'){
+    // top band = tháng; ticks = từng ngày
+    let cur=new Date(minD);
+    while(cur<=maxD){
+      const mEnd=new Date(cur.getFullYear(),cur.getMonth()+1,0);
+      const segEnd=mEnd>maxD?maxD:mEnd;
+      band(xOf(cur), xOf(segEnd)+DAY_W, `Tháng ${cur.getMonth()+1}/${cur.getFullYear()}`);
+      cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);
+    }
+    for(let i=0;i<totalDays;i++){
+      const d=new Date(minD.getTime()+i*86400000);
+      const x=LABEL_W+i*DAY_W;
+      const wknd=(d.getDay()===0||d.getDay()===6);
+      if(wknd) grid+=`<rect x="${x}" y="22" width="${DAY_W}" height="${bodyH+HEAD_H-22}" fill="#9e2c52" fill-opacity="0.03"/>`;
+      grid+=`<line x1="${x}" y1="22" x2="${x}" y2="${HEAD_H+bodyH}" stroke="#e8e4da" stroke-width="0.5"/>`;
+      grid+=`<text x="${x+DAY_W/2}" y="38" text-anchor="middle" font-family="'DM Mono'" font-size="9" fill="${wknd?'#c95a82':'#8b91a3'}">${d.getDate()}</text>`;
+    }
+  } else if(ganttScale==='week'){
+    // top band = tháng; ticks = đầu mỗi tuần (thứ 2)
+    let cur=new Date(minD);
+    while(cur<=maxD){
+      const mEnd=new Date(cur.getFullYear(),cur.getMonth()+1,0);
+      const segEnd=mEnd>maxD?maxD:mEnd;
+      band(xOf(cur), xOf(segEnd)+DAY_W, `${VN_MONTH(cur.getMonth())}/${cur.getFullYear()}`);
+      cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);
+    }
+    // first Monday on/after minD
+    let w0=new Date(minD); while(w0.getDay()!==1) w0=new Date(w0.getTime()+86400000);
+    for(let d=new Date(w0); d<=maxD; d=new Date(d.getTime()+7*86400000)){
+      tick(xOf(d), d.getDate()+'/'+(d.getMonth()+1));
+    }
+  } else if(ganttScale==='month'){
+    // top band = năm; ticks = đầu mỗi tháng
+    let y0=new Date(minD.getFullYear(),0,1);
+    for(let yy=minD.getFullYear(); yy<=maxD.getFullYear(); yy++){
+      const ys=new Date(yy,0,1), ye=new Date(yy,11,31);
+      band(xOf(ys<minD?minD:ys), xOf(ye>maxD?maxD:ye)+DAY_W, 'Năm '+yy);
+    }
+    let cur=new Date(minD.getFullYear(),minD.getMonth(),1);
+    while(cur<=maxD){
+      tick(xOf(cur), VN_MONTH(cur.getMonth()));
+      cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);
+    }
+  } else { // year
+    // top band = năm; ticks = đầu mỗi quý
+    for(let yy=minD.getFullYear(); yy<=maxD.getFullYear(); yy++){
+      const ys=new Date(yy,0,1), ye=new Date(yy,11,31);
+      band(xOf(ys<minD?minD:ys), xOf(ye>maxD?maxD:ye)+DAY_W, ''+yy);
+    }
+    for(let yy=minD.getFullYear(); yy<=maxD.getFullYear(); yy++){
+      for(let q=0;q<4;q++){
+        const qs=new Date(yy,q*3,1);
+        if(qs>=minD&&qs<=maxD) tick(xOf(qs), 'Q'+(q+1));
+      }
+    }
+  }
+  // today line
+  let todayLine='';
+  if(today>=minD&&today<=maxD){
+    const tx=LABEL_W+daysBetween(minD,today)*DAY_W;
+    todayLine=`<line x1="${tx}" y1="22" x2="${tx}" y2="${HEAD_H+bodyH}" stroke="#a8842e" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="${tx+3}" y="${HEAD_H+bodyH-4}" font-family="'DM Mono'" font-size="9" fill="#a8842e">hôm nay</text>`;
+  }
+
+  // rows — record bar geometry per node for dependency lines
+  const pos={}; // id -> {x1,x2,yc, vis:true}
+  let body=''; let y=HEAD_H;
+  const visIds=new Set(vis.map(n=>n.id));
+  rows.forEach(r=>{
+    if(r.type==='group'){
+      body+=`<rect x="0" y="${y}" width="${W}" height="${ROW_H}" fill="#f0ede5"/>`;
+      body+=`<text x="12" y="${y+ROW_H/2+4}" font-family="'Outfit'" font-size="11" font-weight="600" fill="#a8842e" letter-spacing="0.3">${esc(r.label)}</text>`;
+    } else {
+      const n=r.n;
+      const s=parseDate(n.startDate),e=parseDate(n.endDate);
+      const x=LABEL_W+daysBetween(minD,s)*DAY_W;
+      const w=Math.max(6,(daysBetween(s,e)+1)*DAY_W);
+      const col=STATUS_BAR[n.status]||'#888';
+      pos[n.id]={x1:x, x2:x+w, yc:y+ROW_H/2};
+      const isHi=n.prio==='high';
+      const selDim = ganttSelId && ganttSelId!==n.id && !isInSelChain(n.id);
+      const filtDim = filterMode==='dim' && anyFilterActive() && !passesActiveFilter(n);
+      const dimmed = selDim || filtDim;
+      const op = dimmed?0.3:1;
+      body+=`<rect x="0" y="${y}" width="${W}" height="${ROW_H}" fill="transparent" class="g-row"/>`;
+      body+=`<text x="14" y="${y+ROW_H/2+4}" font-family="'Outfit'" font-size="11.5" fill="${isHi?'#9e2c52':'#2a2e38'}" fill-opacity="${op}" style="cursor:pointer" onclick="editNode(${n.id})">${esc(trim(n.name,24))}</text>`;
+      const dur=daysBetween(s,e)+1;
+      const selRing = ganttSelId===n.id ? `<rect x="${x-2}" y="${y+4}" width="${w+4}" height="${ROW_H-8}" rx="6" fill="none" stroke="#a8842e" stroke-width="2"/>`:'';
+      const by=y+6, bh=ROW_H-12;
+      body+=`<g class="g-bar" data-id="${n.id}" data-x="${x}" data-w="${w}" data-y="${by}" data-h="${bh}">
+        ${selRing}
+        <rect class="g-bar-body" x="${x}" y="${by}" width="${w}" height="${bh}" rx="4" fill="${col}" fill-opacity="${0.88*op}" style="cursor:grab"/>
+        ${w>40?`<text class="g-bar-lbl" x="${x+6}" y="${y+ROW_H/2+3.5}" font-family="'DM Mono'" font-size="9" fill="#fff" fill-opacity="${op}" pointer-events="none">${dur}d</text>`:''}
+        <rect class="g-handle g-handle-l" x="${x-3}" y="${by}" width="8" height="${bh}" fill="transparent" style="cursor:ew-resize"/>
+        <rect class="g-handle g-handle-r" x="${x+w-5}" y="${by}" width="8" height="${bh}" fill="transparent" style="cursor:ew-resize"/>
+      </g>`;
+    }
+    y+=ROW_H;
+  });
+
+  // dependency arrows (finish-to-start): from parent bar end → child bar start
+  let deps='';
+  const drawDepFor=(n)=>{
+    n.deps.forEach(depId=>{
+      if(!visIds.has(depId)||!pos[depId]||!pos[n.id])return;
+      const a=pos[depId], b=pos[n.id]; // a=parent(source), b=child
+      const x1=a.x2, y1=a.yc, x2=b.x1, y2=b.yc;
+      const related = !ganttSelId || ganttSelId===n.id || ganttSelId===depId || (isInSelChain(n.id)&&isInSelChain(depId));
+      const op = ganttSelId ? (related?1:0.12) : 0.55;
+      const stroke = related&&ganttSelId ? '#a8842e' : '#8b91a3';
+      const midx = Math.max(x1+10, x2-10);
+      // overlap = ngày bắt đầu của con SỚM HƠN ngày kết thúc của cha (vi phạm finish-to-start)
+      const parentEnd=parseDate(nodes.find(x=>x.id===depId).endDate);
+      const childStart=parseDate(n.startDate);
+      const overlap = parentEnd && childStart && childStart <= parentEnd;
+      const lineCol = overlap ? '#d63a39' : stroke;
+      const path = `M${x1},${y1} L${x1+8},${y1} L${x1+8},${y2} L${x2-6},${y2}`;
+      deps+=`<path d="${path}" fill="none" stroke="${lineCol}" stroke-width="${related&&ganttSelId?1.6:1.1}" stroke-opacity="${op}"${overlap?' stroke-dasharray="3 2"':''}/>`;
+      deps+=`<path d="M${x2-6},${y2-3} L${x2},${y2} L${x2-6},${y2+3}" fill="none" stroke="${lineCol}" stroke-width="${related&&ganttSelId?1.6:1.1}" stroke-opacity="${op}"/>`;
+    });
+  };
+  const showAny = ganttShowDeps || ganttSelId;
+  if(showAny){
+    if(ganttSelId){
+      // only chains touching the selected node
+      vis.forEach(n=>{ if(n.id===ganttSelId || isInSelChain(n.id)) drawDepFor(n); });
+    } else {
+      vis.forEach(n=>drawDepFor(n));
+    }
+  }
+
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" style="display:block">
+    <rect width="${W}" height="${H}" fill="#f4f2ec"/>
+    ${grid}
+    ${head}
+    <line x1="0" y1="${HEAD_H}" x2="${W}" y2="${HEAD_H}" stroke="#ddd8cc" stroke-width="1"/>
+    <line x1="${LABEL_W}" y1="0" x2="${LABEL_W}" y2="${HEAD_H+bodyH}" stroke="#ddd8cc" stroke-width="1"/>
+    ${body}
+    ${deps}
+    ${todayLine}
+  </svg>`;
+  const totD=daysBetween(minD,maxD)+1;
+  const fmtD=d=>d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
+  const depBtn=`<button class="btn sm${ganttShowDeps?' gold':''}" onclick="toggleGanttDeps()" style="margin-left:4px">${ganttShowDeps?'✓ ':''}🔗 Dependency</button>`;
+  const clearSel = ganttSelId?`<button class="btn sm ghost" onclick="ganttSelect(null)">✕ Bỏ chọn</button>`:'';
+  const SCALE_LABEL={day:'Ngày',week:'Tuần',month:'Tháng',year:'Năm'};
+  const scaleBtns=`<div class="g-scale">`+['day','week','month','year'].map(s=>
+    `<button class="gs-btn${ganttScale===s?' active':''}" onclick="setGanttScale('${s}')">${SCALE_LABEL[s]}</button>`).join('')+`</div>`;
+  gv.innerHTML=`<div style="padding:14px 18px 6px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <span style="font-family:'Noto Serif Display';font-size:15px;color:#a8842e;font-weight:500">Gantt ${projectClient?'· '+esc(projectClient):''}</span>
+    <span style="font-size:12px;color:#5a6173">${fmtD(minD)} → ${fmtD(maxD)} · ${totD} ngày · ${vis.length} hạng mục</span>
+    ${scaleBtns}
+    <span style="font-size:11px;color:#8b91a3">🟥 Chưa làm　🟧 Đang làm　🟩 Hoàn thành</span>
+    ${depBtn}${clearSel}
+    ${ganttSelId?'<span style="font-size:11px;color:#a8842e">Đang xem chuỗi của: '+esc((nodes.find(x=>x.id===ganttSelId)||{}).name||'')+'</span>':'<span style="font-size:10.5px;color:#8b91a3">Bấm 1 thanh để xem chuỗi của nó · đường đỏ = lịch chồng</span>'}
+  </div><div style="overflow:auto">${svg}</div>`;
+  attachGanttDrag();
+}
+function setGanttScale(s){ ganttScale=s; renderGantt(); }
+
+function nodeFinance(n){
+  const charge=+n.acceptanceValue||0;
+  const cost=(+n.manday||0)*(+n.costRate||0);
+  const margin=charge-cost;
+  return {charge,cost,margin,pct: charge>0?margin/charge:0};
+}
+// node có được tính vào tổng tài chính không (loại node đang bị làm mờ)
+function fnCounts(n){ return !(filterMode==='dim' && anyFilterActive() && !passesActiveFilter(n)); }
+function setFinanceGroup(g){ financeGroup=g; renderFinance(); }
+function renderFinance(){
+  document.getElementById('svg').style.display='none';
+  document.getElementById('listView').style.display='none';
+  document.getElementById('ganttView').style.display='none';
+  document.getElementById('emptyHint').style.display='none';
+  document.querySelector('.canvas-toolbar').style.display='none';
+  document.querySelector('.legend').style.display='none';
+  const fv=document.getElementById('financeView');
+  fv.style.display='block';
+  const vis=visibleNodes();
+  if(!vis.length){ fv.innerHTML='<div class="gantt-empty">Không có hạng mục nào (theo lọc hiện tại).</div>'; return; }
+
+  // group
+  const groups={};
+  const order=[];
+  vis.forEach(n=>{
+    let key, label;
+    if(financeGroup==='phase'){ key=n.phase; label = n.phase==='0'?'Tầng 0':'Phase '+n.phase; }
+    else { key=n.tier; label=TIER_META[n.tier].label; }
+    if(!groups[key]){ groups[key]={label,items:[]}; order.push(key); }
+    groups[key].items.push(n);
+  });
+  if(financeGroup==='tier') order.sort((a,b)=>TIER_META[a].idx-TIER_META[b].idx);
+  else order.sort();
+
+  let gCharge=0,gCost=0,gMargin=0;
+  const PCT=v=>Math.round(v*100)+'%';
+  const marginColor=m=> m>=0?'#1f8a6b':'#c23a68';
+
+  let rows='';
+  order.forEach(key=>{
+    const g=groups[key];
+    let sCharge=0,sCost=0,sMargin=0;
+    let sub='';
+    g.items.forEach(n=>{
+      const f=nodeFinance(n);
+      const dimmed = filterMode==='dim' && anyFilterActive() && !passesActiveFilter(n);
+      if(!dimmed){ sCharge+=f.charge; sCost+=f.cost; sMargin+=f.margin; }
+      sub+=`<tr onclick="editNode(${n.id})" style="cursor:pointer"${dimmed?' class="lv-dim"':''}>
+        <td class="fn-name">${esc(n.name)}</td>
+        <td class="fn-num">${n.manday||'—'}</td>
+        <td class="fn-num">${f.charge?fmtMoney(f.charge):'—'}</td>
+        <td class="fn-num">${f.cost?fmtMoney(f.cost):'—'}</td>
+        <td class="fn-num" style="color:${marginColor(f.margin)};font-weight:500">${fmtMoney(f.margin)}</td>
+        <td class="fn-num" style="color:${marginColor(f.margin)}">${f.charge>0?PCT(f.pct):'—'}</td>
+      </tr>`;
+    });
+    gCharge+=sCharge; gCost+=sCost; gMargin+=sMargin;
+    const sPct=sCharge>0?sMargin/sCharge:0;
+    rows+=`<tr class="fn-group"><td colspan="6">${esc(g.label)} · ${g.items.length} hạng mục</td></tr>`;
+    rows+=sub;
+    rows+=`<tr class="fn-subtotal">
+      <td>Cộng ${esc(g.label.replace(/Tầng \d+ — /,''))}</td>
+      <td class="fn-num">${g.items.filter(fnCounts).reduce((s,n)=>s+(+n.manday||0),0)}</td>
+      <td class="fn-num">${fmtMoney(sCharge)}</td>
+      <td class="fn-num">${fmtMoney(sCost)}</td>
+      <td class="fn-num" style="color:${marginColor(sMargin)}">${fmtMoney(sMargin)}</td>
+      <td class="fn-num" style="color:${marginColor(sMargin)}">${PCT(sPct)}</td>
+    </tr>`;
+  });
+  const gPct=gCharge>0?gMargin/gCharge:0;
+
+  // KPI cards
+  const card=(label,val,color,sub)=>`<div class="fn-card">
+    <div class="fn-card-label">${label}</div>
+    <div class="fn-card-val" style="color:${color||'var(--plat)'}">${val}</div>
+    ${sub?`<div class="fn-card-sub">${sub}</div>`:''}</div>`;
+  const totManday=vis.filter(fnCounts).reduce((s,n)=>s+(+n.manday||0),0);
+  const kpis=`<div class="fn-cards">
+    ${card('Doanh thu (charge khách)', fmtMoney(gCharge)+' đ', '#473da3')}
+    ${card('Chi phí thực hiện', fmtMoney(gCost)+' đ', '#9e2c52')}
+    ${card('Lợi nhuận dự án', fmtMoney(gMargin)+' đ', marginColor(gMargin), 'Biên '+PCT(gPct))}
+    ${card('Tổng man-day', totManday+' ngày', 'var(--plat)', gCharge>0?('Doanh thu/ngày '+fmtMoney(Math.round(gCharge/totManday))):'')}
+  </div>`;
+
+  // simple margin bar per group (visual)
+  let bars='';
+  const maxAbs=Math.max(1,...order.map(k=>{const it=groups[k].items.filter(fnCounts);return Math.abs(it.reduce((s,n)=>s+nodeFinance(n).margin,0));}));
+  order.forEach(key=>{
+    const g=groups[key];
+    const cnt=g.items.filter(fnCounts);
+    const ch=cnt.reduce((s,n)=>s+nodeFinance(n).charge,0);
+    const co=cnt.reduce((s,n)=>s+nodeFinance(n).cost,0);
+    const mg=ch-co;
+    const wCharge=ch>0?(ch/Math.max(gCharge,1)*100):0;
+    bars+=`<div class="fn-bar-row">
+      <div class="fn-bar-label">${esc(g.label.replace(/Tầng \d+ — /,''))}</div>
+      <div class="fn-bar-track">
+        <div class="fn-bar-charge" style="width:${wCharge}%"></div>
+      </div>
+      <div class="fn-bar-vals"><span style="color:#473da3">${fmtMoney(ch)}</span> − <span style="color:#9e2c52">${fmtMoney(co)}</span> = <b style="color:${marginColor(mg)}">${fmtMoney(mg)}</b></div>
+    </div>`;
+  });
+
+  const grpToggle=`<div class="g-scale">
+    <button class="gs-btn${financeGroup==='tier'?' active':''}" onclick="setFinanceGroup('tier')">Theo tầng</button>
+    <button class="gs-btn${financeGroup==='phase'?' active':''}" onclick="setFinanceGroup('phase')">Theo phase</button>
+  </div>`;
+
+  fv.innerHTML=`<div style="padding:16px 20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px">
+      <span style="font-family:'Noto Serif Display';font-size:16px;color:#a8842e;font-weight:500">Tài chính dự án ${projectClient?'· '+esc(projectClient):''}</span>
+      ${grpToggle}
+      ${vis.length!==nodes.length?'<span style="font-size:11px;color:#c23a68">⚠ Đang lọc — chỉ tính phần hiển thị</span>':''}
+    </div>
+    ${kpis}
+    <div class="fn-bars">${bars}</div>
+    <table class="lv-table fn-table">
+      <thead><tr>
+        <th>Hạng mục</th><th class="fn-num">Man-day</th><th class="fn-num">Charge khách</th>
+        <th class="fn-num">Chi phí</th><th class="fn-num">Lợi nhuận</th><th class="fn-num">Biên</th>
+      </tr></thead>
+      <tbody>${rows}
+        <tr class="lv-total-row"><td>TỔNG DỰ ÁN</td>
+          <td class="fn-num">${totManday}</td>
+          <td class="fn-num">${fmtMoney(gCharge)}</td>
+          <td class="fn-num">${fmtMoney(gCost)}</td>
+          <td class="fn-num" style="color:${marginColor(gMargin)};font-weight:600">${fmtMoney(gMargin)}</td>
+          <td class="fn-num" style="color:${marginColor(gMargin)};font-weight:600">${PCT(gPct)}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>`;
+}
+// chuỗi liên quan tới node đang chọn: cả tổ tiên (deps) lẫn hậu duệ (ai phụ thuộc nó)
+let _selChainCache={id:null,set:null};
+function isInSelChain(id){
+  if(!ganttSelId) return false;
+  if(_selChainCache.id!==ganttSelId){
+    const set=new Set([ganttSelId]);
+    // ancestors
+    ancestorsOf(ganttSelId,set);
+    // descendants
+    const addDesc=(target)=>{ nodes.forEach(n=>{ if(n.deps.includes(target)&&!set.has(n.id)){ set.add(n.id); addDesc(n.id); } }); };
+    addDesc(ganttSelId);
+    _selChainCache={id:ganttSelId,set};
+  }
+  return _selChainCache.set.has(id);
+}
+function ganttSelect(id){ ganttSelId = (ganttSelId===id)?null:id; _selChainCache={id:null,set:null}; renderGantt(); }
+function toggleGanttDeps(){ ganttShowDeps=!ganttShowDeps; renderGantt(); }
+
+let gdrag=null;
+function dateToStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function attachGanttDrag(){
+  const svg=document.querySelector('#ganttView svg'); if(!svg||!ganttGeo) return;
+  svg.querySelectorAll('.g-bar').forEach(g=>{
+    const id=+g.dataset.id;
+    const body=g.querySelector('.g-bar-body');
+    const hl=g.querySelector('.g-handle-l');
+    const hr=g.querySelector('.g-handle-r');
+    const start=(mode)=>(e)=>{
+      e.preventDefault(); e.stopPropagation();
+      const n=nodes.find(x=>x.id===id); if(!n) return;
+      gdrag={id, mode, sx:e.clientX, moved:false,
+        ox:+g.dataset.x, ow:+g.dataset.w, oy:+g.dataset.y, oh:+g.dataset.h,
+        s0:parseDate(n.startDate), e0:parseDate(n.endDate),
+        bodyEl:body, lblEl:g.querySelector('.g-bar-lbl'), hlEl:hl, hrEl:hr, ringEl:g.querySelector('rect[stroke="#a8842e"]')};
+      document.body.style.cursor = mode==='move'?'grabbing':'ew-resize';
+    };
+    body.addEventListener('mousedown', start('move'));
+    hl.addEventListener('mousedown', start('l'));
+    hr.addEventListener('mousedown', start('r'));
+  });
+}
+document.addEventListener('mousemove',e=>{
+  if(!gdrag) return;
+  const dxpx = e.clientX-gdrag.sx;
+  const dDays = Math.round(dxpx/ganttGeo.DAY_W);
+  if(Math.abs(dxpx)>3) gdrag.moved=true;
+  let nx=gdrag.ox, nw=gdrag.ow;
+  if(gdrag.mode==='move'){ nx=gdrag.ox+dDays*ganttGeo.DAY_W; }
+  else if(gdrag.mode==='l'){ nx=gdrag.ox+dDays*ganttGeo.DAY_W; nw=gdrag.ow-dDays*ganttGeo.DAY_W; }
+  else if(gdrag.mode==='r'){ nw=gdrag.ow+dDays*ganttGeo.DAY_W; }
+  if(nw<ganttGeo.DAY_W) nw=ganttGeo.DAY_W; // tối thiểu 1 ngày
+  if(gdrag.mode==='l' && nx>gdrag.ox+gdrag.ow-ganttGeo.DAY_W) nx=gdrag.ox+gdrag.ow-ganttGeo.DAY_W;
+  // live update SVG
+  gdrag.bodyEl.setAttribute('x',nx); gdrag.bodyEl.setAttribute('width',nw);
+  if(gdrag.lblEl) gdrag.lblEl.setAttribute('x',nx+6);
+  gdrag.hlEl.setAttribute('x',nx-3);
+  gdrag.hrEl.setAttribute('x',nx+nw-5);
+  if(gdrag.ringEl){ gdrag.ringEl.setAttribute('x',nx-2); gdrag.ringEl.setAttribute('width',nw+4); }
+  // update duration label
+  if(gdrag.lblEl){ const days=Math.round(nw/ganttGeo.DAY_W); gdrag.lblEl.textContent=days+'d'; }
+  gdrag._nx=nx; gdrag._nw=nw;
+});
+document.addEventListener('mouseup',()=>{
+  if(!gdrag) return;
+  const g=gdrag; gdrag=null; document.body.style.cursor='';
+  const n=nodes.find(x=>x.id===g.id); if(!n){renderGantt();return;}
+  if(!g.moved){ ganttSelect(g.id); editNode(g.id); return; } // click = chọn chuỗi + mở form sửa
+  // quy đổi vị trí mới → ngày
+  const startDayIdx = Math.round(((g._nx??g.ox)-ganttGeo.LABEL_W)/ganttGeo.DAY_W);
+  const durDays = Math.round((g._nw??g.ow)/ganttGeo.DAY_W);
+  const ns=new Date(ganttGeo.minD.getTime()+startDayIdx*86400000);
+  const ne=new Date(ns.getTime()+(durDays-1)*86400000);
+  n.startDate=dateToStr(ns); n.endDate=dateToStr(ne);
+  autoSave();
+  renderGantt();
+});
+
+function trim(t,m){return (t||'').length>m?t.slice(0,m-1)+'…':t;}
+function esc(t){return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function setConnStyle(style,btn){connStyle=style;document.querySelectorAll('.cs-btn').forEach(b=>b.classList.toggle('active',b===btn));render();}
+
+function renderNodeList(){
+  document.getElementById('nodeCount').textContent=nodes.length;
+  const el=document.getElementById('nodeList');
+  if(!nodes.length){el.innerHTML='';return;}
+  const nlItem=n=>{
+    const st=STATUS_META[n.status];
+    const selc=n.id===selectedId?' sel':'';
+    return `<div class="nl-item${selc}" onclick="editNode(${n.id})"><span class="nl-dot" style="background:${st.dot}" title="${st.label}"></span><span class="nl-name">${esc(n.name)}</span></div>`;
+  };
+  let h='';
+  TIERS.forEach(tier=>{
+    const list=nodes.filter(n=>n.tier===tier);
+    if(!list.length)return;
+    const open=openGroups[tier]?' open':'';
+    h+=`<div class="acc-group${open}"><div class="acc-head" onclick="toggleGroup('${tier}')">
+      <span class="acc-caret">▶</span>
+      <span class="acc-tier-name">${TIER_META[tier].label.replace(/Tầng \d+ — /,'')}</span>
+      <span class="acc-count">${list.length}</span></div><div class="acc-body">`;
+    if(tier==='Dashboard'){
+      // nested accordion by dept
+      const byDept={};
+      list.forEach(n=>{const d=n.dept||'(chưa nhóm)';(byDept[d]=byDept[d]||[]).push(n);});
+      Object.keys(byDept).forEach(dept=>{
+        const gk='Dashboard::'+dept;
+        const dopen=openGroups[gk]?' open':'';
+        h+=`<div class="acc-group acc-sub${dopen}"><div class="acc-head acc-subhead" onclick="event.stopPropagation();toggleGroup('${esc(gk).replace(/'/g,"\\'")}')">
+          <span class="acc-caret">▶</span>
+          <span class="acc-tier-name">${esc(dept)}</span>
+          <span class="acc-count">${byDept[dept].length}</span></div><div class="acc-body">`;
+        byDept[dept].forEach(n=>{ h+=nlItem(n); });
+        h+=`</div></div>`;
+      });
+    } else {
+      list.forEach(n=>{ h+=nlItem(n); });
+    }
+    h+=`</div></div>`;
+  });
+  el.innerHTML=h;
+}
+function toggleGroup(tier){openGroups[tier]=!openGroups[tier];renderNodeList();}
+
+function toggleForm(){
+  const w=document.getElementById('formWrap');
+  if(w.classList.contains('open')&&!selectedId){closeForm();}
+  else{resetForm();w.classList.add('open');}
+}
+function closeForm(){document.getElementById('formWrap').classList.remove('open');selectedId=null;renderNodeList();if(nodes.length)render();}
+function onTierChange(){renderTierFields();renderDepsBox();}
+
+function renderTierFields(){
+  const tier=document.getElementById('f-tier').value;
+  const defs=TIER_FIELDS[tier]||[];
+  const cur=selectedId?nodes.find(n=>n.id===selectedId):null;
+  let h='';
+  if(defs.length){
+    h+=`<div class="tier-specific"><div class="tier-specific-label">Thuộc tính ${tier}</div>`;
+    defs.forEach(f=>{
+      const val=cur?(cur[f.key]||''):'';
+      h+=`<div class="field"><label>${f.label}</label><div class="combo-wrap">
+        <input id="tf-${f.key}" value="${esc(val)}" autocomplete="off" placeholder="Gõ mới hoặc chọn..."
+          onfocus="showCombo('${f.key}')" oninput="showCombo('${f.key}')" onblur="hideCombo('${f.key}')">
+        <div class="combo-list" id="combo-${f.key}"></div></div></div>`;
+    });
+    h+=`</div>`;
+  }
+  document.getElementById('tierFields').innerHTML=h;
+}
+function showCombo(key){
+  const input=document.getElementById('tf-'+key);
+  const list=document.getElementById('combo-'+key);
+  const q=(input.value||'').toLowerCase();
+  const all=priorValues(key);
+  const opts=all.filter(v=>v.toLowerCase().includes(q));
+  const exact=all.some(v=>v.toLowerCase()===q);
+  let h='';
+  if(opts.length){
+    h+=`<div class="combo-head">Chọn từ danh sách:</div>`;
+    h+=opts.map(v=>`<div class="combo-opt" onmousedown="pickCombo('${key}','${esc(v).replace(/'/g,"\\'")}')">${esc(v)}</div>`).join('');
+  }
+  if(q && !exact){
+    h+=`<div class="combo-new" onmousedown="pickCombo('${key}','${esc(input.value).replace(/'/g,"\\'")}')">＋ Thêm mới: “${esc(input.value)}”</div>`;
+  }
+  if(!h){list.classList.remove('show');return;}
+  list.innerHTML=h;
+  list.classList.add('show');
+}
+function hideCombo(key){setTimeout(()=>document.getElementById('combo-'+key)?.classList.remove('show'),150);}
+function pickCombo(key,val){document.getElementById('tf-'+key).value=val;document.getElementById('combo-'+key).classList.remove('show');}
+
+function renderDepsBox(){
+  const box=document.getElementById('f-deps');
+  const tier=document.getElementById('f-tier').value;
+  const tierIdx=TIER_META[tier].idx;
+  // Only DM allows same-tier deps (e.g. Data Foundation → Financial model).
+  // All other tiers may depend on upper tiers only.
+  const allowSame = tier==='DM';
+  const parents=nodes.filter(n=>{
+    const pi=TIER_META[n.tier].idx;
+    const ok = allowSame ? pi<=tierIdx : pi<tierIdx;
+    return ok && n.id!==selectedId;
+  });
+  if(!parents.length){box.innerHTML='<div class="dep-empty">Chưa có node tầng trên.</div>';return;}
+  const cur=selectedId?(nodes.find(n=>n.id===selectedId)?.deps||[]):[];
+  box.innerHTML=parents.map(p=>`<label class="dep-item"><input type="checkbox" value="${p.id}" ${cur.includes(p.id)?'checked':''}><span>${esc(p.name)} <span style="color:var(--plat-mute)">· ${p.tier}</span></span></label>`).join('');
+}
+function getFormDeps(){return [...document.querySelectorAll('#f-deps input:checked')].map(i=>+i.value);}
+
+// links editor (uses a temp working array)
+let formLinks=[];
+function renderLinkRows(){
+  const box=document.getElementById('f-links');
+  box.innerHTML=formLinks.map((l,i)=>`<div class="link-row">
+    <input class="lbl" placeholder="Nhãn" value="${esc(l.label||'')}" oninput="formLinks[${i}].label=this.value">
+    <input placeholder="https://..." value="${esc(l.url||'')}" oninput="formLinks[${i}].url=this.value">
+    <span class="link-del" onclick="formLinks.splice(${i},1);renderLinkRows()">✕</span>
+  </div>`).join('');
+}
+function addLinkRow(){formLinks.push({label:'',url:''});renderLinkRows();}
+function recalcAcceptance(){
+  const md=+document.getElementById('f-manday').value||0;
+  const rate=+document.getElementById('f-rate').value||0;
+  const accEl=document.getElementById('f-acceptance');
+  if(!accEl.dataset.manual){ accEl.value=md*rate; }
+  recalcMargin();
+}
+function recalcMargin(){
+  const md=+document.getElementById('f-manday').value||0;
+  const costRate=+document.getElementById('f-costrate').value||0;
+  const charge=+document.getElementById('f-acceptance').value||0;
+  const cost=md*costRate;
+  const margin=charge-cost;
+  const pct = charge>0 ? Math.round(margin/charge*100) : 0;
+  const el=document.getElementById('f-margin');
+  el.value = fmtMoney(margin)+' đ'+(charge>0?' ('+pct+'%)':'');
+  el.style.color = margin>=0 ? 'var(--p1)' : 'var(--p3)';
+  const accEl=document.getElementById('f-acceptance');
+  document.getElementById('acceptHint').textContent = accEl.dataset.manual
+    ? 'Charge nhập tay. Lợi nhuận = charge − man-day × cost rate = '+fmtMoney(margin)+'đ.'
+    : 'Charge = man-day × bill rate. Cost = man-day × cost rate. LN = '+fmtMoney(margin)+'đ.';
+}
+function markAcceptanceManual(){
+  document.getElementById('f-acceptance').dataset.manual='1';
+  recalcMargin();
+}
+// ===== date helpers =====
+function parseDate(s){ if(!s) return null; const d=new Date(s+'T00:00:00'); return isNaN(d)?null:d; }
+function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+function fmtDateShort(s){ if(!s) return ''; const d=parseDate(s); if(!d) return ''; return d.getDate()+'/'+(d.getMonth()+1); }
+function updateDurHint(){
+  const el=document.getElementById('durHint'); if(!el) return;
+  const s=parseDate(document.getElementById('f-start').value);
+  const e=parseDate(document.getElementById('f-end').value);
+  if(s&&e){ const d=daysBetween(s,e)+1; el.textContent = d>0? ('Khoảng '+d+' ngày lịch.') : 'Ngày kết thúc phải sau ngày bắt đầu.'; }
+  else el.textContent='Nhập ngày để hiện trên Gantt.';
+}
+
+function saveNode(){
+  const name=document.getElementById('f-name').value.trim();
+  if(!name){document.getElementById('f-name').focus();return;}
+  const tier=document.getElementById('f-tier').value;
+  const accEl=document.getElementById('f-acceptance');
+  const data={name,sub:document.getElementById('f-sub').value.trim(),tier,
+    phase:document.getElementById('f-phase').value,status:document.getElementById('f-status').value,
+    prio:document.getElementById('f-prio').value,deps:getFormDeps(),
+    effortLevel:document.getElementById('f-effort').value,
+    manday:+document.getElementById('f-manday').value||0,
+    rate:+document.getElementById('f-rate').value||DEFAULT_RATE,
+    costRate:+document.getElementById('f-costrate').value||DEFAULT_COST_RATE,
+    acceptanceValue:+accEl.value||0,
+    acceptanceManual: !!accEl.dataset.manual,
+    startDate:document.getElementById('f-start').value||'',
+    endDate:document.getElementById('f-end').value||'',
+    links: formLinks.filter(l=>l.url||l.label).map(l=>({label:l.label,url:l.url}))};
+  (TIER_FIELDS[tier]||[]).forEach(f=>{data[f.key]=document.getElementById('tf-'+f.key)?.value.trim()||'';});
+  if(selectedId){Object.assign(nodes.find(x=>x.id===selectedId),data);}
+  else{nodes.push({id:nextId++,x:60,y:60,...data});}
+  autoLayout(); resetForm();
+  document.getElementById('formWrap').classList.add('open');
+  render();
+}
+function editNode(id){
+  selectedId=id;
+  const n=nodes.find(x=>x.id===id);
+  document.getElementById('formWrap').classList.add('open');
+  document.getElementById('formTitle').textContent='Sửa node';
+  document.getElementById('f-tier').value=n.tier;
+  document.getElementById('f-name').value=n.name;
+  document.getElementById('f-sub').value=n.sub||'';
+  document.getElementById('f-phase').value=n.phase;
+  document.getElementById('f-status').value=n.status;
+  document.getElementById('f-prio').value=n.prio;
+  document.getElementById('f-effort').value=n.effortLevel||'';
+  document.getElementById('f-manday').value=n.manday||0;
+  document.getElementById('f-rate').value=n.rate||DEFAULT_RATE;
+  document.getElementById('f-costrate').value=n.costRate||DEFAULT_COST_RATE;
+  const accEl=document.getElementById('f-acceptance');
+  accEl.value=n.acceptanceValue||0;
+  if(n.acceptanceManual) accEl.dataset.manual='1'; else delete accEl.dataset.manual;
+  recalcMargin();
+  formLinks=(n.links||[]).map(l=>({label:l.label,url:l.url}));
+  renderLinkRows();
+  document.getElementById('f-start').value=n.startDate||'';
+  document.getElementById('f-end').value=n.endDate||'';
+  updateDurHint();
+  renderTierFields(); renderDepsBox();
+  document.getElementById('saveBtn').textContent='✓ Lưu';
+  document.getElementById('delBtn').style.display='inline-flex';
+  document.getElementById('dupBtn').style.display='inline-flex';
+  if(viewMode==='canvas') render();
+  document.getElementById('sidebar').scrollTop=0;
+}
+function deleteNode(){
+  if(!selectedId)return;
+  nodes=nodes.filter(n=>n.id!==selectedId);
+  nodes.forEach(n=>n.deps=n.deps.filter(d=>d!==selectedId));
+  resetForm(); autoLayout();
+}
+function duplicateNode(){
+  if(!selectedId) return;
+  const src=nodes.find(n=>n.id===selectedId);
+  if(!src) return;
+  // copy sâu tất cả thuộc tính
+  const copy=JSON.parse(JSON.stringify(src));
+  copy.id=nextId++;
+  // tên phải unique → bỏ hậu tố (copy...) cũ rồi thêm mới, tránh trùng
+  const baseName=src.name.replace(/\s*\(copy(?:\s+\d+)?\)\s*$/,'');
+  let name=baseName+' (copy)', k=2;
+  while(nodes.some(n=>n.name===name)){ name=baseName+' (copy '+k+')'; k++; }
+  copy.name=name;
+  // lệch vị trí để không đè node gốc
+  copy.x=(src.x||0)+24; copy.y=(src.y||0)+24;
+  // deps giữ nguyên (đã copy qua JSON)
+  copy.links=(src.links||[]).map(l=>({label:l.label,url:l.url}));
+  nodes.push(copy);
+  autoLayout();
+  editNode(copy.id); // mở form node mới để sửa tên ngay
+}
+function resetForm(){
+  selectedId=null;
+  document.getElementById('formTitle').textContent='Node mới';
+  ['f-name','f-sub'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-phase').value='2';
+  document.getElementById('f-status').value='plan';
+  document.getElementById('f-prio').value='med';
+  document.getElementById('f-effort').value='';
+  document.getElementById('f-manday').value=0;
+  document.getElementById('f-rate').value=DEFAULT_RATE;
+  document.getElementById('f-costrate').value=DEFAULT_COST_RATE;
+  const accEl=document.getElementById('f-acceptance'); accEl.value=0; delete accEl.dataset.manual;
+  recalcMargin();
+  formLinks=[]; renderLinkRows();
+  document.getElementById('f-start').value='';
+  document.getElementById('f-end').value='';
+  updateDurHint();
+  document.getElementById('saveBtn').textContent='＋ Thêm';
+  document.getElementById('delBtn').style.display='none';
+  document.getElementById('dupBtn').style.display='none';
+  renderTierFields(); renderDepsBox(); renderNodeList();
+}
+
+let drag=null;
+let colDrag=null;
+let bandClick=null;
+let pan=null;
+const svg=document.getElementById('svg');
+function attachDrag(){
+  document.querySelectorAll('.node-g').forEach(g=>{
+    g.addEventListener('mousedown',e=>{
+      e.stopPropagation();
+      const id=+g.dataset.id;const n=nodes.find(x=>x.id===id);
+      drag={id,sx:e.clientX,sy:e.clientY,ox:n.x,oy:n.y,moved:false};
+    });
+  });
+  document.querySelectorAll('.col-resizer').forEach(g=>{
+    g.addEventListener('mousedown',e=>{
+      e.stopPropagation();
+      const tier=g.dataset.tier;
+      colDrag={tier, sx:e.clientX, ow:COL_W[tier]};
+    });
+  });
+  document.querySelectorAll('.tier-band').forEach(r=>{
+    r.addEventListener('mousedown',e=>{
+      e.stopPropagation();
+      bandClick={tier:r.dataset.tier, sx:e.clientX, sy:e.clientY, moved:false};
+    });
+  });
+}
+document.addEventListener('mousemove',e=>{
+  if(colDrag){
+    const dw=(e.clientX-colDrag.sx)/view.k;
+    const cap=maxWidthForTier(colDrag.tier);
+    COL_W[colDrag.tier]=Math.max(200,Math.min(cap,colDrag.ow+dw));
+    autoLayout();
+    return;
+  }
+  if(bandClick){
+    if(Math.abs(e.clientX-bandClick.sx)>3||Math.abs(e.clientY-bandClick.sy)>3){
+      bandClick.moved=true;
+      // turn into a pan
+      if(!pan) pan={sx:bandClick.sx,sy:bandClick.sy,ox:view.x,oy:view.y};
+    }
+  }
+  if(pan){
+    if(Math.abs(e.clientX-pan.sx)>3||Math.abs(e.clientY-pan.sy)>3) pan.moved=true;
+    view.x=pan.ox+(e.clientX-pan.sx);view.y=pan.oy+(e.clientY-pan.sy);render();return;
+  }
+  if(!drag)return;
+  const dx=(e.clientX-drag.sx)/view.k,dy=(e.clientY-drag.sy)/view.k;
+  if(Math.abs(dx)>2||Math.abs(dy)>2)drag.moved=true;
+  const n=nodes.find(x=>x.id===drag.id);n.x=drag.ox+dx;n.y=drag.oy+dy;render();
+});
+document.addEventListener('mouseup',()=>{
+  if(bandClick && !bandClick.moved){
+    selectedTier = selectedTier===bandClick.tier ? null : bandClick.tier;
+    render();
+  } else if(pan && !pan.moved && selectedTier){
+    // click vào vùng trống → bỏ chọn zone (bản in sạch)
+    selectedTier=null; render();
+  }
+  if(drag&&!drag.moved)editNode(drag.id);
+  drag=null;colDrag=null;bandClick=null;pan=null;svg.classList.remove('panning');
+});
+
+svg.addEventListener('mousedown',e=>{if(e.target.closest('.node-g')||e.target.closest('.col-resizer')||e.target.closest('.tier-band'))return;pan={sx:e.clientX,sy:e.clientY,ox:view.x,oy:view.y,moved:false};svg.classList.add('panning');});
+svg.addEventListener('wheel',e=>{
+  if(e.ctrlKey||e.metaKey){e.preventDefault();zoomBy(e.deltaY<0?1.05:0.952,e.offsetX,e.offsetY);}
+  else{e.preventDefault();view.y-=e.deltaY;view.x-=e.deltaX;render();}
+},{passive:false});
+function zoomBy(f,cx,cy){
+  const r=svg.getBoundingClientRect();cx=cx??r.width/2;cy=cy??r.height/2;
+  const k2=Math.max(0.3,Math.min(2.5,view.k*f));
+  view.x=cx-(cx-view.x)*(k2/view.k);view.y=cy-(cy-view.y)*(k2/view.k);view.k=k2;render();updateZoomLabel();
+}
+function resetView(){view={x:20,y:20,k:0.78};render();updateZoomLabel();}
+function updateZoomLabel(){const el=document.getElementById('zoomLabel');if(el)el.textContent=Math.round(view.k*100)+'%';}
+
+(function(){
+  const rz=document.getElementById('resizer'),sb=document.getElementById('sidebar');
+  let rzing=false;
+  rz.addEventListener('mousedown',e=>{rzing=true;rz.classList.add('active');e.preventDefault();});
+  document.addEventListener('mousemove',e=>{if(!rzing)return;sb.style.width=Math.max(220,Math.min(560,e.clientX))+'px';});
+  document.addEventListener('mouseup',()=>{rzing=false;rz.classList.remove('active');});
+})();
+
+function openImport(){document.getElementById('importModal').classList.add('show');}
+function closeImport(){document.getElementById('importModal').classList.remove('show');document.getElementById('importText').value='';}
+function doImport(){
+  try{
+    const d=JSON.parse(document.getElementById('importText').value);
+    nodes=d.nodes||[];nextId=d.nextId||(Math.max(0,...nodes.map(n=>n.id))+1);
+    projectClient=d.client||''; document.getElementById('clientInput').value=projectClient;
+    if(d.showCfg) showCfg=Object.assign({phase:true,status:true,meta:true,effort:true,cost:true,links:true},d.showCfg);
+    renderCfgPanel();
+    TIERS.forEach(t=>openGroups[t]=false);
+    closeImport();resetForm();autoLayout();
+  }catch(e){alert('JSON không hợp lệ: '+e.message);}
+}
+function copyJSON(btn){
+  const data=JSON.stringify({client:projectClient,showCfg,nodes,nextId},null,2);
+  const flash=ok=>{const o=btn.textContent;btn.textContent=ok?'✓ Đã copy':'✗ Lỗi';btn.style.opacity='.8';setTimeout(()=>{btn.textContent=o;btn.style.opacity='';},1400);};
+  if(navigator.clipboard?.writeText){navigator.clipboard.writeText(data).then(()=>flash(true)).catch(()=>fb(data,flash));}else fb(data,flash);
+}
+function fb(text,flash){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy');}catch(e){}document.body.removeChild(ta);flash(ok);}
+function exportWord(){
+  const PHASE_LABEL={'0':'Tầng 0','1':'Phase 1','2':'Phase 2','3':'Phase 3'};
+  const STATUS_LABEL={done:'Hoàn thành',prog:'Đang làm',plan:'Dự kiến'};
+  const PRIO_LABEL={high:'Cao',med:'Trung bình',low:'Thấp'};
+  const nameById=id=>{const n=nodes.find(x=>x.id===id);return n?n.name:'?';};
+  const depNames=n=>n.deps.length?n.deps.map(nameById).join(', '):'—';
+  function tierExtraCols(tier){return (TIER_FIELDS[tier]||[]).map(f=>f.label);}
+  function tierExtraVals(tier,n){return (TIER_FIELDS[tier]||[]).map(f=>esc(n[f.key]||'—'));}
+  const source=visibleNodes();   // chỉ xuất phần đang hiển thị theo filter
+  const filtered = source.length!==nodes.length;
+  const total=source.length;
+  const byPhase={};source.forEach(n=>byPhase[n.phase]=(byPhase[n.phase]||0)+1);
+  const byStatus={};source.forEach(n=>byStatus[n.status]=(byStatus[n.status]||0)+1);
+  let grandManday=0, grandValue=0;
+  source.forEach(n=>{grandManday+=(+n.manday||0);grandValue+=(+n.acceptanceValue||0);});
+
+  let body=`<h1>${projectClient?esc(projectClient)+' — ':''}Kiến trúc dữ liệu hệ thống</h1>
+  <p style="color:#666">Sơ đồ kiến trúc 4 tầng: Giao thức nhập liệu → Data Source → Data Model → Dashboard. Tài liệu xuất tự động từ Architecture Builder.${filtered?' <b>(Đang lọc: chỉ xuất phần hiển thị)</b>':''}</p>
+  <p><b>Tổng thành phần:</b> ${total} &nbsp;|&nbsp; <b>Phase:</b> ${Object.keys(byPhase).sort().map(p=>PHASE_LABEL[p]+': '+byPhase[p]).join(' · ')} &nbsp;|&nbsp; <b>Trạng thái:</b> ${Object.keys(byStatus).map(s=>STATUS_LABEL[s]+': '+byStatus[s]).join(' · ')}</p>
+  <p><b>Tổng man-day:</b> ${grandManday} ngày &nbsp;|&nbsp; <b>Tổng giá trị nghiệm thu:</b> ${fmtMoney(grandValue)} đ</p>`;
+
+  TIERS.forEach(tier=>{
+    const list=source.filter(n=>n.tier===tier);
+    if(!list.length)return;
+    body+=`<h2>${TIER_META[tier].label}</h2>`;
+    body+=`<p style="color:#666;font-style:italic">${TIER_META[tier].sub}</p>`;
+    const extra=tierExtraCols(tier);
+    body+=`<table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;width:100%;font-size:9.5pt">
+      <tr style="background:#2a2e38;color:#fff">
+        <th align="left">Tên</th><th align="left">Mô tả</th>
+        ${extra.map(c=>`<th align="left">${c}</th>`).join('')}
+        <th align="left">Phase</th><th align="left">Trạng thái</th><th align="left">Ưu tiên</th>
+        <th align="left">Effort</th><th align="left">M-day</th><th align="left">Giá trị NT</th>
+        <th align="left">Phụ thuộc</th><th align="left">Tài liệu</th>
+      </tr>`;
+    const span=12+extra.length;
+    if(tier==='Dashboard'){
+      const byDept={};list.forEach(n=>{const d=n.dept||'(chưa nhóm)';(byDept[d]=byDept[d]||[]).push(n);});
+      Object.keys(byDept).forEach(dept=>{
+        body+=`<tr style="background:#f0ede5"><td colspan="${span}"><b>▸ Phòng ban: ${esc(dept)}</b></td></tr>`;
+        byDept[dept].forEach(n=>{ body+=rowFor(n,tier,extra); });
+      });
+    } else {
+      list.forEach(n=>{ body+=rowFor(n,tier,extra); });
+    }
+    // tier subtotal
+    let tMd=0,tV=0; list.forEach(n=>{tMd+=(+n.manday||0);tV+=(+n.acceptanceValue||0);});
+    body+=`<tr style="background:#e6e2d8"><td colspan="${5+extra.length}" align="right"><b>Cộng tầng:</b></td><td></td><td><b>${tMd}</b></td><td><b>${fmtMoney(tV)}</b></td><td colspan="2"></td></tr>`;
+    body+=`</table>`;
+  });
+
+  function rowFor(n,tier,extra){
+    const links=(n.links||[]).map(l=>`<a href="${esc(l.url)}">${esc(l.label||'link')}</a>`).join('<br>')||'—';
+    return `<tr>
+      <td><b>${esc(n.name)}</b></td>
+      <td>${esc(n.sub||'—')}</td>
+      ${tierExtraVals(tier,n).map(v=>`<td>${v}</td>`).join('')}
+      <td>${PHASE_LABEL[n.phase]}</td>
+      <td>${STATUS_LABEL[n.status]}</td>
+      <td>${PRIO_LABEL[n.prio]}</td>
+      <td>${esc(n.effortLevel||'—')}</td>
+      <td>${n.manday||'—'}</td>
+      <td>${n.acceptanceValue?fmtMoney(n.acceptanceValue):'—'}</td>
+      <td>${esc(depNames(n))}</td>
+      <td>${links}</td>
+    </tr>`;
+  }
+
+  const html=`<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Kiến trúc dữ liệu</title>
+  <style>
+    body{font-family:'Calibri',sans-serif;font-size:11pt;color:#222}
+    h1{font-size:18pt;color:#1a2238;border-bottom:2px solid #a8842e;padding-bottom:6px}
+    h2{font-size:14pt;color:#473da3;margin-top:18px}
+    table{margin:8px 0 14px}
+    th,td{text-align:left;vertical-align:top}
+  </style></head><body>${body}</body></html>`;
+
+  const blob=new Blob(['\ufeff'+html],{type:'application/msword'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='kien-truc-du-lieu.doc';
+  a.click();
+}
+function exportSVG(){
+  const old={...view};
+  let minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
+  nodes.forEach(n=>{minX=Math.min(minX,n.x-30);minY=Math.min(minY,n.y-60);maxX=Math.max(maxX,n.x+NODE_W+30);maxY=Math.max(maxY,n.y+NODE_H+20);});
+  const pad=40,W=maxX-minX+pad*2,H=maxY-minY+pad*2;
+  view={x:pad-minX,y:pad-minY,k:1};render();
+  const inner=svg.innerHTML;
+  const full=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#f4f2ec"/><style>.tier-label{font-family:serif;font-size:14px;font-weight:500;fill:#a8842e}.tier-sub{font-family:sans-serif;font-size:10.5px;fill:#8b91a3}.zone-label{font-family:sans-serif;font-size:11px;font-weight:500;fill:#5a6173}.node-title{font-family:sans-serif;font-size:12.5px;font-weight:500}.node-subtitle{font-family:sans-serif;font-size:10px}.node-badge-txt{font-family:monospace;font-size:9px}.conn{fill:none;stroke-width:1.4;opacity:.5}</style>${inner}</svg>`;
+  const blob=new Blob([full],{type:'image/svg+xml'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='architecture.svg';a.click();
+  view=old;render();
+}
+
+// Init: nếu có dự án đã lưu trong trình duyệt, mở dự án gần nhất; nếu không, seed demo
+(function init(){
+  renderCfgPanel();
+  const idx = lsAvailable()?getProjectIndex():[];
+  if(idx.length){
+    renderProjectBar();
+    if(!loadProjectFromLS(idx[0].client)){ seedDemo(); resetView(); }
+  } else {
+    seedDemo();
+    resetView();
+    renderProjectBar();
+  }
+  updateSaveStatus();
+})();
+</script>
+</body>
+</html>
