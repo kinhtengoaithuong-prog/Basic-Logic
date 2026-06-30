@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sky Hopper - Platformer</title>
+<style>
+    :root {
+        --ink: #16202e;
+        --paper: #f4ede0;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #1b2430;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        color: var(--paper);
+        user-select: none;
+    }
+    #wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    #hud {
+        width: 800px;
+        max-width: 96vw;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 4px;
+        gap: 12px;
+    }
+    #hud .left  { font-size: 19px; font-weight: bold; letter-spacing: 0.03em; white-space: nowrap; }
+    #hud .right { font-size: 20px; font-variant-numeric: tabular-nums; font-weight: bold; }
+    #hud .who   { font-size: 13px; opacity: 0.7; }
+    .btns { display: flex; gap: 8px; }
+    button {
+        font-family: inherit;
+        font-weight: bold;
+        font-size: 13px;
+        color: var(--paper);
+        background: #2b3a55;
+        border: 2px solid #46587a;
+        border-radius: 6px;
+        padding: 6px 12px;
+        cursor: pointer;
+    }
+    button:hover { background: #36486a; }
+    canvas {
+        display: block;
+        background: #87ceeb;
+        border: 3px solid var(--ink);
+        border-radius: 6px;
+        max-width: 96vw;
+        height: auto;
+    }
+    /* fullscreen */
+    #wrap:fullscreen {
+        justify-content: center;
+        background: #1b2430;
+        width: 100%;
+    }
+    #wrap:fullscreen canvas {
+        max-width: 100vw;
+        max-height: 84vh;
+    }
+    #tip { margin-top: 10px; font-size: 13px; opacity: 0.6; text-align: center; }
+
+    /* Bảng nhập tên */
+    #nameModal {
+        position: fixed; inset: 0;
+        background: rgba(15,20,30,0.85);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 50;
+    }
+    #nameCard {
+        background: #20283a;
+        border: 2px solid #46587a;
+        border-radius: 12px;
+        padding: 28px 32px;
+        text-align: center;
+        max-width: 90vw;
+    }
+    #nameCard h1 { margin: 0 0 6px; font-size: 30px; }
+    #nameCard p  { margin: 0 0 18px; font-size: 14px; opacity: 0.8; }
+    #nameInput {
+        font-family: inherit; font-size: 18px;
+        padding: 10px 14px; width: 240px; max-width: 70vw;
+        border-radius: 8px; border: 2px solid #46587a;
+        background: #141b28; color: var(--paper);
+        text-align: center; outline: none;
+    }
+    #nameInput:focus { border-color: #7d93bd; }
+    #startBtn { margin-top: 16px; display: block; width: 100%; font-size: 16px; padding: 10px; }
+    .hidden { display: none !important; }
+    #records { margin-top: 16px; font-size: 13px; opacity: 0.8; line-height: 1.5; text-align: left; }
+    #records b { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div id="wrap">
+    <div id="hud">
+        <span class="left" id="levelLabel">Sẵn sàng</span>
+        <span class="who" id="whoLabel"></span>
+        <div class="btns">
+            <button id="newBtn">New Game</button>
+            <button id="fsBtn">⛶ Phóng to</button>
+        </div>
+        <span class="right" id="timeLabel">0.00s</span>
+    </div>
+    <canvas id="game" width="800" height="400"></canvas>
+    <div id="tip">← → di chuyển &nbsp;·&nbsp; Space nhảy &nbsp;·&nbsp; R chơi lại màn &nbsp;·&nbsp; Enter tiếp tục</div>
+</div>
+
+<!-- Bảng nhập tên -->
+<div id="nameModal">
+    <div id="nameCard">
+        <h1>SKY HOPPER</h1>
+        <p>5 màn, độ khó tăng dần — chạy đua với đồng hồ</p>
+        <input id="nameInput" type="text" maxlength="14" placeholder="Nhập tên của bạn" autocomplete="off">
+        <button id="startBtn">Bắt đầu chơi</button>
+        <div id="records"></div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const W = canvas.width, H = canvas.height;
+
+const levelLabel = document.getElementById("levelLabel");
+const timeLabel  = document.getElementById("timeLabel");
+const whoLabel   = document.getElementById("whoLabel");
+const nameModal  = document.getElementById("nameModal");
+const nameInput  = document.getElementById("nameInput");
+const startBtn   = document.getElementById("startBtn");
+const newBtn     = document.getElementById("newBtn");
+const fsBtn      = document.getElementById("fsBtn");
+const wrap       = document.getElementById("wrap");
+const recordsBox = document.getElementById("records");
+
+// ---- Các màn (độ khó tăng dần) ----
+const LEVELS = [
+    {
+        name: "Khởi động",
+        spawn: {x: 40, y: 300},
+        goal:  {x: 740, y: 300, w: 26, h: 40},
+        p: [
+            {x: 0, y: 350, w: 800, h: 50},
+            {x: 180, y: 290, w: 110, h: 18},
+            {x: 360, y: 250, w: 110, h: 18},
+            {x: 560, y: 300, w: 120, h: 18}
+        ],
+        m: [], s: []
+    },
+    {
+        name: "Bước nhảy",
+        spawn: {x: 40, y: 300},
+        goal:  {x: 740, y: 110, w: 26, h: 40},
+        p: [
+            {x: 0, y: 350, w: 220, h: 50},
+            {x: 300, y: 320, w: 90, h: 18},
+            {x: 460, y: 270, w: 90, h: 18},
+            {x: 600, y: 210, w: 90, h: 18},
+            {x: 700, y: 150, w: 100, h: 18}
+        ],
+        s: [{x: 220, y: 340, w: 80, h: 10}],
+        m: []
+    },
+    {
+        name: "Bệ trôi",
+        spawn: {x: 40, y: 300},
+        goal:  {x: 740, y: 150, w: 26, h: 40},
+        p: [
+            {x: 0, y: 350, w: 160, h: 50},
+            {x: 700, y: 190, w: 100, h: 18}
+        ],
+        m: [
+            {x: 200, y: 300, w: 90, h: 16, range: 70, dir: 1, axis: "y", spd: 1.2},
+            {x: 380, y: 260, w: 90, h: 16, range: 120, dir: 1, axis: "x", spd: 1.6},
+            {x: 560, y: 240, w: 90, h: 16, range: 60, dir: -1, axis: "y", spd: 1.5}
+        ],
+        s: [{x: 160, y: 340, w: 540, h: 10}]
+    },
+    {
+        name: "Gai góc",
+        spawn: {x: 30, y: 300},
+        goal:  {x: 750, y: 120, w: 26, h: 40},
+        p: [
+            {x: 0, y: 350, w: 140, h: 50},
+            {x: 210, y: 320, w: 70, h: 16},
+            {x: 340, y: 280, w: 70, h: 16},
+            {x: 470, y: 240, w: 70, h: 16},
+            {x: 600, y: 200, w: 70, h: 16},
+            {x: 710, y: 160, w: 90, h: 16}
+        ],
+        s: [
+            {x: 140, y: 340, w: 70, h: 10},
+            {x: 280, y: 310, w: 60, h: 10},
+            {x: 410, y: 270, w: 60, h: 10},
+            {x: 540, y: 230, w: 60, h: 10}
+        ],
+        m: []
+    },
+    {
+        name: "Thử thách",
+        spawn: {x: 30, y: 300},
+        goal:  {x: 752, y: 150, w: 26, h: 40},
+        p: [
+            {x: 0,   y: 350, w: 130, h: 50},   // bến xuất phát
+            {x: 290, y: 250, w: 70,  h: 16},   // chỗ nghỉ giữa chặng
+            {x: 530, y: 250, w: 70,  h: 16},   // chỗ nghỉ giữa chặng
+            {x: 700, y: 200, w: 100, h: 16}    // bến đích
+        ],
+        // 3 bệ động dọc, CÙNG tốc độ & biên độ, lệch pha đều -> nhịp dễ đọc
+        m: [
+            {x: 180, y: 300, w: 78, h: 16, range: 70, dir:  1, axis: "y", spd: 1.4},
+            {x: 420, y: 300, w: 78, h: 16, range: 70, dir: -1, axis: "y", spd: 1.4},
+            {x: 620, y: 300, w: 78, h: 16, range: 70, dir:  1, axis: "y", spd: 1.4}
+        ],
+        s: [{x: 130, y: 342, w: 570, h: 8}]
+    }
+];
+
+const gravity = 0.5;
+const player = { x: 0, y: 0, w: 28, h: 28, vx: 0, vy: 0, speed: 4, jump: -11.5, grounded: false };
+
+let levelIndex = 0;
+let state = "idle";          // idle | playing | win | complete
+let playerName = "";
+let deaths = 0;
+
+// ---- Đồng hồ: chạy liên tục từ khi New Game, KHÔNG reset khi chết ----
+let runStart = 0;            // mốc bắt đầu cả lượt chơi
+let elapsed = 0;            // tổng thời gian từ New Game
+let finalTime = 0;          // thời gian khi hoàn thành toàn bộ
+
+// Bảng record lưu trong trình duyệt không khả dụng ở đây -> lưu trong biến phiên
+const records = [];          // {name, time, deaths}
+
+const keys = {};
+addEventListener("keydown", e => {
+    keys[e.code] = true;
+    if (e.code === "Space") e.preventDefault();
+    if (e.code === "Enter" && document.activeElement !== nameInput) {
+        if (state === "win") nextLevel();
+        else if (state === "complete") openNameModal();
+    }
+    if (e.code === "KeyR" && state === "playing") respawn();   // R: về đầu màn, giữ giờ
+});
+addEventListener("keyup", e => keys[e.code] = false);
+
+function placeAtSpawn() {
+    const lv = LEVELS[levelIndex];
+    player.x = lv.spawn.x; player.y = lv.spawn.y;
+    player.vx = 0; player.vy = 0; player.grounded = false;
+    lv.m.forEach(mp => { mp._off = 0; mp._base = mp.axis === "x" ? mp.x : mp.y;
+                         if (mp.axis === "x") mp.x = mp._base; else mp.y = mp._base; });
+}
+
+// Bắt đầu một lượt chơi mới hoàn toàn (đồng hồ về 0)
+function newGame() {
+    if (!playerName) { openNameModal(); return; }
+    levelIndex = 0;
+    deaths = 0;
+    placeAtSpawn();
+    runStart = performance.now();
+    elapsed = 0;
+    state = "playing";
+    updateHud();
+}
+
+// Chết / chơi lại màn: về điểm xuất phát của màn, đồng hồ vẫn chạy
+function respawn() {
+    placeAtSpawn();
+}
+
+function loadLevel(i) {
+    levelIndex = i;
+    placeAtSpawn();
+    state = "playing";
+    updateHud();
+}
+
+function nextLevel() {
+    if (levelIndex + 1 < LEVELS.length) loadLevel(levelIndex + 1);
+    else completeGame();
+}
+
+function completeGame() {
+    finalTime = elapsed;
+    records.push({ name: playerName, time: finalTime, deaths });
+    records.sort((a, b) => a.time - b.time);
+    state = "complete";
+}
+
+function updateHud() {
+    const lv = LEVELS[levelIndex];
+    levelLabel.textContent = `Màn ${levelIndex + 1} — ${lv.name}`;
+    whoLabel.textContent = playerName ? `Người chơi: ${playerName} · Chết: ${deaths}` : "";
+}
+
+function overlap(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x &&
+           a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function update() {
+    const lv = LEVELS[levelIndex];
+
+    for (const mp of lv.m) {
+        mp._off += mp.spd * mp.dir;
+        if (Math.abs(mp._off) > mp.range) mp.dir *= -1;
+        if (mp.axis === "x") mp.x = mp._base + mp._off;
+        else                 mp.y = mp._base + mp._off;
+    }
+
+    player.vx = 0;
+    if (keys["ArrowLeft"])  player.vx = -player.speed;
+    if (keys["ArrowRight"]) player.vx =  player.speed;
+    if (keys["Space"] && player.grounded) { player.vy = player.jump; player.grounded = false; }
+
+    player.vy += gravity;
+    player.x += player.vx;
+    player.y += player.vy;
+
+    if (player.x < 0) player.x = 0;
+    if (player.x + player.w > W) player.x = W - player.w;
+
+    player.grounded = false;
+    const solids = lv.p.concat(lv.m);
+    for (const p of solids) {
+        if (overlap(player, p)) {
+            const prevBottom = player.y + player.h - player.vy;
+            if (player.vy >= 0 && prevBottom <= p.y + 1) {
+                player.y = p.y - player.h;
+                player.vy = 0;
+                player.grounded = true;
+                if (p.axis === "x") player.x += p.spd * p.dir;
+            }
+        }
+    }
+
+    // chết do gai -> đếm, về đầu màn, KHÔNG reset giờ
+    for (const sp of lv.s) {
+        if (overlap(player, sp)) { deaths++; updateHud(); respawn(); return; }
+    }
+    // rơi khỏi màn -> chết
+    if (player.y > H + 40) { deaths++; updateHud(); respawn(); return; }
+
+    // tới đích
+    if (overlap(player, lv.goal)) {
+        if (levelIndex + 1 < LEVELS.length) { state = "win"; }
+        else completeGame();
+    }
+}
+
+function drawSpikes(s) {
+    ctx.fillStyle = "#7a2230";
+    const tooth = 12;
+    for (let x = s.x; x < s.x + s.w; x += tooth) {
+        ctx.beginPath();
+        ctx.moveTo(x, s.y + s.h);
+        ctx.lineTo(x + tooth / 2, s.y);
+        ctx.lineTo(x + tooth, s.y + s.h);
+        ctx.closePath();
+        ctx.fill();
+    }
+}
+
+function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, "#aee0f5");
+    grad.addColorStop(1, "#87ceeb");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    if (state === "idle") {
+        ctx.fillStyle = "#16202e";
+        ctx.textAlign = "center";
+        ctx.font = "20px Trebuchet MS";
+        ctx.fillText("Nhập tên rồi bấm Bắt đầu để chơi", W/2, H/2);
+        ctx.textAlign = "start";
+        return;
+    }
+
+    const lv = LEVELS[levelIndex];
+
+    ctx.fillStyle = "#6b4f2a";
+    for (const p of lv.p) {
+        ctx.fillRect(p.x, p.y, p.w, p.h);
+        ctx.fillStyle = "#3a8a3a";
+        ctx.fillRect(p.x, p.y, p.w, 5);
+        ctx.fillStyle = "#6b4f2a";
+    }
+    ctx.fillStyle = "#8a6d3b";
+    for (const mp of lv.m) {
+        ctx.fillRect(mp.x, mp.y, mp.w, mp.h);
+        ctx.fillStyle = "#c9a35a";
+        ctx.fillRect(mp.x, mp.y, mp.w, 4);
+        ctx.fillStyle = "#8a6d3b";
+    }
+    for (const sp of lv.s) drawSpikes(sp);
+
+    const g = lv.goal;
+    ctx.fillStyle = "#000";
+    ctx.fillRect(g.x, g.y - 30, 4, g.h + 30);
+    ctx.fillStyle = "#e63946";
+    ctx.beginPath();
+    ctx.moveTo(g.x + 4, g.y - 30);
+    ctx.lineTo(g.x + 30, g.y - 22);
+    ctx.lineTo(g.x + 4, g.y - 14);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = "#2b3a55";
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(player.x + 18, player.y + 7, 5, 5);
+
+    if (state === "win" || state === "complete") {
+        ctx.fillStyle = "rgba(15,20,30,0.72)";
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = "#f4ede0";
+        ctx.textAlign = "center";
+        if (state === "win") {
+            ctx.font = "bold 38px Trebuchet MS";
+            ctx.fillText("Qua màn!", W/2, H/2 - 16);
+            ctx.font = "18px Trebuchet MS";
+            ctx.fillText(`Tổng thời gian: ${elapsed.toFixed(2)}s · Chết: ${deaths}`, W/2, H/2 + 16);
+            ctx.font = "16px Trebuchet MS";
+            ctx.fillText("Nhấn Enter để sang màn tiếp theo", W/2, H/2 + 46);
+        } else {
+            ctx.font = "bold 40px Trebuchet MS";
+            ctx.fillText("HOÀN THÀNH! 🎉", W/2, H/2 - 50);
+            ctx.font = "22px Trebuchet MS";
+            ctx.fillText(`${playerName} — ${finalTime.toFixed(2)}s · ${deaths} lần chết`, W/2, H/2 - 14);
+            // bảng xếp hạng top 5
+            ctx.font = "15px Trebuchet MS";
+            ctx.fillText("— Bảng xếp hạng —", W/2, H/2 + 16);
+            records.slice(0, 5).forEach((r, i) => {
+                ctx.fillText(`${i+1}. ${r.name}  ${r.time.toFixed(2)}s  (${r.deaths} chết)`, W/2, H/2 + 40 + i*22);
+            });
+            ctx.font = "14px Trebuchet MS";
+            ctx.fillText("Bấm New Game để chơi lại", W/2, H/2 + 40 + Math.min(records.length,5)*22 + 8);
+        }
+        ctx.textAlign = "start";
+    }
+}
+
+function loop(now) {
+    if (state === "playing") {
+        elapsed = (now - runStart) / 1000;
+        timeLabel.textContent = elapsed.toFixed(2) + "s";
+        update();
+    }
+    draw();
+    requestAnimationFrame(loop);
+}
+
+// ---- Bảng nhập tên ----
+function openNameModal() {
+    nameModal.classList.remove("hidden");
+    nameInput.value = playerName;
+    renderRecords();
+    setTimeout(() => nameInput.focus(), 30);
+}
+function renderRecords() {
+    if (!records.length) { recordsBox.innerHTML = ""; return; }
+    let html = "<b>Bảng xếp hạng</b><br>";
+    records.slice(0, 5).forEach((r, i) => {
+        html += `${i+1}. ${r.name} — ${r.time.toFixed(2)}s (${r.deaths} chết)<br>`;
+    });
+    recordsBox.innerHTML = html;
+}
+function confirmName() {
+    const v = nameInput.value.trim();
+    if (!v) { nameInput.focus(); return; }
+    playerName = v;
+    nameModal.classList.add("hidden");
+    newGame();
+}
+startBtn.addEventListener("click", confirmName);
+nameInput.addEventListener("keydown", e => { if (e.code === "Enter") confirmName(); });
+
+// New Game: mở lại bảng nhập tên (cho phép đổi tên), đồng hồ sẽ về 0
+newBtn.addEventListener("click", () => { state = "idle"; openNameModal(); });
+
+// Phóng to toàn màn hình
+fsBtn.addEventListener("click", () => {
+    if (!document.fullscreenElement) {
+        wrap.requestFullscreen?.();
+    } else {
+        document.exitFullscreen?.();
+    }
+});
+document.addEventListener("fullscreenchange", () => {
+    fsBtn.textContent = document.fullscreenElement ? "⤢ Thu nhỏ" : "⛶ Phóng to";
+});
+
+requestAnimationFrame(loop);
+openNameModal();
+</script>
+</body>
+</html>
