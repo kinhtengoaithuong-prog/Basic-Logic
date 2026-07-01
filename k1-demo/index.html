@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khối 1 — NPV · Payback · ROI trên một đồ thị</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap&subset=latin,latin-ext,vietnamese" rel="stylesheet">
+<style>
+:root{
+  --ink:#0b1020; --ink-soft:#141b2e; --panel:#1a2236; --panel-soft:#212c44;
+  --navy-deep:#080d1c;
+  --platinum:#e8e6df; --platinum-soft:#b9bdc9; --muted:#6b7693; --muted-dim:#4a5269;
+  --gold:#c9a227; --gold-light:#e3c049;
+  --teal:#4db8a0; --teal-deep:#2d8a76;
+  --rose:#d96d6d; --rose-deep:#b84a4a;
+  --line:rgba(232,230,223,0.10); --line-soft:rgba(232,230,223,0.06); --line-gold:rgba(201,162,39,0.35);
+  --bg:var(--ink); --card:var(--ink-soft); --track:var(--panel-soft);
+}
+[data-theme="light"]{
+  --ink:#f4f1ea; --ink-soft:#ffffff; --panel:#eae5d8; --panel-soft:#e0dccf;
+  --navy-deep:#faf8f2;
+  --platinum:#1a2236; --platinum-soft:#3a4358; --muted:#7a8296; --muted-dim:#9aa2b4;
+  --gold:#a8841a; --gold-light:#c9a227;
+  --teal:#2d8a76; --teal-deep:#1f6b5a;
+  --rose:#c0504d; --rose-deep:#9e3b38;
+  --line:rgba(20,27,46,0.12); --line-soft:rgba(20,27,46,0.07); --line-gold:rgba(168,132,26,0.40);
+  --bg:#f4f1ea; --card:#ffffff; --track:#ded9cb;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--platinum);line-height:1.6;font-weight:300;-webkit-font-smoothing:antialiased;transition:background .35s,color .35s;padding-bottom:60px;}
+.wrap{max-width:1080px;margin:0 auto;padding:0 32px;}
+
+.hd{background:var(--navy-deep);border-bottom:1px solid var(--line);padding:36px 0 30px;transition:background .35s;}
+.hd-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+.eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+.eyebrow::before{content:'';width:30px;height:1px;background:var(--gold);}
+.hd h1{font-family:'Noto Serif Display',serif;font-weight:400;font-size:clamp(24px,3.6vw,36px);line-height:1.12;margin-bottom:12px;}
+.hd h1 em{font-style:italic;color:var(--gold-light);}
+.hd p{font-size:15px;color:var(--platinum-soft);max-width:640px;}
+
+.theme-btn{flex-shrink:0;background:var(--card);border:1px solid var(--line);color:var(--platinum-soft);border-radius:999px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:border-color .2s,color .2s;}
+.theme-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+.demo{margin-top:30px;background:var(--navy-deep);border:1px solid var(--line);border-radius:8px;overflow:hidden;transition:background .35s;}
+.demo-grid{display:grid;grid-template-columns:300px 1fr;}
+@media(max-width:840px){.demo-grid{grid-template-columns:1fr;}}
+.ctrls{padding:26px 26px;border-right:1px solid var(--line);}
+@media(max-width:840px){.ctrls{border-right:none;border-bottom:1px solid var(--line);}}
+.cg{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);margin:20px 0 14px;padding-bottom:7px;border-bottom:1px solid var(--line-soft);}
+.cg:first-child{margin-top:0;}
+.ctrl{margin-bottom:18px;}
+.ctrl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;gap:8px;}
+.ctrl-name{font-size:13px;color:var(--platinum-soft);}
+.ctrl-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold-light);font-weight:500;}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:var(--track);border-radius:2px;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:15px;height:15px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--navy-deep);box-shadow:0 0 0 1px var(--line-gold);transition:transform .12s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--navy-deep);}
+.ctrl-hint{font-size:11px;color:var(--muted-dim);margin-top:5px;font-style:italic;}
+
+.view{padding:26px 28px;min-width:0;}
+/* metric cards */
+.mcards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px;}
+@media(max-width:560px){.mcards{grid-template-columns:1fr;}}
+.mcard{background:var(--card);border:1px solid var(--line);border-radius:5px;padding:15px 17px;position:relative;overflow:hidden;transition:background .35s;}
+.mcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.mcard.npv::before{background:var(--gold);}
+.mcard.pb::before{background:var(--teal);}
+.mcard.roi::before{background:var(--platinum-soft);}
+.mcard .mc-lbl{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.mcard .mc-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;line-height:1;color:var(--gold-light);}
+.mcard.pb .mc-val{color:var(--teal);}
+.mcard.roi .mc-val{color:var(--platinum);}
+.mcard .mc-val.bad{color:var(--rose);}
+.mcard .mc-sub{font-size:11px;color:var(--muted);margin-top:6px;}
+
+.chart-wrap{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 12px 8px;transition:background .35s;}
+.chart-wrap svg{width:100%;height:auto;display:block;}
+.lbl-txt{font-family:'Outfit',sans-serif;font-size:11px;fill:var(--platinum-soft);}
+.val-txt{font-family:'DM Mono',monospace;font-size:10.5px;}
+.axis{stroke:var(--line);stroke-width:1;}
+.gridln{stroke:var(--line-soft);stroke-width:1;stroke-dasharray:2 3;}
+
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft);}
+.leg{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--platinum-soft);}
+.leg .sw{width:16px;height:3px;border-radius:2px;flex-shrink:0;}
+
+.note{margin-top:20px;padding:15px 18px;border-radius:4px;background:rgba(201,162,39,0.07);border-left:2px solid var(--gold);font-size:13.5px;line-height:1.6;color:var(--platinum-soft);}
+.note strong{color:var(--platinum);font-weight:500;}
+.note .k{font-family:'DM Mono',monospace;color:var(--gold-light);}
+
+.teach{margin-top:26px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:700px){.teach{grid-template-columns:1fr;}}
+.tcard{background:var(--card);border:1px solid var(--line);border-radius:5px;padding:18px 20px;transition:background .35s;}
+.tcard h4{font-family:'Noto Serif Display',serif;font-weight:400;font-size:17px;margin-bottom:8px;}
+.tcard.npv h4{color:var(--gold-light);} .tcard.pb h4{color:var(--teal);} .tcard.roi h4{color:var(--platinum);}
+.tcard p{font-size:13px;color:var(--platinum-soft);line-height:1.55;}
+.tcard .f{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--line-soft);}
+</style>
+</head>
+<body data-theme="dark">
+
+<div class="hd">
+  <div class="wrap">
+    <div class="hd-top">
+      <div>
+        <div class="eyebrow">Khối 1 · Demo minh hoạ</div>
+        <h1>Ba chỉ tiêu, <em>một đường tiền.</em></h1>
+        <p>NPV, Thời gian hoàn vốn và ROI không phải ba phép tính rời rạc — chúng là ba góc nhìn trên cùng một đường tiền tích luỹ của dự án. Kéo tham số để thấy cả ba dịch chuyển cùng nhau.</p>
+      </div>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()"><span id="themeIco">☀</span><span id="themeTxt">Nền sáng</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="demo">
+    <div class="demo-grid">
+      <div class="ctrls">
+        <div class="cg">Dòng tiền dự án</div>
+        <div class="ctrl">
+          <div class="ctrl-head"><span class="ctrl-name">Vốn đầu tư ban đầu (tỷ)</span><span class="ctrl-val" id="investV"></span></div>
+          <input type="range" id="invest" min="2" max="20" step="0.5" value="8">
+          <div class="ctrl-hint">Bỏ ra ở năm 0 — cải hoán, thiết bị, vốn lưu động.</div>
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-head"><span class="ctrl-name">Dòng tiền thu về / năm (tỷ)</span><span class="ctrl-val" id="cfV"></span></div>
+          <input type="range" id="cf" min="0.5" max="8" step="0.25" value="2.6">
+          <div class="ctrl-hint">Lợi nhuận tiền mặt mỗi năm dự án tạo ra.</div>
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-head"><span class="ctrl-name">Số năm vận hành</span><span class="ctrl-val" id="yearsV"></span></div>
+          <input type="range" id="years" min="3" max="10" step="1" value="6">
+        </div>
+
+        <div class="cg">Giá trị thời gian</div>
+        <div class="ctrl">
+          <div class="ctrl-head"><span class="ctrl-name">Tỷ lệ chiết khấu / ngưỡng (%)</span><span class="ctrl-val" id="rateV"></span></div>
+          <input type="range" id="rate" min="5" max="18" step="0.5" value="11">
+          <div class="ctrl-hint">Chi phí vốn tối thiểu dự án phải vượt (hurdle rate).</div>
+        </div>
+      </div>
+
+      <div class="view">
+        <div class="mcards">
+          <div class="mcard npv"><div class="mc-lbl">NPV · Giá trị hiện tại ròng</div><div class="mc-val" id="mNpv"></div><div class="mc-sub" id="mNpvSub"></div></div>
+          <div class="mcard pb"><div class="mc-lbl">Payback · Hoàn vốn</div><div class="mc-val" id="mPb"></div><div class="mc-sub">điểm đường tiền cắt 0</div></div>
+          <div class="mcard roi"><div class="mc-lbl">ROI · Suất sinh lời</div><div class="mc-val" id="mRoi"></div><div class="mc-sub">bình quân / năm</div></div>
+        </div>
+
+        <div class="chart-wrap"><svg id="chart" viewBox="0 0 640 320" preserveAspectRatio="xMidYMid meet"></svg></div>
+
+        <div class="legend">
+          <div class="leg"><span class="sw" style="background:var(--muted)"></span>Tiền tích luỹ (chưa chiết khấu)</div>
+          <div class="leg"><span class="sw" style="background:var(--gold)"></span>Tiền tích luỹ (đã chiết khấu)</div>
+          <div class="leg"><span class="sw" style="background:var(--teal)"></span>Điểm hoàn vốn</div>
+        </div>
+
+        <div class="note" id="note"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="teach">
+    <div class="tcard npv"><h4>NPV nói gì</h4><p>Tổng dòng tiền tương lai quy về hôm nay, trừ vốn bỏ ra. Dương = dự án tạo ra giá trị vượt chi phí vốn. Đây là <strong>giá trị cuối</strong> của đường vàng.</p><div class="f">NPV = −Vốn + Σ CF ÷ (1+r)ᵗ</div></div>
+    <div class="tcard pb"><h4>Payback nói gì</h4><p>Bao lâu thu hồi đủ vốn. Là <strong>điểm đường tiền cắt trục 0</strong>. Trả lời câu hỏi "bao giờ tôi lấy lại tiền" — nhưng bỏ qua giá trị thời gian.</p><div class="f">Payback = Vốn ÷ CF/năm</div></div>
+    <div class="tcard roi"><h4>ROI nói gì</h4><p>Mỗi đồng vốn sinh ra bao nhiêu lời mỗi năm. Đơn giản, dễ truyền đạt, nhưng <strong>không tính thời điểm</strong> tiền về — nên đọc kèm NPV.</p><div class="f">ROI = LN bình quân ÷ Vốn</div></div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const fmt=(n,d=2)=>n.toLocaleString('vi-VN',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+function compute(){
+  const invest=+$('invest').value, cf=+$('cf').value, years=+$('years').value, r=+$('rate').value/100;
+  $('investV').textContent=fmt(invest,1);
+  $('cfV').textContent=fmt(cf,2);
+  $('yearsV').textContent=years;
+  $('rateV').textContent=fmt(r*100,1)+'%';
+
+  // cumulative undiscounted & discounted
+  const undisc=[-invest], disc=[-invest];
+  let cu=-invest, cd=-invest;
+  for(let t=1;t<=years;t++){
+    cu+=cf; undisc.push(cu);
+    cd+=cf/Math.pow(1+r,t); disc.push(cd);
+  }
+  const npv=disc[years];
+  // payback (simple, undiscounted)
+  const payback = cf>0 ? invest/cf : Infinity;
+  // roi average
+  const roi = invest>0 ? cf/invest*100 : 0;
+
+  // metrics
+  $('mNpv').textContent=fmt(npv,2)+' tỷ';
+  $('mNpv').className='mc-val'+(npv<0?' bad':'');
+  $('mNpvSub').textContent=npv>=0?'vượt ngưỡng vốn':'dưới ngưỡng — từ chối';
+  $('mPb').textContent=isFinite(payback)&&payback<=years?fmt(payback,1)+' năm':'> '+years+' năm';
+  $('mRoi').textContent=fmt(roi,0)+'%';
+
+  drawChart(undisc,disc,years,payback,invest,npv);
+
+  // teaching note
+  const pbOk=isFinite(payback)&&payback<=years;
+  $('note').innerHTML = npv>=0
+    ? `Ở mức này, đường tiền chiết khấu (vàng) kết thúc ở <span class="k">+${fmt(npv,2)} tỷ</span> — đó chính là <strong>NPV</strong>. Đường cắt trục 0 quanh năm <span class="k">${pbOk?fmt(payback,1):'—'}</span> là <strong>hoàn vốn</strong>, và mỗi đồng vốn sinh <span class="k">${fmt(roi,0)}%</span>/năm là <strong>ROI</strong>. Cùng một đường tiền, ba câu hỏi khác nhau.`
+    : `Đường tiền chiết khấu (vàng) kết thúc <strong>dưới trục 0</strong> ở <span class="k">${fmt(npv,2)} tỷ</span> — <strong>NPV âm</strong>, dự án không bù nổi chi phí vốn ${fmt(r*100,1)}%. Chú ý: payback vẫn có thể "đẹp" (${pbOk?fmt(payback,1)+' năm':'—'}) nhưng <strong>hoàn vốn nhanh không có nghĩa là đáng đầu tư</strong> — đó là lý do phải đọc NPV.`;
+}
+
+function drawChart(undisc,disc,years,payback,invest,npv){
+  const svg=$('chart');
+  const cs=getComputedStyle(document.body);
+  const cMuted=cs.getPropertyValue('--muted').trim();
+  const cGold=cs.getPropertyValue('--gold').trim();
+  const cGoldL=cs.getPropertyValue('--gold-light').trim();
+  const cTeal=cs.getPropertyValue('--teal').trim();
+  const cRose=cs.getPropertyValue('--rose').trim();
+  const cPlat=cs.getPropertyValue('--platinum-soft').trim();
+
+  const W=640,H=320,padL=54,padR=24,padT=20,padB=40;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const all=[...undisc,...disc,0];
+  const yMax=Math.max(...all), yMin=Math.min(...all);
+  const pad=(yMax-yMin)*0.08||1;
+  const yTop=yMax+pad, yBot=yMin-pad;
+  const X=t=>padL+(t/years)*plotW;
+  const Y=v=>padT+(1-(v-yBot)/(yTop-yBot))*plotH;
+  let s=[];
+
+  // grid + y labels
+  for(let i=0;i<=4;i++){const v=yBot+(yTop-yBot)*i/4;const yy=Y(v);s.push(`<line class="gridln" x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}"/>`);s.push(`<text class="val-txt" x="${padL-8}" y="${yy+3}" text-anchor="end" fill="${cMuted}">${fmt(v,0)}</text>`);}
+  // zero axis
+  const y0=Y(0);
+  s.push(`<line class="axis" x1="${padL}" y1="${y0}" x2="${W-padR}" y2="${y0}" stroke="${cMuted}" stroke-width="1.4"/>`);
+  s.push(`<text class="val-txt" x="${W-padR}" y="${y0-6}" text-anchor="end" fill="${cMuted}">0 (hoàn vốn)</text>`);
+  // x labels
+  for(let t=0;t<=years;t++){s.push(`<text class="lbl-txt" x="${X(t)}" y="${padT+plotH+18}" text-anchor="middle" fill="${cPlat}">N${t}</text>`);}
+
+  // undiscounted line
+  let p1=`M ${X(0)} ${Y(undisc[0])}`;
+  for(let t=1;t<=years;t++)p1+=` L ${X(t)} ${Y(undisc[t])}`;
+  s.push(`<path d="${p1}" fill="none" stroke="${cMuted}" stroke-width="1.6" stroke-dasharray="4 3" opacity="0.7"/>`);
+  // discounted line (the star)
+  let p2=`M ${X(0)} ${Y(disc[0])}`;
+  for(let t=1;t<=years;t++)p2+=` L ${X(t)} ${Y(disc[t])}`;
+  s.push(`<path d="${p2}" fill="none" stroke="${cGold}" stroke-width="3"/>`);
+  // dots on discounted
+  disc.forEach((v,t)=>{const col=v>=0?cTeal:cRose;s.push(`<circle cx="${X(t)}" cy="${Y(v)}" r="3.5" fill="${col}" stroke="var(--navy-deep)" stroke-width="1.5"/>`);});
+
+  // payback marker (undiscounted crossing)
+  if(isFinite(payback)&&payback<=years){
+    const px=X(payback);
+    s.push(`<line class="gridln" x1="${px}" y1="${padT}" x2="${px}" y2="${padT+plotH}" stroke="${cTeal}" stroke-dasharray="3 3"/>`);
+    s.push(`<circle cx="${px}" cy="${y0}" r="5" fill="${cTeal}" stroke="var(--navy-deep)" stroke-width="2"/>`);
+    s.push(`<text class="val-txt" x="${px}" y="${padT+12}" text-anchor="middle" fill="${cTeal}">Hoàn vốn ${fmt(payback,1)}n</text>`);
+  }
+  // NPV endpoint label
+  const ex=X(years), ey=Y(npv);
+  s.push(`<circle cx="${ex}" cy="${ey}" r="5" fill="${cGoldL}" stroke="var(--navy-deep)" stroke-width="2"/>`);
+  s.push(`<text class="val-txt" x="${ex-6}" y="${ey+(npv>=0?-9:16)}" text-anchor="end" fill="${cGoldL}" font-weight="600">NPV ${fmt(npv,1)}t</text>`);
+
+  svg.innerHTML=s.join('');
+}
+
+function toggleTheme(){
+  const b=document.body;
+  const light=b.getAttribute('data-theme')==='light';
+  b.setAttribute('data-theme',light?'dark':'light');
+  $('themeIco').textContent=light?'☀':'☾';
+  $('themeTxt').textContent=light?'Nền sáng':'Nền tối';
+  compute(); // redraw with new theme colors
+}
+
+['invest','cf','years','rate'].forEach(id=>$(id).addEventListener('input',compute));
+compute();
+</script>
+</body>
+</html>
