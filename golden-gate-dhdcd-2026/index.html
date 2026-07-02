@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Golden Gate — ĐHĐCĐ Thường niên 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16110C;
+  --ink-2:#211A13;
+  --panel:#2A2118;
+  --gold:#D8B25C;
+  --gold-soft:#B9975047;
+  --cream:#F3EADA;
+  --muted:#A79680;
+  --up:#8FC98F;
+  --line:#3D3223;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:var(--ink);
+  color:var(--cream);
+  font-family:'Be Vietnam Pro',sans-serif;
+  overflow:hidden;
+}
+.deck{position:relative;width:100vw;height:100vh}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:6vh 7vw 12vh;
+  opacity:0;visibility:hidden;transform:translateY(14px);
+  transition:opacity .5s ease,transform .5s ease,visibility .5s;
+}
+.slide.active{opacity:1;visibility:visible;transform:translateY(0)}
+@media (prefers-reduced-motion: reduce){
+  .slide{transition:none;transform:none}
+}
+
+/* type */
+.eyebrow{
+  font-family:'Oswald',sans-serif;font-weight:500;
+  letter-spacing:.28em;text-transform:uppercase;
+  font-size:clamp(.68rem,1.1vw,.85rem);color:var(--gold);
+  display:flex;align-items:center;gap:14px;margin-bottom:2.2vh;
+}
+.eyebrow::after{content:"";height:1px;flex:0 0 64px;background:var(--gold-soft)}
+h1{
+  font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(2.2rem,6vw,4.6rem);line-height:1.04;letter-spacing:.01em;
+}
+h2{
+  font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(1.6rem,3.6vw,2.9rem);line-height:1.08;margin-bottom:3.5vh;
+}
+.gold{color:var(--gold)}
+p.lede{font-size:clamp(.95rem,1.5vw,1.15rem);font-weight:300;color:var(--muted);max-width:56ch;line-height:1.7}
+
+/* title slide */
+.title-mark{
+  font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:.34em;
+  color:var(--gold);text-transform:uppercase;font-size:clamp(.8rem,1.3vw,1rem);
+  margin-bottom:3vh;
+}
+.title-meta{
+  margin-top:4.5vh;display:flex;flex-wrap:wrap;gap:3.5vw;
+  border-top:1px solid var(--line);padding-top:3vh;
+}
+.meta-item .k{font-family:'Oswald',sans-serif;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.meta-item .v{font-size:clamp(.9rem,1.4vw,1.05rem);font-weight:500}
+
+/* grids & cards */
+.grid{display:grid;gap:2vh 2vw}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.card{
+  background:var(--ink-2);border:1px solid var(--line);
+  padding:3vh 1.8vw;border-radius:4px;
+}
+.card .k{font-family:'Oswald',sans-serif;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1.2vh}
+.card .big{font-family:'Oswald',sans-serif;font-weight:600;font-size:clamp(1.7rem,3.4vw,2.8rem);line-height:1;color:var(--cream)}
+.card .sub{font-size:clamp(.75rem,1.1vw,.9rem);color:var(--muted);margin-top:1vh;font-weight:300;line-height:1.55}
+.card .delta{display:inline-block;margin-top:1.2vh;font-family:'Oswald',sans-serif;font-size:clamp(.85rem,1.3vw,1.05rem);color:var(--up);letter-spacing:.05em}
+
+/* comparison bars */
+.bars{margin-top:1.6vh}
+.bar-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+.bar-row .lbl{font-family:'Oswald',sans-serif;font-size:.68rem;letter-spacing:.14em;color:var(--muted);width:38px;flex:none}
+.bar{height:10px;border-radius:2px;background:var(--panel);position:relative;flex:1;overflow:hidden}
+.bar i{position:absolute;inset:0;width:var(--w);background:var(--gold);opacity:.55;display:block}
+.bar.plan i{opacity:1}
+
+/* list rows */
+.rows{display:flex;flex-direction:column}
+.row{
+  display:grid;grid-template-columns:minmax(120px,180px) 1fr;gap:2vw;
+  padding:2.4vh 0;border-bottom:1px solid var(--line);align-items:start;
+}
+.row:first-child{border-top:1px solid var(--line)}
+.row .tag{font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.1em;color:var(--gold);font-size:clamp(.9rem,1.4vw,1.1rem);text-transform:uppercase}
+.row .txt{font-weight:300;font-size:clamp(.85rem,1.3vw,1.02rem);color:var(--cream);line-height:1.65}
+.row .txt b{font-weight:600;color:var(--gold)}
+.row .txt small{display:block;color:var(--muted);margin-top:4px;font-size:.88em}
+
+/* dividend feature */
+.feature{
+  display:flex;align-items:baseline;gap:1.4vw;flex-wrap:wrap;
+  border:1px solid var(--gold-soft);background:var(--ink-2);
+  padding:3.4vh 2.4vw;border-radius:4px;margin-bottom:2.4vh;
+}
+.feature .num{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(2.6rem,6vw,4.6rem);color:var(--gold);line-height:1}
+.feature .desc{font-weight:300;color:var(--cream);font-size:clamp(.9rem,1.35vw,1.05rem);max-width:46ch;line-height:1.6}
+.feature .desc b{font-weight:600;color:var(--gold)}
+
+/* nav */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:2.2vh 7vw;border-top:1px solid var(--line);
+  background:linear-gradient(to top, var(--ink) 70%, transparent);
+  z-index:10;
+}
+.dots{display:flex;gap:9px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--line);border:0;cursor:pointer;padding:0;transition:background .3s,transform .3s}
+.dot.on{background:var(--gold);transform:scale(1.35)}
+.dot:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.nav-btns{display:flex;gap:10px;align-items:center}
+.nav button.arrow{
+  font-family:'Oswald',sans-serif;background:none;border:1px solid var(--line);
+  color:var(--cream);width:42px;height:42px;border-radius:50%;cursor:pointer;
+  font-size:1rem;transition:border-color .25s,color .25s;
+}
+.nav button.arrow:hover{border-color:var(--gold);color:var(--gold)}
+.nav button.arrow:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.counter{font-family:'Oswald',sans-serif;letter-spacing:.2em;font-size:.75rem;color:var(--muted)}
+.counter b{color:var(--gold);font-weight:600}
+
+.footnote{position:fixed;top:2.6vh;right:7vw;font-family:'Oswald',sans-serif;font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);z-index:5}
+
+@media (max-width:760px){
+  .slide{padding:4vh 6vw 14vh}
+  .g2,.g3{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr;gap:.6vh}
+  .footnote{display:none}
+  .card{padding:2.2vh 5vw}
+}
+</style>
+</head>
+<body>
+
+<div class="footnote">BBH ĐHĐCĐ · 29.06.2026</div>
+
+<div class="deck" id="deck">
+
+<!-- 1 · TITLE -->
+<section class="slide active">
+  <div class="title-mark">Golden Gate Group · JSC</div>
+  <h1>Đại hội đồng Cổ đông<br><span class="gold">Thường niên 2026</span></h1>
+  <p class="lede" style="margin-top:2.5vh">Tóm tắt nội dung cốt lõi từ Biên bản họp — 16/16 tờ trình được thông qua với tỷ lệ tán thành 100%.</p>
+  <div class="title-meta">
+    <div class="meta-item"><div class="k">Thời gian</div><div class="v">14h30 · 29/06/2026</div></div>
+    <div class="meta-item"><div class="k">Địa điểm</div><div class="v">Tầng 6, tòa nhà Toyota, 315 Trường Chinh, Hà Nội</div></div>
+    <div class="meta-item"><div class="k">Chủ tọa</div><div class="v">Ông Trần Việt Trung — Chủ tịch HĐQT</div></div>
+  </div>
+</section>
+
+<!-- 2 · QUORUM -->
+<section class="slide">
+  <div class="eyebrow">01 · Thông tin chung</div>
+  <h2>Điều kiện tiến hành <span class="gold">& kết quả biểu quyết</span></h2>
+  <div class="grid g3">
+    <div class="card">
+      <div class="k">Cổ đông & đại diện tham dự</div>
+      <div class="big">8</div>
+      <div class="sub">Nắm giữ 7.240.252 cổ phần có quyền biểu quyết</div>
+    </div>
+    <div class="card">
+      <div class="k">Tỷ lệ đại diện</div>
+      <div class="big gold">93,2%</div>
+      <div class="sub">Tổng số cổ phần có quyền biểu quyết — đủ điều kiện tiến hành đại hội theo quy định</div>
+    </div>
+    <div class="card">
+      <div class="k">Kết quả biểu quyết</div>
+      <div class="big gold">16/16</div>
+      <div class="sub">Toàn bộ tờ trình được thông qua với tỷ lệ tán thành tuyệt đối <b style="color:var(--gold)">100%</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · KQKD 2025 -->
+<section class="slide">
+  <div class="eyebrow">02 · Kết quả kinh doanh 2025</div>
+  <h2>Năm 2025 — <span class="gold">Nền tảng tăng trưởng</span></h2>
+  <div class="grid g3">
+    <div class="card">
+      <div class="k">Doanh thu thuần</div>
+      <div class="big">7.690,5<span style="font-size:.45em;color:var(--muted)"> tỷ</span></div>
+      <div class="sub">Triệu VNĐ: 7.690.511</div>
+    </div>
+    <div class="card">
+      <div class="k">Lợi nhuận sau thuế</div>
+      <div class="big">213,8<span style="font-size:.45em;color:var(--muted)"> tỷ</span></div>
+      <div class="sub">Triệu VNĐ: 213.768</div>
+    </div>
+    <div class="card">
+      <div class="k">EBITDA</div>
+      <div class="big">730,9<span style="font-size:.45em;color:var(--muted)"> tỷ</span></div>
+      <div class="sub">Triệu VNĐ: 730.907</div>
+    </div>
+  </div>
+  <p class="lede" style="margin-top:3vh">Trọng tâm năm 2025: tối ưu hiệu quả từng điểm bán, chuyển sang mô hình vận hành phẳng và mở rộng sang mảng đồ uống.</p>
+</section>
+
+<!-- 4 · PLAN 2026 -->
+<section class="slide">
+  <div class="eyebrow">03 · Kế hoạch 2026</div>
+  <h2>Mục tiêu 2026 — <span class="gold">Bứt phá lợi nhuận</span></h2>
+  <div class="grid g3">
+    <div class="card">
+      <div class="k">Doanh thu thuần</div>
+      <div class="big gold">9.814<span style="font-size:.45em;color:var(--muted)"> tỷ</span></div>
+      <div class="delta">▲ +27,6%</div>
+      <div class="bars">
+        <div class="bar-row"><span class="lbl">2025</span><div class="bar"><i style="--w:78%"></i></div></div>
+        <div class="bar-row"><span class="lbl">2026</span><div class="bar plan"><i style="--w:100%"></i></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="k">Lợi nhuận sau thuế</div>
+      <div class="big gold">466,3<span style="font-size:.45em;color:var(--muted)"> tỷ</span></div>
+      <div class="delta">▲ +118,1%</div>
+      <div class="bars">
+        <div class="bar-row"><span class="lbl">2025</span><div class="bar"><i style="--w:46%"></i></div></div>
+        <div class="bar-row"><span class="lbl">2026</span><div class="bar plan"><i style="--w:100%"></i></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="k">EBITDA</div>
+      <div class="big gold">1.201,6<span style="font-size:.45em;color:var(--muted)"> tỷ</span></div>
+      <div class="delta">▲ +64,4%</div>
+      <div class="bars">
+        <div class="bar-row"><span class="lbl">2025</span><div class="bar"><i style="--w:61%"></i></div></div>
+        <div class="bar-row"><span class="lbl">2026</span><div class="bar plan"><i style="--w:100%"></i></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · STRATEGY -->
+<section class="slide">
+  <div class="eyebrow">04 · Điểm nhấn chiến lược</div>
+  <h2>Ba động lực <span class="gold">tăng trưởng</span></h2>
+  <div class="rows">
+    <div class="row">
+      <div class="tag">Vận hành</div>
+      <div class="txt">Tối ưu hiệu quả <b>từng điểm bán</b>, chuyển đổi sang <b>mô hình vận hành phẳng</b> để tăng tốc độ ra quyết định và giảm chi phí quản lý.</div>
+    </div>
+    <div class="row">
+      <div class="tag">M&A đồ uống</div>
+      <div class="txt">Mua lại chuỗi <b>The Coffee House</b> — bước đi chiến lược thâm nhập mảng đồ uống, mở rộng ngoài hệ sinh thái nhà hàng.</div>
+    </div>
+    <div class="row">
+      <div class="tag">Chuỗi cung ứng</div>
+      <div class="txt">Khởi công <b>nhà máy mới tại Phú Thọ</b>, dự kiến vận hành giữa năm 2026 — củng cố năng lực sản xuất và chuỗi cung ứng nội bộ.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · PROFIT DISTRIBUTION -->
+<section class="slide">
+  <div class="eyebrow">05 · Phân phối lợi nhuận</div>
+  <h2>Làm sạch <span class="gold">bảng cân đối vốn</span></h2>
+  <div class="feature">
+    <div class="num">−118,13 tỷ</div>
+    <div class="desc">Sử dụng <b>lợi nhuận sau thuế chưa phân phối</b> để bù đắp toàn bộ số dư <b>thặng dư vốn cổ phần âm</b> (−118.126.695.110 đồng) tại thời điểm 31/12/2025.</div>
+  </div>
+  <p class="lede">Đây là bước kỹ thuật cần thiết trước khi thực hiện các phương án phát hành cổ phiếu trả cổ tức và ESOP từ nguồn lợi nhuận giữ lại.</p>
+</section>
+
+<!-- 7 · DIVIDENDS -->
+<section class="slide">
+  <div class="eyebrow">06 · Chính sách cổ tức</div>
+  <h2>Cổ tức <span class="gold">cổ phiếu & tiền mặt</span></h2>
+  <div class="grid g2">
+    <div class="card">
+      <div class="k">Cổ tức bằng cổ phiếu</div>
+      <div class="big gold">1 : 12</div>
+      <div class="sub">Cổ đông sở hữu 1 cổ phiếu nhận thêm <b style="color:var(--cream)">12 cổ phiếu mới</b>. Dự kiến phát hành <b style="color:var(--cream)">93.429.120 cổ phiếu</b> từ nguồn lợi nhuận chưa phân phối.</div>
+    </div>
+    <div class="card">
+      <div class="k">Cổ tức tiền mặt 2026 (kế hoạch)</div>
+      <div class="big gold">8.200 đ/cp</div>
+      <div class="sub">Tương đương <b style="color:var(--cream)">82% mệnh giá</b> — cam kết dòng tiền trả lại cho cổ đông trong năm 2026.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · ESOP -->
+<section class="slide">
+  <div class="eyebrow">07 · Phát hành ESOP</div>
+  <h2>Ba chương trình <span class="gold">giữ chân nhân tài</span></h2>
+  <div class="rows">
+    <div class="row">
+      <div class="tag">ESOP 01.2026</div>
+      <div class="txt"><b>17.950 cổ phiếu</b> phát hành mới, giá 10.000 đ/cp cho nhân sự chủ chốt.<small>Hạn chế chuyển nhượng 15 tháng hoặc đến khi có sự kiện thanh khoản.</small></div>
+    </div>
+    <div class="row">
+      <div class="tag">ESOP 02.2026</div>
+      <div class="txt"><b>77.387 cổ phiếu</b> (51.883 CP mới + 25.504 CP quỹ), giá 10.000 đ/cp.<small>Thưởng cho nhân viên các dự án trọng điểm.</small></div>
+    </div>
+    <div class="row">
+      <div class="tag">ESOP 03.2026</div>
+      <div class="txt">Gắn với KQKD 2027: phát hành <b>2% vốn điều lệ</b> nếu EBITDA 2027 đạt 1.500 tỷ, hoặc <b>3%</b> nếu đạt 1.700 tỷ VNĐ.<small>Tỷ lệ đã bao gồm cả ESOP 01 và 02.</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 · CLOSING -->
+<section class="slide">
+  <div class="eyebrow">Tổng kết</div>
+  <h1 style="font-size:clamp(1.8rem,4.6vw,3.6rem)">Đồng thuận tuyệt đối,<br><span class="gold">định hướng tăng trưởng kép</span></h1>
+  <div class="grid g3" style="margin-top:4vh">
+    <div class="card"><div class="k">Biểu quyết</div><div class="big gold">100%</div><div class="sub">16/16 tờ trình được thông qua</div></div>
+    <div class="card"><div class="k">Mục tiêu LNST 2026</div><div class="big gold">+118%</div><div class="sub">466,3 tỷ VNĐ — hơn gấp đôi 2025</div></div>
+    <div class="card"><div class="k">Cổ tức 2026</div><div class="big gold">1:12 + 82%</div><div class="sub">Cổ phiếu 1:12 và tiền mặt 8.200 đ/cp</div></div>
+  </div>
+</section>
+
+</div>
+
+<nav class="nav" aria-label="Điều hướng slide">
+  <div class="counter"><b id="cur">01</b> / <span id="total">09</span></div>
+  <div class="dots" id="dots"></div>
+  <div class="nav-btns">
+    <button class="arrow" id="prev" aria-label="Slide trước">←</button>
+    <button class="arrow" id="next" aria-label="Slide sau">→</button>
+  </div>
+</nav>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+const dotsWrap=document.getElementById('dots');
+let idx=0;
+slides.forEach((_,i)=>{
+  const d=document.createElement('button');
+  d.className='dot'+(i===0?' on':'');
+  d.setAttribute('aria-label','Slide '+(i+1));
+  d.addEventListener('click',()=>go(i));
+  dotsWrap.appendChild(d);
+});
+document.getElementById('total').textContent=String(slides.length).padStart(2,'0');
+function go(n){
+  idx=Math.max(0,Math.min(slides.length-1,n));
+  slides.forEach((s,i)=>s.classList.toggle('active',i===idx));
+  [...dotsWrap.children].forEach((d,i)=>d.classList.toggle('on',i===idx));
+  document.getElementById('cur').textContent=String(idx+1).padStart(2,'0');
+}
+document.getElementById('prev').addEventListener('click',()=>go(idx-1));
+document.getElementById('next').addEventListener('click',()=>go(idx+1));
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ')go(idx+1);
+  if(e.key==='ArrowLeft'||e.key==='PageUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(slides.length-1);
+});
+let tx=0;
+document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>50) go(idx+(dx<0?1:-1));
+},{passive:true});
+</script>
+</body>
+</html>
