@@ -1,0 +1,561 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Nghiên cứu thị trường khách sạn Phú Quốc — Bãi Khem &amp; Sunset Town</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap&subset=latin,latin-ext,vietnamese" rel="stylesheet">
+<style>
+:root,body[data-theme="midnight"]{--bg:#080b14;--card:#121a2e;--line:#22304d;--ink:#eef2f8;--muted:#8fa0bd;
+--gold:#d4af6a;--teal:#4fd1c5;--rose:#e08a9e;--warnbg:#2a2415;--okbg:#14262c;--badbg:#2b1721;
+--grad:linear-gradient(160deg,#080b14,#121a2e 55%,#0d1424);--shadow:0 10px 34px rgba(0,0,0,.34);
+--barbg:rgba(255,255,255,.05);--prebg:#0a0f1c;--btnink:#0b1020;--hl:rgba(212,175,106,.09)}
+
+body[data-theme="light"]{--bg:#f6f7f5;--card:#ffffff;--line:#e0e5e0;--ink:#16201C;--muted:#5b665f;
+--gold:#875f10;--teal:#0B5D4B;--rose:#9d3524;--warnbg:#fff9e8;--okbg:#eaf3ef;--badbg:#fdeeeb;
+--grad:linear-gradient(160deg,#fafbf9,#f2f5f2 55%,#eef2ee);--shadow:0 1px 3px rgba(16,32,28,.07);
+--barbg:rgba(16,32,28,.06);--prebg:#f2f5f2;--btnink:#ffffff;--hl:rgba(154,111,22,.10)}
+
+/* SIREN — theo THEME_siren.md v1.0: nền kem, accent xanh, phẳng, pill */
+body[data-theme="siren"]{--bg:#F7F5EF;--card:#FFFFFF;--line:#DFDBD0;--ink:#1E3932;--muted:#5C6B66;
+--gold:#00704A;--teal:#00704A;--rose:#A6603A;--warnbg:#FDF6F1;--okbg:#D4E9E2;--badbg:#FDF6F1;
+--grad:#F7F5EF;--shadow:none;
+--barbg:rgba(30,57,50,.07);--prebg:#14261F;--btnink:#ffffff;--hl:#D4E9E2;
+--s-forest:#1E3932;--s-cream-warm:#EFEBE0;--s-accent-gold:#C9A227;--s-dim:#637069}
+
+/* Siren: phẳng hoàn toàn, không bóng, không gradient */
+body[data-theme="siren"] .card,
+body[data-theme="siren"] .kpi{box-shadow:none;border-radius:14px}
+body[data-theme="siren"] .hero h1{letter-spacing:-.015em}
+body[data-theme="siren"] .hero .kick{letter-spacing:.22em}
+/* nút pill */
+body[data-theme="siren"] button{border-radius:999px;padding:9px 22px}
+body[data-theme="siren"] .themebar{border-radius:999px}
+body[data-theme="siren"] .themebar button{border-radius:999px}
+/* bảng: header nền forest chữ trắng, row chẵn nền kem ấm, không kẻ dọc */
+body[data-theme="siren"] thead th{background:var(--s-forest);color:#fff;font-family:'DM Mono',monospace;
+ font-size:11px;letter-spacing:.08em}
+body[data-theme="siren"] thead th:first-child{border-radius:6px 0 0 0}
+body[data-theme="siren"] thead th:last-child{border-radius:0 6px 0 0}
+body[data-theme="siren"] tbody tr:nth-child(even) td{background:var(--s-cream-warm)}
+body[data-theme="siren"] tr.hl td{background:#D4E9E2}
+/* callout: viền trái 3px, nền nhạt, không đậm */
+body[data-theme="siren"] .callout{background:#fff;border-left-color:#00704A}
+body[data-theme="siren"] .callout.ok{background:#D4E9E2;border-left-color:#00704A}
+body[data-theme="siren"] .callout.bad{background:#FDF6F1;border-left-color:#A6603A}
+/* gold chỉ dùng cực hiếm: giữ cho 1 KPI quan trọng nhất */
+/* gold ≤2%: chỉ KPI đầu tiên dùng gold, phần còn lại về accent xanh */
+body[data-theme="siren"] .kpi:first-child .v.gold{color:#C9A227}
+body[data-theme="siren"] .kpi .v.gold{color:#00704A}
+body[data-theme="siren"] .kpi:first-child .v.gold{color:#C9A227}
+body[data-theme="siren"] td.num.gold,body[data-theme="siren"] .gold{color:#00704A}
+body[data-theme="siren"] .hero .kick{color:#00704A}
+body[data-theme="siren"] .foot,body[data-theme="siren"] .note{color:var(--s-dim)}
+body[data-theme="siren"] pre{color:#D4E9E2}
+
+
+/* ---------- FILTER ---------- */
+.fbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+.chip{background:transparent;border:1.5px solid var(--line);color:var(--muted);
+ border-radius:999px;padding:7px 16px;font-size:12.5px;font-weight:500}
+.chip:hover{border-color:var(--gold);color:var(--ink);filter:none}
+.chip.on{background:var(--gold);border-color:var(--gold);color:var(--btnink);font-weight:600}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:16px}
+.fg{min-width:0}
+.fh{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+ color:var(--muted);margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.tagsec{font-size:9px;letter-spacing:.05em;background:var(--barbg);color:var(--muted);
+ padding:1px 6px;border-radius:20px;text-transform:none}
+.ck{display:flex;align-items:center;gap:7px;font-size:13px;padding:3px 0;cursor:pointer}
+.ck input{width:15px;height:15px;accent-color:var(--gold);cursor:pointer;flex:0 0 15px}
+.frow{display:grid;grid-template-columns:34px 1fr 72px;gap:8px;align-items:center;margin-bottom:7px}
+.fl{font-size:11.5px;color:var(--muted)}
+.fv{font-family:'DM Mono',monospace;font-size:11.5px;text-align:right;color:var(--ink)}
+.fnote{font-size:11px;color:var(--muted);line-height:1.5;margin-top:7px}
+input[type=range]{-webkit-appearance:none;appearance:none;height:3px;background:var(--barbg);
+ border-radius:2px;cursor:pointer;width:100%}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+ background:var(--gold);cursor:pointer;border:2px solid var(--card)}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--gold);
+ border:2px solid var(--card);cursor:pointer}
+input[type=range]:focus{outline:none}
+input[type=range]:focus::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(0,112,74,.18)}
+.fstat{font-size:12.5px;color:var(--muted);padding-top:13px;border-top:1px solid var(--line)}
+.fstat b{color:var(--ink)} .fstat b.rose{color:var(--rose)}
+@media(max-width:820px){.fgrid{grid-template-columns:1fr}}
+
+/* ---------- THEME SWITCH ---------- */
+.themebar{position:fixed;top:16px;right:18px;z-index:200;display:flex;gap:4px;
+ background:var(--card);border:1px solid var(--line);border-radius:22px;padding:4px;
+ box-shadow:var(--shadow)}
+.themebar button{background:none;border:none;color:var(--muted);font-size:11px;font-weight:500;
+ padding:5px 12px;border-radius:18px;letter-spacing:.3px}
+.themebar button:hover{color:var(--ink);filter:none}
+.themebar button.on{background:var(--gold);color:var(--btnink);font-weight:600}
+@media print{.themebar{display:none}}
+@media(max-width:820px){.themebar{top:auto;bottom:12px;left:50%;right:auto;transform:translateX(-50%)}}
+@media(max-width:430px){.themebar button{padding:5px 9px;font-size:10px}
+ .hero{padding:44px 0 26px}.kpis{grid-template-columns:1fr}
+ table{font-size:11.5px}th,td{padding:6px 5px}
+ .bar{grid-template-columns:60px 1fr 78px;gap:7px;font-size:11px}
+ pre{font-size:10px}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--grad);color:var(--ink);min-height:100vh;
+font-family:Outfit,system-ui,sans-serif;font-size:14.5px;line-height:1.65;
+transition:background .3s,color .3s}
+.wrap{max-width:1080px;margin:0 auto;padding:0 26px 90px;overflow-x:hidden}
+.card{max-width:100%} table{table-layout:auto}
+section{min-width:0}
+h1,h2,h3{font-family:'Noto Serif Display',Georgia,serif;font-weight:600;margin:0}
+.hero{padding:64px 0 34px;border-bottom:1px solid var(--line);margin-bottom:34px}
+.hero .kick{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2.4px;color:var(--gold);text-transform:uppercase}
+.hero h1{font-size:44px;line-height:1.16;margin:14px 0 16px;letter-spacing:-.5px}
+.hero .sub{font-size:16.5px;color:var(--muted);max-width:760px;line-height:1.6}
+.hero .meta{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:20px;letter-spacing:.3px}
+section{margin-bottom:44px}
+section>h2{font-size:26px;margin-bottom:6px;letter-spacing:-.3px}
+section>.lead{color:var(--muted);font-size:14px;margin-bottom:20px;max-width:800px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 26px;
+margin-bottom:18px;box-shadow:var(--shadow)}
+.card h3{font-size:17px;margin-bottom:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px;margin-bottom:20px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:17px 19px;box-shadow:var(--shadow)}
+.kpi .l{font-size:10px;letter-spacing:.9px;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font-family:'Noto Serif Display',serif;font-size:29px;font-weight:600;margin-top:5px;letter-spacing:-.6px}
+.kpi .s{font-size:11px;color:var(--muted);margin-top:3px}
+.gold{color:var(--gold)}.teal{color:var(--teal)}.rose{color:var(--rose)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+.card>table,.card table{display:block;overflow-x:auto;white-space:nowrap}
+@media(min-width:700px){.card>table,.card table{display:table;white-space:normal}}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+thead th{font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:500}
+td.num{font-family:'DM Mono',monospace}
+tr.hl td{background:var(--hl)}
+td.warn{color:var(--rose)}
+.callout{border-left:3px solid var(--gold);background:var(--hl);padding:18px 22px;
+border-radius:0 12px 12px 0;margin:18px 0}
+.callout.bad{border-color:var(--rose);background:var(--badbg)}
+.callout.ok{border-color:var(--teal);background:var(--okbg)}
+.callout .t{font-family:'Noto Serif Display',serif;font-size:16px;font-weight:600;margin-bottom:7px}
+.bars{margin:16px 0}
+.bar{display:grid;grid-template-columns:112px 1fr 108px;gap:12px;align-items:center;margin-bottom:9px;font-size:12.5px}
+.bt{height:22px;background:var(--barbg);border-radius:4px;position:relative;overflow:hidden}
+.bf{height:100%;background:linear-gradient(90deg,var(--gold),color-mix(in srgb,var(--gold) 35%,transparent))}
+.bf.t{background:linear-gradient(90deg,var(--teal),color-mix(in srgb,var(--teal) 30%,transparent))}
+.bv{font-family:'DM Mono',monospace;font-size:12px;text-align:right;color:var(--muted)}
+.mark{position:absolute;top:0;bottom:0;width:2px;background:var(--rose)}
+.note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6}
+pre{background:var(--prebg);border:1px solid var(--line);border-radius:10px;padding:15px 17px;
+overflow-x:auto;font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);line-height:1.55}
+button{font-family:Outfit,sans-serif;font-size:13px;padding:9px 17px;border-radius:8px;cursor:pointer;
+background:var(--gold);color:var(--btnink);border:none;font-weight:600}
+button:hover{filter:brightness(1.1)}
+button:focus-visible{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(0,112,74,.18)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+ol,ul{padding-left:20px}li{margin-bottom:7px}
+.foot{border-top:1px solid var(--line);padding-top:20px;font-size:11.5px;color:var(--muted);
+font-family:'DM Mono',monospace;line-height:1.7}
+@media print{body{background:#fff!important;color:#000!important}
+ .card,.kpi{box-shadow:none!important;border-color:#ccc!important}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media(max-width:820px){.g2{grid-template-columns:1fr}.hero h1{font-size:31px}.wrap{padding:0 15px 60px}
+.bar{grid-template-columns:88px 1fr 88px}}
+</style></head><body data-theme="midnight">
+<div class="themebar" role="group" aria-label="Chọn tone hiển thị">
+ <button id="thMid" class="on" onclick="setTheme('midnight')" title="Tone tối mặc định">◐ Midnight</button>
+ <button id="thLight" onclick="setTheme('light')" title="Tone sáng — hợp in ấn và trình chiếu ban ngày">☀ Sáng</button>
+ <button id="thSiren" onclick="setTheme('siren')" title="Tone cảnh báo — nhấn phần rủi ro">◉ Siren</button>
+</div>
+<div class="wrap">
+
+<div class="hero">
+ <div class="kick">Nghiên cứu thị trường · Phú Quốc · 07/2026</div>
+ <h1>Bãi Khem &amp; Sunset Town<br/>Cấu trúc giá phòng khách sạn</h1>
+ <div class="sub">Phân tích 756 dòng dữ liệu loại phòng từ 45 khách sạn, quét trên 4 nền tảng OTA (Agoda, Booking, Trip, Traveloka). Mục tiêu: xác lập nền giá thị trường để kiểm định giả định ADR trong mô hình tài chính dự án.</div>
+ <div class="meta">Nguồn: HOTEL_PHÚ_QUỐC.xlsx · Kỳ quan sát: 7–9/7 (trong tuần) &amp; 10–12/7 (cuối tuần) · 477 quan sát có giá</div>
+</div>
+
+<section>
+<h2>Kết luận điều hành</h2>
+<div class="lead">Ba điều quan trọng nhất, theo thứ tự tác động tới quyết định đầu tư.</div>
+
+<div class="kpis">
+ <div class="kpi"><div class="l">Median giá comp set</div><div class="v gold" id="kMed">—</div><div class="s" id="kMedSub">—</div></div>
+ <div class="kpi"><div class="l">Phân vị 75</div><div class="v" id="kP75">—</div><div class="s">VND/đêm · vùng mục tiêu khả thi</div></div>
+ <div class="kpi"><div class="l">Premium phòng ≥30m²</div><div class="v teal" id="kPrem">—</div><div class="s">so với phòng &lt;30m²</div></div>
+ <div class="kpi"><div class="l">Uplift cuối tuần</div><div class="v" id="kUp">—</div><div class="s">cuối tuần so với trong tuần</div></div>
+ <div class="kpi"><div class="l">Vị trí ADR mục tiêu</div><div class="v teal" id="kRank">—</div><div class="s">phân vị của 1,83 tr trong comp set</div></div>
+</div>
+
+<div class="callout ok">
+ <div class="t">1. Mức ADR mà mô hình tài chính đòi hỏi là khả thi — nhưng chỉ ở nửa trên thị trường</div>
+ Mô hình dự án cho thấy cần ADR khoảng <b>1,83 triệu/đêm</b> để việc làm khách sạn vượt được phương án cho thuê nguyên căn. Với comp set boutique Bãi Khem đang lọc, mức đó nằm ở <b id="inlRank">—</b> — tức đòi hỏi sản phẩm thuộc nhóm trên của khu vực, nhưng không phải mức bất khả thi. Đổi bộ lọc ở trên để xem con số này dịch chuyển thế nào theo từng định nghĩa comp set.
+</div>
+
+<div class="callout">
+ <div class="t">2. Diện tích phòng là đòn bẩy giá mạnh nhất, và nó nằm trong tầm kiểm soát của thiết kế</div>
+ Phòng từ 30m² trở lên có giá median cao hơn phòng dưới 30m² <b id="inlPrem">—</b> trong comp set đang lọc. Đây là biến số quyết định được ở giai đoạn thiết kế, khác với vị trí hay thương hiệu. Bảng cấu trúc giá theo diện tích bên dưới cho thấy nguồn cung đang tập trung ở nhóm phòng nhỏ, nghĩa là phân khúc phòng rộng <b>thiếu nguồn cung tương đối</b>.
+</div>
+
+<div class="callout bad">
+ <div class="t">3. Dữ liệu công suất trong file này không dùng được — cần nguồn khác</div>
+ Tỷ lệ lấp đầy suy ra từ tồn phòng OTA cho kết quả 12–24%, không phản ánh thực tế Phú Quốc. Ba bằng chứng cho thấy phương pháp sai: <b>(a)</b> trung vị tỷ lệ "còn trống/tổng phòng" đúng bằng 1,00 — 65% số dòng hiển thị còn nguyên phòng, tức đây là hạn mức phân bổ cho kênh chứ không phải tồn kho thật; <b>(b)</b> có 10 dòng "còn trống" lớn hơn "tổng phòng" — bất khả thi về logic; <b>(c)</b> tổng số phòng cộng theo loại phòng lệch tới 4 lần so với mô tả trên web (Paralia: 28 so với 113). <b>Không đưa con số occupancy từ file này vào mô hình tài chính.</b>
+</div>
+</section>
+
+
+<section id="filterSection">
+<h2>Bộ lọc comp set</h2>
+<div class="lead">Mọi số liệu bên dưới tính lại theo bộ lọc này. Mặc định đang lọc theo <b>hồ sơ boutique</b>: cùng khu vực, phòng may đo thay vì sản xuất hàng loạt.</div>
+<div class="card">
+ <div class="fbar">
+  <button class="chip on" onclick="preset('boutique')" id="pBout">Boutique Bãi Khem</button>
+  <button class="chip" onclick="preset('leaders')" id="pLead">Nhóm dẫn đầu giá</button>
+  <button class="chip" onclick="preset('all')" id="pAll">Toàn bộ dữ liệu</button>
+ </div>
+
+ <div class="fgrid">
+  <div class="fg">
+   <div class="fh">Khu vực</div>
+   <label class="ck"><input type="checkbox" class="fArea" value="Bãi Khem" checked onchange="apply()"><span>Bãi Khem</span></label>
+   <label class="ck"><input type="checkbox" class="fArea" value="Sunset" onchange="apply()"><span>Sunset Town</span></label>
+  </div>
+
+  <div class="fg">
+   <div class="fh">Concept</div>
+   <div id="conceptBox"></div>
+  </div>
+
+  <div class="fg">
+   <div class="fh">Loại hình</div>
+   <label class="ck"><input type="checkbox" id="fNoApt" checked onchange="apply()"><span>Loại apartment / villa</span></label>
+   <div class="fnote">Cạnh tranh về giá nhưng mô hình vận hành khác khách sạn.</div>
+  </div>
+ </div>
+
+ <div class="fgrid">
+  <div class="fg">
+   <div class="fh">Độ may đo — số phòng trên mỗi loại phòng</div>
+   <div class="frow"><span class="fl">Tối đa</span>
+    <input type="range" id="fRpt" min="1" max="14" step="0.5" value="4" oninput="apply()">
+    <span class="fv" id="vRpt">4,0</span></div>
+   <div class="fnote">Càng thấp càng may đo. Nhóm ≤15 phòng ở mức 0,7; nhóm &gt;80 phòng ở mức 5,2. Đây là chỉ dấu boutique đáng tin hơn quy mô.</div>
+  </div>
+
+  <div class="fg">
+   <div class="fh">Diện tích phòng</div>
+   <div class="frow"><span class="fl">Từ</span>
+    <input type="range" id="fM2min" min="10" max="80" step="1" value="10" oninput="apply()">
+    <span class="fv" id="vM2min">10 m²</span></div>
+   <div class="frow"><span class="fl">Đến</span>
+    <input type="range" id="fM2max" min="10" max="80" step="1" value="80" oninput="apply()">
+    <span class="fv" id="vM2max">80 m²</span></div>
+   <div class="fnote">Biến giải thích giá mạnh nhất sau khi kiểm soát nhiễu.</div>
+  </div>
+
+  <div class="fg">
+   <div class="fh">Quy mô khách sạn <span class="tagsec">phụ</span></div>
+   <div class="frow"><span class="fl">Từ</span>
+    <input type="range" id="fRmin" min="1" max="230" step="1" value="1" oninput="apply()">
+    <span class="fv" id="vRmin">1 phòng</span></div>
+   <div class="frow"><span class="fl">Đến</span>
+    <input type="range" id="fRmax" min="1" max="230" step="1" value="230" oninput="apply()">
+    <span class="fv" id="vRmax">230 phòng</span></div>
+   <div class="fnote">Không bật mặc định: dữ liệu cho thấy quy mô <b>không</b> giải thích giá khi đã kiểm soát diện tích phòng và khu vực.</div>
+  </div>
+ </div>
+
+ <div class="fstat" id="fStat"></div>
+</div>
+</section>
+
+<section>
+<h2>Phân bố giá — Bãi Khem so với Sunset Town</h2>
+<div class="lead">Hai khu vực phục vụ hai loại nhu cầu khác nhau, và chênh lệch giá phản ánh điều đó.</div>
+<div class="card">
+<div class="bars" id="barBox"></div>
+<p class="note" id="barNote"></p>
+</div>
+
+<div class="g2">
+<div class="card"><h3>Bãi Khem</h3>
+<table><tbody>
+<tr><td>Median trong tuần</td><td class="num gold">1.398.577</td></tr>
+<tr><td>Median cuối tuần</td><td class="num">1.500.513</td></tr>
+<tr><td>Uplift cuối tuần</td><td class="num teal">+7.3%</td></tr>
+<tr><td>Số quan sát có giá</td><td class="num">196</td></tr>
+</tbody></table>
+<p class="note">Nghỉ dưỡng cao cấp, couple và gia đình. Uplift cuối tuần rõ rệt cho thấy cầu cuối tuần thật, có dư địa quản trị doanh thu theo ngày.</p></div>
+
+<div class="card"><h3>Sunset Town</h3>
+<table><tbody>
+<tr><td>Median trong tuần</td><td class="num gold">2.249.550</td></tr>
+<tr><td>Median cuối tuần</td><td class="num">2.270.869</td></tr>
+<tr><td>Uplift cuối tuần</td><td class="num rose">+0.9%</td></tr>
+<tr><td>P90</td><td class="num">6.129.351</td></tr>
+</tbody></table>
+<p class="note">Giá median cao hơn Bãi Khem 61%, nhưng gần như không có uplift cuối tuần — giá đã cao đều cả tuần, phản ánh nguồn cầu check-in/trải nghiệm liên tục thay vì cầu nghỉ dưỡng dồn cuối tuần.</p></div>
+</div>
+</section>
+
+<section>
+<h2>Cấu trúc giá theo diện tích phòng — Bãi Khem</h2>
+<div class="lead">Bảng này là nền để thiết kế room mix. Cột tỷ trọng cho biết nguồn cung hiện tại đang tập trung ở đâu.</div>
+<div class="card">
+<table>
+<thead><tr><th>Nhóm diện tích</th><th>n quan sát</th><th>Giá trong tuần</th><th>Giá cuối tuần</th><th>Số phòng</th><th>Tỷ trọng cung</th></tr></thead>
+<tbody id="segBody"></tbody></table>
+<p class="note">Hai dòng được tô sáng là vùng 30–39m²: giá cao hơn hẳn nhóm dưới 30m² nhưng tỷ trọng nguồn cung chỉ 15.6%. Lưu ý nhóm 25–29m² có giá thấp bất thường (847.923) — thấp hơn cả nhóm dưới 20m², nhiều khả năng do một vài khách sạn giá rẻ chi phối mẫu, cần kiểm tra lại trước khi dùng làm mốc.</p>
+</div>
+</section>
+
+<section>
+<h2>Comp set Bãi Khem — xếp theo giá</h2>
+<div class="lead">Nhóm dẫn đầu về giá là đối thủ trực tiếp nếu dự án định vị ở mức ADR mục tiêu.</div>
+<div class="card">
+<table><thead><tr><th>Khách sạn</th><th>Số phòng</th><th>Loại phòng</th><th>Phòng/loại</th><th>Điểm</th><th>Giá median</th></tr></thead>
+<tbody id="hotBody"></tbody></table>
+<p class="note">Một số khách sạn xuất hiện hai dòng do tên khác nhau giữa các nền tảng; đã giữ nguyên để không mất quan sát. Đáng chú ý: JM Boutique và Laputa dẫn đầu về giá nhưng chỉ hạng 3–4 sao và quy mô 28 phòng — cho thấy ở thị trường này, <b>sản phẩm và thiết kế quyết định giá hơn là số sao hay quy mô</b>.</p>
+</div>
+</section>
+
+<section>
+<h2>Vì sao không dùng số công suất trong file</h2>
+<div class="card">
+<table><thead><tr><th>Khu vực</th><th>Nền tảng</th><th>Tổng phòng</th><th>Còn trống</th><th>Lấp đầy suy ra</th></tr></thead>
+<tbody><tr><td>Bãi Khem</td><td>Agoda</td><td class="num">219</td><td class="num">172</td><td class="num warn">21.5%</td></tr><tr><td>Bãi Khem</td><td>Booking</td><td class="num">183</td><td class="num">140</td><td class="num warn">23.5%</td></tr><tr><td>Bãi Khem</td><td>Trip</td><td class="num">181</td><td class="num">140</td><td class="num warn">22.7%</td></tr><tr><td>Bãi Khem</td><td>Traveloka</td><td class="num">341</td><td class="num">299</td><td class="num warn">12.3%</td></tr><tr><td>Sunset</td><td>Agoda</td><td class="num">289</td><td class="num">241</td><td class="num warn">16.6%</td></tr><tr><td>Sunset</td><td>Booking</td><td class="num">285</td><td class="num">245</td><td class="num warn">14.0%</td></tr><tr><td>Sunset</td><td>Trip</td><td class="num">387</td><td class="num">342</td><td class="num warn">11.6%</td></tr><tr><td>Sunset</td><td>Traveloka</td><td class="num">403</td><td class="num">396</td><td class="num warn">1.7%</td></tr></tbody></table>
+<p class="note">Bốn nền tảng cho kết quả 12–24%, nhất quán với nhau nhưng cùng sai một hướng: tất cả đều đo hạn mức phân bổ kênh, không đo tồn kho thật. Sự nhất quán giữa các nguồn không chứng minh tính đúng khi cả bốn cùng dùng một phương pháp đo.</p>
+</div>
+<div class="callout">
+ <div class="t">Cần bổ sung để hoàn thiện nghiên cứu</div>
+ <ol>
+ <li><b>Công suất thực tế theo mùa</b> — báo cáo Sở Du lịch Kiên Giang, hoặc số liệu STR/AirDNA cho Phú Quốc. Đây là biến còn thiếu duy nhất để chạy được mô hình tài chính.</li>
+ <li><b>Tính mùa vụ</b> — dữ liệu hiện chỉ có một tuần tháng 7 (cao điểm hè). Cần ít nhất giá tháng thấp điểm (5–6, 9–10) để biết biên độ dao động cả năm.</li>
+ <li><b>Chi phí vận hành thực tế</b> — phỏng vấn 2–3 GM trong comp set về payroll, chi phí phòng/đêm và tỷ lệ hoa hồng OTA thực trả.</li>
+ <li><b>Suất đầu tư của nhóm dẫn đầu giá</b> — JM Boutique và Laputa bán được giá cao nhất khu vực; biết họ đầu tư bao nhiêu mỗi phòng sẽ xác định được ngưỡng fit-out hợp lý.</li>
+ </ol>
+</div>
+</section>
+
+<section>
+<h2>Bộ tham số nạp vào mô hình tài chính</h2>
+<div class="lead">Các giá trị dưới đây trích trực tiếp từ phân tích, để cập nhật phần benchmark trong công cụ đánh giá dự án.</div>
+<div class="card">
+<table><thead><tr><th>Tham số trong mô hình</th><th>Giá trị đề xuất</th><th>Cơ sở</th></tr></thead><tbody>
+<tr><td>ADR benchmark thấp</td><td class="num">1.014.106</td><td>P25 Bãi Khem</td></tr>
+<tr><td>ADR benchmark base</td><td class="num gold">1.398.577</td><td>Median Bãi Khem</td></tr>
+<tr><td>ADR benchmark cao</td><td class="num">1.896.804</td><td>P75 Bãi Khem</td></tr>
+<tr><td>ADR mục tiêu nếu định vị dẫn đầu</td><td class="num teal">1.898.235</td><td>Median phòng ≥30m²</td></tr>
+<tr><td>Uplift cuối tuần</td><td class="num">+7.3%</td><td>So sánh hai kỳ quan sát</td></tr>
+<tr><td>Công suất</td><td class="num warn">chưa có</td><td>Không suy ra được từ dữ liệu này</td></tr>
+</tbody></table>
+<div style="margin-top:16px"><button onclick="dl()">Tải preset JSON cho simulator</button></div>
+<pre id="pv">{
+ "source": "HOTEL_PHÚ_QUỐC.xlsx · comp set Bãi Khem 7/2026",
+ "benchAdrLow": 1014000,
+ "benchAdrBase": 1399000,
+ "benchAdrHigh": 1897000,
+ "adr": 1399000,
+ "note_occ": "Occupancy KHÔNG lấy từ file này — proxy OTA không tin cậy. Cần nguồn khác.",
+ "seg_price": {
+  "<20m²": 1326970,
+  "20 - 24m²": 1165350,
+  "25 - 29m²": 847923,
+  "30 - 34m²": 1834106,
+  "35 - 39m²": 2115959,
+  "40 - 44m²": 1379839,
+  "45 - 49m²": 2129469,
+  "50 - 59m²": 1403286,
+  "≥60m²": 3797619
+ }
+}</pre>
+<p class="note">Lưu ý khi nạp: bộ tham số này chỉ thay phần <b>benchmark và ADR</b>. Trường công suất cố tình để trống — nếu điền bằng số suy ra từ OTA sẽ làm sai lệch toàn bộ kết luận đầu tư theo hướng bi quan giả tạo.</p>
+</div>
+</section>
+
+<div class="foot">
+Phương pháp: trích 756 dòng loại phòng từ 8 sheet nền tảng, chuẩn hoá giá về đơn vị VND/phòng/đêm (giá Booking niêm yết 2 đêm đã chia đôi), loại quan sát thiếu giá. Median dùng thay trung bình để giảm ảnh hưởng của phòng suite giá cao.<br/>
+Giới hạn: một kỳ quan sát duy nhất trong cao điểm hè; giá niêm yết OTA không phải giá thực thu sau khuyến mãi và hoa hồng; không có dữ liệu công suất đáng tin cậy.<br/>
+Lập ngày 18/07/2026 · Nguồn dữ liệu: HOTEL_PHÚ_QUỐC.xlsx
+</div>
+</div>
+<script>
+const THEMES={midnight:'thMid',light:'thLight',siren:'thSiren'};
+function setTheme(t){
+ document.body.dataset.theme=t;
+ for(const k in THEMES) document.getElementById(THEMES[k]).classList.toggle('on',k===t);
+ try{localStorage.setItem('khem_report_theme',t)}catch(e){}
+}
+(function(){
+ let t='midnight';
+ try{t=localStorage.getItem('khem_report_theme')||'midnight'}catch(e){}
+ if(!THEMES[t])t='midnight';
+ setTheme(t);
+})();
+
+/* ================= FILTER ENGINE ================= */
+const DS={"h":[["Paralia Bãi Khem Phú Quốc","Bãi Khem","Hiện đại","Gia đình - KH quốc tế","250m",4,8.5,113,22,5.14,0],["Ann Hotel & Spa Bãi Khem PQ","Bãi Khem","Nhiệt đới","Couple - Gia đình","400m",3,8.6,31,26,1.19,0],["JM Boutique Hotel","Bãi Khem","Tối giản","Gia đình - KH quốc tế","180m",4,9.0,28,45,0.62,0],["Laputa Phú Quốc","Bãi Khem","Tối giản","Couple - KH quốc tế","350m",3,8.3,28,12,2.33,0],["Alba Hotel & Spa Sand Phú Quốc","Bãi Khem","Hiện đại","Couple - KH quốc tế","380m",3,8.7,25,20,1.25,0],["La Grotta Hotel Phu Quoc","Bãi Khem","Địa Trung Hải","Couple - KH quốc tế","500m",5,8.6,14,22,0.64,0],["Pearl Phú Quốc","Bãi Khem","Hiện đại","Couple - Gia đình","250m",4,8.5,14,21,0.67,0],["Maison D'rose Phú Quốc Khem Beach","Bãi Khem","Đông Dương","Couple - KH quốc tế","650m",3,9.0,12,7,1.71,0],["Skyline Phú Quốc","Bãi Khem","Nghệ thuật","Couple - Gia đình","750m",3,8.5,20,32,0.62,0],["Laputa Hotel Phú Quốc","Bãi Khem","Tối giản","Couple - KH quốc tế","350m",3,8.1,26,18,1.44,0],["Ann Hotel & Spa Bãi Khem Phú Quốc","Bãi Khem","Nhiệt đới","Couple - Gia đình","400m",3,9.0,32,7,4.57,0],["Maison D'Rose Phú Quốc","Bãi Khem","Đông Dương","Couple - KH quốc tế","650m",3,9.4,22,3,7.33,0],["Skyline Hotel Phú Quốc","Bãi Khem","Nghệ thuật","Couple - Gia đình","750m",3,8.6,10,15,0.67,0],["La Grotta Hotel Phu Quoc","Bãi Khem","Địa Trung Hải","Couple - KH quốc tế","500m",2,9.3,11,11,1.0,0],["Pearl Hotel Phú Quốc","Bãi Khem","Hiện đại","Couple - Gia đình","250m",2,8.8,40,8,5.0,0],["Maison D'rose Phú Quốc Khem Beach","Bãi Khem","Đông Dương","Couple - KH quốc tế","650m",0,8.4,28,2,14.0,0],["La Festa Phu Quoc, Curio Collection by Hilton","Sunset","Địa Trung Hải","Couple - KH cao cấp","51m",5,9.1,197,37,5.32,0],["Roma Hotel Phu Quoc","Sunset","Địa Trung Hải","Couple - Gia đình","599m",3,8.9,30,15,2.0,0],["Venice Phú Quốc","Sunset","Địa Trung Hải","Couple - Gen Z","307m",4,9.0,42,13,3.23,0],["Times Corner Sorrento","Sunset","Địa Trung Hải","Couple - Gen Z","683m",3,9.1,23,7,3.29,0],["Le Bonheur Hotel","Sunset","Địa Trung Hải","Couple - Gen Z","237m",3,9.0,31,11,2.82,0],["CASEPIA","Sunset","Hiện đại","Gia đình - KH quốc tế","662m",4,9.1,50,10,5.0,0],["Lotus Home Cafe","Sunset","Tối giản","Couple - KH quốc tế","521m",3,8.8,9,16,0.56,0],["Coastal Living Phú Quốc","Sunset","Nhiệt đới","Couple - KH quốc tế","255m",3,9.5,11,7,1.57,0],["Mellon OASIS Phu Quoc","Sunset","Hiện đại","Couple - Gia đình","701m",4,9.4,1,3,0.33,0],["Khách sạn KL Phú Quốc","Sunset","Địa Trung Hải","Couple - Gia đình","236m",3,8.7,6,14,0.43,0],["Roma Hotel Phu Quoc","Sunset","Địa Trung Hải","Couple - Gia đình","599m",4,8.8,47,12,3.92,0],["Sole Casa Phu Quoc","Sunset","Địa Trung Hải","Couple - Gia đình","900m",4,9.0,40,11,3.64,0],["Luna Sol Apartment","Sunset","Địa Trung Hải","Couple - KH quốc tế","342m",5,9.2,30,8,3.75,1],["Sakurakyo Hotel & Spa Phu Quoc","Sunset","Nghệ thuật","Couple - KH quốc tế","198m",4,9.6,21,5,4.2,0],["Palo Santo Hotel Phu Quoc","Sunset","Địa Trung Hải","Couple - Gia đình","337m",3,9.1,30,5,6.0,0],["Lotus Home Cafe","Sunset","Tối giản","Couple - KH quốc tế","521m",4,8.3,50,31,1.61,0],["La Festa Phu Quoc, Curio Collection by Hilton","Sunset","Địa Trung Hải","Couple - KH cao cấp","51m",5,9.4,226,23,9.83,0],["Rosie Hillside Seaview Phu Quoc Apartment","Sunset",null,null,null,4,8.6,24,7,3.43,1],["Roma Hotel Phu Quoc","Sunset","Địa Trung Hải","Couple - Gia đình","599m",3,8.9,44,12,3.67,0],["Coastal Living Phú Quốc","Sunset","Nhiệt đới","Couple - KH quốc tế","255m",3,9.7,7,9,0.78,0],["Soléa Sunset Town","Sunset","Hiện đại","Couple - Gia đình","148m",3,8.8,26,17,1.53,0],["CASEPIA","Sunset","Hiện đại","Gia đình - KH quốc tế","662m",4,8.6,25,5,5.0,0],["Le Bonheur","Sunset","Địa Trung Hải","Couple - Gen Z","237m",3,9.0,30,22,1.36,0],["Venice Hotel Phu Quoc – Free Airport Shuttle &","Sunset","Địa Trung Hải","Couple - Gen Z","307m",4,9.2,70,13,5.38,0],["Luna Sol Sunset & Firework Signature","Sunset","Địa Trung Hải","Couple - KH quốc tế","342m",3,8.9,40,30,1.33,0],["Roma Hotel Phu Quoc – Free Airport Shuttle & S","Sunset","Địa Trung Hải","Couple - Gia đình","599m",3,9.1,23,20,1.15,0],["Elyday Apartment Hillside Sunset Town","Sunset","Hiện đại","Couple - Gen Z","215m",4,8.8,30,27,1.11,1],["Milan Hotel & Coffee Phú Quốc","Sunset","Địa Trung Hải","Couple - Gia đình","271m",3,9.5,9,6,1.5,0],["La isla Apartments & Villas – Sea View & Firew","Sunset","Địa Trung Hải","Gia đình - Nhóm bạn","308m",3,8.7,100,46,2.17,1]],"plat":["Agoda","Booking","Trip","Traveloka"],"grp":["20 - 24m²","25 - 29m²","30 - 34m²","35 - 39m²","40 - 44m²","45 - 49m²","50 - 59m²","<20m²","TỶ TRỌNG PHÒNG","≥60m²"],"r":[[0,0,0,20,8,809380,769993],[0,0,0,20,8,1029503,null],[0,0,0,20,3,null,769993],[0,0,0,20,4,1029503,null],[0,0,6,50,5,1633095,null],[1,0,1,25,9,805093,805093],[1,0,7,15,4,616667,616667],[1,0,0,20,4,702315,702315],[1,0,1,25,6,702315,702315],[1,0,0,20,4,805093,null],[1,0,1,25,1,993519,null],[1,0,4,40,1,null,null],[2,0,0,20,4,1508189,1539311],[2,0,0,23,4,1657088,1869243],[2,0,2,33,9,1834106,1878779],[2,0,3,37,8,2019407,2069412],[2,0,3,39,3,null,null],[2,0,9,65,2,3643772,3578598],[2,0,9,65,1,5256563,5006250],[3,0,5,45,1,2129469,2161689],[3,0,0,21,9,1221111,1169537],[3,0,0,21,9,1414128,1413740],[3,0,0,24,8,1729703,1710177],[3,0,3,35,1,1890956,1911252],[3,0,0,21,8,1909091,1909091],[3,0,0,24,8,2227273,2227273],[3,0,5,45,1,3181818,3181818],[4,0,7,18,4,624705,593874],[4,0,0,20,14,731699,710827],[4,0,1,25,4,863369,844499],[4,0,4,40,3,1301770,1273466],[5,0,7,16,1,1306305,1282085],[5,0,7,14,1,1306305,1282085],[5,0,7,18,1,1347634,1321421],[5,0,7,16,4,1347634,1321421],[5,0,7,16,1,1445850,1514700],[5,0,7,18,4,1471621,1438657],[5,0,2,33,5,2259368,2187837],[5,0,2,33,1,2259368,2187837],[6,0,0,20,4,1145049,1112581],[6,0,1,25,3,1250634,1215736],[6,0,1,25,1,1329013,1317971],[6,0,4,40,2,1639276,1600389],[6,0,3,35,1,1845813,1850818],[6,0,4,40,1,1968000,1803850],[6,0,3,35,1,6000000,6000000],[7,0,1,28,8,711171,710732],[7,0,1,25,1,701726,701284],[7,0,1,28,1,711171,710732],[7,0,6,56,1,1403286,null],[8,0,1,28,6,736197,871548],[8,0,2,30,13,779706,940702],[8,0,4,40,2,812855,978151],[8,0,4,40,3,875000,1037037],[8,0,6,50,2,1227282,1528937],[8,0,-1,null,null,null,null],[8,0,8,null,null,null,null],[8,0,-1,null,null,null,null],[8,0,-1,null,null,null,null],[8,0,-1,null,null,null,null],[8,0,-1,null,null,null,null],[8,0,-1,null,null,null,null],[8,0,-1,null,null,null,null],[8,0,-1,null,null,null,null],[8,0,-1,null,null,null,null],[8,0,-1,null,null,null,null],[0,1,0,20,8,null,null],[0,1,0,20,3,null,null],[0,1,0,20,9,null,null],[0,1,0,20,8,null,null],[0,1,-1,50,6,null,null],[1,1,4,42,1,null,null],[1,1,7,16,4,null,null],[1,1,1,25,6,null,null],[1,1,0,20,4,null,null],[1,1,0,20,4,null,null],[1,1,1,25,9,null,null],[1,1,1,25,1,null,null],[2,1,0,20,4,null,null],[2,1,0,23,2,null,null],[2,1,3,33,9,null,null],[2,1,3,39,3,null,null],[2,1,9,65,4,null,null],[2,1,3,37,8,null,null],[2,1,-1,null,1,null,null],[3,1,0,21,9,null,null],[3,1,0,21,9,null,null],[3,1,0,24,8,null,null],[3,1,5,45,1,null,null],[3,1,3,35,1,null,null],[4,1,1,25,4,null,null],[4,1,4,40,3,null,null],[4,1,7,18,4,null,null],[4,1,0,20,10,null,null],[5,1,7,16,1,null,null],[5,1,7,16,4,null,null],[5,1,7,18,1,null,null],[5,1,7,18,5,null,null],[5,1,3,35,1,null,null],[5,1,2,33,1,null,null],[6,1,0,20,4,null,null],[6,1,4,40,1,null,null],[6,1,0,20,3,null,null],[6,1,4,40,2,null,null],[6,1,0,20,1,null,null],[6,1,3,35,1,null,null],[6,1,4,40,1,null,null],[7,1,6,56,2,null,null],[7,1,1,28,10,null,null],[7,1,1,28,8,null,null],[8,1,6,50,2,null,null],[8,1,1,28,6,null,null],[8,1,4,40,3,null,null],[8,1,2,30,10,null,null],[8,1,-1,null,null,null,null],[8,1,8,null,null,null,null],[8,1,-1,null,null,null,null],[8,1,-1,null,null,null,null],[8,1,-1,null,null,null,null],[8,1,-1,null,null,null,null],[8,1,-1,null,null,null,null],[8,1,-1,null,null,null,null],[8,1,-1,null,null,null,null],[8,1,-1,null,null,null,null],[8,1,-1,null,null,null,null],[0,2,0,20,3,null,1030871],[0,2,0,20,5,973399,1030871],[0,2,0,20,4,1237315,null],[0,2,0,20,5,1237315,null],[0,2,6,50,4,2032486,2149970],[4,2,0,20,10,704192,704192],[4,2,7,18,4,579922,579922],[4,2,1,25,4,1038844,1038844],[4,2,4,40,3,1242691,1242691],[2,2,0,20,4,1179161,1179161],[2,2,0,23,4,1881796,2069977],[2,2,2,33,9,1752515,1752515],[2,2,7,3,8,2289519,2289519],[2,2,3,39,3,2271778,2271778],[2,2,9,65,4,4116431,3920409],[2,2,9,65,2,3083128,3083128],[9,2,0,21,9,1139133,1139133],[9,2,0,21,9,1366960,1366960],[9,2,0,24,8,1640352,1640352],[9,2,3,35,1,1822614,1822614],[9,2,5,45,1,2050441,2050441],[10,2,7,15,4,847391,847391],[10,2,7,18,6,965085,965084],[10,2,-1,null,4,965085,965084],[10,2,7,18,4,956861,null],[10,2,0,23,8,1865079,1865079],[10,2,0,23,1,2576342,null],[10,2,-1,null,1,null,null],[5,2,7,16,1,1293086,1351863],[5,2,7,18,1,1293086,1351863],[5,2,7,14,1,1234309,1293086],[5,2,7,18,5,1410639,1469416],[5,2,3,35,1,2115959,2174736],[5,2,3,35,1,2115959,2174736],[5,2,2,33,1,3906687,3977385],[5,2,2,33,1,3906687,3977385],[6,2,0,20,4,1146892,1146892],[6,2,0,20,4,1105202,1105202],[6,2,1,25,3,1261203,1271404],[6,2,1,25,1,1367837,1378872],[6,2,4,40,2,1607567,1607567],[6,2,3,35,1,1901098,1916304],[6,2,4,40,1,1948321,1948321],[11,2,1,25,4,696933,696933],[11,2,6,50,2,1393868,1792116],[11,2,1,25,2,696933,696933],[12,2,1,28,7,726604,865393],[12,2,2,30,6,726604,926623],[12,2,4,40,2,800080,963362],[12,2,6,50,2,1208284,1534848],[12,2,-1,null,null,null,null],[12,2,8,null,null,null,null],[12,2,-1,null,null,null,null],[12,2,-1,null,null,null,null],[12,2,-1,null,null,null,null],[12,2,-1,null,null,null,null],[12,2,-1,null,null,null,null],[12,2,-1,null,null,null,null],[12,2,-1,null,null,null,null],[12,2,-1,null,null,null,null],[12,2,-1,null,null,null,null],[0,3,0,20,7,836496,836496],[0,3,0,20,3,null,836496],[0,3,0,20,5,1309037,null],[0,3,0,20,3,1309037,null],[0,3,6,50,4,1745002,1999723],[0,3,0,20,1,1058593,1058593],[0,3,0,20,1,1083632,1086516],[0,3,6,50,3,1999723,1999723],[2,3,0,23,4,1356571,1356571],[2,3,2,33,8,1500513,1500513],[2,3,3,37,8,1664907,1664907],[2,3,3,39,3,3161937,3161937],[2,3,9,65,2,2928925,2928925],[2,3,-1,65,1,3094367,3094367],[2,3,9,20,1,1120076,1120076],[2,3,-1,null,1,1180118,1183526],[2,3,-1,null,1,1192441,1195848],[2,3,-1,null,1,1428936,1433131],[2,3,-1,null,2,1507593,1987138],[2,3,-1,null,4,1777386,1777386],[2,3,-1,null,4,1580744,1585201],[2,3,-1,null,1,1644849,1569994],[2,3,-1,null,4,1758771,1758771],[2,3,-1,null,2,4142603,3945960],[2,3,0,20,4,1151539,1207647],[2,3,-1,null,1,1867973,2053866],[2,3,2,33,8,1878592,1878592],[2,3,-1,null,4,2097520,2097520],[2,3,9,65,2,3951466,3763345],[2,3,9,65,2,4889320,4802273],[2,3,3,37,7,2197808,2197808],[2,3,-1,null,1,2303864,2303864],[2,3,3,37,7,2527091,2527091],[1,3,7,18,4,680777,680777],[1,3,0,23,3,null,678285],[1,3,0,23,3,775296,678285],[1,3,1,25,7,847923,721023],[1,3,0,20,3,847923,null],[1,3,1,25,1,1324111,null],[1,3,-1,null,4,721023,721023],[1,3,7,18,4,701883,1370468],[1,3,0,23,7,847923,721023],[1,3,0,23,1,1096479,null],[1,3,0,23,1,1133841,null],[1,3,7,18,3,1850039,null],[9,3,0,21,8,1278701,1278701],[9,3,0,24,8,2879309,2838061],[9,3,0,21,8,1610371,1599097],[9,3,3,35,1,3199232,3153400],[9,3,5,45,1,3599137,3547575],[9,3,5,45,1,2313565,2319071],[9,3,0,21,8,1131088,1132923],[9,3,-1,null,8,1758377,1768996],[9,3,0,24,8,2092539,2092539],[9,3,-1,null,8,2110761,2088606],[9,3,-1,null,1,2345552,2320775],[9,3,-1,null,8,2878060,2895496],[9,3,-1,null,1,3197276,3217990],[9,3,-1,null,1,3596461,3620976],[4,3,7,18,1,648921,648921],[4,3,7,18,4,741457,741457],[4,3,0,20,13,900341,900341],[4,3,4,40,3,1588837,1588837],[4,3,1,25,4,1020968,1059225],[4,3,7,18,3,714730,741342],[4,3,0,20,8,787881,787881],[4,3,4,40,2,1457908,1588347],[13,3,7,16,1,1532038,1532038],[13,3,7,16,4,1532038,1532038],[13,3,7,18,5,1671291,1671291],[13,3,3,35,1,2785486,2785486],[13,3,7,14,1,1462381,1462381],[13,3,7,16,1,1546528,1546528],[13,3,7,16,1,1622563,1622563],[13,3,7,18,3,1676968,1676968],[13,3,7,18,5,1691781,1687586],[13,3,7,18,5,1854208,1854208],[13,3,3,35,1,2801370,2812774],[14,3,0,20,4,1242000,1242000],[14,3,1,28,3,1354908,1354908],[14,3,1,28,1,1467819,1467819],[14,3,4,40,2,1806546,1806546],[14,3,0,20,3,1180511,1180511],[14,3,1,25,3,1287877,1287877],[14,3,3,35,1,1931685,1931685],[14,3,4,40,2,1717214,1717214],[15,3,1,28,4,711453,711453],[15,3,6,50,2,1422906,1422906],[8,3,1,28,6,732252,862949],[8,3,2,30,6,771018,927468],[8,3,4,40,3,806300,951662],[8,3,6,50,2,1201675,1524274],[8,3,1,28,6,771017,883449],[8,3,4,40,3,833456,983475],[8,3,4,40,3,875718,1017166],[8,3,6,50,2,1233604,1566848],[8,3,5,49,2,1895372,2203970],[8,3,5,49,2,1956754,2252134],[8,3,-1,null,null,null,null],[8,3,8,null,null,null,null],[8,3,-1,null,null,null,null],[8,3,-1,null,null,null,null],[8,3,-1,null,null,null,null],[8,3,-1,null,null,null,null],[8,3,-1,null,null,null,null],[8,3,-1,null,null,null,null],[8,3,-1,null,null,null,null],[8,3,-1,null,null,null,null],[8,3,-1,null,null,null,null],[16,0,3,37,2,null,null],[16,0,2,33,9,3253331,3229988],[16,0,2,30,7,3416037,3393038],[16,0,2,33,9,3470733,3473864],[16,0,4,40,8,3632204,3632201],[16,0,2,30,2,null,3712916],[16,0,2,32,9,4197261,4197210],[16,0,2,31,9,4842883,4842878],[16,0,4,43,4,null,5165915],[16,0,3,35,4,5327355,5327349],[16,0,2,31,9,5488852,5488784],[16,0,4,42,6,10009885,9525417],[16,0,6,51,9,10817258,10332774],[16,0,9,81,1,11220887,10736398],[16,0,6,51,9,12270463,11785820],[16,0,9,74,2,14207904,13723372],[16,0,4,42,1,14288795,13804098],[16,0,9,66,5,14530978,14046276],[16,0,9,62,4,14692433,14207727],[16,0,9,79,2,15903348,15418788],[16,0,9,143,1,17133650,16638632],[16,0,6,58,3,17875521,17380858],[16,0,9,67,2,25292711,24799374],[17,0,0,22,2,null,null],[17,0,1,26,4,null,null],[17,0,1,28,3,1993300,1972718],[17,0,1,26,11,2072853,2080408],[17,0,3,36,1,null,null],[17,0,9,60,1,3935150,3930706],[17,0,3,36,9,2623407,2625864],[17,0,5,46,6,3246481,3246481],[17,0,3,36,6,null,null],[17,0,4,42,1,null,null],[17,0,9,60,2,3375555,3374052],[17,0,9,60,2,4171500,4171500],[17,0,9,60,1,3514063,4171500],[17,0,9,60,1,3375555,3374052],[17,0,9,60,2,3671918,null],[18,0,1,25,10,2258729,2215914],[18,0,1,28,11,2344146,2329086],[18,0,2,32,7,2804059,2782850],[18,0,3,36,12,3301900,3274138],[18,0,3,38,2,3704151,3671003],[19,0,0,20,9,840831,null],[19,0,7,15,5,877237,null],[19,0,0,20,2,null,null],[19,0,1,25,2,null,null],[19,0,1,25,2,null,null],[19,0,4,40,1,1736518,1717433],[19,0,9,77,1,null,2945237],[20,0,0,20,1,null,972326],[20,0,0,20,1,1279678,1252780],[20,0,0,20,1,1428709,1430781],[20,0,0,22,2,1517508,1518714],[20,0,0,22,1,1567657,1568364],[20,0,0,22,2,1694488,1693950],[20,0,1,25,1,1871447,1869187],[20,0,1,25,1,1871447,1869187],[20,0,2,30,1,1989030,1985597],[20,0,3,35,1,1989030,1985597],[20,0,5,45,1,2312507,2306529],[21,0,1,26,6,1265838,1261625],[21,0,1,26,5,1764668,2037921],[21,0,2,31,4,2099812,2366862],[21,0,3,37,2,2519413,2816814],[21,0,3,37,2,2749208,2728078],[21,0,2,31,4,2627083,null],[22,0,2,30,2,1046320,1047390],[22,0,3,35,1,null,923792],[22,0,3,35,3,1154521,1168674],[22,0,2,30,5,941670,937233],[22,0,3,35,1,1342341,1354156],[22,0,5,45,2,941670,937233],[22,0,3,35,2,1041858,997078],[22,0,2,30,2,1186647,1186647],[22,0,5,45,1,1154521,1168674],[22,0,2,30,2,1184067,1198147],[22,0,2,30,5,978711,978711],[22,0,3,35,1,1186647,1186647],[22,0,3,35,3,1046320,1061456],[22,0,4,40,2,970284,926080],[22,0,2,30,2,1295514,1295514],[22,0,3,35,1,null,2140060],[22,0,5,45,1,1513247,1513247],[23,0,0,22,2,null,1090051],[23,0,0,22,2,1044152,null],[23,0,0,24,3,1202489,1219175],[23,0,0,22,1,null,1269974],[23,0,0,22,1,null,null],[23,0,3,36,1,1644269,1658715],[23,0,2,34,1,2280038,null],[24,0,3,35,1,950000,null],[24,0,5,45,1,null,null],[24,0,9,60,1,null,null],[25,0,0,20,2,626362,625111],[25,0,2,30,2,988361,998483],[25,0,3,35,2,null,1254491],[25,0,-1,null,null,null,null],[25,0,8,null,null,null,null],[25,0,-1,null,null,null,null],[25,0,-1,null,null,null,null],[25,0,-1,null,null,null,null],[25,0,-1,null,null,null,null],[25,0,-1,null,null,null,null],[25,0,-1,null,null,null,null],[25,0,-1,null,null,null,null],[25,0,-1,null,null,null,null],[25,0,-1,null,null,null,null],[26,1,1,28,2,null,null],[26,1,1,28,1,null,null],[26,1,2,30,10,null,null],[26,1,2,32,1,null,null],[26,1,3,36,6,null,null],[26,1,5,46,9,null,null],[26,1,4,42,1,null,null],[26,1,5,46,2,null,null],[26,1,9,60,1,null,null],[26,1,9,60,2,null,null],[26,1,9,60,1,null,null],[26,1,9,60,2,null,null],[21,1,3,37,2,null,null],[21,1,2,31,4,null,null],[21,1,1,26,6,null,null],[21,1,1,26,6,null,null],[21,1,1,26,1,null,null],[21,1,3,38,2,null,null],[27,1,1,28,6,null,null],[27,1,1,28,1,null,null],[27,1,6,50,2,null,null],[27,1,9,70,1,null,null],[27,1,9,75,2,null,null],[27,1,6,50,1,null,null],[16,1,2,33,9,null,null],[16,1,4,40,9,null,null],[16,1,4,43,4,null,null],[16,1,2,30,9,null,null],[16,1,2,31,9,null,null],[16,1,3,35,2,null,null],[16,1,3,37,2,null,null],[16,1,6,51,9,null,null],[16,1,9,62,4,null,null],[16,1,2,32,9,null,null],[16,1,2,33,9,null,null],[16,1,2,31,9,null,null],[16,1,9,66,4,null,null],[16,1,2,30,2,null,null],[16,1,9,63,3,null,null],[16,1,6,59,3,null,null],[16,1,9,74,6,null,null],[16,1,5,45,7,null,null],[16,1,5,48,9,null,null],[16,1,9,79,2,null,null],[18,1,1,25,1,null,null],[18,1,1,25,10,null,null],[18,1,1,28,10,null,null],[18,1,3,36,7,null,null],[18,1,3,37,10,null,null],[18,1,3,39,1,null,null],[28,1,2,30,9,null,null],[28,1,9,400,1,null,null],[28,1,9,90,2,null,null],[28,1,3,35,5,null,null],[28,1,9,60,10,null,null],[28,1,9,70,1,null,null],[28,1,9,80,1,null,null],[28,1,9,80,5,null,null],[29,1,3,39,6,null,null],[29,1,3,39,1,null,null],[29,1,3,39,3,null,null],[29,1,5,45,3,null,null],[29,1,3,39,6,null,null],[29,1,3,39,3,null,null],[30,1,4,40,1,null,null],[30,1,7,17,4,null,null],[30,1,0,23,4,null,null],[30,1,7,17,2,null,null],[30,1,0,23,3,null,null],[31,1,0,25,3,null,null],[31,1,2,30,2,null,null],[31,1,2,30,5,null,null],[31,1,2,30,2,null,null],[31,1,3,35,3,null,null],[31,1,3,35,2,null,null],[31,1,5,45,1,null,null],[31,1,5,45,1,null,null],[31,1,4,40,2,null,null],[31,1,-1,null,null,null,null],[31,1,8,null,null,null,null],[31,1,-1,null,null,null,null],[31,1,-1,null,null,null,null],[31,1,-1,null,null,null,null],[31,1,-1,null,null,null,null],[31,1,-1,null,null,null,null],[31,1,-1,null,null,null,null],[31,1,-1,null,null,null,null],[31,1,-1,null,null,null,null],[31,1,-1,null,null,null,null],[32,2,2,33,2,null,null],[32,2,2,33,9,3280000,3280000],[32,2,2,30,9,3444000,3444000],[32,2,2,33,9,3526000,3526000],[32,2,4,40,9,3526000,4427180],[32,2,2,30,2,null,null],[32,2,2,32,9,3526000,4264000],[32,2,2,31,9,4920000,4920000],[32,2,4,43,4,null,5248000],[32,2,3,35,1,5412000,5412000],[32,2,2,31,9,5576000,5576000],[32,2,5,4250,7,10168000,9676000],[32,2,6,4959,9,10988000,10496000],[32,2,9,81,1,11398000,10906000],[32,2,6,51,9,11398000,11972000],[32,2,9,7488,2,14432000,13940000],[32,2,4,42,1,14514000,14022000],[32,2,9,62,5,14760000,14268000],[32,2,9,62,4,14924000,14432000],[32,2,9,79,2,16154000,15662000],[32,2,9,143,1,17384000,16892000],[32,2,6,59,3,18122000,17630000],[32,2,9,6371,3,25502000,25010000],[18,2,1,25,10,2249550,2249550],[18,2,1,28,10,2507615,2507615],[18,2,2,32,7,2996647,2996647],[18,2,3,36,10,3525681,3525681],[18,2,3,38,2,3953036,3953036],[33,2,1,28,10,974205,1075946],[33,2,1,28,4,947724,1107165],[33,2,1,28,10,1230648,1434967],[33,2,9,62,10,1383956,1567927],[33,2,9,78,10,1567927,1845275],[33,2,9,62,4,1937260,2213773],[33,2,9,78,10,2306594,2766798],[27,2,2,30,10,1211607,1295166],[27,2,2,32,10,1420505,1504064],[27,2,6,56,5,1871725,2139114],[27,2,9,60,5,2239385,2322944],[27,2,9,75,3,2297877,2381436],[27,2,9,75,5,2799231,2924570],[34,2,1,28,2,null,null],[34,2,1,25,4,null,null],[34,2,2,30,3,1977622,1977622],[34,2,2,30,10,2176413,2176413],[34,2,4,42,1,null,null],[34,2,9,60,1,4112907,4112907],[34,2,5,46,9,2747422,2747422],[34,2,3,36,6,null,null],[34,2,5,46,3,null,null],[34,2,9,60,1,3530245,3530245],[34,2,9,60,2,3530245,3530245],[34,2,9,60,2,3838713,null],[35,2,0,22,2,1036555,null],[35,2,0,22,2,null,1036555],[35,2,0,24,3,1188406,1188406],[35,2,0,22,1,null,null],[35,2,0,22,1,null,1237923],[35,2,3,36,1,1650565,1650565],[35,2,-1,null,1,1763669,1763669],[35,2,2,34,1,null,null],[35,2,2,34,1,null,null],[31,2,3,35,1,1314056,1314056],[31,2,3,35,3,1314056,1314056],[31,2,5,45,2,976675,976675],[31,2,3,35,2,1273007,1202446],[31,2,3,35,5,1083794,1083794],[31,2,3,35,2,1168183,1168183],[31,2,5,45,1,1314056,1314056],[31,2,3,35,1,1675722,1675722],[31,2,2,30,3,1434611,1434611],[31,2,3,35,3,2514907,2514907],[31,2,2,30,2,1434611,1314056],[36,2,1,27,1,723574,723912],[36,2,0,2123,4,890039,891439],[36,2,0,2123,3,1108196,1108196],[36,2,3,35,1,1103231,1102917],[36,2,0,2123,2,1363802,1395893],[36,2,1,26,3,1363802,1395893],[36,2,5,46,1,1436131,1436131],[36,2,0,23,2,1529619,1533198],[36,2,2,32,2,1340117,1340776],[36,2,1,29,2,1600677,1779232],[36,2,1,26,2,1888457,1888457],[36,2,5,46,1,1803646,1803646],[36,2,9,65,1,1837559,2038931],[36,2,9,65,1,null,null],[36,2,9,78,1,2583906,2583906],[36,2,-1,null,1,null,null],[36,2,9,78,1,null,null],[37,2,1,26,6,1270588,1267031],[37,2,1,26,4,1779707,2744111],[37,2,3,36,2,2541176,null],[37,2,3,36,2,2755647,null],[37,2,2,31,4,3148151,null],[38,2,0,20,1,null,971053],[38,2,0,20,4,1237571,1371546],[38,2,0,20,4,1462027,1600219],[38,2,0,22,4,1549688,1697977],[38,2,0,20,1,1753560,1753560],[38,2,0,22,4,1728546,null],[38,2,1,25,4,1907403,2090230],[38,2,1,25,4,1907403,2090230],[38,2,2,30,4,2025655,2220657],[38,2,3,35,4,2025655,2220657],[38,2,5,45,4,2356892,2579755],[38,2,-1,null,null,null,null],[38,2,8,null,null,null,null],[38,2,-1,null,null,null,null],[38,2,-1,null,null,null,null],[38,2,-1,null,null,null,null],[38,2,-1,null,null,null,null],[38,2,-1,null,null,null,null],[38,2,-1,null,null,null,null],[38,2,-1,null,null,null,null],[38,2,-1,null,null,null,null],[38,2,-1,null,null,null,null],[39,3,1,25,8,2181684,2280873],[39,3,1,25,8,2481367,2481367],[39,3,1,28,8,2857882,2611921],[39,3,1,28,8,2765712,2765712],[39,3,3,36,2,null,null],[39,3,2,32,2,null,null],[39,3,3,36,1,3449275,null],[39,3,3,37,8,4018152,3672398],[39,3,3,36,8,3888541,3888541],[39,3,3,36,8,4058215,4058215],[39,3,2,32,1,null,null],[39,3,3,38,2,3894178,null],[39,3,3,38,2,4359958,null],[40,3,3,35,5,1027785,1027785],[40,3,3,35,8,966301,966301],[40,3,3,35,7,1149179,null],[40,3,9,60,8,1693636,1693636],[40,3,3,35,5,null,1490321],[40,3,3,35,3,1532239,null],[40,3,9,60,8,1610732,1610732],[40,3,9,60,7,1693636,null],[40,3,9,60,8,1829807,1829807],[40,3,3,35,2,1463849,1463849],[40,3,9,60,5,1746972,1746972],[40,3,3,36,1,1288140,1288140],[40,3,3,35,2,1354908,1354908],[40,3,9,60,1,1996315,2011653],[40,3,9,60,1,2195769,null],[40,3,9,70,1,2032364,null],[40,3,9,60,3,2260865,2260865],[40,3,9,80,1,2361808,2361841],[40,3,9,70,5,2466422,2466422],[40,3,9,70,1,1825236,1825236],[40,3,9,70,1,1919455,1919455],[40,3,9,80,1,1932341,null],[40,3,9,70,5,2484000,2484000],[40,3,9,70,5,2683719,2683717],[40,3,9,80,3,3905321,3905321],[40,3,9,90,1,5152690,null],[40,3,9,90,2,5855384,null],[40,3,9,85,2,5419636,null],[40,3,9,400,2,7707863,7707863],[40,3,9,400,1,8912888,8981320],[40,3,9,90,2,null,null],[41,3,1,28,4,null,null],[41,3,1,28,3,1982419,1982419],[41,3,-1,null,3,2250670,2250670],[41,3,1,28,4,null,null],[41,3,1,28,8,2181815,2181815],[41,3,1,28,8,2476907,2476907],[41,3,-1,null,6,2754438,2754438],[41,3,-1,null,3,null,null],[41,3,9,60,2,4004691,null],[41,3,-1,null,1,4004691,null],[41,3,9,60,1,4017660,null],[41,3,9,60,1,4354714,null],[41,3,9,60,2,3848425,null],[41,3,9,60,1,4665672,null],[41,3,-1,null,1,null,null],[41,3,2,30,6,3126753,3126753],[41,3,1,28,1,null,null],[41,3,2,30,3,null,null],[41,3,9,60,2,4017660,4017660],[41,3,-1,null,2,null,3539303],[41,3,9,60,2,4368718,4368718],[41,3,9,60,1,4680769,4680769],[42,3,2,30,8,782299,943597],[42,3,2,30,8,983922,1185545],[42,3,2,30,8,1060034,1279487],[42,3,2,30,8,1224690,1475294],[42,3,2,30,1,1224690,1475343],[42,3,9,70,8,2030056,2441350],[42,3,9,70,1,2030006,2441383],[42,3,-1,null,1,1132078,1365630],[42,3,6,55,1,1185546,1427494],[42,3,4,40,1,null,null],[42,3,6,55,8,1588793,1911390],[42,3,9,60,1,1277259,1540367],[42,3,9,70,8,1830740,2201727],[42,3,9,70,8,2233987,2685624],[42,3,9,80,3,2556585,3072740],[42,3,9,96,3,null,2688313],[42,3,9,96,3,2688313,null],[42,3,9,100,1,2980970,2980970],[42,3,9,100,3,3042060,3047304],[42,3,9,300,3,6129351,6129351],[42,3,-1,null,1,6150848,7388024],[42,3,9,300,2,4424625,4424625],[42,3,9,300,1,4906362,4906362],[42,3,-1,null,2,5007043,5015433],[42,3,9,300,3,3160447,3160447],[42,3,9,300,1,4003233,4003233],[42,3,9,300,1,3738306,3738306],[42,3,9,300,4,null,null],[42,3,9,300,1,3504432,3504432],[43,3,7,18,5,646097,646097],[43,3,0,23,1,894597,894597],[43,3,0,23,1,675917,675917],[43,3,0,23,5,715676,715676],[43,3,0,23,1,null,992276],[43,3,4,41,1,1441293,1441293],[44,3,1,28,1,903133,1013716],[44,3,-1,null,6,1991734,2994182],[44,3,-1,null,8,2430441,2921793],[44,3,9,75,1,2114674,2365419],[44,3,9,75,1,2580718,2885756],[44,3,-1,null,3,2691300,3234603],[44,3,-1,null,3,2924719,2924719],[44,3,9,80,1,2952904,3301377],[44,3,-1,null,1,4584497,4584497],[44,3,-1,null,2,4813720,4813720],[44,3,9,280,1,3650723,3395984],[44,3,9,300,1,4624873,4301363],[44,3,-1,null,2,4673300,4673300],[44,3,9,350,1,6959713,6473325],[44,3,9,95,1,3105423,2888252],[44,3,-1,null,6,4623980,5554041],[44,3,9,95,1,4909692,5485320],[44,3,9,80,6,2936055,null],[44,3,-1,null,8,851095,null],[44,3,1,28,1,1136280,1273323],[44,3,1,28,1,1275569,1429711],[44,3,-1,null,8,1070447,1289800],[44,3,-1,null,8,1070447,1298503],[44,3,6,56,1,1369052,1533553],[44,3,6,56,1,1834972,2121835],[44,3,-1,null,1,null,null],[44,3,-1,null,4,1163239,null],[44,3,-1,null,1,1289801,1553026],[44,3,-1,null,6,1728509,null],[44,3,-1,null,8,null,null],[44,3,-1,null,3,3338071,3338071],[44,3,-1,null,5,null,null],[44,3,-1,null,4,3692285,3560609],[44,3,-1,null,1,null,null],[44,3,-1,null,4,3560609,3560609],[44,3,-1,null,null,null,null],[44,3,8,null,null,null,null],[44,3,-1,null,null,null,null],[44,3,-1,null,null,null,null],[44,3,-1,null,null,null,null],[44,3,-1,null,null,null,null],[44,3,-1,null,null,null,null],[44,3,-1,null,null,null,null],[44,3,-1,null,null,null,null],[44,3,-1,null,null,null,null],[44,3,-1,null,null,null,null]]};
+const H=DS.h, PLAT=DS.plat, GRP=DS.grp, ROWS=DS.r;
+// hotel fields: 0 name,1 area,2 concept,3 target,4 dist,5 star,6 score,7 rooms,8 ntypes,9 rpt,10 isApt
+// row fields:   0 hid,1 plat,2 grp,3 m2,4 nroom,5 pwk,6 pwe
+const CONCEPTS=[...new Set(H.map(h=>h[2]).filter(Boolean))].sort();
+
+function buildConcepts(){
+ document.getElementById('conceptBox').innerHTML=CONCEPTS.map(c=>
+  `<label class="ck"><input type="checkbox" class="fCon" value="${c}" checked onchange="apply()"><span>${c}</span></label>`).join('');
+}
+const val=id=>parseFloat(document.getElementById(id).value);
+function checks(cls){return [...document.querySelectorAll('.'+cls)].filter(e=>e.checked).map(e=>e.value)}
+
+function filtered(){
+ const areas=checks('fArea'), cons=checks('fCon');
+ const noApt=document.getElementById('fNoApt').checked;
+ const rpt=val('fRpt'), m2a=val('fM2min'), m2b=val('fM2max'), ra=val('fRmin'), rb=val('fRmax');
+ return ROWS.filter(r=>{
+  const h=H[r[0]];
+  if(areas.length&&!areas.includes(h[1]))return false;
+  if(cons.length&&h[2]&&!cons.includes(h[2]))return false;
+  if(noApt&&h[10])return false;
+  if(h[9]!=null&&h[9]>rpt)return false;
+  if(h[7]<ra||h[7]>rb)return false;
+  if(r[3]!=null&&(r[3]<m2a||r[3]>m2b))return false;
+  return true;
+ });
+}
+const median=a=>{const x=a.filter(v=>v!=null).sort((p,q)=>p-q);
+ if(!x.length)return null;const m=x.length>>1;return x.length%2?x[m]:(x[m-1]+x[m])/2};
+function pctile(a,q){const x=a.filter(v=>v!=null).sort((p,q2)=>p-q2);
+ if(!x.length)return null;const i=(x.length-1)*q/100,lo=Math.floor(i),hi=Math.ceil(i);
+ return lo===hi?x[lo]:x[lo]+(x[hi]-x[lo])*(i-lo)}
+const vnd=v=>v==null?'—':Math.round(v).toLocaleString('vi-VN');
+
+function preset(k){
+ const set=(id,v)=>document.getElementById(id).value=v;
+ document.querySelectorAll('.fArea').forEach(e=>e.checked=(e.value==='Bãi Khem'));
+ document.querySelectorAll('.fCon').forEach(e=>e.checked=true);
+ document.getElementById('fNoApt').checked=true;
+ set('fM2min',10); set('fM2max',80); set('fRmin',1); set('fRmax',230); set('fRpt',4);
+ if(k==='leaders'){ set('fRpt',3); set('fM2min',22); }
+ if(k==='all'){
+  document.querySelectorAll('.fArea').forEach(e=>e.checked=true);
+  document.getElementById('fNoApt').checked=false; set('fRpt',14);
+ }
+ ['pBout','pLead','pAll'].forEach(id=>document.getElementById(id).classList.remove('on'));
+ document.getElementById({boutique:'pBout',leaders:'pLead',all:'pAll'}[k]).classList.add('on');
+ apply();
+}
+
+function apply(){
+ // slider labels
+ document.getElementById('vRpt').textContent=val('fRpt').toLocaleString('vi-VN',{minimumFractionDigits:1});
+ document.getElementById('vM2min').textContent=val('fM2min')+' m²';
+ document.getElementById('vM2max').textContent=val('fM2max')+' m²';
+ document.getElementById('vRmin').textContent=val('fRmin')+' phòng';
+ document.getElementById('vRmax').textContent=val('fRmax')+' phòng';
+ if(val('fM2min')>val('fM2max'))document.getElementById('fM2max').value=val('fM2min');
+ if(val('fRmin')>val('fRmax'))document.getElementById('fRmax').value=val('fRmin');
+
+ const F=filtered();
+ const wk=F.map(r=>r[5]).filter(Boolean), we=F.map(r=>r[6]).filter(Boolean);
+ const hset=[...new Set(F.map(r=>r[0]))];
+
+ document.getElementById('fStat').innerHTML= wk.length<5
+  ? `<b class="rose">Chỉ còn ${wk.length} quan sát có giá</b> — quá ít để rút kết luận. Nới bộ lọc lại.`
+  : `Đang dùng <b>${hset.length}</b> khách sạn · <b>${F.length}</b> dòng loại phòng · <b>${wk.length}</b> quan sát có giá`;
+
+ // KPIs
+ const p50=median(wk), p75=pctile(wk,75);
+ const big=F.filter(r=>r[3]>=30).map(r=>r[5]).filter(Boolean);
+ const sml=F.filter(r=>r[3]!=null&&r[3]<30).map(r=>r[5]).filter(Boolean);
+ const prem=(big.length>2&&sml.length>2)?median(big)/median(sml)-1:null;
+ const up=(wk.length&&we.length)?median(we)/median(wk)-1:null;
+ setTxt('kMed',vnd(p50)); setTxt('kP75',vnd(p75));
+ setTxt('kPrem',prem==null?'—':(prem>=0?'+':'')+(prem*100).toFixed(0)+'%');
+ setTxt('kUp',up==null?'—':(up>=0?'+':'')+(up*100).toFixed(1)+'%');
+ setTxt('kMedSub',`VND/đêm · trong tuần · n=${wk.length}`);
+ const TARGET=1830000;
+ const rank=wk.length?wk.filter(v=>v<=TARGET).length/wk.length*100:null;
+ setTxt('kRank',rank==null?'—':'P'+rank.toFixed(0));
+ setTxt('inlRank',rank==null?'—':'phân vị '+rank.toFixed(0));
+ setTxt('inlPrem',prem==null?'—':(prem>=0?'+':'')+(prem*100).toFixed(0)+'%');
+
+ // percentile bars
+ const P={};[10,25,50,75,90,95].forEach(q=>P[q]=pctile(wk,q));
+ const mx=P[95]||1;
+ const bar=(lb,v,mark)=>`<div class="bar"><span>${lb}</span><div class="bt">
+   <div class="bf" style="width:${v?Math.max(2,v/mx*100):0}%"></div>
+   ${mark?`<div class="mark" style="left:${Math.min(99,TARGET/mx*100)}%"></div>`:''}
+  </div><span class="bv">${vnd(v)}</span></div>`;
+ document.getElementById('barBox').innerHTML=
+  bar('P10',P[10])+bar('P25',P[25])+bar('<b>P50 median</b>',P[50])+
+  bar('P75',P[75],true)+bar('P90',P[90])+bar('P95',P[95]);
+ setTxt('barNote',`Vạch đánh dấu = ADR 1.830.000 mà mô hình tài chính đòi hỏi${rank!=null?` — nằm ở phân vị ${rank.toFixed(0)} của comp set đang lọc`:''}.`);
+
+ // size table
+ const byG={};
+ F.forEach(r=>{const g=r[2]>=0?GRP[r[2]]:'?';(byG[g]=byG[g]||{w:[],e:[],n:0});
+  if(r[5])byG[g].w.push(r[5]); if(r[6])byG[g].e.push(r[6]); if(r[4])byG[g].n+=r[4]});
+ const tot=Object.values(byG).reduce((a,v)=>a+v.n,0)||1;
+ document.getElementById('segBody').innerHTML=GRP.filter(g=>byG[g]).map(g=>{
+  const v=byG[g], hl=(g.startsWith('30')||g.startsWith('35'))?' class="hl"':'';
+  return `<tr${hl}><td>${g}</td><td class="num">${v.w.length}</td><td class="num">${vnd(median(v.w))}</td>
+   <td class="num">${vnd(median(v.e))}</td><td class="num">${v.n}</td><td class="num">${(v.n/tot*100).toFixed(1)}%</td></tr>`;
+ }).join('')||'<tr><td colspan="6" class="num">Không có dữ liệu khớp bộ lọc</td></tr>';
+
+ // hotel table
+ const byH={};
+ F.forEach(r=>{(byH[r[0]]=byH[r[0]]||[]).push(r[5])});
+ const hr=Object.entries(byH).map(([hid,ps])=>({h:H[hid],m:median(ps.filter(Boolean)),n:ps.filter(Boolean).length}))
+   .filter(x=>x.m).sort((a,b)=>b.m-a.m);
+ document.getElementById('hotBody').innerHTML=hr.map(x=>{
+  const h=x.h;
+  return `<tr><td>${h[0]}</td><td class="num">${h[7]}</td><td class="num">${h[8]}</td>
+   <td class="num${h[9]<=3?' teal':''}">${h[9]!=null?h[9].toLocaleString('vi-VN',{maximumFractionDigits:1}):'—'}</td>
+   <td class="num">${h[6]||'—'}</td><td class="num">${vnd(x.m)}</td></tr>`;
+ }).join('')||'<tr><td colspan="6" class="num">Không có khách sạn khớp bộ lọc</td></tr>';
+
+ // preset export
+ window.__PRESET={source:'HOTEL_PHÚ_QUỐC.xlsx · comp set đã lọc',
+  filter:{khu_vuc:checks('fArea'),concept:checks('fCon'),
+    loai_apartment:document.getElementById('fNoApt').checked?'loại bỏ':'giữ',
+    phong_moi_loai_toi_da:val('fRpt'),dien_tich:[val('fM2min'),val('fM2max')],
+    quy_mo:[val('fRmin'),val('fRmax')]},
+  so_khach_san:hset.length,so_quan_sat_co_gia:wk.length,
+  benchAdrLow:P[25]?Math.round(P[25]/1000)*1000:null,
+  benchAdrBase:P[50]?Math.round(P[50]/1000)*1000:null,
+  benchAdrHigh:P[75]?Math.round(P[75]/1000)*1000:null,
+  adr:P[50]?Math.round(P[50]/1000)*1000:null,
+  uplift_cuoi_tuan:up==null?null:+(up*100).toFixed(1),
+  premium_phong_30m2:prem==null?null:+(prem*100).toFixed(0),
+  note_occ:'Occupancy KHÔNG lấy từ file này — proxy OTA không tin cậy.'};
+ document.getElementById('pv').textContent=JSON.stringify(window.__PRESET,null,1);
+}
+function setTxt(id,t){const e=document.getElementById(id);if(e)e.textContent=t}
+buildConcepts(); preset('boutique');
+
+const P={
+ "source": "HOTEL_PHÚ_QUỐC.xlsx · comp set Bãi Khem 7/2026",
+ "benchAdrLow": 1014000,
+ "benchAdrBase": 1399000,
+ "benchAdrHigh": 1897000,
+ "adr": 1399000,
+ "note_occ": "Occupancy KHÔNG lấy từ file này — proxy OTA không tin cậy. Cần nguồn khác.",
+ "seg_price": {
+  "<20m²": 1326970,
+  "20 - 24m²": 1165350,
+  "25 - 29m²": 847923,
+  "30 - 34m²": 1834106,
+  "35 - 39m²": 2115959,
+  "40 - 44m²": 1379839,
+  "45 - 49m²": 2129469,
+  "50 - 59m²": 1403286,
+  "≥60m²": 3797619
+ }
+};
+function dl(){
+ const b=new Blob([JSON.stringify(window.__PRESET||P,null,1)],{type:'application/json'});
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(b);
+ a.download='khem_market_preset_baikhem_2026-07.json';
+ a.click();
+}
+</script></body></html>
