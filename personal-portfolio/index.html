@@ -27,6 +27,7 @@ button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit
 .brand{font-family:var(--f-serif);font-weight:700;font-size:15.5px;letter-spacing:-.2px;white-space:nowrap}
 .vbadge{font-family:var(--f-mono);font-size:9.5px;background:var(--accent);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.3px}
 .stamp{font-family:var(--f-mono);font-size:9.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+​.ctxbadge:hover{text-decoration:underline;opacity:.85}
 .ctxbadge{font-size:10.5px;background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:20px;font-weight:600;white-space:nowrap}
 .spacer{flex:1}
 #pill{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;opacity:0;transition:opacity .25s;white-space:nowrap;max-width:340px;overflow:hidden;text-overflow:ellipsis}
@@ -78,6 +79,12 @@ button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit
 .fld input[type=number]{font-family:var(--f-mono)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.autonet{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:7px 10px;margin:8px 0}
+.autonet .an-lbl{color:var(--muted)}
+.autonet .an-val{font-family:var(--f-mono);font-weight:600;color:var(--ink)}
+.autonet .an-note{color:var(--muted);font-size:10.5px;flex-basis:100%}
+.autonet .an-warn{color:#c0392b;font-size:11px;flex-basis:100%}
+.fld-hint{font-weight:400;color:var(--muted);font-size:10px}
 .sect{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.7px;margin:14px 0 7px;padding-bottom:4px;border-bottom:1px solid var(--line)}
 .sect:first-child{margin-top:0}
 
@@ -109,6 +116,17 @@ button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit
 .fgroup>.ftitle{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
 .fchips{display:flex;flex-wrap:wrap;gap:4px}
 .fchip{border:1px solid var(--line);background:#fff;padding:2px 8px;border-radius:20px;cursor:pointer;font-size:10.5px;font-weight:500;color:var(--muted)}
+.fgroup.hlth .fchips{gap:5px}
+.fchip.hl-alive.on{background:#0B5D4B;border-color:#0B5D4B;color:#fff}
+.fchip.hl-done.on{background:#3a7ab0;border-color:#3a7ab0;color:#fff}
+.fchip.hl-stuck.on{background:#c0392b;border-color:#c0392b;color:#fff}
+.fchip.hl-alive{border-color:#0B5D4B;color:#0B5D4B}
+.fchip.hl-done{border-color:#3a7ab0;color:#3a7ab0}
+.fchip.hl-stuck{border-color:#c0392b;color:#c0392b}
+.fchip.dl-ovd{border-color:#c0392b;color:#c0392b}
+.fchip.dl-ovd.on{background:#c0392b;border-color:#c0392b;color:#fff}
+.seg.hidemode{display:inline-flex}
+.seg.hidemode button{font-size:11.5px}
 .fchip.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .fchip:focus-visible{outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
 
@@ -174,7 +192,79 @@ button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit
 .mmn:hover{border-color:var(--accent)}
 .mmn.sel{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .mmn.dim{opacity:.16}
+.mmn.fhidden{display:none}
+.ltbl tbody tr.fhidden{display:none}
 .mmn .mt{font-size:11.5px;font-weight:500;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.mmn.ibn{border-style:dashed;border-color:#b9a68a;background:#fdfaf4;opacity:.92}
+.mmn.ibn .mt{color:#7a6a53}
+#ibmodal{position:fixed;inset:0;background:rgba(13,27,42,.42);z-index:90;display:none;align-items:center;justify-content:center}
+#ibmodal.on{display:flex}
+#expmodal{position:fixed;inset:0;background:rgba(13,27,42,.42);z-index:90;display:none;align-items:center;justify-content:center}
+#expmodal.on{display:flex}
+.expcard{background:#fff;border:1px solid var(--line);border-radius:10px;width:min(560px,94vw);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 18px 50px rgba(0,0,0,.22)}
+.exphd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.exphd b{font-size:14.5px}
+.expbody{padding:14px;overflow:auto}
+.expft{padding:10px 14px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.expfld{margin-bottom:16px}
+.expfld label{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:600}
+.seg.expseg{display:flex;flex-wrap:wrap;gap:4px}
+.seg.expseg button{font:inherit;font-size:12px;padding:6px 12px;border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer;color:var(--muted)}
+.seg.expseg button.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+#expCustom{display:flex;align-items:center;font-size:12px;color:var(--muted)}
+#expCustom input{font:inherit;font-size:12px;padding:5px 8px;border:1px solid var(--line);border-radius:6px}
+.expcount{font-size:12.5px;color:var(--ink);background:var(--bg);border-radius:8px;padding:9px 12px;text-align:center;font-weight:500}
+.ibcard{background:#fff;border:1px solid var(--line);border-radius:10px;width:min(680px,94vw);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 18px 50px rgba(0,0,0,.22)}
+.ibhd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.ibhd b{font-size:14.5px}
+.ibbody{padding:12px 14px;overflow:auto}
+.ibft{padding:10px 14px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
+#ibin{width:100%;font:inherit;font-size:13.5px;padding:9px 10px;border:1px solid var(--line);border-radius:7px;outline:none}
+#ibin:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(11,93,75,.15)}
+.ibrow{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.ibrow:last-child{border-bottom:0}
+.ibrow .x{margin-left:auto;cursor:pointer;color:#a33;opacity:.6}
+.ibrow .x:hover{opacity:1}
+.ibguess{font-size:11.5px;color:#6b7a72;background:#eef3f0;border-radius:4px;padding:1px 6px}
+.ibask{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.ibask .q{font-size:13.5px;font-weight:600;margin-bottom:8px}
+/* ---- Cascade picker ---- */
+.cas{display:flex;flex-direction:column;gap:0}
+.cas-hd{margin-bottom:12px}
+.cas-idea{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.cas-lvl{font-size:12.5px;color:var(--ink)}
+.cas-lvl b{color:var(--acc)}
+.cas-opts{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.cas-o{font:inherit;font-size:13.5px;text-align:left;padding:10px 13px;border:1px solid var(--line);background:#fff;border-radius:9px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.12s}
+.cas-o:hover{border-color:var(--acc);background:#f5faf8}
+.cas-o.guess{border-color:var(--acc);background:#f0f7f4}
+.cas-o .gdot{color:var(--acc);font-size:9px}
+.cas-o .cas-cnt{margin-left:auto;font-family:var(--f-mono);font-size:10.5px;color:var(--muted);background:var(--bg);border-radius:99px;padding:1px 8px}
+.cas-o.newl{border-style:dashed;color:var(--acc);font-weight:600;justify-content:center}
+.cas-ft{display:flex;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.cas-skip{font:inherit;font-size:13px;flex:1;padding:9px;border:1px solid var(--acc);background:var(--acc);color:#fff;border-radius:8px;cursor:pointer;font-weight:600}
+.cas-skip:hover{filter:brightness(1.06)}
+.cas-cancel{font:inherit;font-size:13px;padding:9px 14px;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:8px;cursor:pointer}
+.cas-cancel:hover{color:var(--ink)}
+.askfocus{border:1px solid #f4d0d6;background:#fdf5f6;border-radius:10px;padding:16px;margin-top:6px}
+.askfocus .af-q{font-size:14px;color:#16201C;margin-bottom:12px}
+.askfocus .af-opts{display:flex;gap:8px;flex-wrap:wrap}
+.askfocus .af-yes{font:inherit;font-size:13px;padding:9px 16px;border-radius:9px;cursor:pointer;background:#e0384f;color:#fff;border:0;font-weight:600}
+.askfocus .af-yes:hover{filter:brightness(1.06)}
+.askfocus .af-no{font:inherit;font-size:13px;padding:9px 16px;border-radius:9px;cursor:pointer;background:#fff;color:var(--muted);border:1px solid var(--line)}
+.askfocus .af-no:hover{color:var(--ink)}
+
+.ibopts{display:flex;flex-wrap:wrap;gap:6px}
+.ibopts button{font:inherit;font-size:12.5px;padding:5px 10px;border:1px solid var(--line);background:#fff;border-radius:99px;cursor:pointer}
+.ibopts button:hover{border-color:var(--acc);color:var(--acc)}
+.ibquick{border:1px solid var(--acc);border-radius:8px;padding:10px 12px;margin-bottom:10px;background:#f5faf8}
+.ibquick .q{font-size:13.5px;font-weight:600;margin-bottom:2px}
+.ibquick .sub{font-size:11.5px;color:var(--muted);margin-bottom:8px}
+.ibopts button.top{border-color:var(--acc);background:var(--acc);color:#fff;font-weight:600}
+.ibopts button.top:hover{color:#fff;opacity:.9}
+.ibchk{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;user-select:none}
+.ibchk input{margin:0;cursor:pointer}
+.ibopts button.sd{border-style:dashed;color:#8a7a5a}
 .mmn .mm-meta{display:flex;gap:3px;margin-top:3px;align-items:center;flex-wrap:wrap}
 .mmn.L0{border-width:2px;padding:8px 13px;max-width:210px}
 .mmn{text-align:left}
@@ -186,6 +276,158 @@ button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit
 .mmn.z3{border-left:4px solid var(--z3)}
 .mmn.key{background:#fffdf5;border-color:#e6cd8f}
 .mmn.key::before{content:'★';position:absolute;top:-6px;right:-5px;color:var(--warn);font-size:12px;background:#fff;border-radius:50%;line-height:1;padding:1px}
+.mmn.bnow::after{content:'❤';position:absolute;top:-7px;left:-6px;color:#e0384f;font-size:11px;background:#fff;border-radius:50%;line-height:1;padding:1px 2px;box-shadow:0 0 0 1px #f4d0d6}
+/* ============ FOCUS TAB (Showcase — Midnight) ============ */
+#rBody.focusbg{background:#0D1B2A;padding:0}
+".fx{min-height:100%;background:linear-gradient(160deg,#0D1B2A 0%,#12243b 100%);color:#e8eef5;padding:30px 26px 24px;font-family:var(--f-ui)}
+.fxchat{position:sticky;bottom:0;margin:26px -26px -24px;padding:14px 26px 18px;background:linear-gradient(180deg,rgba(13,27,42,0),#0b1725 28%);backdrop-filter:blur(2px)}
+.fxchat-in{max-width:860px;margin:0 auto;display:flex;gap:8px}
+#fxin{flex:1;font:inherit;font-size:13.5px;padding:11px 15px;border-radius:11px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#e8eef5;outline:none}
+#fxin::placeholder{color:#6b8199}
+#fxin:focus{border-color:#c98b45;box-shadow:0 0 0 3px rgba(201,139,69,.18);background:rgba(255,255,255,.09)}
+.fxchat-btn{font:inherit;font-size:13px;padding:11px 18px;border-radius:11px;cursor:pointer;background:#c98b45;color:#1a1005;border:0;font-weight:600;white-space:nowrap}
+.fxchat-btn:hover{filter:brightness(1.07)}
+.fxchat-hint{max-width:860px;margin:7px auto 0;font-size:11px;color:#5f748c;text-align:center}
+.fx-h{max-width:860px;margin:0 auto 4px}
+.fx-date{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b8199}
+.fx-title{font-family:var(--f-serif);font-size:27px;font-weight:500;color:#fff;margin:2px 0 3px}
+.fx-sub{font-size:12.5px;color:#8ba0b6}
+.fx-wrap{max-width:860px;margin:20px auto 0}
+.fx-sec{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#c98b96;margin:26px 2px 12px;display:flex;align-items:center;gap:9px}
+.fx-sec::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(224,56,79,.35),transparent)}
+.fx-sec.wait{color:#7d8ba0}
+.fx-sec.wait::after{background:linear-gradient(90deg,rgba(125,139,160,.3),transparent)}
+.fxcard{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-left:3px solid #e0384f;border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.fxcard .path{font-family:var(--f-mono);font-size:9.5px;color:#6b8199;letter-spacing:.03em;margin-bottom:6px}
+.fxcard h3{font-family:var(--f-serif);font-size:19px;font-weight:500;color:#fff;margin:0 0 10px;line-height:1.3}
+.fxrow{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.fxchip{font-size:11.5px;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.07);color:#c3d0de;border:1px solid rgba(255,255,255,.08)}
+.fxchip.warnq{background:rgba(224,56,79,.14);color:#ffb3bf;border-color:rgba(224,56,79,.3)}
+.fxgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:rgba(255,255,255,.07);border-radius:8px;overflow:hidden;margin-bottom:12px}
+.fxg{background:#0f1f33;padding:9px 12px}
+.fxg .k{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#6b8199;margin-bottom:2px}
+.fxg .v{font-family:var(--f-mono);font-size:14px;color:#e8eef5}
+.fxg .v.pos{color:#5fd4a6}.fxg .v.neg{color:#ff8a9b}
+.fxnotes{font-size:13px;line-height:1.6;color:#b9c7d6;background:rgba(0,0,0,.18);border-radius:8px;padding:12px 14px;white-space:pre-wrap}
+/* meta thu gọn thành dải mỏng */
+.fxmeta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:10px}
+.fxsep{width:1px;height:16px;background:rgba(255,255,255,.14);margin:0 2px}
+.fxg.mini{background:transparent;padding:0 2px;display:inline-flex;align-items:baseline;gap:5px}
+.fxg.mini .k{margin:0;font-size:9px}
+.fxg.mini .v{font-size:12px}
+/* NOTE BOX — vùng lớn nhất của card */
+.fxnotebox{margin:6px 0 12px}
+.fxnote-bar{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.fxnote-lbl{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8ba0b6}
+.fxnote-ts{font:inherit;font-size:11px;font-family:var(--f-mono);padding:2px 9px;border-radius:99px;cursor:pointer;background:rgba(201,139,69,.16);color:#e5b878;border:1px solid rgba(201,139,69,.32)}
+.fxnote-ts:hover{background:rgba(201,139,69,.28)}
+.fxnote-saved{font-size:10.5px;color:#5fd4a6;margin-left:auto;opacity:0;transition:.2s}
+.fxnote-saved.on{opacity:1}
+.fxnote-ta{width:100%;min-height:140px;resize:vertical;font:inherit;font-size:13.5px;line-height:1.65;color:#eaf1f8;background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:13px 15px;outline:none;box-sizing:border-box}
+.fxnote-ta::placeholder{color:#5f748c}
+.fxnote-ta:focus{border-color:#c98b45;box-shadow:0 0 0 3px rgba(201,139,69,.15);background:rgba(0,0,0,.3)}
+.fximp{font-size:11.5px;color:#8ba0b6;margin-top:10px}
+.fximp b{color:#c3d0de;font-weight:600}
+.fxact{display:flex;gap:8px;margin-top:14px}
+.fxbtn{font:inherit;font-size:12px;padding:6px 13px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,.08);color:#e8eef5;border:1px solid rgba(255,255,255,.12)}
+.fxbtn:hover{background:rgba(255,255,255,.14)}
+.fxbtn.done{border-color:rgba(95,212,166,.4);color:#5fd4a6}
+.fxempty{text-align:center;color:#6b8199;padding:40px 0;font-size:13px}
+.fxempty .big{font-size:34px;margin-bottom:10px;opacity:.5}
+/* ============ GUIDE TAB ============ */
+#rBody.guidebg{background:#faf9f6;padding:0}
+.gd{max-width:820px;margin:0 auto;padding:34px 30px 80px;font-family:var(--f-ui);color:#2a2f2c;line-height:1.6}
+.gd-hero{border-bottom:2px solid #e8e4da;padding-bottom:20px;margin-bottom:8px}
+.gd-hero h1{font-family:var(--f-serif);font-size:30px;font-weight:500;color:#16201C;margin:0 0 6px}
+.gd-hero p{font-size:14px;color:#6a746e;margin:0}
+.gd h2{font-family:var(--f-serif);font-size:21px;font-weight:500;color:#0B5D4B;margin:34px 0 12px;padding-top:8px}
+.gd h3{font-size:15px;font-weight:600;color:#16201C;margin:20px 0 6px}
+.gd p{font-size:13.5px;margin:0 0 12px}
+.gd .lead{font-size:14.5px;color:#3a423d;background:#f0f3ef;border-left:3px solid #0B5D4B;padding:12px 16px;border-radius:0 8px 8px 0;margin:14px 0}
+.gd ul{margin:0 0 14px;padding-left:0;list-style:none}
+.gd ul li{font-size:13.5px;margin:0 0 8px;padding-left:22px;position:relative}
+.gd ul li::before{content:'▸';position:absolute;left:4px;color:#0B5D4B}
+.gd .step{display:flex;gap:12px;margin:0 0 14px;align-items:flex-start}
+.gd .step .n{flex:0 0 26px;height:26px;border-radius:50%;background:#0B5D4B;color:#fff;font-family:var(--f-mono);font-size:12px;display:flex;align-items:center;justify-content:center;font-weight:600}
+.gd .step .t{flex:1;font-size:13.5px;padding-top:2px}
+.gd .hgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0}
+.gd .hcard{border:1px solid #e8e4da;border-radius:10px;padding:14px;background:#fff}
+.gd .hcard.alive{border-top:3px solid #0B5D4B}
+.gd .hcard.done{border-top:3px solid #3a7ab0}
+.gd .hcard.stuck{border-top:3px solid #c0392b}
+.gd .hcard b{display:block;font-size:14px;margin-bottom:4px}
+.gd .hcard .st{font-family:var(--f-mono);font-size:10.5px;color:#6a746e;margin-bottom:6px}
+.gd .hcard p{font-size:12px;color:#4a524d;margin:0}
+.gd .tierline{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:12px 0;font-size:12.5px}
+.gd .tierline .tp{background:#0B5D4B;color:#fff;padding:3px 10px;border-radius:99px;font-weight:600}
+.gd .tierline .ar{color:#b3bab5}
+.gd .tierline .tc{background:#eef2ee;color:#16201C;padding:3px 10px;border-radius:99px}
+.gd .kbd{font-family:var(--f-mono);font-size:11px;background:#16201C;color:#fff;padding:1px 7px;border-radius:5px}
+.gd .note{font-size:12.5px;color:#8a5a2b;background:#fbf3e6;border-radius:8px;padding:10px 14px;margin:12px 0}
+.gd .tag{display:inline-block;font-size:11px;font-family:var(--f-mono);background:#eef2ee;color:#0B5D4B;padding:1px 7px;border-radius:5px;margin-right:4px}
+.gd .toc{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 8px}
+.gd .toc a{font-size:12.5px;color:#0B5D4B;text-decoration:none;border:1px solid #d5e0d8;border-radius:99px;padding:4px 12px;cursor:pointer}
+.gd .toc a:hover{background:#eef4ef}
+@media(max-width:760px){.gd .hgrid{grid-template-columns:1fr}}
+
+/* vùng chờ xử lý — thu nhỏ, xám */
+.fxwait{margin-top:8px}
+.fxwrow{display:flex;align-items:center;gap:10px;padding:9px 13px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:9px;margin-bottom:7px}
+.fxwrow .wt{flex:1;font-size:13px;color:#aab8c7}
+.fxwrow .wg{font-size:10.5px;color:#6b8199;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:99px}
+.fxwrow .wo{font:inherit;font-size:11px;padding:4px 11px;border-radius:7px;cursor:pointer;background:#c98b45;color:#1a1005;border:0;font-weight:600}
+.fxwrow .wo:hover{filter:brightness(1.08)}
+/* done-mini trong Focus */
+.fxcard.done-mini{display:flex;align-items:center;gap:10px;padding:9px 15px;border-left-color:#5fd4a6;opacity:.72}
+.fxcard.done-mini .dm-check{color:#5fd4a6;font-weight:700}
+.fxcard.done-mini .dm-title{flex:1;text-decoration:line-through;color:#8ba0b6;font-size:13.5px}
+.fxcard.done-mini .dm-dur{font-family:var(--f-mono);font-size:11px;color:#c98b45}
+.fxcard.done-mini .dm-btn{font:inherit;font-size:11px;padding:3px 9px;border-radius:7px;cursor:pointer;background:rgba(255,255,255,.08);color:#c3d0de;border:1px solid rgba(255,255,255,.12)}
+.fxcard.done-mini .dm-btn:hover{background:rgba(255,255,255,.16)}
+.fxcard.done-mini .dm-btn.hide{border-color:rgba(224,56,79,.3);color:#ffb3bf}
+.fx-donehdr{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5fd4a6;margin:20px 2px 10px;opacity:.8}
+.fxwrow .wo.done{background:#5fd4a6;color:#053}
+.fxwrow .wo.note{background:rgba(255,255,255,.08);color:#c3d0de;border:1px solid rgba(255,255,255,.12)}
+.fxwrow .wo.note.has{border-color:#c98b45;color:#e5b878}
+.fxwitem{margin-bottom:7px}
+.fxwitem .fxwrow{margin-bottom:0}
+.fxwnote{max-height:0;overflow:hidden;transition:max-height .18s ease}
+.fxwnote.open{max-height:320px;margin-top:5px}
+.fxwnote-ta{width:100%;min-height:64px;resize:vertical;font:inherit;font-size:12.5px;line-height:1.55;color:#eaf1f8;background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:9px 12px;outline:none;box-sizing:border-box}
+.fxwnote-ta::placeholder{color:#5f748c}
+.fxwnote-ta:focus{border-color:#c98b45;box-shadow:0 0 0 3px rgba(201,139,69,.15)}
+/* WORKING LOG (Showcase sáng-ấm giống Guide) */
+#rBody.logbg{background:#faf9f6;padding:0}
+.lg{max-width:900px;margin:0 auto;padding:32px 28px 70px;font-family:var(--f-ui);color:#2a2f2c}
+.lg-h{border-bottom:2px solid #e8e4da;padding-bottom:16px;margin-bottom:18px}
+.lg-date{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8a948e}
+.lg-title{font-family:var(--f-serif);font-size:28px;font-weight:500;color:#16201C;margin:2px 0 4px}
+.lg-sub{font-size:13.5px;color:#6a746e}
+.lg-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.lg-kpi{background:#fff;border:1px solid #e8e4da;border-radius:12px;padding:14px 16px;border-top:3px solid #0B5D4B}
+.lg-kpi .k{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#8a948e;margin-bottom:4px}
+.lg-kpi .v{font-family:var(--f-mono);font-size:22px;color:#16201C;font-weight:500}
+.lg-sec{font-family:var(--f-serif);font-size:18px;color:#0B5D4B;margin:26px 0 10px}
+.lg-dayhdr{font-size:13px;font-weight:600;color:#16201C;margin:16px 0 6px;display:flex;align-items:baseline;gap:10px}
+.lg-daysum{font-family:var(--f-mono);font-size:11px;color:#8a948e;font-weight:400}
+.lg-tbl{border:1px solid #e8e4da;border-radius:10px;overflow:hidden;margin-bottom:8px;background:#fff}
+.lg-row{display:grid;grid-template-columns:1fr 120px 120px 96px 88px;align-items:center;padding:10px 14px;border-bottom:1px solid #f0eee8;font-size:13px}
+.lg-row:last-child{border-bottom:0}
+.lg-row:hover{background:#f7f9f6}
+.lg-row.head{background:#f4f6f2;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:#8a948e;cursor:default;font-weight:600}
+.lg-row.head:hover{background:#f4f6f2}
+.lg-open{font:inherit;font-size:11.5px;padding:4px 10px;border:1px solid #0B5D4B;color:#0B5D4B;background:#fff;border-radius:7px;cursor:pointer;justify-self:end}
+.lg-open:hover{background:#0B5D4B;color:#fff}
+.lg-row .c-name{font-weight:500;color:#16201C;display:flex;flex-direction:column;gap:1px}
+.lg-row .c-name small{font-family:var(--f-mono);font-size:9.5px;color:#a3aca6;font-weight:400}
+.lg-row .c-t{font-family:var(--f-mono);font-size:11.5px;color:#5a635d}
+.lg-row .c-d{font-family:var(--f-mono);font-size:12.5px;color:#0B5D4B;font-weight:600;text-align:right}
+.lg-row .c-d.live{color:#c98b45}
+.lg-row.done .c-name{color:#5a635d}
+.lg-empty{text-align:center;color:#8a948e;padding:50px 0;font-size:13.5px}
+@media(max-width:760px){.lg-kpis{grid-template-columns:1fr 1fr}.lg-row{grid-template-columns:1fr 90px}.lg-row .c-t:nth-child(3){display:none}}
+
+
 .mmn.done{opacity:.55}
 .mmn.done .mt{text-decoration:line-through}
 .mmn.hascol{cursor:pointer}
@@ -421,7 +663,7 @@ button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit
   <div class="wbox">
     <h1>Portfolio Strategy Map</h1>
     <p class="sub">Bản đồ chiến lược 3 cạnh — Zone › Pillar › Key Project › Key Result › Big Task. Kết nối bằng chuỗi <b>impact&nbsp;to</b> cắt ngang các cạnh.</p>
-    <div class="wopt" onclick="wSeed()"><span class="ic">🌱</span><div><b>Mở workspace mẫu — portfolio thật</b><small>~45 node seed từ Finan · Rabity · VFX · NEG · Idealab · Omnikey · Training · HSV. Sửa nhanh hơn nhập từ đầu.</small></div></div>
+    <div class="wopt" onclick="wSeed()"><span class="ic">🌱</span><div><b>Mở workspace MẪU (ẩn danh)</b><small>~45 node minh họa, tên & số liệu là giả. Mở dưới tên riêng "DEMO", KHÔNG đè workspace của bạn.</small></div></div>
     <div class="wopt" onclick="wBlank()"><span class="ic">📄</span><div><b>Tạo workspace trống</b><small>Chỉ có 3 Zone gốc. Tự dựng Pillar và bên dưới.</small></div></div>
     <div class="wopt" onclick="$('#impf').click()"><span class="ic">📥</span><div><b>Import file .psm.json</b><small>Full model — khôi phục nguyên trạng, import ngược được.</small></div></div>
     <input type="file" id="impf" accept=".json" style="display:none" onchange="doImport(this)">
@@ -429,16 +671,74 @@ button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit
   </div>
 </div>
 
+<div id="expmodal" onclick="if(event.target===this)closeExport()">
+  <div class="expcard">
+    <div class="exphd"><b>📤 Export</b>
+      <span class="muted" style="font-size:12px">Xuất ra file có dấu thời gian — làm nguyên liệu cho AI, hoặc backup.</span>
+      <span class="spacer"></span>
+      <button class="btn sm" onclick="closeExport()">Đóng</button></div>
+    <div class="expbody">
+      <div class="expfld"><label>Lọc theo mốc thời gian</label>
+        <div class="seg expseg" id="expBasis">
+          <button class="on" data-v="captured" onclick="expPick('basis','captured',this)">Captured (tạo)</button>
+          <button data-v="focus" onclick="expPick('basis','focus',this)">Focus at</button>
+          <button data-v="done" onclick="expPick('basis','done',this)">Done at</button>
+        </div>
+        <div class="muted" style="font-size:11px;margin-top:4px">Captured = mọi việc từng ghi vào, kể cả chưa xong.</div>
+      </div>
+      <div class="expfld"><label>Khoảng thời gian</label>
+        <div class="seg expseg" id="expRange">
+          <button data-v="all" class="on" onclick="expPick('range','all',this)">Tất cả</button>
+          <button data-v="today" onclick="expPick('range','today',this)">Hôm nay</button>
+          <button data-v="7" onclick="expPick('range','7',this)">7 ngày</button>
+          <button data-v="30" onclick="expPick('range','30',this)">30 ngày</button>
+          <button data-v="custom" onclick="expPick('range','custom',this)">Tùy chọn</button>
+        </div>
+        <div id="expCustom" style="display:none;margin-top:8px;gap:8px">
+          <input type="date" id="expFrom" onchange="expRender()"> → <input type="date" id="expTo" onchange="expRender()">
+        </div>
+      </div>
+      <div class="expfld"><label>Phạm vi</label>
+        <div class="seg expseg" id="expScope">
+          <button data-v="all" class="on" onclick="expPick('scope','all',this)">Tất cả node</button>
+          <button data-v="filtered" onclick="expPick('scope','filtered',this)">Chỉ cái đang hiện (theo filter)</button>
+        </div>
+      </div>
+      <div class="expcount" id="expCount">—</div>
+    </div>
+    <div class="expft">
+      <button class="btn" onclick="runExport('json')" title="Máy đọc, import ngược được, đủ mọi trường">💾 Xuất JSON</button>
+      <button class="btn primary" onclick="runExport('md')" title="Người + AI đọc: tên, path, status, thời lượng, ghi chú">📝 Xuất Markdown (cho AI)</button>
+    </div>
+  </div>
+</div>
+
+<div id="ibmodal" onclick="if(event.target===this)closeInbox()">
+  <div class="ibcard">
+    <div class="ibhd"><b>📥 Ý tưởng đột xuất</b>
+      <span class="muted" style="font-size:12px">Gõ ý tưởng rồi Enter để neo nhanh vào Focus. Phân loại vào cây sau bằng nút 🍊 trên từng dòng.</span>
+      <span class="spacer"></span>
+      <button class="btn sm" onclick="closeInbox()">Đóng</button></div>
+    <div class="ibbody" id="ibbody"></div>
+    <div class="ibft">
+      <input id="ibin" placeholder="Gõ ý tưởng rồi Enter để neo nhanh…" onkeydown="ibKey(event)" autocomplete="off" style="flex:1">
+      <button class="btn" onclick="ibAdd()">Thêm</button>
+      <button class="btn primary" onclick="orange()" title="Chạy lại luồng phân loại cho các ý tưởng còn mồ côi">🍊 Orange</button>
+    </div>
+  </div>
+</div>
+
 <div id="topbar">
   <span class="brand">Portfolio Strategy Map</span>
   <span class="vbadge" id="vb"></span>
   <span class="stamp" id="stamp"></span>
-  <span class="ctxbadge" id="ctx">—</span>
+  <span class="ctxbadge" id="ctx" onclick="renameWs()" title="Bấm để đổi tên workspace" style="cursor:pointer">—</span>
   <span class="spacer"></span>
   <span id="pill"></span>
+  <button class="btn" id="inboxBtn" onclick="openInbox()" title="Ý tưởng đột xuất — quăng vào rồi phân loại theo cấp">📥 Ý tưởng đột xuất (0)</button>
   <button class="btn" id="undoBtn" onclick="undo()" disabled>↩ Undo (0)</button>
   <button class="btn" onclick="exportJSON()" title="Full model — có toàn bộ node, link, finance. IMPORT NGƯỢC ĐƯỢC.">💾 Full model</button>
-  <button class="btn" onclick="exportCSV()" title="Bảng phẳng 1 node/dòng cho Excel. KHÔNG import ngược được.">📤 CSV phẳng</button>
+  <button class="btn" onclick="openExport()" title="Export có lọc thời gian + JSON/Markdown, có timestamp">📤 Export…</button>
   <button class="btn" onclick="switchWs()">⇄ Workspace</button>
   <button class="btn primary" onclick="saveWs(1)">Lưu</button>
 </div>
@@ -446,11 +746,13 @@ button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit
 <div id="tabs">
   <button class="tab active" data-v="dash" onclick="setView('dash')"><span class="tabnum">1</span>Dashboard</button>
   <button class="tab" data-v="tree" onclick="setView('tree')"><span class="tabnum">2</span>List</button>
-  <button class="tab" data-v="mind" onclick="setView('mind')"><span class="tabnum">3</span>Mind map</button>
-  <button class="tab" data-v="chain" onclick="setView('chain')"><span class="tabnum">4</span>Impact chain</button>
-  <button class="tab" data-v="board" onclick="setView('board')"><span class="tabnum">5</span>Board</button>
-  <button class="tab" data-v="gantt" onclick="setView('gantt')"><span class="tabnum">6</span>Gantt</button>
-  <button class="tab" data-v="fin" onclick="setView('fin')"><span class="tabnum">7</span>Finance</button>
+  <button class="tab" data-v="chain" onclick="setView('chain')"><span class="tabnum">3</span>Impact chain</button>
+  <button class="tab" data-v="board" onclick="setView('board')"><span class="tabnum">4</span>Board</button>
+  <button class="tab" data-v="gantt" onclick="setView('gantt')"><span class="tabnum">5</span>Gantt</button>
+  <button class="tab" data-v="fin" onclick="setView('fin')"><span class="tabnum">6</span>Finance</button>
+  <button class="tab" data-v="focus" onclick="setView('focus')"><span class="tabnum">7</span>❤️ Focus</button>
+  <button class="tab" data-v="log" onclick="setView('log')"><span class="tabnum">8</span>📊 Working Log</button>
+  <button class="tab" data-v="guide" onclick="setView('guide')"><span class="tabnum">9</span>📖 Hướng dẫn</button>
 </div>
 
 <div id="shell">
@@ -477,12 +779,19 @@ button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit
 </div>
 <script>
 /* ================= CONSTANTS ================= */
-const VER='v7.1';
-const REL='Released 12/07/2026 · v7.1: Net/giờ chỉ hiện 1 lần ở cột tổng (chỉ số của cả stream, không lặp mỗi tháng); mỗi tháng còn Net·Giờ';
+const VER='v9.4';
+const REL='Released 22/07/2026 · v9.4: Gõ ý tưởng đột xuất (cả ô chat Focus lẫn nút 📥 topbar) giờ NEO NHANH thành node rời trong vùng Chờ xử lý của Focus — không cascade, không hỏi. Muốn phân loại vào cây thì bấm 🍊 Xếp sau; muốn nâng lên vùng ❤️ thì thả tim.';
 const LS_PRE='psm:ws:';
 const LS_LAST='psm:last';
 const LS_W='psm:leftw';
 const TIERS=['Zone','Pillar','Key Project','Key Result','Big Task'];
+/* Nhóm Sức khỏe: gom 6 status thành 3 cực */
+const HEALTH=[
+  {k:'alive', l:'🟢 Sống',  members:['idea','live','handed'], desc:'đang chạy / đang có người lo'},
+  {k:'done',  l:'✅ Xong',  members:['done'],                 desc:'đã hoàn thành, đóng lại'},
+  {k:'stuck', l:'🔴 Tắc',   members:['blocked','orphan'],     desc:'nghẽn / mất chủ, cần xử lý'}
+];
+function healthOf(status){const h=HEALTH.find(g=>g.members.includes(status));return h?h.k:'alive';}
 const STATUS=[
  {k:'idea',   l:'Ý tưởng', c:'st-idea'},
  {k:'live',   l:'🟢 Live', c:'st-live'},
@@ -507,7 +816,8 @@ const fmtD=fmtH; // alias, tránh vỡ chỗ cũ
 /* ================= STATE ================= */
 let M={name:'',nodes:[]};
 let sel=null, view='dash', mode='edit', collapsed={}, undoStack=[];
-let F={zone:[],status:[],key:false,q:''};
+let F={zone:[],tier:[],health:[],status:[],deadline:[],key:false,q:''};
+let F_HIDE=false;  // false=làm mờ, true=ẩn hẳn
 let mm=(function(){try{const v=JSON.parse(localStorage.getItem('psm:mmview'));
   return (v&&typeof v.k==='number')?v:{x:60,y:60,k:0.6};}catch(e){return {x:60,y:60,k:0.6};}})();
 let mmSaveT=null;
@@ -516,177 +826,177 @@ function saveMM(){clearTimeout(mmSaveT);mmSaveT=setTimeout(()=>{
 },400);}
 
 /* ================= SEED ================= */
-function seed(){
+function seed()  {
  const N=[];
  const add=(id,pid,title,o={})=>{N.push(Object.assign({
-   id,parentId:pid,title,zone:o.zone||(pid?null:id),status:o.status||'live',
-   keyAction:!!o.keyAction,finKey:!!o.finKey,impactTo:o.impactTo||[],owner:o.owner||'',
-   decWho:o.decWho||'',decWhat:o.decWhat||'',decWhen:o.decWhen||'',
-   start:o.start||'',due:o.due||'',freq:o.freq||'once',
-   revenue:o.revenue??'',cost:o.cost??'',netOverride:o.netOverride??'',hours:o.hours??'',
-   stage:o.stage||'',notes:o.notes||''
+  id,parentId:pid,title,zone:o.zone||(pid?null:id),status:o.status||'live',
+  keyAction:!!o.keyAction,finKey:!!o.finKey,impactTo:o.impactTo||[],owner:o.owner||'',
+  decWho:o.decWho||'',decWhat:o.decWhat||'',decWhen:o.decWhen||'',
+  start:o.start||'',due:o.due||'',freq:o.freq||'once',
+  revenue:o.revenue??'',cost:o.cost??'',netOverride:o.netOverride??'',hours:o.hours??'',
+  stage:o.stage||'',notes:o.notes||''
  }));return id;};
 
  /* ---- ZONES ---- */
  add('Z1',null,'Cạnh 1 · C-level Job',{zone:'Z1',notes:'Ghế CFO/Optimiser trong doanh nghiệp thật. Nguồn thu ổn định + nguồn nguyên liệu case study.'});
- add('Z2',null,'Cạnh 2 · AI Innovation',{zone:'Z2',notes:'Idealab + Omnikey/F5. Biến bài toán từ Cạnh 1 thành sản phẩm bán được cho người khác.'});
- add('Z3',null,'Cạnh 3 · Training & Brand',{zone:'Z3',notes:'CMA/Corporate/AI adoption + #CFOkechuyen. Biến kinh nghiệm thành uy tín, uy tín kéo deal về Cạnh 1 & 2.'});
+ add('Z2',null,'Cạnh 2 · AI Innovation',{zone:'Z2',notes:'Ventures Lab + AccTech K/Engine K. Biến bài toán từ Cạnh 1 thành sản phẩm bán được cho người khác.'});
+ add('Z3',null,'Cạnh 3 · Training & Brand',{zone:'Z3',notes:'CMA/Corporate/AI adoption + #PersonalBrand. Biến kinh nghiệm thành uy tín, uy tín kéo deal về Cạnh 1 & 2.'});
 
  /* ---- Z1 PILLARS ---- */
- add('P_FIN','Z1','Finan / SBH',{zone:'Z1',owner:'CFO',finKey:true,freq:'monthly',start:'2026-01-01',due:'2026-12-31',hours:12,revenue:0,cost:0,stage:'pipeline',
-   notes:'◆ finKey đặt ở tầng Pillar: Finan chưa tách được P&L theo từng project, nên hợp nhất ở đây. Các Key Project bên dưới bị khóa finance — đúng thiết kế.'});
- add('P_RAB','Z1','Rabity',{zone:'Z1',owner:'CFO'});
- add('P_VFX','Z1','VFX Auto (VinFast)',{zone:'Z1',owner:'Business Optimiser'});
- add('P_NEG','Z1','NEG (BYD)',{zone:'Z1',owner:'Advisor',status:'handed'});
- add('P_HSV','Z1','HSV — Board seat',{zone:'Z1',status:'blocked'});
+ add('P_FINA','Z1','Fintech A (POS/SaaS)',{zone:'Z1',owner:'CFO',finKey:true,freq:'monthly',start:'2026-01-01',due:'2026-12-31',hours:12,revenue:0,cost:0,stage:'pipeline',
+  notes:'◆ finKey đặt ở tầng Pillar: Fintech A chưa tách được P&L theo từng project, nên hợp nhất ở đây. Các Key Project bên dưới bị khóa finance — đúng thiết kế.'});
+ add('P_RETB','Z1','Retail B',{zone:'Z1',owner:'CFO'});
+ add('P_AUTC','Z1','Auto C (phân phối xe)',{zone:'Z1',owner:'Business Optimiser'});
+ add('P_AUTD','Z1','Auto D (advisor)',{zone:'Z1',owner:'Advisor',status:'handed'});
+ add('P_BRDE','Z1','Board seat E',{zone:'Z1',status:'blocked'});
 
- /* Finan */
- add('K_FIN1','P_FIN','Lending-as-a-Core pivot',{zone:'Z1',status:'live',keyAction:true,start:'2026-06-01',due:'2026-09-30',
-   decWho:'CEO Finan + Board',decWhat:'Chốt POS/SaaS là data-acquisition layer, interest income là engine chính',decWhen:'2026-09-30',
-   hours:96,revenue:0,cost:0,stage:'pipeline',notes:'Distribution moat > product moat. Ai có merchants, người đó có leverage.'});
- add('K_FIN2','P_FIN','HLB partnership + rewards program',{zone:'Z1',status:'live',
-   hours:48,notes:'4 tầng: welcome · cashback · milestone bonus · loyalty tier. Không reference rate formula trong material merchant-facing (SBV).'});
- add('K_FIN3','P_FIN','Staff cost simulator (v21)',{zone:'Z1',status:'handed',freq:'monthly',hours:4,
-   impactTo:['K_IDL_ARCH'],notes:'125 nhân sự, data T5. Đã handed — cần xác nhận ai bấm nút hàng tháng.'});
- add('K_FIN4','P_FIN','Finance foundation — Châu → Power BI, MRR pipeline',{zone:'Z1',status:'live',freq:'monthly',hours:8,
-   decWho:'Châu (FP&A)',decWhat:'MRR chuyển từ Excel (Mai) sang Power BI',decWhen:'2026-08-31'});
- add('K_FIN5','P_FIN','ESOP vesting → cửa sổ đàm phán CFO',{zone:'Z1',status:'idea',keyAction:true,start:'2026-07-20',
-   decWho:'Chính mình',decWhat:'Đàm phán lại điều kiện CFO tại vesting event — hay rút?',decWhen:'2026-08-15',
-   notes:'[6] Nói thật, nói đủ — rồi biết buông. Ở lại vì impact, không vì loyalty. Đây là Gate lớn nhất của Cạnh 1.'});
- add('R_FIN4','K_FIN4','MRR chạy trên Power BI, Mai không phải mở Excel nữa',{zone:'Z1',status:'live',owner:'Châu',due:'2026-08-31'});
- add('T_FIN1','R_FIN4','Chốt schema MRR cho Power BI',{zone:'Z1',status:'live',owner:'Châu'});
- add('R_FIN1','K_FIN1','Chứng minh interest income > SaaS ARPU trên cùng 1 merchant',{zone:'Z1',status:'live',keyAction:true,
-   decWho:'CEO Finan',decWhat:'Chốt pivot hay không',decWhen:'2026-09-30'});
- add('T_FIN2','R_FIN1','Unit economics interest income vs SaaS ARPU',{zone:'Z1',status:'live',keyAction:true,notes:'[C5] Để con số nói. Tính trước, kết luận sau.'});
+ /* Fintech A */
+ add('K_FINA1','P_FINA','Lending-as-a-Core pivot',{zone:'Z1',status:'live',keyAction:true,start:'2026-06-01',due:'2026-09-30',
+  decWho:'CEO đối tác + Board',decWhat:'Chốt POS/SaaS là data-acquisition layer, interest income là engine chính',decWhen:'2026-09-30',
+  hours:96,revenue:0,cost:0,stage:'pipeline',notes:'Distribution moat > product moat. Ai có merchants, người đó có leverage.'});
+ add('K_FINA2','P_FINA','HLB partnership + rewards program',{zone:'Z1',status:'live',
+  hours:48,notes:'4 tầng: welcome · cashback · milestone bonus · loyalty tier. Tuân thủ quy định ngành khi thiết kế ưu đãi.'});
+ add('K_FINA3','P_FINA','Staff cost simulator (v21)',{zone:'Z1',status:'handed',freq:'monthly',hours:4,
+  impactTo:['K_IDL_ARCH'],notes:'(quy mô nhân sự mẫu). Đã handed — cần xác nhận ai bấm nút hàng tháng.'});
+ add('K_FINA4','P_FINA','Fintech Ace foundation — FP&A lead → Power BI, MRR pipeline',{zone:'Z1',status:'live',freq:'monthly',hours:8,
+  decWho:'FP&A lead',decWhat:'MRR chuyển từ Excel (kế toán) sang Power BI',decWhen:'2026-08-31'});
+ add('K_FINA5','P_FINA','Vesting → cửa sổ đàm phán CFO',{zone:'Z1',status:'idea',keyAction:true,start:'2026-07-20',
+  decWho:'Chính mình',decWhat:'Đàm phán lại điều kiện CFO tại vesting event — hay rút?',decWhen:'2026-08-15',
+  notes:'[6] Nói thật, nói đủ — rồi biết buông. Ở lại vì impact, không vì loyalty. Đây là Gate lớn nhất của Cạnh 1.'});
+ add('R_FINA4','K_FINA4','MRR chạy trên Power BI, kế toán không phải mở Excel nữa',{zone:'Z1',status:'live',owner:'FP&A lead',due:'2026-08-31'});
+ add('T_FINA1','R_FINA4','Chốt schema MRR cho Power BI',{zone:'Z1',status:'live',owner:'FP&A lead'});
+ add('R_FINA1','K_FINA1','Chứng minh interest income > SaaS ARPU trên cùng 1 merchant',{zone:'Z1',status:'live',keyAction:true,
+  decWho:'CEO đối tác',decWhat:'Chốt pivot hay không',decWhen:'2026-09-30'});
+ add('T_FINA2','R_FINA1','Unit economics interest income vs SaaS ARPU',{zone:'Z1',status:'live',keyAction:true,notes:'[C5] Để con số nói. Tính trước, kết luận sau.'});
 
- /* Rabity */
- add('K_RAB1','P_RAB','BI project (Idealab delivery)',{zone:'Z1',status:'live',keyAction:true,finKey:true,stage:'pipeline',revenue:150,start:'2026-05-01',
-   decWho:'Tido (PM) + Diễm Trang (SCM)',decWhat:'Duyệt User Requirement báo cáo tồn kho → BI team build',decWhen:'2026-07-25',
-   hours:80,notes:'DWH/ETL ~90%. Dual-role: minh bạch với leadership rằng Idealab là external engagement, không phải CFO opinion [G7].',
-   impactTo:['K_IDL_PB','K_TRN_AI']});
- add('K_RAB2','P_RAB','SCM master data cleanup',{zone:'Z1',status:'live',finKey:true,owner:'Diễm Trang',
-   decWho:'Diễm Trang',decWhat:'Chốt template báo cáo tồn kho chuẩn hóa',decWhen:'2026-07-31',hours:24});
- add('K_RAB3','P_RAB','Revenue reconciliation tool (AMIS vs bank)',{zone:'Z1',status:'blocked',owner:'Chính mình',
-   notes:'Subset-sum + temporal mismatch. BLOCKED bởi standing rule 07/07: chưa rõ ai bấm nút. Không build cho tới khi có tên người.'});
- add('K_RAB4','P_RAB','Lark finance governance + treasury (VCB hub, auto-sweep)',{zone:'Z1',status:'live',finKey:true,start:'2026-06-01',due:'2026-09-30',hours:40,
-   impactTo:['K_IDL_TY']});
- add('K_RAB5','P_RAB','Rabity AI Challenge (11 đội)',{zone:'Z1',status:'live',finKey:true,start:'2026-06-15',due:'2026-08-31',hours:32,
-   impactTo:['K_TRN_AI','K_BRAND'],notes:'Adoption follows pain, không follows enthusiasm. Đây là thí nghiệm adoption sống.'});
- add('R_RAB1','K_RAB1','Báo cáo tồn kho chạy tự động, Diễm Trang không cần xin số nữa',{zone:'Z1',status:'live',keyAction:true,
-   decWho:'Diễm Trang',decWhat:'Duyệt User Requirement',decWhen:'2026-07-25',owner:'Tido'});
- add('T_RAB1','R_RAB1','Gửi P&L management mock-up cho Tido',{zone:'Z1',status:'live',keyAction:true,due:'2026-07-18',owner:'Mình'});
- add('R_RAB2','K_RAB1','BU P&L tách Retail / eCom / Wholesale',{zone:'Z1',status:'idea'});
- add('T_RAB2','R_RAB2','CLV/RFM customer strategy',{zone:'Z1',status:'idea'});
+ /* Retail B */
+ add('K_RETB1','P_RETB','BI project (Ventures Lab delivery)',{zone:'Z1',status:'live',keyAction:true,finKey:true,stage:'pipeline',revenue:37.5,start:'2026-05-01',
+  decWho:'PM đối tác + Trưởng SCM (SCM)',decWhat:'Duyệt User Requirement báo cáo tồn kho → BI team build',decWhen:'2026-07-25',
+  hours:80,notes:'DWH/ETL ~90%. Dual-role: minh bạch với leadership rằng Ventures Lab là external engagement, không phải CFO opinion [G7].',
+  impactTo:['K_IDL_PB','K_TRN_AI']});
+ add('K_RETB2','P_RETB','SCM master data cleanup',{zone:'Z1',status:'live',finKey:true,owner:'Trưởng SCM',
+  decWho:'Trưởng SCM',decWhat:'Chốt template báo cáo tồn kho chuẩn hóa',decWhen:'2026-07-31',hours:24});
+ add('K_RETB3','P_RETB','Revenue reconciliation tool (sổ KT vs bank)',{zone:'Z1',status:'blocked',owner:'Chính mình',
+  notes:'Subset-sum + temporal mismatch. BLOCKED bởi standing rule 07/07: chưa rõ ai bấm nút. Không build cho tới khi có tên người.'});
+ add('K_RETB4','P_RETB','Lark finance governance + treasury (bank hub, auto-sweep)',{zone:'Z1',status:'live',finKey:true,start:'2026-06-01',due:'2026-09-30',hours:40,
+  impactTo:['K_IDL_CH']});
+ add('K_RETB5','P_RETB','AI Challenge nội bộ (11 đội)',{zone:'Z1',status:'live',finKey:true,start:'2026-06-15',due:'2026-08-31',hours:32,
+  impactTo:['K_TRN_AI','K_BRAND'],notes:'Adoption follows pain, không follows enthusiasm. Đây là thí nghiệm adoption sống.'});
+ add('R_RETB1','K_RETB1','Báo cáo tồn kho chạy tự động, Trưởng SCM không cần xin số nữa',{zone:'Z1',status:'live',keyAction:true,
+  decWho:'Trưởng SCM',decWhat:'Duyệt User Requirement',decWhen:'2026-07-25',owner:'PM đối tác'});
+ add('T_RETB1','R_RETB1','Gửi P&L management mock-up cho PM đối tác',{zone:'Z1',status:'live',keyAction:true,due:'2026-07-18',owner:'Mình'});
+ add('R_RETB2','K_RETB1','BU P&L tách Retail / eCom / Wholesale',{zone:'Z1',status:'idea'});
+ add('T_RETB2','R_RETB2','CLV/RFM customer strategy',{zone:'Z1',status:'idea'});
 
- /* VFX */
- add('K_VFX1','P_VFX','Margin stack architecture (4 TAB)',{zone:'Z1',status:'blocked',keyAction:true,finKey:true,owner:'TGĐ Trường Giang',start:'2026-06-01',due:'2026-07-25',
-   decWho:'CHƯA CÓ TÊN',decWhat:'Ai bấm nút vì Tab2? Chưa trả lời được',decWhen:'',
-   hours:64,notes:'⛔ BLOCKED bởi standing rule 07/07. Architecture đã chốt (Dashboard/CM KD xe/Sales Force/XDV) nhưng KHÔNG build cho tới khi trả lời được decision-link. Đây là test case của chính nguyên tắc mình đặt ra.',
-   impactTo:['K_IDL_PB']});
- add('K_VFX2','P_VFX','Planning model v46 + BCQT mgmt report',{zone:'Z1',status:'live',finKey:true,start:'2026-05-01',due:'2026-07-31',
-   freq:'monthly',hours:16,
-   revenue:75,cost:0,stage:'booked',
-   notes:'Hợp đồng 0301/2026 · 75tr/tháng ×3 (5–7/2026). Volume plan matrix 10 model × 12 tháng là source; %đạt SI/SO là biến phụ thuộc [A4].'});
- add('K_VFX3','P_VFX','Re-seed Tab2 bằng data thật từ BKCT (20,398 dòng)',{zone:'Z1',status:'live',
-   notes:'Bài học Sa La: giả định "hub không có data" hóa ra SAI — có 128 xe/5 tháng. Test với real data trước khi kết luận pattern.'});
- add('K_VFX4','P_VFX','Gia hạn hợp đồng sau 07/2026',{zone:'Z1',status:'idea',keyAction:true,
-   decWho:'Nguyễn Thị Trường Giang (TGĐ)',decWhat:'Gia hạn / đổi scope / dừng',decWhen:'2026-07-31',
-   notes:'Gate. Hợp đồng hết hạn tháng này. Cần chốt trước khi hết tháng.'});
- add('R_VFX1','K_VFX1','Có tên người bấm nút Tab2 — hoặc chính thức khai tử Tab2',{zone:'Z1',status:'blocked',keyAction:true,owner:'Chính mình',
-   decWho:'CHƯA CÓ TÊN',decWhat:'Xác nhận decision-link hoặc kết luận không build',decWhen:'2026-07-25',
-   notes:'Đây là Key Result thật: không phải "build xong Tab2" mà là "trả lời được câu hỏi".'});
- add('T_VFX1','R_VFX1','Hỏi TGĐ Giang: ai đọc Tab2 và bấm nút gì?',{zone:'Z1',status:'blocked',keyAction:true,owner:'Chính mình',
-   notes:'Standing rule 07/07: chưa trả lời được thì không build.'});
+ /* Auto C */
+ add('K_AUTC1','P_AUTC','Margin stack architecture (4 TAB)',{zone:'Z1',status:'blocked',keyAction:true,finKey:true,owner:'TGĐ đối tác',start:'2026-06-01',due:'2026-07-25',
+  decWho:'CHƯA CÓ TÊN',decWhat:'Ai bấm nút vì Tab2? Chưa trả lời được',decWhen:'',
+  hours:64,notes:'⛔ BLOCKED bởi standing rule 07/07. Architecture đã chốt (Dashboard/CM KD xe/Sales Force/XDV) nhưng KHÔNG build cho tới khi trả lời được decision-link. Đây là test case của chính nguyên tắc mình đặt ra.',
+  impactTo:['K_IDL_PB']});
+ add('K_AUTC2','P_AUTC','Planning model v46 + báo cáo QT mgmt report',{zone:'Z1',status:'live',finKey:true,start:'2026-05-01',due:'2026-07-31',
+  freq:'monthly',hours:16,
+  revenue:18.75,cost:0,stage:'booked',
+  notes:'Hợp đồng 0301/2026 · ≈19tr/tháng ×3. Volume plan matrix 10 model × 12 tháng là source; %đạt SI/SO là biến phụ thuộc [A4].'});
+ add('K_AUTC3','P_AUTC','Re-seed Tab2 bằng data thật từ nguồn gốc (20k+ dòng)',{zone:'Z1',status:'live',
+  notes:'Bài học chi nhánh trung tâm: giả định "hub không có data" hóa ra SAI — có 128 xe/5 tháng. Test với real data trước khi kết luận pattern.'});
+ add('K_AUTC4','P_AUTC','Gia hạn hợp đồng sau 07/2026',{zone:'Z1',status:'idea',keyAction:true,
+  decWho:'TGĐ đối tác',decWhat:'Gia hạn / đổi scope / dừng',decWhen:'2026-07-31',
+  notes:'Gate. Hợp đồng hết hạn tháng này. Cần chốt trước khi hết tháng.'});
+ add('R_AUTC1','K_AUTC1','Có tên người bấm nút Tab2 — hoặc chính thức khai tử Tab2',{zone:'Z1',status:'blocked',keyAction:true,owner:'Chính mình',
+  decWho:'CHƯA CÓ TÊN',decWhat:'Xác nhận decision-link hoặc kết luận không build',decWhen:'2026-07-25',
+  notes:'Đây là Key Result thật: không phải "build xong Tab2" mà là "trả lời được câu hỏi".'});
+ add('T_AUTC1','R_AUTC1','Hỏi TGĐ Giang: ai đọc Tab2 và bấm nút gì?',{zone:'Z1',status:'blocked',keyAction:true,owner:'Chính mình',
+  notes:'Standing rule 07/07: chưa trả lời được thì không build.'});
 
- /* NEG */
- add('K_NEG1','P_NEG','Cởi trói vốn lưu động',{zone:'Z1',status:'blocked',owner:'NEG — CFO',notes:'Chờ data từ NEG.'});
- add('K_NEG2','P_NEG','Xem xét lại BYD Tiền Giang',{zone:'Z1',status:'blocked',owner:'NEG — CFO',notes:'Chờ data.'});
- add('K_NEG3','P_NEG','Phản ứng nhanh đặt hàng từ hãng',{zone:'Z1',status:'blocked',owner:'NEG — CFO',notes:'Chờ data.'});
+ /* Auto D */
+ add('K_AUTD1','P_AUTD','Cởi trói vốn lưu động',{zone:'Z1',status:'blocked',owner:'Auto D — CFO',notes:'Chờ data từ Auto D.'});
+ add('K_AUTD2','P_AUTD','Xem xét lại chi nhánh tỉnh',{zone:'Z1',status:'blocked',owner:'Auto D — CFO',notes:'Chờ data.'});
+ add('K_AUTD3','P_AUTD','Phản ứng nhanh đặt hàng từ hãng',{zone:'Z1',status:'blocked',owner:'Auto D — CFO',notes:'Chờ data.'});
 
- /* HSV */
- add('K_HSV1','P_HSV','Board membership — chờ Mekong Capital',{zone:'Z1',status:'blocked',keyAction:true,owner:'Mekong Capital',
-   decWho:'Mekong Capital',decWhat:'Duyệt / từ chối board seat',decWhen:'',
-   notes:'Beauty Box / The Face Shop. Proposal đã gửi. Ngoài tầm kiểm soát — không đổ thêm thời gian, chỉ theo dõi.'});
+ /* E */
+ add('K_BRDE1','P_BRDE','Board membership — chờ quỹ đầu tư',{zone:'Z1',status:'blocked',keyAction:true,owner:'quỹ đầu tư',
+  decWho:'quỹ đầu tư',decWhat:'Duyệt / từ chối board seat',decWhen:'',
+  notes:'chuỗi mỹ phẩm. Proposal đã gửi. Ngoài tầm kiểm soát — không đổ thêm thời gian, chỉ theo dõi.'});
 
  /* ---- Z2 PILLARS ---- */
- add('P_IDL','Z2','Idealab');
- add('P_OMK','Z2','Omnikey / F5');
+ add('P_IDL','Z2','Ventures Lab');
+ add('P_ACCK','Z2','AccTech K');
 
- add('K_IDL_NN','P_IDL','NutriNest — Phase 2',{zone:'Z2',status:'live',keyAction:true,finKey:true,start:'2026-04-01',
-   revenue:360,cost:0,hours:360,stage:'booked',
-   decWho:'CEO NutriNest',decWhat:'Nghiệm thu Phase 2 → mở Phase 3',decWhen:'2026-09-30',
-   notes:'180 man-days. Anchor client. Architecture Builder 29 node. Allocation thật là manual_table visit-count weights, KHÔNG phải fixed_pct — bài học test-with-real-data.',
-   impactTo:['K_IDL_PB']});
- add('K_IDL_SVN','P_IDL','SVN — BI engagement (scope overrun)',{zone:'Z2',status:'live',finKey:true,start:'2026-03-01',due:'2026-08-31',
-   hours:160,stage:'sunk',
-   notes:'[G2] Scope overrun → document bằng dashboard-expansion framework. Mandatory change-request cho mọi extension. Bài học pricing đã ghi.',
-   impactTo:['K_IDL_PB']});
- add('K_IDL_TY','P_IDL','Thanh Yến — treasury 15 công ty trên Lark',{zone:'Z2',status:'live',finKey:true,start:'2026-05-01',due:'2026-08-15',hours:64,stage:'booked',
-   notes:'Lark design flow-first (actor→action→data), không data-first.'});
- add('K_IDL_IBS','P_IDL','IBS — đá granite/marble',{zone:'Z2',status:'blocked',keyAction:true,finKey:true,owner:'Thảo + kế toán IBS',stage:'pipeline',revenue:90,start:'2026-06-15',
-   decWho:'Thảo + kế toán IBS',decWhat:'Cung cấp offcut pricing rule + hao phí rate từng vật liệu',decWhen:'2026-07-20',hours:48,
-   notes:'⛔ BLOCKED. Không build backend cho tới khi có 2 con số này. 2 rủi ro cấu trúc: dual-entry Excel/OZ + thiếu phiếu nhập kho thành phẩm chính thức.'});
- add('K_IDL_LC','P_IDL','Linkcare — B2B benefit aggregator',{zone:'Z2',status:'idea',finKey:true,stage:'pipeline',revenue:60,start:'2026-09-01',due:'2026-11-30',hours:16});
+ add('K_IDL_CF','P_IDL','Client F (FMCG) — Phase 2',{zone:'Z2',status:'live',keyAction:true,finKey:true,start:'2026-04-01',
+  revenue:90,cost:0,hours:360,stage:'booked',
+  decWho:'CEO Client F (FMCG)',decWhat:'Nghiệm thu Phase 2 → mở Phase 3',decWhen:'2026-09-30',
+  notes:'(số ngày công ẩn). Anchor client. Architecture Builder 29 node. Allocation thật là manual_table visit-count weights, KHÔNG phải fixed_pct — bài học test-with-real-data.',
+  impactTo:['K_IDL_PB']});
+ add('K_IDL_CG','P_IDL','Client G (BI) — BI engagement (scope overrun)',{zone:'Z2',status:'live',finKey:true,start:'2026-03-01',due:'2026-08-31',
+  hours:160,stage:'sunk',
+  notes:'[G2] Scope overrun → document bằng dashboard-expansion framework. Mandatory change-request cho mọi extension. Bài học pricing đã ghi.',
+  impactTo:['K_IDL_PB']});
+ add('K_IDL_CH','P_IDL','Client H — treasury 15 công ty trên Lark',{zone:'Z2',status:'live',finKey:true,start:'2026-05-01',due:'2026-08-15',hours:64,stage:'booked',
+  notes:'Lark design flow-first (actor→action→data), không data-first.'});
+ add('K_IDL_CI','P_IDL','Client I — đá granite/marble',{zone:'Z2',status:'blocked',keyAction:true,finKey:true,owner:'chủ Client I + kế toán Client I',stage:'pipeline',revenue:22.5,start:'2026-06-15',
+  decWho:'chủ Client I + kế toán Client I',decWhat:'Cung cấp offcut pricing rule + hao phí rate từng vật liệu',decWhen:'2026-07-20',hours:48,
+  notes:'⛔ BLOCKED. Không build backend cho tới khi có 2 con số này. 2 rủi ro cấu trúc: dual-entry Excel/OZ + thiếu phiếu nhập kho thành phẩm chính thức.'});
+ add('K_IDL_CJ','P_IDL','Client J — B2B benefit aggregator',{zone:'Z2',status:'idea',finKey:true,stage:'pipeline',revenue:15,start:'2026-09-01',due:'2026-11-30',hours:16});
  add('K_IDL_PB','P_IDL','Playbook hóa: 1 model, N lens',{zone:'Z2',status:'idea',keyAction:true,finKey:true,start:'2026-07-15',
-   decWho:'Chính mình + co-founder Idealab',decWhat:'Chốt: Idealab bán engagement hay bán sản phẩm lặp lại?',decWhen:'2026-08-31',
-   notes:'★ ĐÒN BẨY. Mọi engagement hiện tại là bespoke → không scale. Đây là node biến Cạnh 2 từ agency thành product. Nhận input từ VFX + Rabity + NutriNest + SVN.',
-   impactTo:['K_TRN_AI','K_BRAND']});
+  decWho:'Chính mình + co-founder Ventures Lab',decWhat:'Chốt: Ventures Lab bán engagement hay bán sản phẩm lặp lại?',decWhen:'2026-08-31',
+  notes:'★ ĐÒN BẨY. Mọi engagement hiện tại là bespoke → không scale. Đây là node biến Cạnh 2 từ agency thành product. Nhận input từ Auto C + Retail B + Client F (FMCG) + Client G (BI).',
+  impactTo:['K_TRN_AI','K_BRAND']});
  add('K_IDL_ARCH','P_IDL','Architecture Builder + Digital Twin Publisher',{zone:'Z2',status:'live',finKey:true,start:'2026-01-01',due:'2026-12-31',
-   freq:'monthly',hours:4,
-   notes:'Công cụ nội bộ. ⚠️ Cảnh giác tool-building drift: versioning tạo cảm giác tiến bộ trong khi adoption bị bỏ quên.'});
+  freq:'monthly',hours:4,
+  notes:'Công cụ nội bộ. ⚠️ Cảnh giác tool-building drift: versioning tạo cảm giác tiến bộ trong khi adoption bị bỏ quên.'});
  add('R_IDL_PB','K_IDL_PB','6 tool hiện có được phân loại 🟢🟡🔴⚫ — biết cái nào sống',{zone:'Z2',status:'orphan',keyAction:true,
-   decWho:'Chính mình',decWhat:'Cắt tool 🔴 Orphan, dồn lực vào tool 🟢 Live',decWhen:'2026-07-20',
-   notes:'Ưu tiên: đẩy tool đã có tới người vận hành thật — không build tool mới.'});
+  decWho:'Chính mình',decWhat:'Cắt tool 🔴 Orphan, dồn lực vào tool 🟢 Live',decWhen:'2026-07-20',
+  notes:'Ưu tiên: đẩy tool đã có tới người vận hành thật — không build tool mới.'});
  add('T_IDL1','R_IDL_PB','Điền cột impact cho 6 tool',{zone:'Z2',status:'orphan',keyAction:true,owner:'Chính mình',
-   notes:'Từ 07/07. Cột impact vẫn trống — chính mình là người nợ. Món nợ với standing rule của chính mình.'});
+  notes:'Từ 07/07. Cột impact vẫn trống — chính mình là người nợ. Món nợ với standing rule của chính mình.'});
 
- add('K_OMK1','P_OMK','F5 engine — automation cho HKD',{zone:'Z2',status:'live',keyAction:true,finKey:true,revenue:50,start:'2026-05-15',
-   hours:120,stage:'pipeline',
-   decWho:'Chính mình + partner SBH',decWhat:'Chốt 3-tier pricing đi vào production',decWhen:'2026-08-15',
-   notes:'[G3] Revenue-share: build P&L từ NET revenue. SBH lấy 25% — gross là vanity metric, từng suýt tưởng lãi nhưng net âm.',
-   impactTo:['K_OMK2','K_BRAND']});
- add('K_OMK2','P_OMK','Scale ~50 HKD → Phase 2 (KiotViet, VinaSoft)',{zone:'Z2',status:'idea',finKey:true,revenue:120,start:'2026-09-01',due:'2026-12-31',
-   hours:40,stage:'pipeline',notes:'Multi-client reusable engine. Phase 2 mở sang POS khác.'});
- add('K_OMK3','P_OMK','Dịch vụ kế toán HKD (~50 khách)',{zone:'Z2',status:'live',finKey:true,
-   freq:'monthly',start:'2026-01-01',due:'2026-12-31',revenue:15,cost:10,hours:8,stage:'booked',
-   notes:'Nhập theo CHU KỲ: 15tr thu / 10tr chi mỗi tháng × 12 = 180tr/120tr năm. Nguồn thu đều, cũng là test bed cho F5.'});
- add('R_OMK1','K_OMK1','F5 chạy production trên ≥10 HKD, net dương sau khi trừ 25% SBH',{zone:'Z2',status:'live',keyAction:true,
-   decWho:'Chính mình + partner SBH',decWhat:'Chốt 3-tier pricing production',decWhen:'2026-08-15',
-   notes:'[G3] Net, không phải gross. Gross là vanity metric.'});
- add('T_OMK1','R_OMK1','NDA Pico — đàm phán lại 3 điểm đã flag',{zone:'Z2',status:'live',
-   notes:'Một chiều · non-solicitation chỉ có bản tiếng Anh · thời hạn bảo mật vô thời hạn.'});
+ add('K_ACCK1','P_ACCK','Engine K — automation cho hộ KD',{zone:'Z2',status:'live',keyAction:true,finKey:true,revenue:12.5,start:'2026-05-15',
+  hours:120,stage:'pipeline',
+  decWho:'Chính mình + partner POS',decWhat:'Chốt 3-tier pricing đi vào production',decWhen:'2026-08-15',
+  notes:'[G3] Revenue-share: build P&L từ NET revenue. đối tác POS lấy 25% — gross là vanity metric, từng suýt tưởng lãi nhưng net âm.',
+  impactTo:['K_ACCK2','K_BRAND']});
+ add('K_ACCK2','P_ACCK','Scale ~50 hộ KD → Phase 2 (POS partners khác)',{zone:'Z2',status:'idea',finKey:true,revenue:30,start:'2026-09-01',due:'2026-12-31',
+  hours:40,stage:'pipeline',notes:'Multi-client reusable engine. Phase 2 mở sang POS khác.'});
+ add('K_ACCK3','P_ACCK','Dịch vụ kế toán hộ KD (~50 khách)',{zone:'Z2',status:'live',finKey:true,
+  freq:'monthly',start:'2026-01-01',due:'2026-12-31',revenue:3.75,cost:2.5,hours:8,stage:'booked',
+  notes:'Nhập theo CHU KỲ: ≈4tr thu/≈2,5tr chi mỗi tháng ×12. Nguồn thu đều, cũng là test bed cho Engine K.'});
+ add('R_ACCK1','K_ACCK1','Engine K chạy production trên ≥10 hộ KD, net dương sau khi trừ 25% đối tác POS',{zone:'Z2',status:'live',keyAction:true,
+  decWho:'Chính mình + partner POS',decWhat:'Chốt 3-tier pricing production',decWhen:'2026-08-15',
+  notes:'[G3] Net, không phải gross. Gross là vanity metric.'});
+ add('T_ACCK1','R_ACCK1','NDA đối tác N — đàm phán lại 3 điểm đã flag',{zone:'Z2',status:'live',
+  notes:'Một chiều · non-solicitation chỉ có bản tiếng Anh · thời hạn bảo mật vô thời hạn.'});
 
  /* ---- Z3 PILLARS ---- */
  add('P_CERT','Z3','Chứng chỉ (CMA / SmartTrain)');
  add('P_CORP','Z3','Corporate training');
- add('P_BRND','Z3','Personal brand #CFOkechuyen');
+ add('P_BRND','Z3','Personal brand #PersonalBrand');
 
  add('K_CMA','P_CERT','CMA program + CFO program',{zone:'Z3',status:'live',finKey:true,
-   freq:'monthly',start:'2026-01-01',due:'2026-12-31',revenue:12.5,cost:0,hours:16,stage:'booked',
-   notes:'Nhập theo CHU KỲ: 12,5tr/tháng × 12 tháng = 150tr/năm. Tool tự nhân — không nhập tổng.'});
- add('K_TRN_AI','P_CORP','AI-for-finance training (launch 7/2026)',{zone:'Z3',status:'live',keyAction:true,finKey:true,revenue:80,start:'2026-06-01',
-   revenue:0,cost:0,hours:80,stage:'pipeline',
-   decWho:'Chính mình',decWhat:'Chốt curriculum + ngày launch',decWhen:'2026-07-31',
-   notes:'★ Node hội tụ. Nguyên liệu đến từ Rabity AI Challenge + Idealab playbook + F5. Đây là nơi Cạnh 1 và 2 biến thành tiền ở Cạnh 3.',
-   impactTo:['K_BRAND']});
- add('K_HTV','P_CORP','Hyundai Thành Công — KHCL Session 2',{zone:'Z3',status:'live',keyAction:true,finKey:true,revenue:45,start:'2026-07-10',
-   hours:24,stage:'pipeline',
-   decWho:'Trưởng nhóm KHCL',decWhat:'Có chuyển sang co-design session (→ Idealab engagement) hay không',decWhen:'2026-08-15',
-   notes:'Hiệu chỉnh tuyên bố "90–95% chính xác": hỏi ngược — horizon nào? đo bằng metric gì? sai 5–10% thì hậu quả kinh doanh là gì? [M13][M10]. KHÔNG pitch trong session coaching — chờ nhóm tự nói ra pain.',
-   impactTo:['K_IDL_LC']});
- add('K_FTMS','P_CORP','FTMS / ngân hàng thương mại — proposal',{zone:'Z3',status:'live',finKey:true,revenue:100,start:'2026-07-01',due:'2026-09-15',hours:32,stage:'pipeline',
-   notes:'9 slide, Midnight Executive. Four-verb journey: Chẩn đoán → Dựng → Kiểm thử → Quyết định. Positioning trung thực: kinh nghiệm banking qua hợp tác fintech–bank, KHÔNG phải nội bộ ngân hàng.'});
- add('K_MISC','P_CORP','MISA CX · VSP · AHT · Central Cons',{zone:'Z3',status:'live',finKey:true,
-   freq:'once',start:'2026-03-01',due:'2026-10-31',revenue:120,cost:0,hours:64,stage:'booked'});
- add('K_BRAND','P_BRND','#CFOkechuyen — CFO voice về AI adoption',{zone:'Z3',status:'live',keyAction:true,finKey:true,
-   freq:'monthly',start:'2026-01-01',due:'2026-12-31',hours:14,
-   decWho:'Chính mình',decWhat:'Duy trì nhịp viết đều — hay chấp nhận đứt?',decWhen:'',
-   notes:'"AI cho bạn con số. Tư duy tài chính mới ra quyết định." Đây là node ROI cao nhất mà ít tốn ngày nhất — nhưng cũng dễ bị bỏ rơi nhất khi bận.'});
+  freq:'monthly',start:'2026-01-01',due:'2026-12-31',revenue:3.12,cost:0,hours:16,stage:'booked',
+  notes:'Nhập theo CHU KỲ: ≈3tr/tháng ×12 ≈37tr/năm. Tool tự nhân — không nhập tổng.'});
+ add('K_TRN_AI','P_CORP','AI-for-finance training (launch 7/2026)',{zone:'Z3',status:'live',keyAction:true,finKey:true,revenue:20,start:'2026-06-01',
+  revenue:0,cost:0,hours:80,stage:'pipeline',
+  decWho:'Chính mình',decWhat:'Chốt curriculum + ngày launch',decWhen:'2026-07-31',
+  notes:'★ Node hội tụ. Nguyên liệu đến từ Retail B AI Challenge + Ventures Lab playbook + Engine K. Đây là nơi Cạnh 1 và 2 biến thành tiền ở Cạnh 3.',
+  impactTo:['K_BRAND']});
+ add('K_HTV','P_CORP','Client L — KHCL Session 2',{zone:'Z3',status:'live',keyAction:true,finKey:true,revenue:11.25,start:'2026-07-10',
+  hours:24,stage:'pipeline',
+  decWho:'Trưởng nhóm KH',decWhat:'Có chuyển sang co-design session (→ Ventures Lab engagement) hay không',decWhen:'2026-08-15',
+  notes:'Hiệu chỉnh tuyên bố "90–95% chính xác": hỏi ngược — horizon nào? đo bằng metric gì? sai 5–10% thì hậu quả kinh doanh là gì? [M13][M10]. KHÔNG pitch trong session coaching — chờ nhóm tự nói ra pain.',
+  impactTo:['K_IDL_CJ']});
+ add('K_PARTM','P_CORP','Đối tác M / ngân hàng — proposal',{zone:'Z3',status:'live',finKey:true,revenue:25,start:'2026-07-01',due:'2026-09-15',hours:32,stage:'pipeline',
+  notes:'9 slide, Midnight Executive. Four-verb journey: Chẩn đoán → Dựng → Kiểm thử → Quyết định. Positioning trung thực: kinh nghiệm banking qua hợp tác fintech–bank, KHÔNG phải nội bộ ngân hàng.'});
+ add('K_MISC','P_CORP','Corporate clients (đợt dự án)',{zone:'Z3',status:'live',finKey:true,
+  freq:'once',start:'2026-03-01',due:'2026-10-31',revenue:30,cost:0,hours:64,stage:'booked'});
+ add('K_BRAND','P_BRND','#PersonalBrand — CFO voice về AI adoption',{zone:'Z3',status:'live',keyAction:true,finKey:true,
+  freq:'monthly',start:'2026-01-01',due:'2026-12-31',hours:14,
+  decWho:'Chính mình',decWhat:'Duy trì nhịp viết đều — hay chấp nhận đứt?',decWhen:'',
+  notes:'"AI cho bạn con số. Tư duy tài chính mới ra quyết định." Đây là node ROI cao nhất mà ít tốn ngày nhất — nhưng cũng dễ bị bỏ rơi nhất khi bận.'});
  add('R_BR1','K_BRAND','Nhịp viết đều — không đứt quá 2 tuần',{zone:'Z3',status:'live',keyAction:true,
-   freq:'monthly',hours:13.9,
-   decWho:'Chính mình',decWhat:'Giữ nhịp hay chấp nhận đứt',decWhen:''});
+  freq:'monthly',hours:13.9,
+  decWho:'Chính mình',decWhat:'Giữ nhịp hay chấp nhận đứt',decWhen:''});
  add('T_BR1','R_BR1','Bài: tool-building drift — nghịch lý người xây công cụ',{zone:'Z3',status:'idea',
-   notes:'Góc nghịch lý. Storytelling → analogy → chi tiết thật → kết mở. Nguyên liệu: chính món nợ tool triage của mình.'});
+  notes:'Góc nghịch lý. Storytelling → analogy → chi tiết thật → kết mở. Nguyên liệu: chính món nợ tool triage của mình.'});
 
  return N;
 }
@@ -695,7 +1005,8 @@ function seed(){
 const byId=id=>M.nodes.find(n=>n.id===id);
 function tierOf(n){let d=0,c=n,g=0;while(c&&c.parentId&&g++<12){c=byId(c.parentId);d++;}return Math.min(d,4);}
 function kids(id){return M.nodes.filter(n=>n.parentId===id);}
-function roots(){return M.nodes.filter(n=>!n.parentId);}
+function roots(){return M.nodes.filter(n=>!n.parentId&&!n.inbox);}
+function inboxNodes(){return M.nodes.filter(n=>n.inbox&&!n.doneAt);}
 function zoneOf(n){let c=n,g=0;while(c&&c.parentId&&g++<12)c=byId(c.parentId);return c?c.id:null;}
 function pathOf(n){const p=[];let c=byId(n.parentId),g=0;while(c&&g++<12){p.unshift(c.title);c=byId(c.parentId);}return p;}
 function descendants(id){const out=[];const walk=i=>kids(i).forEach(k=>{out.push(k);walk(k.id);});walk(id);return out;}
@@ -739,10 +1050,9 @@ function mult(n){
 function netOf(n){
   if(!n.finKey)return null;
   if(!finReady(n).ok)return null;
-  if(n.netOverride!==''&&n.netOverride!=null&&!isNaN(n.netOverride))return (+n.netOverride)*mult(n);
   if(n.revenue===''&&n.cost==='')return null;
   const r=+n.revenue||0,c=+n.cost||0;
-  return (r-c)*mult(n);
+  return (r-c)*mult(n);   // net LUÔN = (doanh thu − chi phí) × chu kỳ. Không còn override.
 }
 /* ===== THÁNG NÀY (dòng tiền tháng hiện tại) ===== */
 function inMonth(n,ym){ // ym = 'YYYY-MM'
@@ -755,7 +1065,6 @@ function inMonth(n,ym){ // ym = 'YYYY-MM'
 function nowYM(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 function netMonth(n,ym){
   if(!inMonth(n,ym||nowYM()))return 0;
-  if(n.netOverride!==''&&n.netOverride!=null&&!isNaN(n.netOverride))return +n.netOverride;
   return (+n.revenue||0)-(+n.cost||0);
 }
 function hoursMonth(n,ym){
@@ -779,6 +1088,455 @@ function cashOf(n){
   const c=+n.cost;
   return n.cost===''||isNaN(c)?null:c*mult(n);
 }
+
+
+/* ================= 8. FOCUS (❤️ Be now & here) ================= */
+function hdFocus(){
+  const bn=beNowNodes().length, ib=inboxNodes().length;
+  return `<span style="font-size:11px;color:var(--muted)">Không gian tập trung — chỉ việc cần bạn <b>ở đây, bây giờ</b> (${bn}) và những ý tưởng thô đang chờ (${ib}). Đánh dấu ❤️ trong editor để đưa task vào đây.</span>`;
+}
+function money(v){return v==null?'—':(v>=0?'+':'')+(+v).toLocaleString('vi-VN');}
+function fmtDay(d){if(!d)return'';const a=d.split('-');return a[2]+'/'+a[1];}
+function fxCard(n){
+  // ĐÃ XONG → dòng thu nhỏ, gạch ngang, kèm thời lượng
+  if(n.doneAt){
+    return `<div class="fxcard done-mini">
+      <span class="dm-check">✓</span>
+      <span class="dm-title">${esc(n.title)||'(chưa tên)'}</span>
+      <span class="dm-dur">⏱ ${fmtDur(n.focusAt,n.doneAt)}</span>
+      <button class="dm-btn" onclick="fxReopen('${n.id}')" title="Mở lại (bỏ đánh dấu xong)">↺</button>
+      <button class="dm-btn hide" onclick="fxHide('${n.id}')" title="Ẩn khỏi Focus (vẫn lưu ở Working Log)">Ẩn</button>
+    </div>`;
+  }
+  const st=stat(n.status), z=zoneOf(n), path=pathOf(n).join(' › ')||'—';
+  const net=netOf(n), cash=cashOf(n), tm=timeOf(n);
+  const overdue=n.due&&n.due<todayISO()&&n.status!=='done';
+  const imp=(n.impactTo||[]).map(id=>(byId(id)||{}).title).filter(Boolean);
+  let g='';
+  const cell=(k,v,cls)=>`<div class="fxg"><div class="k">${k}</div><div class="v ${cls||''}">${v}</div></div>`;
+  if(n.owner) g+=cell('Owner',esc(n.owner));
+  if(n.start||n.due) g+=cell('Thời hạn',(n.start?fmtDay(n.start):'—')+(n.due?' → '+fmtDay(n.due):''), overdue?'neg':'');
+  if(n.finKey&&net!=null) g+=cell('Net',money(net)+'tr',net>=0?'pos':'neg');
+  if(n.finKey&&cash!=null) g+=cell('Chi phí',(+cash).toLocaleString('vi-VN')+'tr');
+  if(n.finKey&&tm.per) g+=cell('Giờ/tháng',tm.per+'h');
+  // meta thu gọn thành 1 dải mỏng trên đầu
+  const metaChips = `<span class="fxchip">${esc(st.l)}</span>`
+    + (z?`<span class="fxchip">${z}</span>`:'')
+    + (n.keyAction?`<span class="fxchip">★</span>`:'')
+    + (overdue?`<span class="fxchip warnq">⚠ Quá hạn</span>`:'');
+  return `<div class="fxcard">
+    <div class="fxtop">
+      <div class="fxtop-l">
+        <div class="path">${esc(path)}</div>
+        <h3>${esc(n.title)||'(chưa tên)'}</h3>
+      </div>
+    </div>
+    <div class="fxmeta">${metaChips}${g?`<span class="fxsep"></span>${g.replace(/fxg"/g,'fxg mini"')}`:''}</div>
+    ${imp.length?`<div class="fximp">Nuôi cho: <b>${imp.map(esc).join('</b>, <b>')}</b></div>`:''}
+
+    <div class="fxnotebox">
+      <div class="fxnote-bar">
+        <span class="fxnote-lbl">📝 Ghi chú</span>
+        <button class="fxnote-ts" onclick="fxNoteStamp('${n.id}')" title="Chèn dòng mới có dấu thời gian">＋ ${nowHM()}</button>
+        <span class="fxnote-saved" id="fxsaved-${n.id}"></span>
+      </div>
+      <textarea class="fxnote-ta" id="fxnote-${n.id}"
+        placeholder="Take note nhanh khi đang làm… (tự lưu)"
+        oninput="fxNoteInput('${n.id}',this)"
+        onkeydown="fxNoteKey(event,'${n.id}',this)">${esc(n.notes||'')}</textarea>
+    </div>
+
+    <div class="fxact">
+      <button class="fxbtn" onclick="fxOpenEditor('${n.id}')">Mở editor →</button>
+      <button class="fxbtn done" onclick="fxDone('${n.id}')">✓ Xong</button>
+      <button class="fxbtn" onclick="fxUnbe('${n.id}')">Bỏ ❤️</button>
+    </div>
+  </div>`;
+}
+function vFocus(){
+  const bn=beNowNodes(), ib=inboxNodes();
+  const today=new Date().toLocaleDateString('vi-VN',{weekday:'long',day:'numeric',month:'long'});
+  let h=`<div class="fx"><div class="fx-h">
+    <div class="fx-date">${today}</div>
+    <div class="fx-title">Ở đây, bây giờ</div>
+    <div class="fx-sub">Một việc tại một thời điểm. Phần còn lại có thể đợi.</div>
+  </div><div class="fx-wrap">`;
+
+  h+=`<div class="fx-sec">❤️ Be now &amp; here — ${bn.length}</div>`;
+  if(!bn.length){
+    h+=`<div class="fxempty"><div class="big">❤</div>Chưa có việc nào được đánh dấu.<br>Vào editor một node → bật <b>❤️ Be now &amp; here</b>.</div>`;
+  } else {
+    const active=bn.filter(n=>!n.doneAt), fin=bn.filter(n=>n.doneAt);
+    active.forEach(n=>h+=fxCard(n));
+    if(fin.length){
+      h+=`<div class="fx-donehdr">✓ Đã xong hôm nay — ${fin.length}</div>`;
+      fin.forEach(n=>h+=fxCard(n));
+    }
+  }
+
+  const ibPending=ib.filter(n=>!n.doneAt);
+  if(ibPending.length){
+    h+=`<div class="fx-sec wait">⏳ Chờ xử lý — ${ibPending.length} ý tưởng thô</div>`;
+    h+=`<div class="fxwait">`;
+    ibPending.forEach(n=>{
+      const g=guessTarget(n);
+      const hasNote=!!(n.notes&&n.notes.trim());
+      h+=`<div class="fxwitem">
+        <div class="fxwrow">
+          <span class="wt">${esc(n.title)}</span>
+          ${g?`<span class="wg">→ ${esc(g.title)}</span>`:''}
+          <button class="wo note ${hasNote?'has':''}" onclick="fxToggleNote('${n.id}')" title="Ghi chú">📝${hasNote?'•':''}</button>
+          <button class="wo done" onclick="fxDone('${n.id}')" title="Đánh dấu xong ngay">✓ Xong</button>
+          <button class="wo" onclick="fxOrangeOne('${n.id}')">🍊 Xếp</button>
+        </div>
+        <div class="fxwnote ${(hasNote||_fxNoteOpen[n.id])?'open':''}" id="fxwnote-${n.id}">
+          <textarea class="fxwnote-ta" id="fxwn-${n.id}" placeholder="Ghi chú cho ý tưởng này…"
+            oninput="fxWNoteInput('${n.id}',this)">${esc(n.notes||'')}</textarea>
+        </div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  // chat box cố định đáy — đẩy ý tưởng đột xuất vào ngay khung làm việc
+  h+=`</div>
+  <div class="fxchat">
+    <div class="fxchat-in">
+      <input id="fxin" placeholder="💡 Ý tưởng đột xuất… gõ rồi Enter để neo nhanh (không hỏi)" onkeydown="fxThrowKey(event)" autocomplete="off">
+      <button class="fxchat-btn" onclick="fxThrow()">Đẩy vào</button>
+    </div>
+    <div class="fxchat-hint">Gõ ý tưởng → popup chọn nơi gắn (Zone → Pillar → …) y như Ý tưởng đột xuất. Bỏ qua = để mồ côi.</div>
+  </div>`;
+  h+=`</div>`;
+  return h;
+}
+function fxThrowKey(e){if(e.key==='Enter'){e.preventDefault();fxThrow();}}
+function fxThrow(){
+  const el=$('#fxin'),v=(el.value||'').trim();if(!v)return;
+  snap('ý tưởng đột xuất');
+  const n={id:uid(),parentId:null,inbox:true,captured:new Date().toISOString(),
+    title:v,zone:null,status:'idea',keyAction:false,beNow:false,finKey:false,impactTo:[],owner:'',
+    start:'',due:'',freq:'once',revenue:'',cost:'',netOverride:'',hours:'',stage:'',notes:'',kw:'',
+    focusAt:new Date().toISOString(),doneAt:'',focusHidden:false};
+  M.nodes.push(n);
+  el.value='';refreshInboxBtn();refreshUndo();
+  render();                 // node rơi vào vùng "Chờ xử lý" của Focus ngay
+  setView('focus');
+  pill('💡 Đã neo: '+n.title,'ok');
+}
+function nowHM(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function nowISO(){return new Date().toISOString();}
+/* Bật Focus: ghi focusAt lần đầu. Tắt Focus: KHÔNG xoá focusAt (giữ lịch sử cho Working Log). */
+function markFocusOn(n){ if(!n.focusAt)n.focusAt=nowISO(); n.beNow=true; n.focusHidden=false; }
+/* Định dạng thời lượng giữa 2 ISO → '2g 15p' / '45p' / '30 giây' */
+function fmtDur(a,b){
+  if(!a||!b)return '—';
+  let ms=new Date(b)-new Date(a); if(ms<0)ms=0;
+  const s=Math.floor(ms/1000), m=Math.floor(s/60), h=Math.floor(m/60), d=Math.floor(h/24);
+  if(d>0)return d+' ngày '+(h%24)+'g';
+  if(h>0)return h+'g '+(m%60)+'p';
+  if(m>0)return m+'p';
+  return s+' giây';
+}
+function fmtDateTime(iso){
+  if(!iso)return '—';
+  const d=new Date(iso);
+  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+' '
+    +String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+
+/* Ghi chú live trên card Focus — tự lưu, tự giãn, chèn timestamp */
+let _fxNoteT={};
+function fxAutoGrow(ta){ta.style.height='auto';ta.style.height=Math.max(140,ta.scrollHeight)+'px';}
+function fxNoteInput(id,ta){
+  const n=byId(id);if(!n)return;
+  fxAutoGrow(ta);
+  n.notes=ta.value;                       // cập nhật model ngay (không render lại card → không mất con trỏ)
+  const sv=$('#fxsaved-'+id);if(sv){sv.textContent='đang lưu…';sv.className='fxnote-saved on';}
+  clearTimeout(_fxNoteT[id]);
+  _fxNoteT[id]=setTimeout(()=>{
+    saveWs(0);
+    if(sv){sv.textContent='✓ đã lưu';setTimeout(()=>{if(sv)sv.textContent='';},1400);}
+    refreshUndo();
+  },500);
+}
+function fxNoteKey(e,id,ta){
+  // Enter thường = xuống dòng bình thường (đang trong textarea)
+  // Ctrl/Cmd+Enter = xuống dòng MỚI kèm dấu thời gian
+  if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){
+    e.preventDefault();
+    fxInsertStamp(id,ta);
+  }
+}
+function fxNoteStamp(id){
+  const ta=$('#fxnote-'+id);if(!ta)return;
+  ta.focus();
+  fxInsertStamp(id,ta);
+}
+function fxInsertStamp(id,ta){
+  snap('ghi chú');
+  const stamp=(ta.value&&!ta.value.endsWith('\n')?'\n':'')+'['+nowHM()+'] ';
+  const pos=ta.selectionStart;
+  // chèn ở cuối cho đơn giản & nhất quán khi take-note liên tục
+  ta.value=ta.value+stamp;
+  const n=byId(id);if(n)n.notes=ta.value;
+  fxAutoGrow(ta);
+  ta.focus();ta.selectionStart=ta.selectionEnd=ta.value.length;
+  saveWs(0);refreshUndo();
+}
+function fxOpenEditor(id){pick(id);setView('tree');setMode('edit');pill('Đã mở editor trong List','ok');}
+function fxDone(id){
+  const n=byId(id);if(!n)return;
+  snap('đánh dấu xong');
+  if(!n.focusAt)n.focusAt=nowISO();   // fallback
+  n.doneAt=nowISO();
+  n.status='done';
+  // mồ côi xong: GIỮ inbox=true (không đẩy thành root làm bẩn cây), đánh dấu beNow để hiện done-mini
+  // KHÔNG bỏ beNow, KHÔNG ẩn — node ở lại Focus, gạch ngang thu nhỏ
+  render();
+  pill('✅ Xong sau '+fmtDur(n.focusAt,n.doneAt),'ok');
+}
+function fxReopen(id){ // bỏ đánh dấu xong (lỡ tay)
+  const n=byId(id);if(!n)return;snap('mở lại');n.doneAt='';if(n.status==='done')n.status='live';render();pill('Đã mở lại','ok');
+}
+/* Mở lại từ Working Log: đưa node trở về vùng Focus để sửa/ghi tiếp. */
+function logReopen(id){
+  const n=byId(id);if(!n)return;
+  snap('mở lại từ log');
+  n.beNow=true;              // hiện lại ở Be-now-here
+  n.focusHidden=false;       // bỏ ẩn nếu từng ẩn
+  n.doneAt='';               // bỏ đánh dấu xong để ghi tiếp
+  if(n.status==='done')n.status='live';
+  render();setView('focus');
+  pill('↩ Đã mở lại trong Focus: '+(n.title||''),'ok');
+}
+function fxHide(id){ // ẩn khỏi Focus sau khi xong (không xoá dữ liệu, vẫn trong Working Log)
+  const n=byId(id);if(!n)return;snap('ẩn khỏi Focus');n.focusHidden=true;render();pill('Đã ẩn khỏi Focus','ok');
+}
+function fxUnbe(id){const n=byId(id);if(!n)return;snap('bỏ be-now');n.beNow=false;render();pill('Bỏ ❤️','ok');}
+let _fxNoteOpen={};
+function fxToggleNote(id){
+  _fxNoteOpen[id]=!(_fxNoteOpen[id]||(byId(id)&&byId(id).notes));
+  const box=$('#fxwnote-'+id);
+  if(box){box.classList.toggle('open');if(box.classList.contains('open')){const ta=$('#fxwn-'+id);ta&&(fxAutoGrow(ta),ta.focus());}}
+}
+let _fxWNoteT={};
+function fxWNoteInput(id,ta){
+  const n=byId(id);if(!n)return;
+  fxAutoGrow(ta);
+  n.notes=ta.value;
+  clearTimeout(_fxWNoteT[id]);
+  _fxWNoteT[id]=setTimeout(()=>{saveWs(0);refreshUndo();},500);
+}
+function fxOrangeOne(id){
+  const n=byId(id);if(!n)return;
+  const g=guessTarget(n);
+  if(g){snap('orange 1');attachTo(n,g.id);render();pill('🍊 '+n.title+' → '+g.title,'ok');}
+  else {openInbox();ibAsk={queue:[{id:n.id,cands:orangeCandidates().slice(0,6)}],i:0};ibRender();pill('Không đoán được — chọn giúp','warn');}
+}
+
+
+
+/* ================= 9. WORKING LOG ================= */
+function loggedNodes(){return M.nodes.filter(n=>n.focusAt).sort((a,b)=>(b.focusAt||'').localeCompare(a.focusAt||''));}
+function isSameDay(iso,d){if(!iso)return false;const x=new Date(iso);return x.getFullYear()===d.getFullYear()&&x.getMonth()===d.getMonth()&&x.getDate()===d.getDate();}
+function durMs(a,b){if(!a||!b)return 0;let m=new Date(b)-new Date(a);return m<0?0:m;}
+function hdLog(){
+  const all=loggedNodes();
+  const done=all.filter(n=>n.doneAt);
+  const today=new Date();
+  const todayDone=done.filter(n=>isSameDay(n.doneAt,today));
+  const totMs=todayDone.reduce((s,n)=>s+durMs(n.focusAt,n.doneAt),0);
+  return `<span style="font-size:11px;color:var(--muted)">Mọi việc từng đưa vào Focus — <b>${all.length}</b> việc · xong hôm nay <b>${todayDone.length}</b>${totMs?` · tổng <b>${fmtDur(0? '' :new Date(0).toISOString(), new Date(totMs).toISOString())}</b>`:''}</span>`;
+}
+function vLog(){
+  const all=loggedNodes();
+  const today=new Date();
+  const done=all.filter(n=>n.doneAt), doing=all.filter(n=>!n.doneAt);
+  const todayDone=done.filter(n=>isSameDay(n.doneAt,today));
+  const totMsToday=todayDone.reduce((s,n)=>s+durMs(n.focusAt,n.doneAt),0);
+  const avgMs=done.length?done.reduce((s,n)=>s+durMs(n.focusAt,n.doneAt),0)/done.length:0;
+
+  let h=`<div class="lg">
+    <div class="lg-h">
+      <div class="lg-date">${today.toLocaleDateString('vi-VN',{weekday:'long',day:'numeric',month:'long'})}</div>
+      <div class="lg-title">Working Log</div>
+      <div class="lg-sub">Việc bạn thật sự tập trung làm — bắt đầu, kết thúc, mất bao lâu.</div>
+    </div>
+    <div class="lg-kpis">
+      <div class="lg-kpi"><div class="k">Xong hôm nay</div><div class="v">${todayDone.length}</div></div>
+      <div class="lg-kpi"><div class="k">Tổng giờ focus hôm nay</div><div class="v">${totMsToday?fmtDurFromMs(totMsToday):'—'}</div></div>
+      <div class="lg-kpi"><div class="k">Đang làm</div><div class="v">${doing.length}</div></div>
+      <div class="lg-kpi"><div class="k">TB / việc (mọi ngày)</div><div class="v">${avgMs?fmtDurFromMs(avgMs):'—'}</div></div>
+    </div>`;
+
+  if(!all.length){
+    h+=`<div class="lg-empty">Chưa có việc nào đi qua Focus.<br>Đưa một việc vào Focus (❤️) rồi bấm ✓ Xong — nó sẽ xuất hiện ở đây.</div></div>`;
+    return h;
+  }
+
+  // Đang làm
+  if(doing.length){
+    h+=`<div class="lg-sec">⏳ Đang làm — ${doing.length}</div><div class="lg-tbl">
+      <div class="lg-row head"><span class="c-name">Việc</span><span class="c-t">Bắt đầu</span><span class="c-t">Kết thúc</span><span class="c-d">Thời lượng</span><span></span></div>`;
+    doing.forEach(n=>{
+      h+=`<div class="lg-row">
+        <span class="c-name">${esc(n.title)||'(chưa tên)'}<small>${esc(pathOf(n).join(' › ')||'mồ côi')}</small></span>
+        <span class="c-t">${fmtDateTime(n.focusAt)}</span>
+        <span class="c-t muted">— đang chạy —</span>
+        <span class="c-d live">${fmtDur(n.focusAt,nowISO())}</span>
+        <button class="lg-open" onclick="logReopen('${esc(n.id)}')" title="Mở lại trong Focus để sửa/ghi tiếp">↩ Mở</button>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+
+  // Đã xong — nhóm theo ngày
+  if(done.length){
+    const byDay={};
+    done.forEach(n=>{const k=(n.doneAt||'').slice(0,10);(byDay[k]=byDay[k]||[]).push(n);});
+    const days=Object.keys(byDay).sort().reverse();
+    h+=`<div class="lg-sec">✓ Đã xong — ${done.length}</div>`;
+    days.forEach(day=>{
+      const list=byDay[day];
+      const dayMs=list.reduce((s,n)=>s+durMs(n.focusAt,n.doneAt),0);
+      const label=day===today.toISOString().slice(0,10)?'Hôm nay':new Date(day).toLocaleDateString('vi-VN',{day:'numeric',month:'numeric',year:'numeric'});
+      h+=`<div class="lg-dayhdr">${label} <span class="lg-daysum">${list.length} việc · ${fmtDurFromMs(dayMs)}</span></div>`;
+      h+=`<div class="lg-tbl">
+        <div class="lg-row head"><span class="c-name">Việc</span><span class="c-t">Bắt đầu</span><span class="c-t">Kết thúc</span><span class="c-d">Thời lượng</span><span></span></div>`;
+      list.sort((a,b)=>(b.doneAt||'').localeCompare(a.doneAt||''));
+      list.forEach(n=>{
+        h+=`<div class="lg-row done">
+          <span class="c-name">${esc(n.title)||'(chưa tên)'}<small>${esc(pathOf(n).join(' › ')||'mồ côi')}</small></span>
+          <span class="c-t">${fmtDateTime(n.focusAt)}</span>
+          <span class="c-t">${fmtDateTime(n.doneAt)}</span>
+          <span class="c-d">${fmtDur(n.focusAt,n.doneAt)}</span>
+          <button class="lg-open" onclick="logReopen('${esc(n.id)}')" title="Mở lại trong Focus (bỏ đánh dấu xong, ghi tiếp được)">↩ Mở lại</button>
+        </div>`;
+      });
+      h+=`</div>`;
+    });
+  }
+  h+=`</div>`;
+  return h;
+}
+function fmtDurFromMs(ms){
+  const s=Math.floor(ms/1000), m=Math.floor(s/60), h=Math.floor(m/60), d=Math.floor(h/24);
+  if(d>0)return d+' ngày '+(h%24)+'g';
+  if(h>0)return h+'g '+(m%60)+'p';
+  if(m>0)return m+'p';
+  return s+' giây';
+}
+
+/* ================= 9. HƯỚNG DẪN ================= */
+function hdGuide(){
+  return `<span style="font-size:11px;color:var(--muted)">Cách dùng công cụ — đọc một lần là nắm. Nhấn số <b>1–9</b> để nhảy tab.</span>`;
+}
+function vGuide(){
+  return `<div class="gd">
+    <div class="gd-hero">
+      <h1>Hướng dẫn sử dụng</h1>
+      <p>Bản đồ chiến lược danh mục — nơi mọi việc của bạn sống trong một cái cây, và bạn nhìn được cái gì đang chạy, cái gì đang tắc, cái gì cần ở-đây-bây-giờ.</p>
+    </div>
+
+    <div class="toc">
+      <a onclick="gdJump('g-model')">1· Mô hình cây</a>
+      <a onclick="gdJump('g-inbox')">2· Ném ý tưởng</a>
+      <a onclick="gdJump('g-health')">3· Trạng thái &amp; Sức khỏe</a>
+      <a onclick="gdJump('g-filter')">4· Bộ lọc</a>
+      <a onclick="gdJump('g-focus')">5· Focus ❤️</a>
+      <a onclick="gdJump('g-tabs')">6· Các tab</a>
+    </div>
+
+    <h2 id="g-model">1 · Mọi thứ là một cái cây 5 tầng</h2>
+    <p>Công cụ này không phải danh sách việc. Nó là một cái cây: từ gốc là bạn, tỏa ra các tầng nhỏ dần.</p>
+    <div class="tierline">
+      <span class="tp">Zone</span><span class="ar">→</span>
+      <span class="tc">Pillar</span><span class="ar">→</span>
+      <span class="tc">Key Project</span><span class="ar">→</span>
+      <span class="tc">Key Result</span><span class="ar">→</span>
+      <span class="tc">Big Task</span>
+    </div>
+    <ul>
+      <li><b>Zone</b> — ba cạnh lớn của sự nghiệp (vd: C-level Job, AI Innovation, Training &amp; Brand).</li>
+      <li><b>Pillar</b> — mỗi tổ chức / khách lớn (Finan, Rabity, VFX, Idealab…).</li>
+      <li><b>Key Project → Key Result → Big Task</b> — chia nhỏ dần xuống việc cụ thể.</li>
+    </ul>
+    <p>Tầng của một node <b>tự suy ra</b> từ vị trí của nó trong cây — bạn không phải khai. Kéo một việc về dưới Pillar nào thì nó thành con của Pillar đó.</p>
+
+    <h2 id="g-inbox">2 · Ném ý tưởng vào — không cần nghĩ nó thuộc đâu</h2>
+    <p>Ý tưởng vụt qua giữa lúc bận? Nhấn <span class="kbd">I</span> hoặc nút <b>📥 Inbox</b>, gõ một câu, Enter. Xong.</p>
+    <p>Ngay khi Enter, một popup hiện lên hỏi bạn muốn gắn việc đó vào đâu — <b>theo từng cấp</b>:</p>
+    <div class="step"><div class="n">1</div><div class="t">Chọn <b>Zone</b> (hoặc ➕ tạo Zone mới, hoặc <b>Bỏ qua</b> để việc nằm mồ côi chờ sau).</div></div>
+    <div class="step"><div class="n">2</div><div class="t">Chọn <b>Pillar</b> trong Zone đó → rồi <b>Key Project</b> → … cho tới khi bạn bấm <b>Dừng ở đây</b>.</div></div>
+    <div class="step"><div class="n">3</div><div class="t">Nhánh mà máy <b>đoán</b> phù hợp sẽ có chấm xanh ● và nằm trên đầu — bấm nhanh.</div></div>
+    <div class="note">Không chọn gì ở cấp Zone (Bỏ qua) = việc thành <b>mồ côi</b>, nằm trong Inbox. Lúc rảnh bấm <b>🍊 Orange</b> để công cụ chạy lại popup phân loại cho từng việc mồ côi còn tồn.</div>
+
+    <h2 id="g-health">3 · Trạng thái &amp; ba nhóm Sức khỏe</h2>
+    <p>Mỗi node có một <b>Status</b> (mở trong editor bên phải). Sáu status được gom thành <b>ba nhóm sức khỏe</b> để lọc cho gọn:</p>
+    <div class="hgrid">
+      <div class="hcard alive">
+        <b>🟢 Sống</b>
+        <div class="st">idea · live · handed</div>
+        <p>Việc đang chạy, hoặc đã có người lo (handed = đã bàn giao). Đây là thứ bạn muốn thấy đa số thời gian.</p>
+      </div>
+      <div class="hcard done">
+        <b>✅ Xong</b>
+        <div class="st">done</div>
+        <p>Đã hoàn thành, đóng lại. Không xấu — chỉ là không cần nhìn nữa khi đang làm việc.</p>
+      </div>
+      <div class="hcard stuck">
+        <b>🔴 Tắc</b>
+        <div class="st">blocked · orphan</div>
+        <p>Nghẽn (blocked = chờ thứ khác) hoặc mất chủ (orphan = không ai đang lo). Cần bạn xử lý.</p>
+      </div>
+    </div>
+    <h3>Từng status nghĩa là gì</h3>
+    <ul>
+      <li><span class="tag">idea</span> ý tưởng thô, chưa bắt tay.</li>
+      <li><span class="tag">live</span> đang chạy, bạn đang trực tiếp làm.</li>
+      <li><span class="tag">handed</span> đã giao cho người khác, bạn theo dõi.</li>
+      <li><span class="tag">done</span> đã xong.</li>
+      <li><span class="tag">blocked</span> bị chặn — chờ quyết định / dữ liệu / người khác.</li>
+      <li><span class="tag">orphan</span> mồ côi — không ai đang phụ trách, dễ rơi.</li>
+    </ul>
+
+    <h2 id="g-filter">4 · Bộ lọc — và quy tắc "cha kéo theo con"</h2>
+    <p>Mở panel <b>Filter</b> (nút bên trái). Bộ lọc <b>không xóa</b> node, chỉ <b>làm mờ</b> cái không khớp — để bạn không mất định vị trong cây.</p>
+    <div class="lead"><b>Bộ lọc Sức khỏe là bộ lọc chính.</b> Đa số thời gian bạn chỉ cần bật <b>🟢 Sống</b> — màn hình còn lại đúng những việc đang chạy. Thỉnh thoảng bật <b>🔴 Tắc</b> để soi chỗ nghẽn.</div>
+    <h3>Quy tắc kế thừa (điều làm bộ lọc thật sự sạch)</h3>
+    <p>Khi bạn lọc để ẩn một nhóm, <b>một node cha bị ẩn sẽ kéo theo toàn bộ con cháu</b> — kể cả con đang Sống.</p>
+    <ul>
+      <li>Ví dụ: một <b>Pillar bị Tắc</b>. Bạn bật lọc "🟢 Sống". Cả Pillar đó và mọi việc con bên dưới đều mờ đi — vì nếu cái nóc đang tắc thì soi việc con lúc này vô nghĩa.</li>
+      <li>Chỉ nhóm <b>Tắc</b> và <b>Xong</b> mới có sức "kéo chìm" này. Nhóm <b>Sống</b> không bao giờ kéo chìm ai — nên khi bạn soi riêng "🔴 Tắc", các nhánh Sống ở trên không che mất kết quả.</li>
+    </ul>
+    <p>Các bộ lọc khác (Zone, Tầng, Tìm kiếm) chỉ làm mờ chính node đó, <b>không</b> kích hoạt kế thừa.</p>
+    <h3>Lọc theo Tầng</h3>
+    <p>Chọn <b>Pillar</b> ở bộ lọc Tầng để thấy nhanh khung xương tổ chức mà không bị chi tiết làm rối. Thêm tầng sâu hơn khi cần soi kỹ.</p>
+
+    <h2 id="g-focus">5 · Tab Focus ❤️ — chỗ để tập trung</h2>
+    <p>Trong editor của bất kỳ node nào có hai cờ độc lập:</p>
+    <ul>
+      <li><b>★ Key Action</b> — việc bạn quan tâm đặc biệt (hiện sao vàng trên cây).</li>
+      <li><b>❤️ Be now &amp; here</b> — việc cần bạn <b>ở đây, bây giờ</b>, tập trung tuyệt đối.</li>
+    </ul>
+    <p>Tab <b>❤️ Focus</b> (nền tối) gom mọi việc ❤️ thành các thẻ lớn đầy đủ thông tin để bạn làm sâu, và ở dưới là các ý tưởng mồ côi đang chờ — xếp được ngay tại chỗ.</p>
+    <div class="note">Mẹo giữ tab này có ích: đừng đánh dấu quá 3 việc ❤️ cùng lúc. Nhiều hơn thì nó thành cái danh sách todo thứ hai, mất hết ý nghĩa "tập trung".</div>
+
+    <h2 id="g-tabs">6 · Chín tab, mỗi tab một góc nhìn</h2>
+    <ul>
+      <li><span class="tag">1 Dashboard</span> chẩn đoán tổng — chỗ nào đang sai.</li>
+      <li><span class="tag">2 List</span> cây dạng danh sách, sửa nhanh.</li>
+      <li><span class="tag">4 Impact chain</span> node nào nuôi node nào.</li>
+      <li><span class="tag">5 Board</span> cột theo trạng thái.</li>
+      <li><span class="tag">6 Gantt</span> theo thời gian.</li>
+      <li><span class="tag">7 Finance</span> tiền &amp; giờ theo tháng.</li>
+      <li><span class="tag">8 Focus</span> ❤️ chỗ tập trung.</li>
+      <li><span class="tag">9 Hướng dẫn</span> trang này.</li>
+    </ul>
+    <p style="margin-top:20px;color:#8a948e;font-size:12.5px">Mọi thay đổi tự lưu vào máy bạn. Dùng <b>Export</b> để sao lưu ra file, <b>Import</b> để mở lại. Nhấn <span class="kbd">Ctrl/⌘ Z</span> để hoàn tác.</p>
+  </div>`;
+}
+function gdJump(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
 
 /* ================= UNDO ================= */
 function snap(label){
@@ -804,7 +1562,10 @@ function pill(msg,type='ok'){
 /* ================= FILTER ================= */
 function passF(n){
   if(F.zone.length&&!F.zone.includes(zoneOf(n)))return false;
+  if(F.tier.length&&!F.tier.includes(tierOf(n)))return false;
   if(F.status.length&&!F.status.includes(n.status))return false;
+  if(F.health.length&&!F.health.includes(healthOf(n.status)))return false;
+  if(F.deadline.length&&!F.deadline.includes(deadlineBucket(n)))return false;
   if(F.key&&!n.keyAction)return false;
   if(F.q){
     const q=F.q.toLowerCase();
@@ -812,12 +1573,31 @@ function passF(n){
   }
   return true;
 }
-/* node sáng nếu tự pass HOẶC có hậu duệ pass (giữ đường dẫn cây) */
-function visF(n){
-  if(passF(n))return true;
-  return descendants(n.id).some(passF);
+/* Kế thừa CHỈ theo bộ lọc Sức khỏe: tổ tiên bị nhấn chìm khi health của nó
+   nằm ngoài health đang chọn (vd tắt nhóm Tắc → mọi nhánh có cha Tắc biến mất).
+   Zone/Tier/Search KHÔNG kích hoạt kế thừa — chúng chỉ làm mờ chính node đó. */
+function ancestorFilteredOut(n){
+  if(!F.health.length)return false;
+  /* Chỉ nhóm 'đóng/xấu' mới nhấn chìm con: Tắc, Xong.
+     'Sống' không bao giờ nhấn chìm — nó là trạng thái bình thường.
+     → cha bị ẩn có chủ đích (Tắc/Xong nằm ngoài filter) thì cả nhánh biến mất. */
+  const SINK=['stuck','done'];
+  let c=byId(n.parentId),g=0;
+  while(c&&g++<12){
+    const hc=healthOf(c.status);
+    if(SINK.includes(hc) && !F.health.includes(hc))return true;
+    c=byId(c.parentId);
+  }
+  return false;
 }
-function filterActive(){return F.zone.length||F.status.length||F.key||F.q;}
+/* node sáng nếu: (tự pass HOẶC có hậu duệ pass) VÀ không tổ tiên nào bị lọc ra.
+   Đây là quy tắc kế thừa: cha bị ẩn → toàn bộ con cháu bị ẩn, kể cả con đang 'sống'. */
+function visF(n){
+  if(ancestorFilteredOut(n))return false;
+  if(passF(n))return true;
+  return descendants(n.id).some(d=>passF(d)&&!ancestorFilteredOut(d));
+}
+function filterActive(){return F.zone.length||F.tier.length||F.health.length||F.status.length||F.deadline.length||F.key||F.q;}
 
 /* ================= LEFT PANEL ================= */
 function setMode(m){mode=m;$('#mEdit').classList.toggle('on',m==='edit');$('#mFilt').classList.toggle('on',m==='filter');renderLeft();}
@@ -828,7 +1608,6 @@ function applyPanel(){
   if(!l||!r||!ro)return;
   if(panelHidden){l.style.display='none';r.style.display='none';ro.style.display='flex';}
   else{l.style.display='';r.style.display='';ro.style.display='none';}
-  if(view==='mind')setTimeout(()=>drawMM(),30);
   if(view==='gantt')setTimeout(gToday,30);
 }
 function togglePanel(){
@@ -848,10 +1627,24 @@ function renderLeft(){
 function ftHTML(){
   const zs=roots();
   const cnt=M.nodes.filter(passF).length;
-  let h=`<div class="hint">Filter <b>làm mờ</b> node không khớp (opacity .22) chứ không xóa khỏi màn hình — bạn không mất định vị trong cây. Node cha của node khớp vẫn sáng để thấy đường dẫn.</div>`;
-  h+=`<div class="fld"><label>Tìm kiếm</label><input id="fq" value="${esc(F.q)}" placeholder="tiêu đề · ghi chú · người..." oninput="F.q=this.value;render()"></div>`;
+  let h=`<div class="hint">Filter <b>${F_HIDE?'ẩn hẳn':'làm mờ'}</b> node không khớp. <b>Quy tắc kế thừa:</b> node cha Tắc/Xong bị lọc thì <b>toàn bộ con cháu</b> cũng theo. Nhờ vậy bộ lọc thật sự sạch.</div>`;
+  h+=`<div class="fld"><label>Chế độ hiển thị khi lọc</label>
+    <div class="seg hidemode">
+      <button class="${!F_HIDE?'on':''}" onclick="setHide(false)">Làm mờ</button>
+      <button class="${F_HIDE?'on':''}" onclick="setHide(true)">Ẩn hẳn</button>
+    </div></div>`;
+  h+=`<div class="fld"><label>Tìm kiếm</label><input id="fq" value="${esc(F.q)}" placeholder="tiêu đề · ghi chú · người..." oninput="onSearchInput(this.value)"></div>`;
+  h+=`<div class="fgroup hlth"><div class="ftitle">Sức khỏe <span class="muted" style="font-weight:400">— bộ lọc chính. Tắt nhóm nào, cả nhánh có nhóm đó biến mất.</span></div><div class="fchips">`;
+  HEALTH.forEach(g=>h+=`<button class="fchip hl-${g.k} ${F.health.includes(g.k)?'on':''}" onclick="tgF('health','${g.k}')" title="${esc(g.desc)}">${esc(g.l)}</button>`);
+  h+=`</div><div class="muted" style="font-size:11px;margin-top:5px">Mẹo: chọn <b>🟢 Sống</b> để chỉ thấy việc đang chạy. Không chọn gì = hiện tất cả.</div></div>`;
+  h+=`<div class="fgroup"><div class="ftitle">Thời hạn <span class="muted" style="font-weight:400">— ⚠ Quá hạn = việc trễ deadline</span></div><div class="fchips">`;
+  DEADLINE.forEach(d=>h+=`<button class="fchip ${d.k==='overdue'?'dl-ovd':''} ${F.deadline.includes(d.k)?'on':''}" onclick="tgF('deadline','${d.k}')">${esc(d.l)}</button>`);
+  h+=`</div></div>`;
   h+=`<div class="fgroup"><div class="ftitle">Zone</div><div class="fchips">`;
   zs.forEach(z=>h+=`<button class="fchip ${F.zone.includes(z.id)?'on':''}" onclick="tgF('zone','${z.id}')">${esc(z.title.replace(/^Cạnh \d+ · /,''))}</button>`);
+  h+=`</div></div>`;
+  h+=`<div class="fgroup"><div class="ftitle">Tầng <span class="muted" style="font-weight:400">— chọn để thấy độ bao quát</span></div><div class="fchips">`;
+  TIERS.forEach((tn,ti)=>h+=`<button class="fchip ${F.tier.includes(ti)?'on':''}" onclick="tgF('tier',${ti})">T${ti} ${esc(tn)}</button>`);
   h+=`</div></div>`;
   h+=`<div class="fgroup"><div class="ftitle">Status</div><div class="fchips">`;
   STATUS.forEach(s=>h+=`<button class="fchip ${F.status.includes(s.k)?'on':''}" onclick="tgF('status','${s.k}')">${esc(s.l)}</button>`);
@@ -870,8 +1663,35 @@ function ftHTML(){
   return h;
 }
 function todayISO(){return new Date().toISOString().slice(0,10);}
+/* Bucket thời hạn của 1 node (khớp cột Board): overdue/week/month/far/none/done */
+function deadlineBucket(n){
+  if(n.status==='done')return 'done';
+  const d=n.due;if(!d)return 'none';
+  const T=todayISO();
+  const wk=new Date(Date.now()+7*864e5).toISOString().slice(0,10);
+  const mo=new Date(Date.now()+31*864e5).toISOString().slice(0,10);
+  if(d<T)return 'overdue';
+  if(d<=wk)return 'week';
+  if(d<=mo)return 'month';
+  return 'far';
+}
+const DEADLINE=[
+  {k:'overdue',l:'⚠ Quá hạn'},
+  {k:'week',   l:'Tuần này'},
+  {k:'month',  l:'Tháng này'},
+  {k:'far',    l:'Xa hơn'},
+  {k:'none',   l:'Không hạn'}
+];
 function tgF(k,v){const a=F[k];const i=a.indexOf(v);i<0?a.push(v):a.splice(i,1);render();}
-function clrF(){F={zone:[],status:[],key:false,q:''};render();}
+let _searchT=null;
+function onSearchInput(v){
+  F.q=v;
+  clearTimeout(_searchT);
+  _searchT=setTimeout(()=>{ renderRight(); updRCount(); },160); // chỉ cập nhật kết quả, KHÔNG vẽ lại ô input
+}
+function updRCount(){const el=document.querySelector('.rcount');if(el)el.textContent=M.nodes.filter(passF).length+'/'+M.nodes.length+' node khớp';}
+function setHide(v){F_HIDE=!!v;render();}
+function clrF(){F={zone:[],tier:[],health:[],status:[],deadline:[],key:false,q:''};render();}
 
 /* ================= CASCADE PARENT SELECT ================= */
 /* Chuỗi ancestor của node: [Zone, Pillar, KProject, KResult] tới cha trực tiếp */
@@ -1062,6 +1882,13 @@ function edHTML(){
   h+=`<div class="fld"><label>Tiêu đề</label><input id="e_title" value="${esc(n.title)}" oninput="up('title',this.value)"></div>`;
 
   h+=`<div class="tgl ${n.keyAction?'on':''}" onclick="upKey()"><span class="sw"></span><span>★ Key Action — quan tâm đặc biệt</span></div>`;
+  h+=`<div class="tgl bnow ${n.beNow?'on':''}" onclick="upBeNow()"><span class="sw"></span><span>❤️ Be now &amp; here — tập trung tuyệt đối</span></div>`;
+
+  if(t===1){
+    h+=`<div class="fld"><label>🍊 Từ khóa Orange <span class="muted" style="font-weight:400">— cách nhau bằng dấu phẩy</span></label>
+      <textarea id="e_kw" rows="2" oninput="up('kw',this.value)" placeholder="vd: nutrinest, svn, ibs, dashboard, etl">${esc(n.kw||'')}</textarea>
+      <div class="muted" style="font-size:11px;margin-top:3px">Node Inbox chứa 1 trong các từ này sẽ tự xếp về đây khi bấm Orange.</div></div>`;
+  }
 
   h+=`<div class="row2">
     <div class="fld"><label>Status</label><select onchange="up('status',this.value)">
@@ -1136,8 +1963,15 @@ function edHTML(){
       <div class="fld"><label>Chi phí${unit}</label><input type="number" step="0.1" value="${esc(n.cost)}" oninput="up('cost',this.value)" placeholder="triệu"></div>
       <div class="fld"><label>Số giờ${unit}</label><input type="number" step="0.5" value="${esc(n.hours)}" oninput="up('hours',this.value)" placeholder="giờ"></div>
     </div>`;
+    // Net LUÔN = DT − CP (theo chu kỳ). Hiển thị chỉ-đọc, không nhập tay.
+    const _r=+n.revenue||0,_c=+n.cost||0;
+    const _autoNet=(n.revenue===''&&n.cost==='')?null:(_r-_c);
+    h+=`<div class="autonet">
+      <span class="an-lbl">Net (DT − CP):</span>
+      <span class="an-val">${_autoNet==null?'—':(_autoNet>=0?'+':'')+_autoNet+(unit?' '+unit.replace(/[()]/g,'').trim():'tr')}</span>
+      <span class="an-note">tự tính · nhập Doanh thu &amp; Chi phí ở trên</span>
+    </div>`;
     h+=`<div class="row2">
-      <div class="fld"><label>Net override${unit}</label><input type="number" step="0.1" value="${esc(n.netOverride)}" oninput="up('netOverride',this.value)" placeholder="trống = DT − CP"></div>
       <div class="fld"><label>Stage</label><select onchange="up('stage',this.value)">
         <option value="">—</option>${STAGE.map(s=>`<option value="${s.k}" ${n.stage===s.k?'selected':''}>${esc(s.l)}</option>`).join('')}</select></div>
     </div>`;
@@ -1191,6 +2025,10 @@ function up(k,v){
   $('#ctx').textContent=M.name;
 }
 function upKey(){const n=byId(sel);if(!n)return;snap('key action');n.keyAction=!n.keyAction;render();pill(n.keyAction?'★ Đánh dấu Key Action':'Bỏ đánh dấu','ok');}
+function upBeNow(){const n=byId(sel);if(!n)return;snap('be now & here');
+  if(!n.beNow){markFocusOn(n);}else{n.beNow=false;}
+  render();pill(n.beNow?'❤️ Be now & here':'Bỏ đánh dấu','ok');}
+function beNowNodes(){return M.nodes.filter(n=>(n.beNow||(n.inbox&&n.doneAt))&&!n.focusHidden);}
 
 /* ===== TOGGLE FIN KEY — Cách B ===== */
 function upFinKey(){
@@ -1259,7 +2097,7 @@ function upFinKey(){
   render();
   pill('✓ «'+n.title+'» là Financial Key Point — nhập số ở đây','ok');
 }
-function pick(id){sel=id;render();}
+function pick(id){sel=id;mode='edit';$('#mEdit').classList.add('on');$('#mFilt').classList.remove('on');render();}
 function addImp(id){if(!id)return;const n=byId(sel);if(!n)return;
   if(hasCycle(n.id,id)){pill('Từ chối: tạo vòng lặp trong chuỗi impact','err');return;}
   snap('thêm impact');n.impactTo=n.impactTo||[];n.impactTo.push(id);render();pill('Đã nối → '+byId(id).title,'ok');}
@@ -1349,18 +2187,20 @@ function quickAdd(pid,val){
 }
 
 /* ================= VIEW SWITCH ================= */
-function setView(v){view=v;document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));renderRight();}
-function render(){renderLeft();renderRight();$('#ctx').textContent=M.name||'—';}
+function setView(v){view=v;document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));const B=$('#rBody');if(B){B.classList.toggle('focusbg',v==='focus');B.classList.toggle('guidebg',v==='guide');B.classList.toggle('logbg',v==='log');}renderRight();}
+function render(){renderLeft();renderRight();$('#ctx').textContent=M.name||'—';refreshInboxBtn();}
 function renderRight(){
   const H=$('#rHead'),B=$('#rBody');
   B.style.padding='12px';
   if(view==='dash')  {H.innerHTML=hdDash();  B.innerHTML=vDash(); setTimeout(drawDash,30);}
   if(view==='tree')  {H.innerHTML=hdTree();  B.innerHTML=vTree();}
-  if(view==='mind')  {H.innerHTML=hdMind();  B.style.padding='0'; B.innerHTML=vMind(); drawMM();}
   if(view==='chain') {H.innerHTML=hdChain(); B.innerHTML=vChain();}
   if(view==='board') {H.innerHTML=hdBoard(); B.innerHTML=vBoard();}
   if(view==='gantt') {H.innerHTML=hdGantt(); B.innerHTML=vGantt(); setTimeout(gToday,20);}
   if(view==='fin')   {H.innerHTML=hdFin();   B.innerHTML=vFin();}
+  if(view==='focus') {B.style.padding='0'; H.innerHTML=hdFocus(); B.innerHTML=vFocus(); setTimeout(()=>document.querySelectorAll('.fxnote-ta').forEach(fxAutoGrow),20);}
+  if(view==='log')   {B.style.padding='0'; H.innerHTML=hdLog();   B.innerHTML=vLog();}
+  if(view==='guide') {B.style.padding='0'; H.innerHTML=hdGuide(); B.innerHTML=vGuide();}
 }
 
 /* ================= 1. DASHBOARD ================= */
@@ -1737,7 +2577,7 @@ function vTree(){
   let rows='';
   const walk=(n,lv)=>{
     const ks=kids(n.id),co=collapsed[n.id],dim=fa&&!visF(n);
-    rows+=`<tr class="tr${lv} ${sel===n.id?'sel':''} ${dim?'dim':''} ${n.status==='done'?'done':''} ${finLocked(n)?'finlock':''}" onclick="pick('${n.id}')">
+    rows+=`<tr class="tr${lv} ${sel===n.id?'sel':''} ${dim?(F_HIDE?'fhidden':'dim'):''} ${n.status==='done'?'done':''} ${finLocked(n)?'finlock':''}" onclick="pick('${n.id}')">
       <td class="tcell">
         <span class="ind" style="width:${lv*15}px"></span>
         <span class="car ${ks.length?'':'empty'}" onclick="tgC('${n.id}',event)">${ks.length?(co?'▶':'▼'):''}</span>
@@ -1768,7 +2608,8 @@ function setAlign(a){
   mmCfg.align=a;saveCfg();renderRight();
   setTimeout(()=>{
     mm.k=Math.max(.3,Math.min(1.1,keepK)); // giữ zoom, chỉ ép về khoảng đọc được nếu quá lố
-    if(sel&&MMP[sel])mmCenterSel(true); else mmFit();
+    /* v7.5: giữ nguyên viewport khi render; không auto-center theo node chọn */
+    applyMM();
     saveMM();
   },40);
 }
@@ -1832,7 +2673,7 @@ function mmLayout(){
       pos[n.id]={x,y:mid-h/2,w:NW[lv],h,lv};return mid;
     };
     roots().forEach(r=>{walk(r,0,0);cy+=34;});
-    return pos;
+    layoutInbox(pos);return pos;
   }
 
   if(mmCfg.align==='v'){
@@ -1845,7 +2686,7 @@ function mmLayout(){
       pos[n.id]={x:mid-w/2,y,w,h,lv};return mid;
     };
     roots().forEach(r=>{walk(r,0,0);cx+=50;});
-    return pos;
+    layoutInbox(pos);return pos;
   }
 
   /* radial: 3 Zone tỏa từ tâm */
@@ -1878,7 +2719,18 @@ function mmLayout(){
   const xs=Object.values(pos);
   const mnx=Math.min(...xs.map(p=>p.x)),mny=Math.min(...xs.map(p=>p.y));
   xs.forEach(p=>{p.x-=mnx-40;p.y-=mny-40;});
+  layoutInbox(pos);
   return pos;
+}
+
+/* Node Inbox: cụm trôi ở rìa phải, không nối vào cây */
+function layoutInbox(pos){
+  const ib=inboxNodes();if(!ib.length)return;
+  const vals=Object.values(pos);
+  const maxX=vals.length?Math.max(...vals.map(p=>p.x+p.w)):200;
+  const minY=vals.length?Math.min(...vals.map(p=>p.y)):40;
+  const W=190,H=34,GAP=12,X=maxX+110;
+  ib.forEach((n,i)=>{pos[n.id]={x:X,y:minY+i*(H+GAP),w:W,h:H,lv:2,inbox:true};});
 }
 
 /* ---- CONNECTOR PATH ---- */
@@ -1923,7 +2775,7 @@ function drawMM(){
     const p=MMP[n.id];if(!p)return;
     const z=zoneOf(n),st=stat(n.status),dim=fa&&!visF(n);
     const ks=kids(n.id),co=collapsed[n.id],out=(n.impactTo||[]).length;
-    html+=`<div class="mmn L${p.lv} ${z?z.toLowerCase():''} ${n.keyAction?'key':''} ${sel===n.id?'sel':''} ${dim?'dim':''} ${n.status==='done'?'done':''}"
+    html+=`<div class="mmn L${p.lv} ${n.inbox?'ibn':''} ${z?z.toLowerCase():''} ${n.keyAction?'key':''} ${n.beNow?'bnow':''} ${sel===n.id?'sel':''} ${dim?(F_HIDE?'fhidden':'dim'):''} ${n.status==='done'?'done':''}"
       style="left:${p.x}px;top:${p.y}px;width:${p.w}px;min-height:${p.h}px" onclick="mmClick('${n.id}',event)">
       <div class="mt">${esc(n.title)||'(chưa tên)'}</div>
       <button class="mmdup" onclick="dupNode('${n.id}',event)" title="Sao chép">⧉</button>
@@ -1932,7 +2784,10 @@ function drawMM(){
       ${ks.length&&co?`<span class="colbadge">▶ ${ks.length}</span>`:''}
     </div>`;
     if(n.parentId&&MMP[n.parentId]&&!collapsed[n.parentId]){
-      lines+=`<path d="${pathParent(MMP[n.parentId],p)}" fill="none" stroke="#c9d2cd" stroke-width="1.3" opacity="${dim?.15:1}"/>`;
+      const parHidden=fa&&F_HIDE&&!visF(byId(n.parentId));
+      const meHidden=F_HIDE&&dim;
+      if(!(parHidden||meHidden))
+        lines+=`<path d="${pathParent(MMP[n.parentId],p)}" fill="none" stroke="#c9d2cd" stroke-width="1.3" opacity="${dim?.15:1}"/>`;
     }
   });
   M.nodes.forEach(n=>{
@@ -1940,6 +2795,7 @@ function drawMM(){
     (n.impactTo||[]).forEach(tid=>{
       const q=MMP[tid];if(!q)return;
       const dim=fa&&(!visF(n)||!visF(byId(tid)));
+      if(F_HIDE&&dim)return;
       const hl=sel===n.id||sel===tid;
       imp+=`<path d="${pathImpact(p,q)}" fill="none" stroke="${hl?'#5b31a3':'#7A4FBF'}" stroke-width="${hl?2.4:1.5}"
         stroke-dasharray="6,4" opacity="${dim?.08:(hl?1:.5)}" marker-end="url(#ah${hl?'h':''})"/>`;
@@ -2017,12 +2873,6 @@ function mmFit(force){
   const w=$('#mmwrap');if(!w||!Object.keys(MMP).length)return;
   const cw=w.clientWidth-70,ch=w.clientHeight-70;
   const fitK=Math.min(cw/MMBB.w,ch/MMBB.h);
-  /* nếu fit cả cây ra < 35% (quá nhỏ để đọc) và đang có node chọn -> zoom vào node đó thay vì cả cây */
-  if(!force && fitK<0.35 && sel && MMP[sel]){
-    mm.k=0.75; mmCenterSel(true);
-    pill('Cây rộng — đã phóng vào node đang chọn. Bấm Fit lần nữa để xem toàn cảnh.','ok');
-    return;
-  }
   mm.k=Math.max(.15,Math.min(1.3,fitK));
   mm.x=(w.clientWidth-MMBB.w*mm.k)/2;
   mm.y=Math.max(30,(w.clientHeight-MMBB.h*mm.k)/2);
@@ -2507,7 +3357,19 @@ function slug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-
 function saveWs(notify){
   if(!M.name)return;
   try{
-    localStorage.setItem(LS_PRE+slug(M.name),JSON.stringify({name:M.name,nodes:M.nodes,savedAt:new Date().toISOString()}));
+    const key=LS_PRE+slug(M.name);
+    // Guard chống đè nhầm: nếu đang lưu bản DEMO đè lên một workspace thật cùng slug → hỏi
+    if(notify){ // chỉ guard khi người dùng CHỦ ĐỘNG bấm Lưu (notify=1)
+      const existing=localStorage.getItem(key);
+      if(existing){
+        try{const d=JSON.parse(existing);
+          if(d.name!==M.name || Math.abs((d.nodes||[]).length-M.nodes.length)>5){
+            if(!confirm(`Đã có workspace "${d.name}" (${(d.nodes||[]).length} node) lưu ở đây.\nGhi đè bằng "${M.name}" (${M.nodes.length} node)?\n\nKHÔNG undo được.`))return;
+          }
+        }catch(e){}
+      }
+    }
+    localStorage.setItem(key,JSON.stringify({name:M.name,nodes:M.nodes,savedAt:new Date().toISOString()}));
     localStorage.setItem(LS_LAST,slug(M.name));
     if(notify)pill('Đã lưu «'+M.name+'» vào máy này','ok');
   }catch(e){pill('Lưu thất bại: '+e.message,'err');}
@@ -2531,6 +3393,29 @@ function delWs(k,nm,e){
   localStorage.removeItem(k);renderWL();
 }
 function switchWs(){saveWs(0);$('#welcome').style.display='flex';renderWL();}
+function renameWs(){
+  if(!M.name)return;
+  const old=M.name, oldKey=LS_PRE+slug(old);
+  const nm=prompt('Đổi tên workspace:', old);
+  if(nm===null)return;
+  const name=nm.trim();
+  if(!name){pill('Tên không được để trống','warn');return;}
+  if(name===old){return;}
+  const newKey=LS_PRE+slug(name);
+  // nếu tên mới trùng workspace KHÁC đang tồn tại → cảnh báo
+  if(newKey!==oldKey && localStorage.getItem(newKey)){
+    if(!confirm(`Đã có workspace tên tương tự "${name}".\nĐổi tên sẽ GHI ĐÈ lên nó. Tiếp tục?\n\nKHÔNG undo được.`))return;
+  }
+  snap('đổi tên workspace');
+  M.name=name;
+  try{
+    localStorage.setItem(newKey,JSON.stringify({name:M.name,nodes:M.nodes,savedAt:new Date().toISOString()}));
+    localStorage.setItem(LS_LAST,slug(name));
+    if(newKey!==oldKey)localStorage.removeItem(oldKey); // dọn key cũ, không để lại bản trùng
+  }catch(e){pill('Lưu thất bại: '+e.message,'err');return;}
+  render();
+  pill('Đã đổi tên: «'+old+'» → «'+name+'»','ok');
+}
 function renderWL(){
   const L=listWs();
   $('#wsl').style.display=L.length?'block':'none';
@@ -2540,7 +3425,7 @@ function renderWL(){
     <button class="btn sm danger" onclick="delWs('${w.k}','${esc(w.name)}',event)">×</button></div>`).join('');
 }
 function normalize(ns){
-  return (ns||[]).map(n=>{
+  const out=(ns||[]).map(n=>{
     /* v1 -> v2: decWhen -> due */
     if(n.decWhen&&!n.due){n.due=n.decWhen;}
     if(n.decWhat&&!(n.notes||'').includes(n.decWhat)){n.notes=((n.notes||'')+(n.notes?'\n':'')+'[Quyết định] '+(n.decWho?n.decWho+': ':'')+n.decWhat).trim();}
@@ -2559,11 +3444,42 @@ function normalize(ns){
       });
     }
     delete n.recurring;delete n.daysPerCycle;delete n.days;
+    if(n.inbox===undefined)n.inbox=false;
+    if(n.captured===undefined)n.captured='';
+    if(n.kw===undefined)n.kw='';
+    if(n.beNow===undefined)n.beNow=false;
+    if(n.focusAt===undefined)n.focusAt='';
+    if(n.doneAt===undefined)n.doneAt='';
+    if(n.focusHidden===undefined)n.focusHidden=false;
     return n;
   }).map(n=>Object.assign({
     id:uid(),parentId:null,title:'',zone:null,status:'idea',keyAction:false,finKey:false,impactTo:[],owner:'',
     start:'',due:'',freq:'once',
     revenue:'',cost:'',netOverride:'',hours:'',stage:'',notes:''},n));
+  return repairCycles(out);
+}
+/* Sửa dữ liệu lỗi: node tự làm cha, hoặc parentId trỏ vào chu trình → cắt về mồ côi */
+function repairCycles(ns){
+  const byid={};ns.forEach(n=>byid[n.id]=n);
+  let fixed=0;
+  ns.forEach(n=>{
+    if(n.parentId===n.id){n.parentId=null;n.inbox=true;fixed++;return;}
+    let c=byid[n.parentId],g=0,seen=new Set([n.id]);
+    while(c&&g++<60){
+      if(seen.has(c.id)){ n.parentId=null;n.inbox=true;fixed++;break; }
+      seen.add(c.id); c=byid[c.parentId];
+    }
+    // parentId trỏ tới node không tồn tại → mồ côi
+    if(n.parentId&&!byid[n.parentId]){n.parentId=null;n.inbox=true;fixed++;}
+    // "Root ma": ý tưởng đột xuất (có captured/focusAt) bị kẹt thành Zone gốc (parentId=null, inbox=false)
+    // mà KHÔNG có con → đưa về mồ côi. Zone seed không có captured/focusAt nên không đụng.
+    if(!n.parentId && !n.inbox && (n.captured||n.focusAt)){
+      const hasKids=ns.some(x=>x.parentId===n.id);
+      if(!hasKids){ n.inbox=true; fixed++; }
+    }
+  });
+  if(fixed)setTimeout(()=>{try{pill('Đã sửa '+fixed+' node lỗi vòng lặp cha-con','warn');}catch(e){}},400);
+  return ns;
 }
 
 /* ================= EXPORT / IMPORT ================= */
@@ -2592,6 +3508,121 @@ function exportCSV(){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=slug(M.name)+'.csv';a.click();
   pill('Đã export CSV phẳng — KHÔNG import ngược được','warn');
 }
+
+/* ================= EXPORT (có lọc thời gian + timestamp) ================= */
+let expOpt={basis:'captured', range:'all', scope:'all'};
+function openExport(){$('#expmodal').classList.add('on');expRender();}
+function closeExport(){$('#expmodal').classList.remove('on');}
+function expPick(k,v,btn){
+  expOpt[k]=v;
+  const seg=btn.parentElement;seg.querySelectorAll('button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  if(k==='range')$('#expCustom').style.display=(v==='custom')?'flex':'none';
+  expRender();
+}
+function expBasisDate(n){
+  if(expOpt.basis==='captured')return n.captured||'';
+  if(expOpt.basis==='focus')return n.focusAt||'';
+  if(expOpt.basis==='done')return n.doneAt||'';
+  return '';
+}
+function expRangeBounds(){
+  const r=expOpt.range;
+  if(r==='all')return [null,null];
+  if(r==='custom'){
+    const f=$('#expFrom').value, t=$('#expTo').value;
+    return [f?new Date(f+'T00:00:00').toISOString():null, t?new Date(t+'T23:59:59').toISOString():null];
+  }
+  const days=r==='today'?1:(+r);
+  const from=new Date(Date.now()-(days-1)*864e5);
+  if(r==='today')from.setHours(0,0,0,0);
+  return [from.toISOString(), null];
+}
+function expNodes(){
+  let list=M.nodes.slice();
+  // phạm vi filter
+  if(expOpt.scope==='filtered'){const fa=filterActive();list=list.filter(n=>!fa||visF(n));}
+  // lọc thời gian theo mốc
+  const [from,to]=expRangeBounds();
+  list=list.filter(n=>{
+    const d=expBasisDate(n);
+    // Nếu chọn mốc Focus/Done: chỉ xuất node CÓ mốc đó (kể cả range=all).
+    // Captured thì mọi node đều có, nên range=all giữ tất cả.
+    if(!d)return expOpt.basis==='captured' ? (!from&&!to) : false;
+    if(from&&d<from)return false;
+    if(to&&d>to)return false;
+    return true;
+  });
+  return list;
+}
+function expRender(){
+  const el=$('#expCount');if(!el)return;
+  const n=expNodes().length;
+  const basisLbl={captured:'Captured',focus:'Focus at',done:'Done at'}[expOpt.basis];
+  el.textContent=`Sẽ xuất ${n} node · lọc theo ${basisLbl}` + (expOpt.range==='all'?' · mọi thời điểm':` · ${expOpt.range==='custom'?'khoảng tùy chọn':expOpt.range+(expOpt.range==='today'?'':' ngày gần nhất')}`);
+}
+function stampName(ext){
+  const d=new Date();
+  const p=x=>String(x).padStart(2,'0');
+  return `psm-export_${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.${ext}`;
+}
+function runExport(fmt){
+  const list=expNodes();
+  if(!list.length){pill('Không có node nào khớp bộ lọc','warn');return;}
+  const [from,to]=expRangeBounds();
+  const meta={
+    _type:'psm-export', _ver:VER, workspace:M.name,
+    exportedAt:new Date().toISOString(),
+    filter:{basis:expOpt.basis, range:expOpt.range, from:from||null, to:to||null, scope:expOpt.scope},
+    count:list.length
+  };
+  if(fmt==='json'){
+    const blob=new Blob([JSON.stringify({...meta, nodes:list},null,2)],{type:'application/json'});
+    dl(blob, stampName('json'));
+    pill(`Đã xuất ${list.length} node (JSON) — import ngược được`,'ok');
+  } else {
+    dl(new Blob([expMarkdown(list,meta)],{type:'text/markdown;charset=utf-8'}), stampName('md'));
+    pill(`Đã xuất ${list.length} node (Markdown cho AI)`,'ok');
+  }
+  closeExport();
+}
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();}
+
+function expMarkdown(list,meta){
+  const basisLbl={captured:'Captured (lúc tạo)',focus:'Focus at',done:'Done at'}[meta.filter.basis];
+  let h=`# Portfolio Strategy Map — Export\n\n`;
+  h+=`- **Workspace:** ${M.name||'—'}\n`;
+  h+=`- **Xuất lúc:** ${fmtDateTime(meta.exportedAt)}\n`;
+  h+=`- **Lọc theo:** ${basisLbl}\n`;
+  h+=`- **Khoảng:** ${meta.filter.range==='all'?'Tất cả':(meta.filter.from?fmtDateTime(meta.filter.from):'…')+' → '+(meta.filter.to?fmtDateTime(meta.filter.to):'nay')}\n`;
+  h+=`- **Số node:** ${meta.count}\n`;
+  h+=`- **Phiên bản công cụ:** ${meta._ver}\n\n---\n\n`;
+
+  // nhóm theo Zone → Pillar cho AI dễ đọc ngữ cảnh
+  const byZone={};
+  list.forEach(n=>{const z=byId(zoneOf(n));const zk=z?z.title:'(mồ côi / chưa gắn)';(byZone[zk]=byZone[zk]||[]).push(n);});
+  Object.keys(byZone).sort().forEach(zk=>{
+    h+=`## ${zk}\n\n`;
+    byZone[zk].forEach(n=>{
+      const path=pathOf(n).join(' › ')||'—';
+      h+=`### ${n.title||'(chưa tên)'}\n`;
+      h+=`- Đường dẫn: ${path}\n`;
+      h+=`- Tầng: ${TIERS[tierOf(n)]} · Trạng thái: ${stat(n.status).l}`;
+      if(n.keyAction)h+=` · ★ Key Action`;
+      if(n.beNow)h+=` · ❤️ Focus`;
+      h+=`\n`;
+      if(n.owner)h+=`- Owner: ${n.owner}\n`;
+      if(n.start||n.due)h+=`- Thời hạn: ${n.start||'—'} → ${n.due||'—'}\n`;
+      if(n.focusAt)h+=`- Vào Focus: ${fmtDateTime(n.focusAt)}`+(n.doneAt?` · Xong: ${fmtDateTime(n.doneAt)} · Thời lượng: ${fmtDur(n.focusAt,n.doneAt)}`:` · (chưa xong)`)+`\n`;
+      if(n.finKey){const net=netOf(n);h+=`- Tài chính: net ${net!=null?net+'tr':'—'}`+(n.hours?` · ${timeOf(n).per}h/tháng`:'')+`\n`;}
+      const imp=(n.impactTo||[]).map(id=>(byId(id)||{}).title).filter(Boolean);
+      if(imp.length)h+=`- Nuôi cho: ${imp.join(', ')}\n`;
+      if(n.notes&&n.notes.trim()){h+=`\n**Ghi chú:**\n\n${n.notes.trim().split('\n').map(l=>'> '+l).join('\n')}\n`;}
+      h+=`\n`;
+    });
+  });
+  return h;
+}
+
 function doImport(inp){
   const f=inp.files[0];if(!f)return;
   const r=new FileReader();
@@ -2607,9 +3638,14 @@ function doImport(inp){
 }
 
 /* ================= WELCOME ================= */
-function wSeed(){M={name:'Portfolio '+new Date().getFullYear(),nodes:normalize(seed())};sel=null;undoStack=[];collapsed={};
+function wSeed(){
+  const demoName='DEMO — Mẫu ẩn danh';
+  M={name:demoName,nodes:normalize(seed())};sel=null;undoStack=[];collapsed={};
   M.nodes.forEach(n=>{if(tierOf(n)>=3&&kids(n.id).length)collapsed[n.id]=true;});
-  saveWs(0);boot();pill('Đã nạp '+M.nodes.length+' node từ portfolio thật','ok');}
+  // KHÔNG saveWs ngay — tránh đè. Chỉ mở trong bộ nhớ. Người dùng tự bấm Lưu nếu muốn giữ.
+  boot();
+  pill('Đã mở workspace MẪU (ẩn danh) — chưa lưu. Bấm 💾 Lưu nếu muốn giữ.','ok');
+}
 function wBlank(){
   const nm=prompt('Tên workspace:','Portfolio '+new Date().getFullYear());if(nm===null)return;
   const mk=(id,t,z)=>({id,parentId:null,title:t,zone:id,status:'live',keyAction:false,finKey:false,impactTo:[],owner:'',
@@ -2654,7 +3690,7 @@ document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undo();}
   if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveWs(1);}
   if(e.key>='1'&&e.key<='7'&&!e.ctrlKey&&!e.metaKey){
-    const vs=['dash','tree','mind','chain','board','gantt','fin'];setView(vs[+e.key-1]);}
+    const vs=['dash','tree','chain','board','gantt','fin','focus','log','guide'];setView(vs[+e.key-1]);}
   if(e.key==='k'&&sel){upKey();}
   if(view==='mind'){
     if(e.key==='f'||e.key==='F'){e.preventDefault();mmFit(true);}
@@ -2664,16 +3700,296 @@ document.addEventListener('keydown',e=>{
 
 /* ================= AUTOSAVE ================= */
 setInterval(()=>{if(M.name&&M.nodes.length)saveWs(0);},20000);
+
+/* ================= INBOX + ORANGE (v7.3) ================= */
+/* Node Inbox: parentId=null, inbox=true, status='idea'.
+   Không vào roots() → không hiện thành Zone, không vào Dashboard/Capacity. */
+
+function openInbox(){$('#ibmodal').classList.add('on');ibRender();setTimeout(()=>$('#ibin').focus(),40);}
+function closeInbox(){$('#ibmodal').classList.remove('on');ibAsk=null;render();}
+function refreshInboxBtn(){const b=$('#inboxBtn');if(b)b.textContent='📥 Ý tưởng đột xuất ('+inboxNodes().length+')';}
+
+function ibAdd(){
+  const el=$('#ibin'),v=(el.value||'').trim();if(!v)return;
+  snap('thêm ý tưởng');
+  const n={id:uid(),parentId:null,inbox:true,captured:new Date().toISOString(),
+    title:v,zone:null,status:'idea',keyAction:false,beNow:false,finKey:false,impactTo:[],owner:'',
+    start:'',due:'',freq:'once',revenue:'',cost:'',netOverride:'',hours:'',stage:'',notes:'',kw:'',
+    focusAt:new Date().toISOString(),doneAt:'',focusHidden:false};
+  M.nodes.push(n);
+  el.value='';refreshInboxBtn();refreshUndo();
+  render();ibRender();     // neo nhanh vào "Chờ xử lý"; ô nhập vẫn mở để gõ ý tiếp
+  pill('💡 Đã neo: '+n.title,'ok');
+  setTimeout(()=>{const i=$('#ibin');i&&i.focus();},20);
+}
+function ibKey(e){
+  if(e.key!=='Enter')return;
+  e.preventDefault();
+  ibAdd();
+}
+
+/* =================================================================
+   CASCADE PICKER — chọn cha theo cấp: Zone → Pillar → Project → ...
+   Mỗi cấp: các node cùng cấp + "➕ mới" + "Bỏ qua" (dừng, gắn tại chỗ).
+   Bỏ qua ngay cấp Zone = node mồ côi (Inbox).
+   Engine đoán (guessRank) đẩy nhánh khả dĩ lên đầu — sau này thay ruột bằng AI.
+   ================================================================= */
+let ibCas=null; // {id, parent:null|nodeId}
+
+function ibCascadeStart(id){ ibCas={id, parent:null}; ibRender(); }
+
+/* danh sách lựa chọn ở cấp hiện tại: con trực tiếp của ibCas.parent (null = Zone) */
+function ibCasOptions(){
+  const par=ibCas.parent;
+  const selfId=ibCas.id;
+  const banned=new Set([selfId,...descendants(selfId).map(d=>d.id)]); // không cho chọn chính nó / hậu duệ
+  let opts = (par===null ? roots() : kids(par)).filter(o=>!banned.has(o.id));
+  // đoán: xếp nhánh khả dĩ lên đầu, gắn cờ
+  const node=byId(ibCas.id);
+  const ranked=guessRank(node?node.title:'');
+  const guessIds=new Set(ranked.map(r=>r.id));
+  opts=opts.slice().sort((a,b)=>{
+    const ga=guessIds.has(a.id)?ranked.findIndex(r=>r.id===a.id):999;
+    const gb=guessIds.has(b.id)?ranked.findIndex(r=>r.id===b.id):999;
+    return ga-gb;
+  });
+  return {opts, guessIds};
+}
+function ibCasLevelName(){
+  const par=ibCas.parent;
+  const depth = par===null ? 0 : (tierOf(byId(par))+1);
+  return TIERS[Math.min(depth,4)]||('Cấp '+depth);
+}
+function ibCasHTML(){
+  const n=byId(ibCas.id);if(!n)return (ibCas=null,ibListHTML());
+  const {opts,guessIds}=ibCasOptions();
+  const lvl=ibCasLevelName();
+  const par=ibCas.parent;
+  const pathTxt = par===null ? 'gốc' : pathOf(byId(par)).concat(byId(par).title).join(' › ');
+  const canDeeper = true; // luôn cho phép đi sâu nếu có con
+  let h=`<div class="cas">
+    <div class="cas-hd">
+      <div class="cas-idea">${esc(n.title)}</div>
+      <div class="cas-lvl">Chọn <b>${esc(lvl)}</b> <span class="muted">· đang ở: ${esc(pathTxt)}</span></div>
+    </div>
+    <div class="cas-opts">`;
+  opts.forEach(o=>{
+    const g=guessIds.has(o.id);
+    const hasKids=kids(o.id).length>0;
+    h+=`<button class="cas-o ${g?'guess':''}" onclick="ibCasChoose('${o.id}')">
+      ${g?'<span class="gdot">●</span>':''}${esc(o.title)}${hasKids?`<span class="cas-cnt">${kids(o.id).length}</span>`:''}</button>`;
+  });
+  h+=`<button class="cas-o newl" onclick="ibCasNew()">➕ ${esc(lvl)} mới…</button>`;
+  h+=`</div>
+    <div class="cas-ft">
+      <button class="cas-skip" onclick="ibCasSkip()">${par===null?'⏸ Bỏ qua → để mồ côi (Inbox)':'✓ Dừng ở đây'}</button>
+      <button class="cas-cancel" onclick="ibCasCancel()">Huỷ</button>
+    </div>
+  </div>`;
+  return h;
+}
+/* chọn 1 node ở cấp này → gắn tạm vào đó, rồi hỏi tiếp cấp con (nếu node đó có/để tạo con) */
+function ibCasChoose(pid){
+  const n=byId(ibCas.id);if(!n){ibCas=null;return ibRender();}
+  snap('gán cấp');
+  attachTo(n,pid);
+  refreshInboxBtn();refreshUndo();render();
+  // đi sâu tiếp: cấp con của pid
+  ibCas.parent=pid;
+  // nếu đã tới Big Task (tier 4) thì dừng luôn
+  if(tierOf(byId(pid))>=4){ ibCasDone(); return; }
+  ibRender();
+}
+/* tạo node cha mới ở cấp hiện tại */
+function ibCasNew(){
+  const lvl=ibCasLevelName();
+  const name=prompt(`Tên ${lvl} mới:`);
+  if(name===null)return;
+  const t=name.trim();if(!t)return;
+  snap('tạo '+lvl+' mới');
+  const par=ibCas.parent;
+  const newNode={id:uid(),parentId:par,inbox:false,title:t,zone:null,status:'idea',
+    keyAction:false,beNow:false,finKey:false,impactTo:[],owner:'',start:'',due:'',freq:'once',
+    revenue:'',cost:'',netOverride:'',hours:'',stage:'',notes:'',kw:'',captured:''};
+  if(par){const p=byId(par);newNode.zone=p?(zoneOf(p)||p.zone||null):null;}
+  M.nodes.push(newNode);
+  refreshUndo();
+  ibCasChoose(newNode.id); // gắn ý tưởng vào node vừa tạo, đi tiếp
+}
+/* Dừng: node gắn vào parent hiện tại (hoặc mồ côi nếu chưa gắn gì) */
+function ibCasSkip(){
+  const n=byId(ibCas.id);
+  if(ibCas.parent===null && n){ // mồ côi
+    n.inbox=true;n.parentId=null;n.zone=null;
+  }
+  ibCasDone();
+}
+let ibAskFocus=null; // id node vừa xử lý, đang hỏi có đưa vào Focus không
+function ibCasDone(){
+  const doneId=ibCas?ibCas.id:null;
+  ibCas=null;refreshInboxBtn();refreshUndo();render();
+  if(doneId&&byId(doneId)){ ibAskFocus=doneId; ibRender(); return; } // hỏi Focus trước khi đóng
+  ibRender();
+  setTimeout(()=>{const i=$('#ibin');i&&i.focus();},20);
+  pill('Đã xử lý ý tưởng','ok');
+}
+function ibFocusYes(){
+  const n=byId(ibAskFocus);
+  if(n){snap('đưa vào Focus');markFocusOn(n);pill('❤️ Đã đưa vào Focus','ok');}
+  ibFocusClose();
+}
+function ibFocusNo(){ ibFocusClose(); }
+function ibFocusClose(){
+  ibAskFocus=null;refreshInboxBtn();refreshUndo();render();ibRender();
+  setTimeout(()=>{const i=$('#ibin');i&&i.focus();},20);
+}
+function ibAskFocusHTML(){
+  const n=byId(ibAskFocus);if(!n)return (ibAskFocus=null,ibListHTML());
+  const loc = n.inbox ? 'để mồ côi (chờ xử lý)' : (pathOf(n).concat(n.title).join(' › '));
+  return `<div class="cas">
+    <div class="cas-hd">
+      <div class="cas-idea">${esc(n.title)}</div>
+      <div class="cas-lvl muted" style="font-size:12px">Đã ${n.inbox?'':'gắn vào: <b>'+esc(pathOf(n).join(' › '))+'</b>'}${n.inbox?loc:''}</div>
+    </div>
+    <div class="askfocus">
+      <div class="af-q">❤️ Đưa vào <b>Focus</b> luôn để khỏi trôi mất?</div>
+      <div class="af-opts">
+        <button class="af-yes" onclick="ibFocusYes()">❤️ Có, đưa vào Focus</button>
+        <button class="af-no" onclick="ibFocusNo()">Không, để trong cây</button>
+      </div>
+    </div>
+  </div>`;
+}
+function ibCasCancel(){
+  // huỷ: xoá node vừa tạo nếu vẫn mồ côi & rỗng thông tin? Không — chỉ để nguyên mồ côi.
+  const n=byId(ibCas.id);
+  if(n && ibCas.parent===null){n.inbox=true;n.parentId=null;}
+  ibCas=null;ibRender();
+  setTimeout(()=>{const i=$('#ibin');i&&i.focus();},20);
+}
+
+function ibDel(id){snap('xóa ý tưởng');M.nodes=M.nodes.filter(n=>n.id!==id);ibRender();refreshInboxBtn();refreshUndo();}
+
+/* ---- ORANGE: chạy lại cascade cho từng node mồ côi còn tồn đọng ---- */
+let ibOrangeQueue=null;
+function orange(){
+  const ib=inboxNodes();
+  if(!ib.length){pill('Không còn ý tưởng mồ côi','warn');return;}
+  ibOrangeQueue=ib.map(n=>n.id);
+  orangeNext();
+}
+function orangeNext(){
+  if(!ibOrangeQueue||!ibOrangeQueue.length){ibOrangeQueue=null;ibRender();render();pill('🍊 Xong hàng chờ','ok');return;}
+  const id=ibOrangeQueue.shift();
+  const n=byId(id);
+  if(!n||!n.inbox){return orangeNext();}
+  ibCascadeStart(id); // dùng chung cascade; khi done sẽ tự gọi orangeNext qua hook
+}
+/* hook: sau mỗi lần cascade kết thúc trong chế độ Orange, đi node tiếp */
+/* Trong chế độ Orange: chỉ sang node kế SAU KHI đóng bước hỏi Focus.
+   ibCasDone mở bước hỏi Focus (chưa xong) → không gọi orangeNext ở đây. */
+const _ibFocusCloseOrig=ibFocusClose;
+ibFocusClose=function(){
+  _ibFocusCloseOrig();
+  if(ibOrangeQueue){ setTimeout(orangeNext,80); }
+};
+const _ibCasCancelOrig=ibCasCancel;
+ibCasCancel=function(){
+  _ibCasCancelOrig(); // Cancel = thoát hẳn, không hỏi Focus
+  if(ibOrangeQueue){ setTimeout(orangeNext,80); }
+};
+
+function ibRender(){
+  const b=$('#ibbody');if(!b)return;
+  if(ibCas){b.innerHTML=ibCasHTML();return;}
+  if(ibAskFocus){b.innerHTML=ibAskFocusHTML();return;}
+  b.innerHTML=ibListHTML();
+}
+function ibListHTML(){
+  const ib=inboxNodes();
+  if(!ib.length)return '<div class="muted" style="font-size:13px;padding:14px 0;text-align:center">Không có ý tưởng mồ côi. Gõ vào ô dưới để thêm.</div>';
+  return `<div class="muted" style="font-size:11.5px;margin-bottom:8px">${ib.length} ý tưởng mồ côi — bấm 🍊 Orange để phân loại lại, hoặc ✕ để bỏ.</div>`
+    + ib.map(n=>{
+    const g=guessTarget(n);
+    return `<div class="ibrow"><span>${esc(n.title)}</span>
+      ${g?`<span class="ibguess">gợi ý: ${esc(g.title)}</span>`:'<span class="ibguess" style="background:#fbf1e3;color:#8a6d3b">chưa đoán được</span>'}
+      <span class="x" onclick="ibDel('${n.id}')" title="Xóa">✕</span></div>`;
+  }).join('');
+}
+
+/* ---- Keyword map (đoán). Sau này thay bằng AI: chỉ cần đổi ruột guessRank. ---- */
+const ORANGE_KW=[
+  {pid:'P_FIN', kw:['finan','sbh','sobanhang','só bán hàng','merchant','hlb','mrr','lending','pos','esop','châu','chau']},
+  {pid:'P_RAB', kw:['rabity','scm','tồn kho','ton kho','inventory','oanh','diễm trang','diem trang','clv','rfm','store','wholesale','ecom']},
+  {pid:'P_VFX', kw:['vfx','vinfast','showroom','sa la','margin stack','bcqt','xdv','tvbh','rebate','trợ giá','tro gia']},
+  {pid:'P_NEG', kw:['neg','byd','tiền giang','tien giang','vốn lưu động','von luu dong']},
+  {pid:'P_HSV', kw:['hsv','beauty box','the face shop','mekong','board seat']}
+];
+function normTxt(t){return (t||'').toLowerCase();}
+/* ứng viên đoán: toàn bộ node không mồ côi (mọi cấp) — để đoán được cả Project/Result */
+function orangeCandidates(){return M.nodes.filter(n=>!n.inbox);}
+function guessTarget(n){return guessFromText(n.title);}
+function guessRank(t){
+  t=normTxt(t);const sc=new Map();
+  const add=(id,w)=>sc.set(id,(sc.get(id)||0)+w);
+  // 1) từ khóa khai trên node (mọi cấp có field kw)
+  orangeCandidates().forEach(p=>{
+    (p.kw||'').split(',').map(x=>normTxt(x).trim()).filter(x=>x.length>1)
+      .forEach(k=>{if(t.includes(k))add(p.id,3);});
+  });
+  // 2) bảng keyword mặc định (map tới Pillar)
+  ORANGE_KW.forEach(r=>{const p=byId(r.pid);if(!p)return;
+    r.kw.forEach(k=>{if(t.includes(k))add(p.id,2);});});
+  // 3) tên node xuất hiện trong câu
+  orangeCandidates().forEach(p=>{
+    const nm=normTxt(p.title).replace(/\s*\(.*\)/,'').split(/[\/·—-]/)[0].trim();
+    if(nm.length>2&&t.includes(nm))add(p.id,1);
+  });
+  return [...sc.entries()].sort((a,b)=>b[1]-a[1]).map(e=>byId(e[0])).filter(Boolean);
+}
+function guessFromText(t){const r=guessRank(t);return r.length?r[0]:null;}
+
+function attachTo(n,pid){
+  if(!n)return;
+  if(!pid){ n.inbox=true; n.parentId=null; return; } // pid rỗng → giữ mồ côi, không thành root
+  if(pid===n.id)return;                           // không tự làm cha
+  // chống chu trình: pid không được là hậu duệ của n
+  let c=byId(pid),g=0;
+  while(c&&g++<50){ if(c.id===n.id)return; c=byId(c.parentId); }
+  n.inbox=false;n.parentId=pid;
+  const p=byId(pid);n.zone=p?(zoneOf(p)||p.zone||null):null;
+  n.status=n.status||'idea';
+}
+
+/* phím tắt: I mở Inbox */
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  if(e.key==='i'||e.key==='I'){e.preventDefault();openInbox();}
+});
+
 window.addEventListener('beforeunload',()=>{if(M.name)saveWs(0);});
 
 /* ================= BOOT ================= */
+function warnLegacyOverride(){
+  // Đếm node còn netOverride KHÁC (DT − CP) — sẽ bị bỏ qua từ nay.
+  const affected=M.nodes.filter(n=>{
+    if(n.netOverride===''||n.netOverride==null||isNaN(n.netOverride))return false;
+    const auto=(+n.revenue||0)-(+n.cost||0);
+    return +n.netOverride!==auto;
+  });
+  if(affected.length){
+    setTimeout(()=>{
+      pill(`⚠ ${affected.length} node có net override cũ — giờ net tính lại theo DT − CP, override bị bỏ qua`,'warn');
+    },600);
+  }
+}
 function boot(){
   $('#welcome').style.display='none';
   $('#vb').textContent=VER;
   $('#stamp').textContent=REL;
   $('#ctx').textContent=M.name;
   refreshUndo();render();applyPanel();
-  if(view==='mind'&&!localStorage.getItem('psm:mmview'))setTimeout(()=>mmFit(true),60);
+  warnLegacyOverride();
 }
 (function init(){
   $('#vb').textContent=VER;
