@@ -1,0 +1,2515 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buổi 1 — Chốt số nền và giả định</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap&subset=latin,latin-ext,vietnamese" rel="stylesheet">
+<style>
+:root{
+  --cream:#F7F5EF; --warm:#EFEBE0; --white:#FFFFFF;
+  --green:#00704A; --forest:#1E3932; --deep:#14261F; --soft:#D4E9E2;
+  --ink:#1E3932; --muted:#5C6B66; --dim:#637069;
+  --line:#DFDBD0; --lined:#2C4A40;
+  --line2:#CFC8B8; --txt:#1E3932; --teal:#2E8B74; --rose:#A6603A;
+  --gold:#C9A227; --warn:#A6603A;
+  --serif:'Noto Serif Display',Georgia,serif;
+  --sans:'Outfit',system-ui,sans-serif;
+  --mono:'DM Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans);
+     font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow:hidden}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(30px,4.6vw,52px);line-height:1.1;
+   letter-spacing:-.015em;margin:0 0 .3em}
+h2{font-family:var(--serif);font-weight:600;font-size:clamp(23px,3.1vw,35px);line-height:1.16;margin:0 0 .35em}
+h3{font-size:17px;font-weight:600;margin:0 0 .4em}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.mono{font-family:var(--mono)}
+p{margin:0 0 12px;max-width:76ch}
+
+/* ---------- khung slide ---------- */
+#deck{height:100vh;width:100vw;position:relative}
+.slide{position:absolute;inset:0;padding:56px 60px 74px;display:none;
+       flex-direction:column;overflow-y:auto}
+.slide.on{display:flex}
+.slide.center{justify-content:center}
+.stitle{margin-bottom:18px;flex:none}
+.sbody{flex:1;min-height:0}
+
+/* ---------- thanh điều hướng ---------- */
+#bar{position:fixed;left:0;right:0;bottom:0;height:52px;background:var(--forest);color:#fff;
+     display:flex;align-items:center;gap:16px;padding:0 22px;z-index:60}
+#bar .nav{display:flex;gap:6px}
+#bar button{border:1px solid var(--lined);background:transparent;color:#cfe0d8;border-radius:999px;
+     width:32px;height:30px;cursor:pointer;font-size:14px;font-family:var(--sans)}
+#bar button:hover{background:rgba(255,255,255,.1)}
+#bar .lbl{font-family:var(--mono);font-size:11px;color:#9db3aa;flex:1;
+     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bar .cnt{font-family:var(--mono);font-size:11px;color:#cfe0d8}
+#prog{position:fixed;left:0;bottom:52px;height:3px;background:var(--gold);z-index:61;transition:width .28s}
+#dots{display:flex;gap:4px}
+#dots i{width:7px;height:7px;border-radius:50%;background:var(--lined);cursor:pointer;display:block}
+#dots i.on{background:var(--gold)}
+#dots i.act{background:#fff}
+
+/* ---------- thành phần chung ---------- */
+.card{border:1px solid var(--line);border-radius:14px;background:var(--white);padding:18px 20px}
+.card.warm{background:var(--warm)}
+.note{border-left:3px solid var(--green);background:var(--white);padding:13px 17px;
+      border-radius:0 10px 10px 0;font-size:14.5px;color:var(--muted);line-height:1.6}
+.note.warn{border-left-color:var(--warn);background:#FDF6F1}
+.note.gold{border-left-color:var(--gold);background:#FDFAF0}
+.note b{color:var(--ink)}
+.quote{font-family:var(--serif);font-style:italic;font-size:clamp(17px,2vw,23px);
+       border-left:3px solid var(--green);background:var(--soft);padding:18px 24px;
+       border-radius:0 12px 12px 0;line-height:1.4;color:var(--ink)}
+.btn{border:1.5px solid var(--green);color:var(--green);background:transparent;border-radius:999px;
+     padding:9px 22px;font:500 14px var(--sans);cursor:pointer}
+.btn:hover{background:rgba(0,112,74,.07)}
+.btn.pri{background:var(--green);color:#fff}
+.btn.pri:hover{background:#005c3c}
+.btn.sm{padding:6px 15px;font-size:13px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+table{width:100%;border-collapse:collapse;font-size:14px;background:var(--white)}
+th{background:var(--forest);color:#fff;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;
+   text-transform:uppercase;text-align:left;padding:8px 12px;font-weight:400;white-space:nowrap}
+td{padding:8px 12px;border-bottom:1px solid var(--line)}
+td.n{text-align:right;font-family:var(--mono);font-size:13.5px;white-space:nowrap}
+tr.tot td{background:var(--soft);font-weight:600;border-top:2px solid var(--forest)}
+.tag{font-family:var(--mono);font-size:10px;border:1px solid var(--line);border-radius:999px;
+     padding:2px 9px;color:var(--dim);white-space:nowrap}
+.tag.g{border-color:var(--green);color:var(--green)}
+.tag.w{border-color:var(--warn);color:var(--warn);background:#FDF6F1}
+input[type=range]{width:100%;accent-color:var(--green);height:26px}
+input:focus-visible,button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(0,112,74,.2)}
+.sld .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.sld label{font-size:13.5px;font-weight:500}
+.sld .v{font-family:var(--mono);font-size:14px;color:var(--green);font-weight:500}
+.sld .b{font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.kpi{border:1px solid var(--line);border-radius:12px;background:var(--white);padding:12px 15px}
+.kpi .k{font-size:12px;color:var(--muted)}
+.kpi .v{font-family:var(--mono);font-size:24px;font-weight:500;line-height:1.25}
+.kpi .d{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.kpi.hi{background:var(--soft);border-color:var(--green)}
+.kpi.bad .v{color:var(--warn)}
+.kpi.good .v{color:var(--green)}
+
+/* ---------- nhãn khám phá ---------- */
+.explore{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);
+  border-radius:999px;padding:3px 12px;background:#FDFAF0}
+.explore::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold)}
+
+/* ---------- màn 3: trục thời gian ---------- */
+.tl{position:relative;margin:22px 0 10px;padding:0 4px}
+.tl-track{height:4px;background:var(--warm);border-radius:2px;position:relative}
+.tl-fill{position:absolute;top:0;bottom:0;left:0;background:var(--green);border-radius:2px}
+.tl-steps{display:flex;justify-content:space-between;margin-top:-9px}
+.tl-step{width:14px;height:14px;border-radius:50%;background:var(--white);border:2px solid var(--green);
+  cursor:pointer;position:relative;flex:none}
+.tl-step.dim{border-color:var(--line)}
+.tl-step.act{background:var(--green);transform:scale(1.35)}
+.tl-lbl{display:flex;justify-content:space-between;margin-top:10px;font-family:var(--mono);
+  font-size:10px;color:var(--dim)}
+.tl-lbl span{width:52px;text-align:center}
+#roomZone{position:absolute;top:-6px;bottom:-6px;background:rgba(166,96,58,.14);
+  border-left:2px dashed var(--warn);border-radius:3px;pointer-events:none}
+#stepDetail{margin-top:16px;min-height:96px}
+
+/* ---------- màn 5: dự đoán ---------- */
+.pred{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:760px}
+.pred button{border:1.5px solid var(--line);background:var(--white);border-radius:14px;padding:20px 16px;
+  cursor:pointer;text-align:left;font-family:var(--sans);transition:border-color .15s}
+.pred button:hover{border-color:var(--green)}
+.pred button.sel{border-color:var(--green);background:var(--soft)}
+.pred .pv{font-family:var(--serif);font-size:26px;font-weight:600;color:var(--ink)}
+.pred .pd{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.45}
+#predOut{margin-top:20px}
+
+/* ---------- màn 6: biểu đồ cầu ---------- */
+.wf{display:flex;align-items:flex-end;gap:14px;height:270px;padding-top:8px}
+.wf .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.wf .bar{width:100%;border-radius:7px 7px 0 0;position:relative;transition:height .5s ease}
+.wf .cap{font-family:var(--mono);font-size:12.5px;margin-bottom:5px;font-weight:500}
+.wf .nm{font-size:12px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.35}
+
+/* ---------- màn 10: cơ cấu nguồn ---------- */
+.fund .frow{display:flex;align-items:center;gap:12px;margin-bottom:9px;font-size:13.5px}
+.fund .fn{width:220px;flex:none}
+.fund .fw{flex:1;height:20px;background:var(--warm);border-radius:5px;overflow:hidden}
+.fund .fb{display:block;height:100%;border-radius:5px;transition:width .4s}
+.fund .fv{width:96px;text-align:right;font-family:var(--mono);font-size:13px;flex:none}
+.fund .fg{width:78px;text-align:right;font-family:var(--mono);font-size:12px;flex:none}
+.chain{display:flex;align-items:stretch;gap:0;margin-top:14px}
+.chain .ci{flex:1;background:var(--white);border:1px solid var(--line);padding:13px 15px;position:relative}
+.chain .ci:first-child{border-radius:12px 0 0 12px}
+.chain .ci:last-child{border-radius:0 12px 12px 0}
+.chain .ci+.ci{border-left:none}
+.chain .cl{font-family:var(--mono);font-size:9.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+.chain .cv{font-family:var(--mono);font-size:19px;font-weight:500;margin-top:3px}
+.chain .cs{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+.chain .ci.alert{background:#FDF6F1;border-color:var(--warn)}
+.chain .ci.alert .cv{color:var(--warn)}
+
+/* ---------- màn 12: biểu đồ độ nhạy ---------- */
+.tor{margin-top:6px}
+.tor .trow{display:flex;align-items:center;gap:11px;margin-bottom:8px}
+.tor .tn{width:250px;flex:none;font-size:13.5px}
+.tor .tmid{flex:1;position:relative;height:26px}
+.tor .taxis{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line)}
+.tor .tb{position:absolute;top:3px;bottom:3px;border-radius:4px;transition:all .35s}
+.tor .tb.pos{background:var(--green);left:50%}
+.tor .tb.neg{background:var(--warn);right:50%}
+.tor .tv{width:104px;text-align:right;font-family:var(--mono);font-size:13px;flex:none}
+.tor .tr{width:118px;flex:none;font-family:var(--mono);font-size:11px;color:var(--dim);text-align:right}
+
+/* ---------- ghi chú giảng viên ---------- */
+#notes{position:fixed;right:0;top:0;bottom:52px;width:400px;background:var(--deep);color:#cfe0d8;
+  padding:26px 26px 26px;overflow-y:auto;transform:translateX(100%);transition:transform .25s;z-index:55;
+  font-size:13.5px;line-height:1.65}
+#notes.on{transform:translateX(0)}
+#notes h4{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold);margin:0 0 12px}
+#notes b{color:#fff}
+#notes .blk{margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--lined)}
+#notes .blk:last-child{border:none}
+#notes .q{font-family:var(--serif);font-style:italic;font-size:15px;color:#fff;
+  border-left:2px solid var(--gold);padding-left:12px;margin:8px 0}
+
+.hint{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:9px}
+.src{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:auto;padding-top:14px}
+@media(max-width:900px){.slide{padding:34px 24px 70px}.g2,.g3,.g4,.pred{grid-template-columns:1fr}
+  .fund .fn{width:130px}.tor .tn{width:150px}#notes{width:100%}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ===== A1 · xếp thẻ ===== */
+.cardpool{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.ct{border:1.5px solid var(--line);background:var(--white);border-radius:10px;padding:8px 13px;
+  cursor:pointer;font-size:13px;line-height:1.35;max-width:290px;transition:border-color .14s,opacity .2s}
+.ct:hover{border-color:var(--green)}
+.ct.used{opacity:.28;pointer-events:none}
+.ct .cm{font-family:var(--mono);font-size:9.5px;color:var(--dim);display:block;margin-top:3px}
+.seq{display:flex;flex-direction:column;gap:5px;min-height:60px}
+.slot{display:flex;align-items:center;gap:10px;border:1px dashed var(--line);border-radius:9px;
+  padding:7px 12px;background:var(--warm);font-size:13px;min-height:38px}
+.slot .no{font-family:var(--mono);font-size:11px;color:var(--dim);width:20px;flex:none}
+.slot .tx{flex:1;cursor:pointer}
+.slot.ok{border-style:solid;border-color:var(--green);background:var(--soft)}
+.slot.err{border-style:solid;border-color:var(--warn);background:#FDF6F1}
+.slot .mk{font-family:var(--mono);font-size:11px;flex:none}
+.slot.ok .mk{color:var(--green)}.slot.err .mk{color:var(--warn)}
+.a1grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+
+/* ===== A2 · Gantt ===== */
+.gantt{margin-top:6px}
+.grow{display:flex;align-items:center;gap:10px;margin-bottom:5px;font-size:12.5px}
+.grow .gn{width:290px;flex:none;line-height:1.3}
+.grow .gt{flex:1;position:relative;height:22px;background:var(--warm);border-radius:5px}
+.gbar{position:absolute;top:3px;bottom:3px;border-radius:4px;background:var(--green);
+  display:flex;align-items:center;padding-left:7px;font-family:var(--mono);font-size:9.5px;color:#fff}
+.gbar.late{background:var(--forest)}
+.gscale{display:flex;margin:8px 0 0 300px;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.gscale span{flex:1;text-align:center}
+.gantt{position:relative;padding-top:20px}
+.gvline{position:absolute;top:20px;bottom:34px;width:2px;background:var(--warn);z-index:4;pointer-events:none}
+.gvline::after{content:attr(data-l);position:absolute;top:-17px;left:50%;transform:translateX(-50%);
+  white-space:nowrap;font-family:var(--mono);font-size:9.5px;color:var(--warn);
+  background:var(--cream);padding:0 6px}
+.modesw{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-bottom:12px}
+.modesw button{border:none;background:transparent;padding:7px 17px;font:500 13px var(--sans);
+  cursor:pointer;color:var(--muted)}
+.modesw button.on{background:var(--green);color:#fff}
+
+/* ===== A4 · bỏ phiếu điểm nghẽn ===== */
+.vsteps{display:flex;flex-direction:column;gap:5px}
+.vrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:9px;
+  padding:7px 12px;background:var(--white);cursor:pointer;font-size:13px;transition:border-color .15s}
+.vrow:hover{border-color:var(--green)}
+.vrow .vn{font-family:var(--mono);font-size:10.5px;color:var(--dim);width:52px;flex:none}
+.vrow .vt{flex:1;line-height:1.3}
+.vrow .vbw{width:190px;flex:none;height:15px;background:var(--warm);border-radius:4px;overflow:hidden}
+.vrow .vb{display:block;height:100%;background:var(--green);border-radius:4px;transition:width .3s}
+.vrow .vc{width:34px;text-align:right;font-family:var(--mono);font-size:13px;flex:none}
+.vrow.hot{border-color:var(--warn);background:#FDF6F1}
+.vrow.hot .vb{background:var(--warn)}
+
+/* ===== A5 · ba tầng ===== */
+.tier{border:1px solid var(--line);border-radius:14px;background:var(--white);padding:16px 19px;margin-bottom:12px}
+.tier.lock{background:var(--warm);border-style:dashed}
+.tier .th{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:9px}
+.tier .tnum{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--gold)}
+.tier .tq{font-family:var(--serif);font-size:19px;font-weight:600;line-height:1.25}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.opts.two{grid-template-columns:repeat(2,1fr)}
+.opt{border:1.5px solid var(--line);background:var(--white);border-radius:11px;padding:11px 14px;
+  cursor:pointer;text-align:left;font-family:var(--sans);position:relative;overflow:hidden}
+.opt:hover{border-color:var(--green)}
+.opt .on2{font-size:14px;font-weight:600;position:relative;z-index:2}
+.opt .on2{display:block}
+.opt .oc{display:block;font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:4px;position:relative;z-index:2}
+.opt .ofill{position:absolute;left:0;top:0;bottom:0;background:var(--soft);transition:width .35s;z-index:1}
+.opt.win{border-color:var(--green)}
+.opt.win .ofill{background:rgba(0,112,74,.16)}
+.reveal{display:none}
+.reveal.on{display:block}
+
+/* ===== khối B ===== */
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.bitem{border:1.5px solid var(--line);border-radius:11px;background:var(--white);padding:11px 14px}
+.bitem .bn{font-size:14px;font-weight:600;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.bitem .bnum{font-family:var(--mono);font-size:12px;color:var(--dim);white-space:nowrap}
+.bitem .bsel{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.bitem .bsel button{border:1px solid var(--line);background:transparent;border-radius:999px;
+  padding:3px 11px;font:400 11.5px var(--sans);cursor:pointer;color:var(--muted)}
+.bitem .bsel button:hover{border-color:var(--green)}
+.bitem .bsel button.pick{background:var(--green);border-color:var(--green);color:#fff}
+.bitem .bsel button.wrong{background:#FDF6F1;border-color:var(--warn);color:var(--warn)}
+.bitem .bmech{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:8px;
+  border-left:2px solid var(--line);padding-left:10px;display:none}
+.bitem .bmech.on{display:block}
+.bitem.g1{border-left:4px solid var(--green)}
+.bitem.g2{border-left:4px solid var(--warn)}
+.bitem.g3{border-left:4px solid var(--gold)}
+.blegend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:12.5px;color:var(--muted)}
+.blegend span{display:flex;align-items:center;gap:6px}
+.blegend i{width:11px;height:11px;border-radius:3px;display:block}
+.peel tr.cur td{background:var(--soft);font-weight:600}
+.peel td.d{font-family:var(--mono);font-size:13.5px;text-align:right;white-space:nowrap}
+.decomp td.v{font-family:var(--mono);text-align:right;white-space:nowrap}
+.decomp tr.pos td.v{color:var(--green)}
+.decomp tr.neg td.v{color:var(--warn)}
+.flow{display:flex;flex-direction:column;gap:4px;font-size:13.5px}
+.flow .fr{display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:9px;background:var(--white);
+  border:1px solid var(--line)}
+.flow .fr.op{background:var(--warm);border-style:dashed}
+.flow .fr.tot{background:var(--soft);border-color:var(--green);font-weight:600}
+.flow .fl{flex:1}
+.flow .fv{font-family:var(--mono);font-size:14px;white-space:nowrap}
+.flow .fs{font-family:var(--mono);font-size:15px;width:16px;text-align:center;color:var(--dim);flex:none}
+
+/* ===== giải phẫu mô hình ===== */
+.anat{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.stack{display:flex;flex-direction:column;gap:6px}
+.lay{border:1px solid var(--line);border-radius:11px;background:var(--white);padding:11px 15px;
+  opacity:.22;transition:opacity .3s,border-color .2s}
+.lay.on{opacity:1}
+.lay.act{border-color:var(--green);background:var(--soft)}
+.lay .lh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.lay .ln{font-size:14px;font-weight:600}
+.lay .lv{font-family:var(--mono);font-size:15px;white-space:nowrap}
+.lay .lb{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:3px}
+.lay.neg .lv{color:var(--warn)}
+.lay.sum{background:var(--forest);border-color:var(--forest)}
+.lay.sum .ln,.lay.sum .lv{color:#fff}
+.lay.sum .lb{color:#9db3aa}
+.kind{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  border-radius:999px;padding:2px 8px;border:1px solid;white-space:nowrap}
+.kind.k1{color:var(--green);border-color:var(--green)}
+.kind.k2{color:var(--warn);border-color:var(--warn)}
+.kind.k3{color:var(--gold);border-color:var(--gold);background:#FDFAF0}
+.basebox{border:1px solid var(--line);border-radius:12px;background:var(--white);padding:15px 18px}
+.basebox h4{font-family:var(--serif);font-size:18px;font-weight:600;margin:0 0 3px}
+.basebox .bwhy{font-size:13px;color:var(--muted);line-height:1.55;margin:8px 0 12px}
+.eqn{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-family:var(--mono);font-size:13px;
+  background:var(--warm);border-radius:9px;padding:10px 13px;margin-bottom:11px}
+.eqn b{font-weight:500;color:var(--green)}
+.eqn .op{color:var(--dim)}
+.capbar{margin-top:9px}
+.capbar .ct2{height:15px;background:var(--warm);border-radius:4px;overflow:hidden;position:relative}
+.capbar .cf{display:block;height:100%;background:var(--gold);border-radius:4px;transition:width .3s}
+.capbar .cf.over{background:var(--warn)}
+.capbar .cl2{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;
+  color:var(--dim);margin-top:4px}
+.anat-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+
+/* ===== tầng cấu trúc ===== */
+#crumb{position:fixed;left:0;right:0;top:0;height:38px;background:var(--warm);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;gap:0;
+  padding:0 60px;z-index:50;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em}
+#crumb.hide{display:none}
+#crumb .cbit{color:var(--dim);display:flex;align-items:center;gap:9px;padding-right:9px}
+#crumb .cbit.act{color:var(--green);font-weight:500}
+#crumb .cbit::after{content:"›";margin-left:9px;color:var(--line2)}
+#crumb .cbit:last-child::after{content:""}
+#crumb .cright{margin-left:auto;color:var(--dim)}
+.slide.crumbed{padding-top:64px}
+/* trang chuyển khối */
+.divider{display:flex;flex-direction:column;justify-content:center;height:100%}
+.divider .dcode{font-family:var(--mono);font-size:13px;letter-spacing:.3em;color:var(--gold)}
+.divider h1{margin:10px 0 14px}
+.divider .dmeta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:26px}
+.divider .dlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:11px;max-width:1150px}
+.divider .di{border-left:3px solid var(--line);padding:2px 0 2px 14px}
+.divider .di .dn{font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:.1em}
+.divider .di .dt{font-size:14.5px;font-weight:600;margin-top:3px;line-height:1.35}
+.divider .di .dd{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.45}
+/* mục lục */
+.toc{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:8px}
+.toc .tc{border:1px solid var(--line);border-radius:14px;background:var(--white);padding:17px 19px;
+  display:flex;flex-direction:column;opacity:.5}
+.toc .tc.cur{opacity:1;border-color:var(--green);background:var(--soft)}
+.toc .tc .tcn{font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:.14em}
+.toc .tc .tct{font-family:var(--serif);font-size:20px;font-weight:600;margin:6px 0 4px;line-height:1.25}
+.toc .tc .tcs{font-size:13px;color:var(--muted);line-height:1.5}
+.toc .tc .tcm{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:auto;padding-top:10px}
+.agenda{display:flex;flex-direction:column;gap:9px;max-width:1000px}
+.ag{display:flex;align-items:center;gap:16px;border:1px solid var(--line);border-radius:12px;
+  background:var(--white);padding:13px 18px}
+.ag.br{background:var(--warm);border-style:dashed}
+.ag .agt{font-family:var(--mono);font-size:12px;color:var(--dim);width:96px;flex:none}
+.ag .agc{font-family:var(--mono);font-size:11px;color:var(--gold);width:26px;flex:none}
+.ag .agn{flex:1;font-size:15px;font-weight:600}
+.ag .agd{font-size:13px;color:var(--muted);flex:2}
+.ag .agm{font-family:var(--mono);font-size:11px;color:var(--dim);width:52px;text-align:right;flex:none}
+
+/* ===== ĐÃ PHÓNG CỠ CHỮ · trình chiếu màn hình lớn ===== */
+.toc{gap:18px}
+.toc .tc{padding:24px 26px;border-radius:16px}
+.toc .tc .tcn{font-size:13.5px;letter-spacing:.18em}
+.toc .tc .tct{font-size:29px;margin:9px 0 7px}
+.toc .tc .tcs{font-size:17px;line-height:1.45}
+.toc .tc .tcm{font-size:13px;padding-top:14px}
+.note.bigger{font-size:18px;line-height:1.6;padding:18px 24px}
+.ag{padding:16px 22px}
+.ag .agt{font-size:14.5px;width:112px}
+.ag .agc{font-size:13.5px;width:32px}
+.ag .agn{font-size:18px}
+.ag .agd{font-size:15px}
+.ag .agm{font-size:13.5px;width:60px}
+.divider .dcode{font-size:15px}
+.divider .di .dn{font-size:12px}
+.divider .di .dt{font-size:17px}
+.divider .di .dd{font-size:14.5px}
+.divider .dlist{gap:14px}
+.divider p{font-size:18px!important}
+/* trang bìa & tiêu đề buổi */
+.slide.center .eyebrow{font-size:13.5px;letter-spacing:.24em}
+
+/* ===== PHONG-CO-LAN-2 · cỡ chữ cho máy chiếu ===== */
+h2.bigh{font-size:clamp(30px,3.6vw,46px);margin-bottom:.45em}
+.slide.center h1{font-size:clamp(36px,5.4vw,64px)}
+.toc .tc .tct{font-size:clamp(26px,2.2vw,36px)}
+.toc .tc .tcs{font-size:clamp(16px,1.15vw,20px)}
+.toc .tc .tcn{font-size:clamp(12px,.9vw,15px)}
+.toc .tc .tcm{font-size:clamp(12px,.85vw,14px)}
+.note.bigger{font-size:clamp(16px,1.2vw,21px)}
+.ag .agn{font-size:clamp(16px,1.25vw,22px)}
+.ag .agd{font-size:clamp(14px,1.05vw,18px)}
+.ag .agt,.ag .agc,.ag .agm{font-size:clamp(13px,.95vw,16px)}
+.divider h1{font-size:clamp(32px,4.6vw,56px)}
+.divider .di .dt{font-size:clamp(15px,1.15vw,20px)}
+.divider .di .dd{font-size:clamp(13px,1vw,17px)}
+.slide.center p{font-size:clamp(16px,1.3vw,22px)!important}
+
+/* ===== thẻ năng lực ===== */
+.g4.caps{gap:16px}
+.card.capc{padding:24px 26px;border-radius:16px;display:flex;flex-direction:column}
+.capn{font-size:clamp(13px,1vw,16px);color:var(--dim);letter-spacing:.14em}
+.capt{font-family:var(--serif);font-size:clamp(20px,1.75vw,28px);font-weight:600;
+  color:var(--green);line-height:1.2;margin:10px 0 10px}
+.capd{font-size:clamp(14px,1.1vw,19px);color:var(--muted);line-height:1.5}
+
+/* GO-BO-CAU-DAN */
+.tag.bigtag{font-size:clamp(13px,1.05vw,17px);padding:7px 20px}
+/* DA-DON-NOI-BO */
+/* DON-LAN-2 */
+
+/* ===== STEPDOC · hồ sơ chi tiết từng bước ===== */
+.sd{display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:start}
+.sdlist{display:flex;flex-direction:column;gap:4px}
+.sdb{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--line);border-radius:9px;
+  background:var(--white);padding:8px 12px;cursor:pointer;font-size:13.5px;text-align:left;
+  font-family:var(--sans);color:var(--ink);line-height:1.3;transition:border-color .15s}
+.sdb:hover{border-color:var(--green)}
+.sdb.on{background:var(--soft);border-color:var(--green);font-weight:600}
+.sdb .sn{font-family:var(--mono);font-size:11px;color:var(--dim);flex:none;width:16px;padding-top:1px}
+.sdb.on .sn{color:var(--green)}
+.sdpanel{border:1px solid var(--line);border-radius:14px;background:var(--white);padding:22px 26px}
+.sdh{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.sdh .sdno{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:.14em}
+.sdt{font-family:var(--serif);font-size:clamp(20px,1.8vw,27px);font-weight:600;line-height:1.25;margin-bottom:12px}
+.sdmeta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.sdg{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+.sdbox .sdl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:6px}
+.sdbox ul{margin:0;padding-left:17px;font-size:14px;color:var(--muted);line-height:1.55}
+.sdbox li{margin-bottom:4px}
+.sdbox p{font-size:14px;color:var(--muted);margin:0;line-height:1.55}
+.sdwarn{border-left:3px solid var(--warn);background:#FDF6F1;border-radius:0 10px 10px 0;
+  padding:12px 16px;font-size:13.5px;color:var(--muted);line-height:1.55}
+.sdwarn b{color:var(--ink)}
+@media(max-width:1100px){.sd{grid-template-columns:1fr}.sdg{grid-template-columns:1fr}}
+/* FIX-A3 */
+
+/* ===== READREPORT · đọc báo cáo tổng thể ===== */
+.rr{display:grid;grid-template-columns:1.25fr .75fr;gap:22px;align-items:start}
+.rr table{font-size:14px}
+.rr td.lb{font-weight:500}
+.rr tr.sub td{color:var(--muted);font-size:13.5px}
+.rr tr.sub td.lb{padding-left:26px;font-weight:400}
+.cc{display:flex;flex-direction:column;gap:11px}
+.ccrow .ccn{font-size:13px;margin-bottom:5px}
+.ccbars{display:flex;align-items:flex-end;gap:8px;height:62px}
+.ccb{flex:1;border-radius:5px 5px 0 0;position:relative;min-height:3px;transition:height .35s}
+.ccb.y24{background:rgba(0,112,74,.32)}
+.ccb.y25{background:var(--green)}
+.ccb.neg{background:var(--warn)}
+.ccv{display:flex;gap:7px;font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:3px}
+.ccv span{flex:1;text-align:center}
+.cclg{display:flex;gap:16px;font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-bottom:2px}
+.cclg i{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:-1px}
+@media(max-width:1100px){.rr{grid-template-columns:1fr}}
+/* FIX-CHART */
+/* FIX-BATCH-1 */
+
+/* ===== ROLEDETAIL · hồ sơ ba khối ===== */
+.rc{border:1px solid var(--line);border-radius:14px;background:var(--white);padding:18px 20px;
+  cursor:pointer;display:flex;flex-direction:column;transition:border-color .15s}
+.rc:hover{border-color:var(--green)}
+.rc.on{background:var(--soft)}
+.rc .rn{font-family:var(--serif);font-size:clamp(18px,1.5vw,23px);font-weight:600}
+.rc .rk{font-family:var(--mono);font-size:11px;color:var(--dim);margin:6px 0 12px}
+.rc .rq{font-family:var(--serif);font-style:italic;font-size:clamp(15px,1.25vw,18px);line-height:1.4;
+  padding-left:12px}
+.rd{border:1px solid var(--line);border-radius:14px;background:var(--white);padding:20px 24px}
+.rd h4{font-family:var(--serif);font-size:clamp(18px,1.5vw,23px);font-weight:600;margin:0 0 3px}
+.rdg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:14px}
+.rdbox .rdl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:6px}
+.rdbox ul{margin:0;padding-left:17px;font-size:13.5px;color:var(--muted);line-height:1.55}
+.rdbox li{margin-bottom:4px}
+.rdclash{border-left:3px solid var(--warn);background:#FDF6F1;border-radius:0 10px 10px 0;
+  padding:12px 16px;font-size:13.5px;color:var(--muted);line-height:1.55;margin-top:14px}
+.rdclash b{color:var(--ink)}
+.rdsteps{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.rdsteps span{font-family:var(--mono);font-size:10px;border:1px solid var(--line);border-radius:999px;
+  padding:2px 9px;color:var(--dim)}
+@media(max-width:1100px){.rdg{grid-template-columns:1fr}}
+/* ROLEDETAIL */
+/* ROLEDETAIL-JS */
+
+/* ===== RECONCILE · đối chiếu mức tăng ===== */
+.rec{display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:start}
+.rec table{font-size:14px}
+.rec tr.off td{opacity:.32}
+.rec tr{cursor:pointer}
+.rec tr:hover td{background:var(--soft)}
+.rec tr.sum{cursor:default}
+.rec tr.sum:hover td{background:var(--soft)}
+.rec td.ck{width:30px;text-align:center;font-family:var(--mono);font-size:13px}
+.rec td.ck .bx{display:inline-block;width:15px;height:15px;border:1.5px solid var(--line2);
+  border-radius:4px;line-height:13px;font-size:11px;color:#fff}
+.rec tr.on td.ck .bx{background:var(--green);border-color:var(--green)}
+.rec td.v{text-align:right;font-family:var(--mono);font-size:13.5px;white-space:nowrap}
+.rec tr.sum td{background:var(--soft);font-weight:600;border-top:2px solid var(--forest)}
+.wfc{display:flex;align-items:flex-end;gap:5px;height:290px;padding-top:6px}
+.wfc .wcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;position:relative}
+.wfc .wbar{width:100%;border-radius:4px;position:relative;transition:height .3s,margin-bottom .3s}
+.wfc .wbar.base{background:var(--forest)}
+.wfc .wbar.up{background:var(--green)}
+.wfc .wbar.dn{background:var(--warn)}
+.wfc .wbar.dim{opacity:.2}
+.wfc .wv{font-family:var(--mono);font-size:10.5px;text-align:center;margin-bottom:4px;white-space:nowrap}
+.wfc .wn{font-size:10.5px;color:var(--muted);text-align:center;margin-top:6px;line-height:1.25;
+  min-height:38px;word-break:break-word}
+@media(max-width:1100px){.rec{grid-template-columns:1fr}}
+/* RECONCILE */
+/* MERGE-A2 */
+
+/* ===== GANTT-IN-PANEL ===== */
+.gwrap{}
+.ghead{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:12px}
+.gantt2{position:relative;padding-top:18px}
+.grow2{display:flex;align-items:center;gap:8px;margin-bottom:5px;cursor:pointer;border-radius:6px;
+  padding:2px 4px;transition:background .15s}
+.grow2:hover{background:var(--warm)}
+.grow2.sel{background:var(--soft)}
+.grow2 .gnum{width:22px;flex:none;font-family:var(--mono);font-size:11px;color:var(--dim);text-align:right}
+.grow2.sel .gnum{color:var(--green);font-weight:500}
+.grow2 .gt{flex:1;position:relative;height:22px;background:var(--warm);border-radius:5px}
+.grow2.sel .gt{background:#E4DED0}
+.gscale2{display:flex;margin:8px 0 0 34px;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.gscale2 span{flex:1;text-align:center}
+.gantt2 .gvline{position:absolute;top:18px;bottom:26px;width:2px;background:var(--warn);z-index:4;
+  pointer-events:none}
+.gantt2 .gvline::after{content:attr(data-l);position:absolute;top:-16px;left:50%;
+  transform:translateX(-50%);white-space:nowrap;font-family:var(--mono);font-size:9.5px;
+  color:var(--warn);background:var(--cream);padding:0 6px}
+/* GANTT-IN-PANEL */
+/* GANTT-MARKUP-OK */
+
+/* ===== ROOMLINE · đối chiếu lịch nội bộ với mốc giao giới hạn ===== */
+.rl{display:grid;grid-template-columns:1fr 290px;gap:20px;align-items:start}
+.rlhead{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px;font-family:var(--mono);
+  font-size:10.5px;color:var(--dim)}
+.rlk{display:flex;align-items:center;gap:6px}
+.sw{width:11px;height:11px;border-radius:3px;display:block}
+.sw.pre{background:var(--warn)}.sw.cut{background:var(--gold)}.sw.post{background:var(--green)}
+.rlrows{position:relative;padding-top:18px}
+.rlr{display:flex;align-items:center;gap:9px;margin-bottom:5px;cursor:pointer;border-radius:6px;
+  padding:2px 3px;transition:background .15s}
+.rlr:hover{background:var(--warm)}
+.rlr.sel{background:var(--soft)}
+.rlr .rln{width:250px;flex:none;font-size:12.5px;line-height:1.3;display:flex;gap:7px}
+.rlr .rlnum{font-family:var(--mono);font-size:10.5px;color:var(--dim);flex:none;width:14px;text-align:right}
+.rlr .rlt{flex:1;position:relative;height:21px;background:var(--warm);border-radius:5px}
+.rlbar{position:absolute;top:3px;bottom:3px;border-radius:4px;display:flex;align-items:center;
+  padding-left:7px;font-family:var(--mono);font-size:9.5px;color:#fff}
+.rlbar.pre{background:var(--warn)}
+.rlbar.cut{background:var(--gold)}
+.rlbar.post{background:var(--green)}
+.rlmark{position:absolute;top:18px;bottom:24px;width:2px;background:var(--rose);z-index:4;pointer-events:none}
+.rlmark::after{content:attr(data-l);position:absolute;top:-16px;left:50%;transform:translateX(-50%);
+  white-space:nowrap;font-family:var(--mono);font-size:9.5px;color:var(--rose);
+  background:var(--cream);padding:0 6px}
+.rlside{border:1px solid var(--line);border-radius:14px;background:var(--white);padding:17px 19px}
+.rlbig{font-family:var(--mono);font-size:40px;font-weight:500;line-height:1.1;color:var(--warn)}
+.rlbig.ok{color:var(--green)}
+.rlcap{font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px}
+.rllist{margin:14px 0 0;padding:0;list-style:none;font-size:12.5px;color:var(--muted);line-height:1.5}
+.rllist li{padding:5px 0;border-top:1px solid var(--line);display:flex;gap:8px}
+.rllist li span{font-family:var(--mono);font-size:10.5px;color:var(--warn);flex:none}
+@media(max-width:1100px){.rl{grid-template-columns:1fr}.rlr .rln{width:150px}}
+/* ROOMLINE */
+/* OLD-A3-REMOVED */
+/* DRAWTL-CLEAN */
+
+/* ===== ROLESTEPS ===== */
+.rs{display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:start}
+.rslist{display:flex;flex-direction:column;gap:3px}
+.rsr{display:flex;align-items:baseline;gap:8px;padding:6px 10px;border-radius:7px;
+  border-left:3px solid transparent;background:var(--white);border:1px solid var(--line);
+  border-left-width:3px;font-size:12.5px;line-height:1.3;opacity:.4;transition:opacity .2s}
+.rsr.hit{opacity:1;background:var(--warm)}
+.rsr .rsn{font-family:var(--mono);font-size:10.5px;color:var(--dim);flex:none;width:14px;text-align:right}
+.rsr .rst{flex:1}
+.rsr .rsm{font-family:var(--mono);font-size:9.5px;color:var(--dim);flex:none}
+.rssum{font-family:var(--mono);font-size:12px;text-align:right;margin-top:8px;font-weight:500}
+@media(max-width:1100px){.rs{grid-template-columns:1fr}}
+/* ROLESTEPS */
+/* WORDING-FIX */
+/* WORDING-FIX2 */
+
+/* ===== RATIODRILL · công thức và cấu phần chỉ số ===== */
+tr.ratr:hover td{background:var(--warm)}
+tr.ratr.on td{background:var(--soft);font-weight:600}
+.fml{border:1px solid var(--line);border-radius:12px;background:var(--white);padding:15px 18px}
+.fmlh{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:12px}
+.fmlrow{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.fmlfrac,.fmlyr{display:flex;flex-direction:column;align-items:center;gap:2px}
+.fmlfrac .fnum,.fmlfrac .fden{font-size:13px;color:var(--muted)}
+.fbar{display:block;height:1.5px;background:var(--line2);width:100%;min-width:130px;margin:3px 0}
+.fmleq{font-family:var(--mono);font-size:17px;color:var(--dim)}
+.fmlyr{padding:8px 14px;border-radius:9px;background:var(--warm);position:relative}
+.fmlyr.on{background:var(--soft)}
+.fmlyr .fy{font-family:var(--mono);font-size:9.5px;color:var(--dim);letter-spacing:.1em;margin-bottom:2px}
+.fmlyr .fnum,.fmlyr .fden{font-family:var(--mono);font-size:13px;color:var(--txt)}
+.fmlyr .fres{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--green);margin-top:5px}
+.ccgap{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;margin-top:2px}
+@media(max-width:1100px){.fmlrow{gap:10px}}
+/* RATIODRILL */
+
+/* ===== BSCHART · biểu đồ bảng cân đối ===== */
+.gbc{display:flex;align-items:flex-end;gap:12px;height:165px;margin-top:6px}
+.gbcg{flex:1;display:flex;align-items:flex-end;gap:3px;height:100%;position:relative;
+  padding-bottom:38px}
+.gbcb{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.gbcv{font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:3px;white-space:nowrap;
+  writing-mode:vertical-rl;transform:rotate(180deg)}
+.gbcbar{width:100%;border-radius:4px 4px 0 0;min-height:2px}
+.gbcbar.y24{background:rgba(0,112,74,.32)}
+.gbcbar.y25{background:var(--green)}
+.gbcn{position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:11px;
+  color:var(--muted);line-height:1.3}
+.mxwrap{}
+.mxrow{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.mxy{font-family:var(--mono);font-size:11px;color:var(--dim);width:34px;flex:none}
+.mxbar{flex:1;display:flex;height:34px;border-radius:5px;overflow:hidden}
+.mxs{display:block;flex:none;font-family:var(--mono);font-size:10.5px;color:#fff;
+  text-align:center;line-height:34px;overflow:hidden;white-space:nowrap}
+.mxlg{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:11.5px;color:var(--muted)}
+.mxlg b{font-size:11px;color:var(--txt);margin-left:4px}
+.mxlg span{display:flex;align-items:center;gap:5px}
+.mxlg i{width:11px;height:11px;border-radius:2px;display:block;flex:none}
+.mxnote{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:11px;
+  border-left:3px solid var(--green);padding-left:12px}
+/* BSCHART */
+/* BSCHART-FIX */
+/* BSCHART-FIX2 */
+/* TWO-GROUP */
+/* NO-2026 */
+/* NO-2026-C */
+/* CAP-REC-FIX */
+/* C2-CLEAN */
+/* ANAT-DEFAULT */
+</style>
+</head>
+<body>
+
+<div id="crumb"></div>
+<div id="deck"></div>
+<div id="prog"></div>
+<div id="bar">
+  <div class="nav">
+    <button onclick="go(-1)" title="Trước">‹</button>
+    <button onclick="go(1)" title="Sau">›</button>
+  </div>
+  <div id="dots"></div>
+  <div class="lbl" id="barLbl"></div>
+  <button onclick="toggleNotes()" title="Ghi chú giảng viên (N)" style="width:auto;padding:0 14px">Ghi chú</button>
+  <div class="cnt" id="barCnt"></div>
+</div>
+<div id="notes"></div>
+
+<script>
+/* ══════════ SỐ NỀN — Báo cáo tài chính riêng, tỷ đồng ══════════ */
+const D={
+  pbt:{y24:30697.871,y25:35508.846},
+  hdk:{y24:4770.473,y25:12750.809},
+  nii:{y24:56233.503,y25:61255.496},
+  toi:{y24:77044.853,y25:86329.574},
+  opex:{y24:25809.100,y25:28248.461},
+  prov:{y24:20537.882,y25:22572.267},
+  fee:{y24:5628.744,y25:5708.343},
+  loan:{y24:2013808.136,y25:2321468.581,h1:2449208.681},
+  dep:{y24:1929557.458,y25:2195892.605,h1:2236429.488},
+  tctd:{y24:222117.274,y25:401538.224},
+  nocp:{y24:167226.790,y25:217524.929},
+  gtcg:{y24:199000.165,y25:225107.774},
+  h1:{pbt25:15259.399,pbt26:18081.911,hdk25:3952.067,hdk26:4631.232},
+  cf:{h125:91630.921,h126:-21323.038},
+  ldr:{y24:104.37,y25:105.72,h1:109.51},
+  casa:{y24:19.29,y25:21.03},
+  npl:{y24:1.38,y25:1.44,h1:1.79},
+  cov:{y24:133.07,y25:100.87,h1:76.35},
+  rate:{lend:5.97,cof:3.71,term:4.59,casa:0.20}
+};
+D.ta={y24:2709397.390,y25:3265518.922};   D.ta25=D.ta.y25;
+D.casaAmt={y24:372162.109,y25:461799.738};   // tiền gửi không kỳ hạn
+D.nplAmt={y24:27712.025,y25:33396.390};      // nợ nhóm 3+4+5
+D.equity={y24:136350.642,y25:163017.075};
+D.ppop={y24:51235.753,y25:58081.113};
+D.lnst={y24:24579.917,y25:28445.518};
+D.cir={y24:33.50,y25:32.72};
+D.staff=26280;          // tổng tài sản & nhân sự 31/12/2025
+D.fx={y24:5264.524,y25:3718.008};                // lãi thuần kinh doanh ngoại hối
+D.sec={y24:4941.835,y25:2676.526};              // lãi thuần mua bán chứng khoán
+D.gv={y24:205.774,y25:220.392};              // thu từ góp vốn, mua cổ phần
+D.llr={y24:36876.153,y25:33687.934};        // dự phòng rủi ro cho vay cuối kỳ
+D.xlrrUsed={y24:23071.832,y25:25779.922};   // dự phòng đã dùng để xử lý rủi ro
+D.core={y24:D.pbt.y24-D.hdk.y24, y25:D.pbt.y25-D.hdk.y25};
+D.h1.core25=D.h1.pbt25-D.h1.hdk25; D.h1.core26=D.h1.pbt26-D.h1.hdk26;
+const GUIDE=Math.round(D.pbt.y25*1.10);
+
+const f=n=>Math.round(n).toLocaleString('vi-VN');
+const f1=n=>n.toLocaleString('vi-VN',{minimumFractionDigits:1,maximumFractionDigits:1});
+const f2=n=>n.toLocaleString('vi-VN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pc=(a,b)=>((a/b-1)*100);
+const sg=n=>(n>=0?'+':'−')+f1(Math.abs(n))+'%';
+
+/* ══════════ NỘI DUNG SLIDE ══════════ */
+const SL=[];
+
+/* --- 1. bìa --- */
+SL.push({lbl:'Bìa',html:`
+<div class="stitle" style="margin:auto 0">
+  <div class="eyebrow">Buổi 1 · Bước 0–1 của chu trình · tương ứng tháng 9–10</div>
+  <h1 style="margin-top:14px">Chốt số nền<br>và giả định</h1>
+  <p style="font-size:17.5px;color:var(--muted);max-width:60ch;margin-top:16px">
+  Buổi duy nhất chưa đụng đến kế hoạch năm sau. Toàn bộ buổi này là chuẩn bị nguyên liệu —
+  và kiểm tra xem nguyên liệu ấy có sạch không.</p>
+  <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:26px">
+    <span class="tag g">Số liệu công bố công khai</span>
+    <span class="tag g">Cơ sở báo cáo riêng</span>
+    <span class="tag">6 màn khám phá</span>
+  </div>
+</div>
+<div class="src">Nguồn: Báo cáo tài chính riêng của BIDV, năm 2025 đã kiểm toán, có số so sánh 2024</div>`,
+notes:`<h4>Mở buổi</h4>
+<div class="blk">Ba điều nói rõ ngay trong 2 phút đầu: số liệu <b>công bố công khai</b>, cơ sở <b>báo cáo riêng</b> chứ không phải hợp nhất, số 6 tháng mới <b>soát xét</b> chứ chưa kiểm toán.
+<br><br>Nói trước để lớp không phải thắc mắc giữa chừng, và để họ thấy mình cẩn trọng với nguồn.</div>
+<div class="blk"><b>Không</b> giới thiệu dài về bản thân. Nhóm này đánh giá qua nội dung, không qua tiểu sử.</div>`});
+
+/* --- 2. năng lực đạt được --- */
+SL.push({lbl:'Năng lực đạt được',cls:'center',html:`
+<div style="width:100%">
+  <div class="eyebrow">Năng lực đạt được</div>
+  <h2 class="bigh">Bốn năng lực hình thành sau buổi 1</h2>
+  <div class="g4 caps" style="margin-top:10px">
+  ${[['01','Quy trình lập kế hoạch',
+      'Hình dung trọn chu kỳ lập kế hoạch của ngân hàng thương mại, xác định vai trò và đầu ra của từng khối'],
+     ['02','Chất lượng lợi nhuận',
+      'Phân biệt lợi nhuận bền vững với khoản thu một lần, và xác lập số nền phù hợp để lập kế hoạch'],
+     ['03','Cấu trúc sinh lời',
+      'Đọc cơ cấu nguồn vốn – sử dụng vốn để suy ra định hướng điều hành, thay vì chỉ đọc con số tăng trưởng'],
+     ['04','Tham số hóa giả định',
+      'Chuyển giả định ngầm thành tham số kiểm chứng được, làm cơ sở cho dự báo và phân tích chênh lệch']]
+   .map(x=>`<div class="card capc">
+     <div class="mono capn">${x[0]}</div>
+     <div class="capt">${x[1]}</div>
+     <div class="capd">${x[2]}</div></div>`).join('')}
+  </div>
+</div>`,
+notes:`<h4>Năng lực đạt được</h4>
+<div class="blk">Chiếu nhanh, để lớp nhìn lướt. <b>Không đọc từng thẻ.</b>
+Dừng lại ở thẻ <b>02</b> — đó là trục của buổi và là phần gây tranh luận nhất.</div>
+<div class="blk">Không giải thích cách học ở đây. Cách làm việc sẽ tự lộ ra ngay ở màn A1.</div>`});
+
+/* --- A1: xếp thẻ --- */
+SL.push({lbl:'A1 · Xếp lại mùa lập kế hoạch',html:`
+<div class="stitle">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối A · chặng 1 · 12 phút</div><span class="explore">Xếp thẻ</span></div>
+  <h2 style="margin-top:6px">Cấu phần của một mùa lập kế hoạch</h2>
+  <p style="color:var(--muted);font-size:14.5px">Bấm vào thẻ để đưa lên sơ đồ, bấm thẻ trên sơ đồ để gỡ ra.
+  <b>Trong kho có những việc không thuộc chu trình lập kế hoạch</b> — đừng đưa chúng lên.</p>
+</div>
+<div class="sbody">
+  <div class="a1grid">
+    <div>
+      <div class="eyebrow" style="margin-bottom:8px">Kho thẻ việc</div>
+      <div class="cardpool" id="pool"></div>
+    </div>
+    <div>
+      <div class="eyebrow" style="margin-bottom:8px">Sơ đồ mùa kế hoạch — theo thứ tự</div>
+      <div class="seq" id="seq"></div>
+      <div style="display:flex;gap:9px;margin-top:14px;flex-wrap:wrap">
+        <button class="btn pri sm" onclick="a1check()">Kiểm tra</button>
+        <button class="btn sm" onclick="a1reset()">Làm lại</button>
+      </div>
+      <div id="a1out" style="margin-top:12px"></div>
+    </div>
+  </div>
+</div>`,
+notes:`<h4>A1 — 12 phút</h4>
+<div class="blk"><b>Cách chạy:</b> phát bộ thẻ in cho mỗi bàn, cho 7 phút xếp trên mặt bàn.
+Sau đó mời <b>một bàn</b> lên bấm trên màn hình theo kết quả của họ.</div>
+<div class="blk">Chọn bàn có kết quả <b>khác biệt nhất</b>, không chọn bàn xếp đúng nhất — chỗ khác nhau mới đáng bàn.</div>
+<div class="q">"Không có đáp án chuẩn ở đây. Cái tôi quan tâm là chỗ các bàn xếp khác nhau."</div>
+<div class="blk"><b>Bất đồng thường gặp:</b> cân đối nguồn – sử dụng vốn xảy ra trước hay sau khi chi nhánh bảo vệ;
+ngân sách chi phí làm song song hay nối tiếp.</div>
+<div class="blk"><b>Năm thẻ nhiễu</b> đều là việc có thật, cùng mùa, nhưng thuộc chu trình khác.
+Bàn nào đưa nhầm lên thì đó là cơ hội nói về ranh giới của chu trình lập kế hoạch.</div>`});
+
+/* --- A2: đối chiếu thông lệ --- */
+SL.push({lbl:'A2 · Đối chiếu thông lệ ngành',html:`
+<div class="stitle">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối A · chặng 2 · 16 phút</div><span class="explore">Khám phá</span></div>
+  <h2 style="margin-top:6px">Đối chiếu với thông lệ ngành</h2>
+  <p style="color:var(--muted);font-size:14.5px">Chọn một bước trên trục thời gian để xem đầu vào,
+  việc chính, đầu ra và đơn vị chủ trì. Đây là <b>thông lệ chung của ngân hàng thương mại Việt Nam</b>.</p>
+</div>
+<div class="sbody">
+  <div class="tl" style="margin-top:2px">
+    <div class="tl-track"><div class="tl-fill" id="tlFill" style="width:0"></div></div>
+    <div class="tl-steps" id="tlSteps"></div>
+    <div class="tl-lbl" id="tlLbl"></div>
+  </div>
+  <div class="modesw" style="margin:16px 0 12px">
+    <button id="mLine" class="on" onclick="setMode('line')">Hồ sơ bước</button>
+    <button id="mGantt" onclick="setMode('gantt')">Chồng lấn thực tế</button>
+  </div>
+  <div class="sd">
+    <div class="sdlist" id="sdList"></div>
+    <div class="sdpanel" id="sdPanel"></div>
+  </div>
+</div>`,
+notes:`<h4>A2 — 16 phút · trục thời gian và hồ sơ bước</h4>
+<div class="blk"><b>7 phút đầu:</b> bấm lần lượt từng mốc ở chế độ Trình tự, đối chiếu với bản lớp vừa xếp.
+Chuyển sang <b>Chồng lấn thực tế</b> khi có ai đó nói "thực ra mấy bước này làm cùng lúc".</div>
+<div class="blk"><b>3 phút cuối:</b> mời một học viên lên kéo thanh thời điểm giao room.</div>
+<div class="q">"Ràng buộc lớn nhất chưa biết vào lúc kế hoạch buộc phải xong."</div>
+<div class="blk"><b>Hồ sơ bước ở nửa dưới:</b> không đi hết 11 bước. Mở 3–4 bước mà lớp vừa xếp sai
+ở chặng A1, và bước sẽ được chấm nghẽn ở chặng A5.</div>
+<div class="blk">Với mỗi bước mở ra, hỏi: <i>"Ở đơn vị mình, đầu ra của bước này có đúng như vậy không?"</i></div>
+<div class="blk">Mục <b>Điểm cần lưu ý</b> của bước 5 và bước 6 là nền cho chặng phân tích điểm nghẽn.</div>`});
+
+/* --- A3: vai trò ba khối --- */
+SL.push({lbl:'A4 · Vai trò ba khối',html:`
+<div class="stitle">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối A · chặng 4 · 6 phút</div><span class="explore">Chọn khối</span></div>
+  <h2 style="margin-top:6px">Ba khối hỏi ba câu khác nhau về cùng một con số</h2></div>
+<div class="sbody">
+  <div class="g3" id="roleCards" style="margin-top:2px"></div>
+  <div class="rs" style="margin-top:16px">
+    <div>
+      <div class="eyebrow" style="margin-bottom:9px">Các bước khối này tham gia</div>
+      <div class="rslist" id="roleSteps"></div>
+    </div>
+    <div id="roleDetail"></div>
+  </div>
+</div>`,
+notes:`<h4>A5 — 6 phút</h4>
+<div class="blk">Bấm từng thẻ để mở hồ sơ khối. Không cần mở cả ba nếu thiếu thời gian —
+mở khối mà lớp đang ngồi nhiều nhất, rồi mở một khối đối diện.</div>
+<div class="blk">Nhấn câu chốt: <b>ba khối hỏi ba câu khác nhau về cùng một con số</b>.
+Đây là cách đóng khung xung đột như một vấn đề <b>cấu trúc</b>, không phải vấn đề con người —
+rất quan trọng vì trong phòng có thể có cả hai phía.</div>
+<div class="blk">Mục <b>Thường va ở đâu</b> của mỗi khối là nền trực tiếp cho chặng A6.</div>`});
+
+/* --- A4: bỏ phiếu điểm nghẽn --- */
+SL.push({lbl:'A5 · Chấm điểm nghẽn',html:`
+<div class="stitle">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối A · chặng 5 · 5 phút</div><span class="explore">Bỏ phiếu</span></div>
+  <h2 style="margin-top:6px">Bước nào tốn thời gian nhất, bước nào hay phải làm lại nhất?</h2>
+  <p style="color:var(--muted);font-size:14.5px">Mỗi bàn hai phiếu. Bấm vào bước để bỏ phiếu.</p>
+</div>
+<div class="sbody">
+  <div class="vsteps" id="vsteps"></div>
+  <div style="display:flex;gap:9px;margin-top:13px;flex-wrap:wrap;align-items:center">
+    <button class="btn sm" onclick="vreset()">Xóa phiếu</button>
+    <span class="hint" style="margin:0" id="vtot"></span>
+  </div>
+  <div id="vout" style="margin-top:12px"></div>
+</div>`,
+notes:`<h4>A4 — 5 phút</h4>
+<div class="blk">Giơ tay theo bàn, mình bấm. Hoặc mời đại diện từng bàn lên bấm — nhanh hơn và vui hơn.</div>
+<div class="blk"><b>Dự đoán:</b> phiếu sẽ dồn vào bước 4–5 (chi nhánh bảo vệ, tổng hợp chênh lệch)
+và bước 6 (cân đối cuối).</div>
+<div class="blk">Nếu lớp chấm khác dự đoán — <b>bám theo cái họ chấm</b>, đừng lái về dự đoán của mình.
+Đó mới là thông tin thật về đơn vị họ.</div>`});
+
+/* --- A6: phân tích ba tầng --- */
+SL.push({lbl:'A6 · Phân tích điểm nghẽn',html:`
+<div class="stitle">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối A · chặng 6 · 12 phút</div><span class="explore">Bỏ phiếu · ba tầng</span></div>
+  <h2 style="margin-top:6px">Vì sao đàm phán Hội sở – Chi nhánh là vòng khó khăn nhất</h2>
+</div>
+<div class="sbody">
+  <div class="tier" id="t1">
+    <div class="th"><span class="tnum">TẦNG 1</span><span class="tq">Nguyên nhân nằm ở đâu?</span></div>
+    <div class="opts" id="o1"></div>
+    <button class="btn sm" onclick="tierShow(1)">Chốt phiếu và xem phân tích</button>
+    <div class="reveal" id="r1" style="margin-top:12px"></div>
+  </div>
+  <div class="tier lock" id="t2">
+    <div class="th"><span class="tnum">TẦNG 2</span><span class="tq">Đang giải quyết bằng cách nào?</span></div>
+    <div id="b2"></div>
+  </div>
+  <div class="tier lock" id="t3">
+    <div class="th"><span class="tnum">TẦNG 3</span><span class="tq">Vì sao vẫn chưa đủ?</span></div>
+    <div id="b3"></div>
+  </div>
+</div>`,
+notes:`<h4>A6 — 12 phút · phần giá trị nhất của khối A</h4>
+<div class="blk"><b>Tầng 1 (5'):</b> cho lớp bỏ phiếu trước, rồi mới mở phân tích.
+Nêu hệ quả nhưng <b>không đứng về phía Hội sở</b> — trong phòng có thể có người từng ở chi nhánh.</div>
+<div class="blk"><b>Tầng 2 (3'):</b> hai cách bổ sung nhau, không thay thế nhau.</div>
+<div class="blk"><b>Tầng 3 (4'):</b> cho lớp bỏ phiếu rào cản lớn nhất ở đơn vị mình.
+Ba rào cản dẫn tới cùng một hệ quả: chỉ chạy được 2–3 vòng.</div>
+<div class="q">"Nếu một vòng lặp chỉ tốn vài phút thay vì hai tuần, các anh chị sẽ làm gì khác?"</div>
+<div class="blk">Không trả lời. Đó là nội dung buổi 2 và 3. Dừng ở đây, chuyển khối B.</div>`});
+
+/* --- A3: đối chiếu lịch nội bộ với mốc giao giới hạn --- */
+SL.push({lbl:'A3 · Đối chiếu với mốc giao giới hạn',html:`
+<div class="stitle">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối A · chặng 3 · 8 phút</div><span class="explore">Khám phá</span></div>
+  <h2 style="margin-top:6px">Bao nhiêu phần của kế hoạch phải làm khi chưa biết giới hạn tín dụng</h2>
+</div>
+<div class="sbody">
+  <div class="card warm" style="margin-bottom:14px">
+    <div class="sld" style="margin-bottom:0"><div class="row">
+      <label for="roomT">Thời điểm Ngân hàng Nhà nước giao giới hạn tăng trưởng tín dụng chính thức</label>
+      <span class="v" id="roomV"></span></div>
+      <input type="range" id="roomT" min="0" max="10" step="1" value="8">
+      <div class="b">Kéo để đối chiếu với lịch nội bộ bên dưới</div>
+    </div>
+  </div>
+  <div class="rl">
+    <div class="rlmain">
+      <div class="rlhead">
+        <span class="rlk"><i class="sw pre"></i>Hoàn thành trước mốc — làm khi chưa biết giới hạn</span>
+        <span class="rlk"><i class="sw cut"></i>Đang làm thì giới hạn được giao — phải điều chỉnh</span>
+        <span class="rlk"><i class="sw post"></i>Bắt đầu sau mốc — đã biết giới hạn</span>
+      </div>
+      <div class="rlrows" id="rlRows"></div>
+      <div class="gscale2" style="margin-left:250px" id="rlScale"></div>
+    </div>
+    <div class="rlside" id="rlSide"></div>
+  </div>
+  <div id="rlNote" style="margin-top:14px"></div>
+</div>`,
+notes:`<h4>A3 — 8 phút</h4>
+<div class="blk"><b>Mời một học viên lên kéo.</b> Bắt đầu ở mốc mặc định (bước 8 · tháng 1–2),
+đó là tình huống thường gặp: giới hạn được giao đúng lúc hoặc sau khi kế hoạch trình phê duyệt.</div>
+<div class="q">"Có bao nhiêu bước ở đây phải làm xong khi chưa biết giới hạn?"</div>
+<div class="blk">Kéo sang trái đến bước 2 — số bước cảnh báo giảm mạnh. Đó là tình huống lý tưởng
+mà thực tế ngành hiếm khi có.</div>
+<div class="blk"><b>Điểm cần rút ra:</b> phần lớn công việc dựng khung, đàm phán và cân đối
+đều nằm trước mốc. Kế hoạch vì vậy không thể là một con số, phải là phương án theo từng mức giới hạn.</div>
+<div class="blk">Gieo hạt cho buổi 3 rồi để đó, đừng khai triển ở đây.</div>`});
+
+SL.push({lbl:'B2 · Dự đoán trước khi thấy số',cls:'center',html:`
+<div style="width:100%">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối B · chặng 2 · 8 phút</div><span class="explore">Bỏ phiếu</span></div>
+  <h2 style="margin-top:8px">Lợi nhuận trước thuế 2025 tăng ${f(D.pbt.y25-D.pbt.y24)} tỷ so với 2024</h2>
+  <p style="font-size:16px;color:var(--muted);max-width:72ch">
+  Trước khi xem thêm bất cứ dòng nào — trong mức tăng <b class="mono">${f(D.pbt.y25-D.pbt.y24)} tỷ</b> đó,
+  phần đến từ <b>hoạt động lõi</b> (thu nhập lãi thuần, dịch vụ, trừ chi phí và dự phòng) chiếm bao nhiêu?</p>
+  <div class="opts" id="bp" style="margin-top:20px;max-width:900px"></div>
+  <div style="margin-top:14px"><button class="btn pri sm" onclick="bpShow()">Chốt phiếu và xem kết quả</button></div>
+  <div id="bpOut" style="margin-top:16px"></div>
+</div>`,
+notes:`<h4>B1 — 8 phút</h4>
+<div class="blk"><b>Câu nối từ khối A:</b> "Vòng lặp nhanh mà số nền sai thì chỉ sai nhanh hơn.
+Trước khi bàn chuyện chạy nhanh hơn, ta kiểm tra nguyên liệu đầu vào."</div>
+<div class="blk">Bắt buộc lớp bỏ phiếu <b>trước</b> khi thấy đáp án. Giơ tay theo bàn, mình bấm.</div>
+<div class="blk">Đa số chọn "khoảng một nửa". Đáp án là <b>13%</b> — 628 trên 4.811 tỷ.
+Khoảng cách giữa cảm nhận và số liệu chính là lý do phải bóc tách trước khi lấy làm số nền.</div>`});
+
+/* --- B2: phân loại --- */
+SL.push({lbl:'B3 · Phân loại chất lượng lợi nhuận',html:`
+<div class="stitle">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối B · chặng 3 · 12 phút</div><span class="explore">Phân loại</span></div>
+  <h2 style="margin-top:6px">Khoản nào nhân được cho năm sau?</h2>
+  <div class="blegend">
+    <span><i style="background:var(--green)"></i> Lặp lại được — có thể ngoại suy cho năm sau</span>
+    <span><i style="background:var(--warn)"></i> Không lặp lại được — có thật, nhưng không dựa vào để lập kế hoạch</span>
+  </div>
+</div>
+<div class="sbody">
+  <div class="bgrid" id="bitems"></div>
+  <div style="display:flex;gap:9px;margin-top:13px;align-items:center;flex-wrap:wrap">
+    <button class="btn pri sm" onclick="b2check()">Kiểm tra và xem cơ chế</button>
+    <button class="btn sm" onclick="b2reset()">Làm lại</button>
+    <span class="hint" style="margin:0" id="b2stat"></span>
+  </div>
+  <div id="b2out" style="margin-top:12px"></div>
+</div>`,
+notes:`<h4>B2 — 12 phút · chặng lý thuyết duy nhất của khối B</h4>
+<div class="blk">Đừng giảng trước. Cho lớp bấm phân loại từng khoản, rồi mới mở phần cơ chế.</div>
+<div class="blk"><b>Điểm cần lớp tự phát hiện:</b> sáu khoản đầu <b>có thể tốt lên</b> năm sau.
+Riêng thu hồi nợ đã xử lý rủi ro thì <b>càng làm tốt càng cạn</b> — đó là khác biệt về bản chất,
+không phải về mức độ.</div>
+<div class="q">"Khoản nào càng làm tốt thì năm sau càng khó lặp lại?"</div>
+<div class="blk"><b>Hoàn nhập dự phòng</b> không có dòng riêng trên báo cáo — nó nằm trong chi phí dự phòng ròng.
+Nếu lớp hỏi, chỉ sang chặng B4 nơi có chuỗi biến động dự phòng đầy đủ.</div>`});
+
+/* --- B4: đối chiếu mức tăng lợi nhuận --- */
+SL.push({lbl:'B4 · Đối chiếu mức tăng lợi nhuận',html:`
+<div class="stitle">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối B · chặng 4 · 12 phút</div><span class="explore">Chọn cấu phần</span></div>
+  <h2 style="margin-top:6px">Mức tăng lợi nhuận đến từ những cấu phần nào</h2>
+  <p style="color:var(--muted);font-size:14.5px">Bỏ chọn một cấu phần để loại nó khỏi phép cộng.
+  Tổng và biểu đồ đối chiếu cập nhật ngay.</p>
+</div>
+<div class="sbody">
+  <div class="rec">
+    <div>
+      <div style="overflow-x:auto"><table id="recTbl"></table></div>
+      <div style="display:flex;gap:9px;margin-top:11px;flex-wrap:wrap">
+        <button class="btn sm" onclick="recAll(1)">Chọn tất cả</button>
+        <button class="btn sm" onclick="recAll(0)">Bỏ chọn tất cả</button>
+        <button class="btn sm" onclick="recCore()">Chỉ giữ hoạt động lõi</button>
+      </div>
+      <div id="recMsg" style="margin-top:13px"></div>
+    </div>
+    <div>
+      <div class="eyebrow" style="margin-bottom:10px">Đối chiếu lợi nhuận trước thuế · tỷ đồng</div>
+      <div class="wfc" id="recWf"></div>
+    </div>
+  </div>
+</div>`,
+notes:`<h4>B4 — 12 phút · công cụ, không phải bảng đọc</h4>
+<div class="blk"><b>Cách chạy:</b> bắt đầu với tất cả được chọn — tổng ra đúng +4.811 tỷ,
+khớp với bảng ở chặng B1. Đó là điểm neo, phải chỉ ra trước.</div>
+<div class="blk">Sau đó mời một học viên lên bỏ chọn từng cấu phần. Mỗi lần bỏ, hỏi:
+<i>"Bây giờ ta đang trả lời câu hỏi gì?"</i></div>
+<div class="blk"><b>Ba tổ hợp đáng dừng lại:</b> bỏ lãi thuần hoạt động khác → tổng âm;
+chỉ giữ hoạt động lõi → +643 tỷ; giữ tất cả → +4.811 tỷ. Cùng một năm, ba con số.</div>
+<div class="q">"Bóc cấu phần nào là một quyết định — và quyết định đó thay đổi kết luận."</div>
+<div class="blk">Không áp đặt tổ hợp nào là đúng. Điều lớp cần mang về là <b>ý thức rằng phải nói rõ
+mình đang loại gì</b> khi trình bày một con số tăng trưởng.</div>`});
+
+/* --- B4: chuỗi dự phòng và nợ xấu --- */
+SL.push({lbl:'B5 · Trữ lượng nằm ở đâu',html:`
+<div class="stitle"><div class="eyebrow">Khối B · chặng 5 · 10 phút</div>
+<h2>Khoản thu hồi nợ lấy từ đâu ra</h2>
+<p style="color:var(--muted);font-size:14.5px">Chỉ thu được từ danh mục đã dùng dự phòng để xử lý rủi ro
+trong quá khứ. Hai chuỗi dưới đây cho thấy trữ lượng ấy hình thành và vơi đi như thế nào.</p></div>
+<div class="sbody">
+  <div class="g2" style="align-items:start">
+    <div>
+      <div class="eyebrow" style="margin-bottom:9px">Biến động dự phòng rủi ro cho vay · năm 2025</div>
+      <div class="flow" id="flow"></div>
+      <div class="note warn" style="margin-top:12px;font-size:13.5px">
+      <b>Dùng nhiều hơn trích lập.</b> Số dự phòng đem đi xử lý rủi ro (${f(D.xlrrUsed.y25)} tỷ)
+      lớn hơn số trích lập mới (${f(D.prov.y25)} tỷ), nên bộ đệm cuối kỳ mỏng đi
+      ${f(D.llr.y24-D.llr.y25)} tỷ.</div>
+    </div>
+    <div>
+      <div class="eyebrow" style="margin-bottom:9px">Cơ cấu nhóm nợ và mức bao phủ</div>
+      <table id="nplt"></table>
+      <div class="note" style="margin-top:12px;font-size:13.5px">Nợ nhóm 5 tăng từ 0,94% lên
+      <b>1,07%</b> trong khi tỷ lệ bao phủ nợ xấu giảm từ 133,07% xuống <b>100,87%</b> —
+      giảm hơn 32 điểm phần trăm. Hai con số này giải thích lẫn nhau, và giải thích luôn
+      vì sao dự phòng cuối kỳ giảm.</div>
+    </div>
+  </div>
+  <div class="quote" style="margin-top:18px;font-size:18px">Trích lập ít hơn số đem đi xử lý,
+  bộ đệm mỏng dần — điều đó có bền không?</div>
+  <div class="hint">Câu này để ngỏ. Ràng buộc an toàn vốn là nội dung buổi 3.</div>
+</div>`,
+notes:`<h4>B4 — 10 phút · chỉ trình bày, không cho thao tác</h4>
+<div class="blk">Đây là chỗ chứng minh cho khái niệm "trữ lượng hữu hạn" ở B2.
+Nói suông thì lớp phải tin; cho thấy chuỗi thì lớp tự kiểm được.</div>
+<div class="blk"><b>Chuỗi dự phòng khớp gần tuyệt đối</b> — chênh khoảng 19 tỷ do dự phòng các tài sản
+khác ngoài cho vay khách hàng. Nếu lớp phát hiện chênh, đó là câu hỏi hay, trả lời thẳng.</div>
+<div class="blk">Đọc theo trật tự: nhóm 5 tăng → dùng dự phòng nhiều hơn → bộ đệm mỏng →
+bao phủ giảm 32 điểm.</div>
+<div class="blk">Kết bằng câu hỏi mở, <b>không trả lời</b>. Hẹn buổi 3.</div>`});
+
+/* --- B5: kéo giả định --- */
+SL.push({lbl:'B6 · Hệ quả cho số nền',html:`
+<div class="stitle">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối B · chặng 6 · 13 phút</div><span class="explore">Khám phá</span></div>
+  <h2 style="margin-top:6px">Mức tăng lợi nhuận 2025 phụ thuộc vào một khoản đến mức nào</h2>
+  <p style="color:var(--muted);font-size:14.5px">Giữ nguyên mọi cấu phần khác của năm 2025, chỉ thay đổi
+  mức lãi thuần hoạt động khác, rồi xem lợi nhuận trước thuế và mức tăng so với 2024 thay đổi ra sao.</p>
+</div>
+<div class="sbody">
+  <div class="g2" style="grid-template-columns:.9fr 1.1fr;align-items:start">
+    <div class="card warm">
+      <div class="sld"><div class="row"><label for="recov">Lãi thuần hoạt động khác 2025 giả định bằng</label>
+      <span class="v" id="recovV"></span></div>
+      <input type="range" id="recov" min="20" max="120" step="1" value="100">
+      <div class="b">so với mức thực tế ${f(D.hdk.y25)} tỷ · mức của năm 2024 là ${f(D.hdk.y24)} tỷ,
+      tương đương ${f1(D.hdk.y24/D.hdk.y25*100)}%</div></div>
+      <div class="note" style="margin-top:14px;font-size:13.5px">Thực tế 2025: lợi nhuận trước thuế
+      <b class="mono">${f(D.pbt.y25)} tỷ</b>, tăng ${f2(pc(D.pbt.y25,D.pbt.y24))}% so với
+      <b class="mono">${f(D.pbt.y24)} tỷ</b> của năm 2024.</div>
+    </div>
+    <div>
+      <div class="g2" id="recovKpi" style="gap:12px"></div>
+      <div id="recovNote" style="margin-top:14px"></div>
+    </div>
+  </div>
+</div>`,
+notes:`<h4>B6 — 13 phút · chốt khối B</h4>
+<div class="blk"><b>Cách chạy:</b> để một học viên kéo. Dừng ở <b>mốc của năm 2024</b> (khoảng 37%) —
+mức hoàn toàn có thật vì đó là con số đã xảy ra.</div>
+<div class="blk">Ở mốc đó, lợi nhuận 2025 <b>thấp hơn 2024</b> dù mọi cấu phần khác giữ nguyên.
+Đây là bằng chứng định lượng cho kết luận của cả khối B.</div>
+<div class="q">"Điểm hòa nằm ở đâu — mức nào thì lợi nhuận 2025 bằng 2024?"</div>
+<div class="blk">Đáp án hiện trên màn khi kéo: khoảng <b>62%</b> mức thực tế.</div>
+<div class="blk"><b>Câu treo, chưa trả lời ở đây:</b> nếu lấy số nền cho kế hoạch năm sau,
+lấy con số nào? Để đến buổi 4.</div>`});
+
+/* --- C1: giải phẫu mô hình --- */
+SL.push({lbl:'C1 · Giải phẫu mô hình kinh doanh',html:`
+<div class="stitle">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối C · chặng 1 · 15 phút</div><span class="explore">Hiện dần từ lõi</span></div>
+  <h2 style="margin-top:6px">Mỗi khoản lợi nhuận sinh ra từ một cơ sở — và cơ sở đó quyết định bản chất của nó</h2>
+</div>
+<div class="sbody">
+  <div class="anat">
+    <div>
+      <div class="eyebrow" style="margin-bottom:8px">Cấu trúc lợi nhuận 2025 · tỷ đồng</div>
+      <div class="stack" id="stack"></div>
+      <div class="anat-nav">
+        <button class="btn pri sm" id="anatNext" onclick="anatNext()">Mở lớp tiếp theo →</button>
+        <button class="btn sm" onclick="anatReset()">Về lõi</button>
+        <span class="hint" style="margin:0" id="anatStep"></span>
+      </div>
+    </div>
+    <div id="anatPanel"></div>
+  </div>
+</div>`,
+notes:`<h4>C1 — 15 phút · màn xương sống của cả khóa</h4>
+<div class="blk"><b>Không giảng mô hình ngân hàng từ đầu.</b> Nhóm này sống trong nó hằng ngày.
+Việc của màn này là <b>bày nó ra thành sơ đồ để chỉ trỏ vào</b>, và nối lại với phần phân loại ở khối B.</div>
+<div class="blk"><b>Cách chạy:</b> mở từng lớp, mỗi lớp kéo thanh trượt cho lớp thấy khoảng dao động.
+Câu hỏi lặp lại ở mỗi lớp: <i>"Cơ sở sinh ra khoản này có còn nguyên vào năm sau không?"</i></div>
+<div class="blk"><b>Lớp 5 là chỗ ăn tiền.</b> Kéo thanh hoàn nhập đến khi chạm trần — không thể hoàn nhập
+nhiều hơn số đã trích. Trần là <b>36.876 tỷ</b>, đúng bằng số dư dự phòng đầu kỳ. Đây là chốt chặn
+tuyệt đối, không phải ước lượng.</div>
+<div class="q">"Khoản nào có cơ sở tự tái tạo, khoản nào có cơ sở bị tiêu hao khi khai thác?"</div>
+<div class="blk">Sơ đồ này dùng lại suốt ba buổi sau: buổi 2 kéo thanh nào thì trỏ vào nút đó,
+buổi 3 ràng buộc nào vỡ thì trỏ vào nhánh đó.</div>`});
+
+/* --- 10. cơ cấu nguồn (tương tác) --- */
+SL.push({lbl:'C2 · Cơ cấu nguồn vốn',html:`
+<div class="stitle">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối C · chặng 2 · 16 phút</div><span class="explore">Bóc cơ cấu</span></div>
+  <h2 style="margin-top:6px">Dư nợ tăng ${f2(pc(D.loan.y25,D.loan.y24))}%, tiền gửi tăng ${f2(pc(D.dep.y25,D.dep.y24))}% — phần chênh lấy ở đâu?</h2>
+</div>
+<div class="sbody">
+  <div class="fund" id="fund" style="margin-bottom:6px"></div>
+  <div class="note warn" style="margin:12px 0 16px"><b>Tiền gửi và vay các tổ chức tín dụng tăng 80,8%.</b>
+  Đây là nguồn kém ổn định hơn tiền gửi dân cư và tổ chức kinh tế. Tổng nguồn vẫn tăng mạnh,
+  nhưng <b>chất lượng nguồn đã dịch chuyển</b>.</div>
+  <div class="hint">Tỷ lệ dư nợ trên tiền gửi ở đây là <b>tỷ lệ thô</b>, lấy thẳng hai dòng bảng cân đối —
+  không phải tỷ lệ theo công thức Thông tư của Ngân hàng Nhà nước.</div>
+</div>`,
+notes:`<h4>Điều hành khám phá 4</h4>
+<div class="blk">Đây là bài tập nhìn thấy <b>cơ chế liên kết</b> — năng lực nền cho toàn bộ buổi 2.
+Đừng vội giải thích, để lớp tự kéo và tự nói ra mối liên hệ.</div>
+<div class="blk">Kéo tiền gửi lên 5,5% (bằng tốc độ dư nợ) → tỷ lệ về mức ổn, dòng tiền dương trở lại.
+Kéo xuống 1,85% (thực tế) → cả ba ô đỏ.</div>
+<div class="q">"Ba con số này là ba vấn đề riêng biệt, hay là một vấn đề nhìn từ ba phía?"</div>
+<div class="blk">Phân biệt <b>tỷ lệ thô</b> và tỷ lệ theo Thông tư — bài học đọc số thận trọng,
+sẽ dùng lại ở buổi 3.</div>`});
+
+/* --- 11. giả định ngầm --- */
+SL.push({lbl:'Giả định ngầm',html:`
+<div class="stitle"><div class="eyebrow">Khối 1.4 · 40 phút</div>
+<h2>Bao nhiêu giả định được ghi thành văn bản, bao nhiêu nằm trong đầu?</h2></div>
+<div class="sbody">
+  <table style="margin-top:6px">
+    <thead><tr><th>Nhóm giả định</th><th>Ví dụ</th><th>Hậu quả khi không viết ra</th></tr></thead>
+    <tbody>
+      <tr><td><b>Giá</b></td><td>Lãi suất cho vay bình quân · lãi suất huy động có kỳ hạn</td>
+          <td>Giữa năm lệch, không biết do giá hay do lượng</td></tr>
+      <tr><td><b>Cơ cấu</b></td><td>Tỷ lệ tiền gửi không kỳ hạn · cơ cấu kỳ hạn danh mục</td>
+          <td>Không giải thích được vì sao biên thu hẹp</td></tr>
+      <tr><td><b>Rủi ro</b></td><td>Chi phí rủi ro tín dụng trên dư nợ bình quân</td>
+          <td>Trích lập vượt dự toán, không truy được nguyên nhân</td></tr>
+      <tr><td><b>Cách tính</b></td><td>Thu nhập lãi tính trên dư nợ bình quân hay cuối kỳ</td>
+          <td>Kế hoạch lạc quan có hệ thống mà không ai phát hiện</td></tr>
+    </tbody>
+  </table>
+  <div class="g2" style="margin-top:20px">
+    <div class="note warn"><b>Từ câu nói mơ hồ</b><br>
+    <span style="font-family:var(--serif);font-style:italic;font-size:16px;color:var(--ink)">
+    "Năm nay huy động sẽ tốt hơn."</span></div>
+    <div class="note"><b>Thành tham số kiểm chứng được</b><br>
+    <span class="mono" style="font-size:13px;color:var(--ink)">
+    Tỷ lệ tiền gửi không kỳ hạn: ${f2(D.casa.y24)}% → ${f2(D.casa.y25)}%<br>
+    Đơn vị: điểm phần trăm · Nguồn: thuyết minh tiền gửi khách hàng</span></div>
+  </div>
+  <div class="note gold" style="margin-top:16px"><b>Tham số phải có đủ bốn thứ:</b>
+  tên · đơn vị · giá trị · nguồn. Thiếu một trong bốn thì giữa năm không truy vết được.</div>
+</div>`,
+notes:`<h4>Hoạt động khối 1.4 — 25 phút</h4>
+<div class="blk">Cá nhân làm trước (10 phút), rồi ghép cặp đối chiếu (10 phút), sau đó mới gọi phát biểu.
+Cách này giúp người ngại nói trước cấp trên vẫn tham gia được.</div>
+<div class="blk">Yêu cầu: mỗi người liệt kê <b>tối thiểu 5 giả định ngầm</b> trong kế hoạch năm trước
+của phần việc mình phụ trách, rồi viết lại thành tham số đủ 4 thành phần.</div>
+<div class="blk">Thu lại một vài phiếu, dùng làm ví dụ mở đầu buổi 2.</div>`});
+
+/* --- 12. độ nhạy (tương tác) --- */
+SL.push({lbl:'Xếp hạng đòn bẩy',html:`
+<div class="stitle">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối 1.4 · vì sao phải tham số hóa</div><span class="explore">Khám phá 5</span></div>
+  <h2 style="margin-top:6px">Giả định nào lệch một chút thì lợi nhuận đổi nhiều nhất?</h2>
+  <p style="color:var(--muted);font-size:14.5px">Đặt biên độ dao động hợp lý cho từng tham số,
+  biểu đồ tự sắp xếp lại theo mức tác động lên lợi nhuận trước thuế.</p>
+</div>
+<div class="sbody">
+  <div class="tor" id="tor"></div>
+  <div class="g2" style="margin-top:14px">
+    <div class="card warm" id="torCtl"></div>
+    <div id="torNote"></div>
+  </div>
+</div>`,
+notes:`<h4>Điều hành khám phá 5</h4>
+<div class="blk">Cho lớp tự đặt biên độ: <i>"Theo kinh nghiệm các anh chị, lãi suất cho vay bình quân
+một năm xê dịch bao nhiêu là hợp lý?"</i> Rồi nhập đúng con số họ nói.</div>
+<div class="blk">Kết quả gần như luôn giống nhau: <b>giá và chi phí rủi ro chi phối, quy mô đứng sau</b>.
+Đây là nền cho phần dựng kế hoạch ở buổi 2.</div>
+<div class="q">"Nếu tăng trưởng dư nợ không phải đòn bẩy mạnh nhất, vì sao mùa kế hoạch nào cũng tranh luận nhiều nhất về con số này?"</div>
+<div class="blk">Câu này để ngỏ, dẫn sang buổi 2.</div>`});
+
+/* --- 13. chuyển tiếp --- */
+SL.push({lbl:'Kết quả đầu ra của buổi',cls:'center',html:`
+<div style="width:100%">
+  <div class="eyebrow">Kết buổi 1</div>
+  <h2 class="bigh" style="margin-top:8px">Kết quả đầu ra của buổi</h2>
+  <div class="g3" style="margin-top:22px">
+    ${[['Số nền đã tách lõi','Không còn lẫn khoản thu một lần. Đây là điểm xuất phát của mọi phép ngoại suy ở buổi sau.'],
+       ['Bản đồ cơ cấu nguồn vốn','Biết tăng trưởng đang được tài trợ bằng nguồn nào, và nguồn đó ổn định đến đâu.'],
+       ['Danh sách giả định thành tham số','Có tên, đơn vị, giá trị, nguồn — sẵn sàng đưa vào mô hình.']]
+     .map((x,i)=>`<div class="card" style="display:flex;flex-direction:column">
+       <div class="mono" style="font-size:26px;color:var(--green)">0${i+1}</div>
+       <div style="font-family:var(--serif);font-size:19px;font-weight:600;margin:6px 0 8px;line-height:1.3">${x[0]}</div>
+       <div style="font-size:13.5px;color:var(--muted);line-height:1.55">${x[1]}</div></div>`).join('')}
+  </div>
+  <div class="quote" style="margin-top:26px">Ba kết quả này là dữ liệu đầu vào của Buổi 2 —
+  xây dựng kế hoạch 2026 theo phương pháp dựa trên yếu tố dẫn dắt.</div>
+</div>`,
+notes:`<h4>Kết buổi</h4>
+<div class="blk">Nhắc học viên <b>giữ lại phiếu giả định</b> — buổi 2 sẽ dùng chính phiếu đó.</div>
+<div class="blk">Câu cuối là câu tạo tò mò cho buổi 2. Nói xong thì dừng, đừng giải thích thêm.</div>
+<div class="blk">Nếu còn thời gian: quay lại trục thời gian ở màn 3, hỏi lớp hôm nay đã phủ được
+bước nào trong mười bước.</div>`});
+
+
+/* ══════════ CẤU TRÚC CHƯƠNG TRÌNH ══════════ */
+const PROG={
+  title:'Kế hoạch Kinh doanh & Hoạch định Tài chính Ngân hàng Thương mại',
+  sub:'Chương trình đào tạo chuyên sâu · 2 ngày · 4 buổi',
+  sessions:[
+    {n:'BUỔI 1',t:'Chẩn đoán',s:'Quy trình lập kế hoạch và chất lượng số nền',m:'Sáng ngày 1 · 08:30–12:00'},
+    {n:'BUỔI 2',t:'Dựng',s:'Kế hoạch 2026 qua ba đòn bẩy lợi nhuận',m:'Chiều ngày 1 · 13:30–17:00'},
+    {n:'BUỔI 3',t:'Kiểm thử',s:'Ràng buộc điều tiết và an toàn vốn',m:'Sáng ngày 2 · 08:30–12:00'},
+    {n:'BUỔI 4',t:'Quyết định',s:'Trình bày báo cáo và ra quyết định điều hành',m:'Chiều ngày 2 · 13:30–17:00'}]
+};
+const SECT={
+  A:{c:'A',n:'Bối cảnh và quy trình lập kế hoạch',m:59,
+     d:'Tái hiện mùa lập kế hoạch, xác định vai trò các khối và phân tích điểm nghẽn của quy trình hiện hành.',
+     items:[['A1','Xếp lại mùa lập kế hoạch','Dựng lại trình tự từ bộ thẻ việc'],
+            ['A2','Đối chiếu thông lệ ngành','Trục thời gian và hồ sơ chi tiết từng bước'],
+            ['A3','Đối chiếu với mốc giao giới hạn','Bao nhiêu phần kế hoạch làm khi chưa biết ràng buộc'],
+            ['A4','Vai trò ba khối','Ba câu hỏi khác nhau về cùng một con số'],
+            ['A5','Chấm điểm nghẽn','Bước nào tốn thời gian và hay phải làm lại'],
+            ['A6','Phân tích điểm nghẽn','Nguyên nhân, cách xử lý hiện nay và giới hạn']]},
+  B:{c:'B',n:'Chất lượng lợi nhuận và số nền',m:65,
+     d:'Phân biệt khoản nhân được cho năm sau với khoản không, và xác định số nền dùng để lập kế hoạch.',
+     items:[['B1','Kết quả năm 2025 trên báo cáo','Kết quả kinh doanh, bảng cân đối và chỉ số chính'],
+            ['B2','Dự đoán trước khi thấy số','Mức tăng lợi nhuận đến từ đâu'],
+            ['B3','Phân loại chất lượng lợi nhuận','Bảy khoản mục và cơ chế sinh ra từng khoản'],
+            ['B4','Đối chiếu mức tăng lợi nhuận','Chọn cấu phần và xem tổng thay đổi theo'],
+            ['B5','Trữ lượng nằm ở đâu','Chuỗi biến động dự phòng và cơ cấu nhóm nợ'],
+            ['B6','Hệ quả cho số nền','Kéo giả định và xem yêu cầu đặt lên phần lõi']]},
+  C:{c:'C',n:'Cấu trúc sinh lời và giả định',m:46,
+     d:'Giải phẫu mô hình kinh doanh theo từng cơ sở sinh lời, đọc cơ cấu nguồn vốn và tham số hóa giả định.',
+     items:[['C1','Giải phẫu mô hình kinh doanh','Sáu lớp, mỗi lớp một cơ sở và một trần'],
+            ['C2','Cơ cấu nguồn vốn','Tăng trưởng đang được tài trợ bằng nguồn nào'],
+            ['C3','Giả định ngầm','Bốn nhóm giả định thường không được viết ra'],
+            ['C4','Xếp hạng đòn bẩy','Giả định nào lệch thì lợi nhuận đổi nhiều nhất']]}
+};
+const SESSION='BUỔI 1 · CHẨN ĐOÁN';
+
+/* --- gán mã và khối cho các slide đã dựng --- */
+(function(){
+  const codes=['COVER','GOAL','A1','A2','A4','A5','A6','A3','B2','B3','B4','B5','B6','C1','C2','C3','C4','END'];
+  SL.forEach((s,i)=>{ s.code=codes[i]; s.sec=/^[ABC]\d$/.test(codes[i]||'')?codes[i][0]:null; });
+})();
+
+/* --- chèn các slide cấu trúc --- */
+function mkCover(){return{code:'TITLE',lbl:'Trang bìa chương trình',cls:'center',html:`
+<div style="width:100%">
+  <div class="eyebrow">Chương trình đào tạo chuyên sâu</div>
+  <h1 style="margin-top:14px;max-width:20ch">${PROG.title}</h1>
+  <p style="font-size:17px;color:var(--muted);max-width:64ch;margin-top:14px">
+  Lập kế hoạch kinh doanh, lập ngân sách và quản trị dòng tiền của ngân hàng thương mại —
+  đúc kết từ kinh nghiệm triển khai và điều hành thực tế.</p>
+  <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:26px">
+    <span class="tag g">Chẩn đoán → Dựng → Kiểm thử → Quyết định</span>
+    <span class="tag g">Số liệu ngân hàng thương mại thực tế</span>
+    <span class="tag">2 ngày · 4 buổi</span>
+  </div>
+  <div class="src" style="margin-top:34px">Số liệu sử dụng trong chương trình là số công bố công khai · Cơ sở báo cáo riêng, không phải hợp nhất</div>
+</div>`,notes:`<h4>Trang bìa</h4><div class="blk">Chiếu trong lúc lớp ổn định chỗ. Không thuyết minh.</div>`};}
+
+function mkAgenda(){return{code:'AGENDA',lbl:'Mục lục chương trình',cls:'center',html:`
+<div style="width:100%"><div class="eyebrow">Mục lục chương trình</div>
+<h2 class="bigh">Bốn bước của chu kỳ lập kế hoạch kinh doanh</h2>
+  <div class="toc">${PROG.sessions.map((s,i)=>`
+    <div class="tc${i===0?' cur':''}"><div class="tcn">${s.n}</div>
+      <div class="tct">${s.t}</div><div class="tcs">${s.s}</div>
+      <div class="tcm">${s.m}</div></div>`).join('')}</div>
+  <div class="note bigger" style="margin-top:30px"><b>Tính kế thừa giữa các buổi.</b>
+  Số liệu nền được xác lập tại Buổi 1 là dữ liệu đầu vào của Buổi 2. Phương án kế hoạch xây dựng
+  tại Buổi 2 được kiểm thử qua các ràng buộc điều tiết tại Buổi 3, và bảo vệ trước Ban điều hành
+  tại Buổi 4.</div>
+</div>`,notes:`<h4>Mục lục chương trình</h4>
+<div class="blk">Nhấn <b>tính liên tục</b>: đây không phải bốn chuyên đề rời, mà là bốn bước của cùng một dòng việc.</div>
+<div class="blk">Quay lại slide này ở đầu mỗi buổi để lớp định vị.</div>`};}
+
+function mkSession(){return{code:'SESSION',lbl:'Buổi 1 · tiêu đề',cls:'center',html:`
+<div style="width:100%">
+  <div class="eyebrow">Buổi 1 · Sáng ngày 1 · 08:30–12:00</div>
+  <h1 style="margin-top:12px">Chẩn đoán</h1>
+  <div style="font-family:var(--serif);font-size:clamp(20px,2.6vw,28px);color:var(--green);
+    margin-top:-4px">Quy trình lập kế hoạch và chất lượng số nền</div>
+  <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:30px">
+    ${['A · Bối cảnh và quy trình lập kế hoạch','B · Chất lượng lợi nhuận và số nền',
+       'C · Cấu trúc sinh lời và giả định'].map(x=>`<span class="tag g bigtag">${x}</span>`).join('')}
+  </div>
+</div>`,notes:`<h4>Mở buổi 1</h4>
+<div class="blk">Hai điều nói rõ trong 2 phút đầu: số liệu <b>công bố công khai</b> và cơ sở <b>báo cáo riêng</b>
+— không phải hợp nhất.</div>
+<div class="blk"><b>Không</b> giới thiệu dài về bản thân — nhóm này đánh giá qua nội dung.</div>`};}
+
+function mkToc(){return{code:'TOC1',lbl:'Mục lục buổi 1',cls:'center',html:`
+<div style="width:100%"><div class="eyebrow">${SESSION} · mục lục buổi</div>
+<h2 class="bigh">Nội dung</h2>
+  <div class="agenda">
+    <div class="ag"><span class="agt">08:30</span><span class="agc">—</span>
+      <span class="agn">Mở đầu</span><span class="agd">Bối cảnh, nguồn số liệu và cách làm việc</span>
+      <span class="agm">10′</span></div>
+    ${['A','B','C'].map(k=>`<div class="ag"><span class="agt">${{A:'08:40',B:'09:48',C:'10:53'}[k]}</span>
+      <span class="agc">${k}</span><span class="agn">${SECT[k].n}</span>
+      <span class="agd">${SECT[k].d}</span><span class="agm">${SECT[k].m}′</span></div>
+      ${k==='A'?'<div class="ag br"><span class="agt">09:33</span><span class="agc"></span><span class="agn">Giải lao</span><span class="agd"></span><span class="agm">15′</span></div>':''}`).join('')}
+    <div class="ag"><span class="agt">11:45</span><span class="agc">—</span>
+      <span class="agn">Chốt buổi và chuyển tiếp</span>
+      <span class="agd">Tổng hợp kết quả đầu ra và chuyển tiếp sang Buổi 2</span><span class="agm">10′</span></div>
+  </div>
+</div>`,notes:`<h4>Mục lục buổi 1</h4>
+<div class="blk">Chiếu nhanh, không đọc từng dòng. Mục đích là để lớp biết mình đang ở đâu
+khi quay lại các trang chuyển khối.</div>
+<div class="blk">Tỷ lệ lý thuyết và hoạt động khoảng 40/60 theo đúng đề xuất đã gửi.</div>`};}
+
+function mkDiv(k){const s=SECT[k];return{code:'DIV'+k,lbl:'Khối '+k+' · '+s.n,cls:'center',html:`
+<div class="divider">
+  <div class="dcode">KHỐI ${s.c} · ${s.m} PHÚT</div>
+  <h1>${s.n}</h1>
+  <p style="font-size:16px;color:var(--muted);max-width:72ch;margin:-4px 0 0">${s.d}</p>
+  <div class="dmeta"></div>
+  <div class="dlist">${s.items.map(it=>`<div class="di"><div class="dn">${it[0]}</div>
+    <div class="dt">${it[1]}</div><div class="dd">${it[2]}</div></div>`).join('')}</div>
+</div>`,notes:`<h4>Chuyển khối ${k}</h4>
+<div class="blk">Dừng 20 giây. Nói một câu về việc khối trước đã cho ra cái gì,
+và khối này sẽ dùng nó để làm gì.</div>`};}
+
+SL.splice(0,1,mkCover(),mkAgenda(),mkSession(),mkToc());   // bỏ bìa buổi cũ, đã có trang tiêu đề buổi
+
+/* --- A3: hồ sơ chi tiết từng bước --- */
+function mkStepDoc(){return{code:'A4',sec:'A',lbl:'A4 · Hồ sơ chi tiết từng bước',html:`
+<div class="stitle">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối A · chặng 4 · 8 phút · tra cứu theo nhu cầu</div><span class="explore">Tra cứu</span></div>
+  <h2 style="margin-top:6px">Hồ sơ chi tiết từng bước</h2>
+  <p style="color:var(--muted);font-size:15px">Chọn một bước để xem đầu vào, việc chính, đầu ra
+  và đơn vị chủ trì. Nội dung theo thông lệ ngành ngân hàng thương mại Việt Nam.</p>
+</div>
+<div class="sbody">
+  <div class="sd">
+    <div class="sdlist" id="sdList"></div>
+    <div class="sdpanel" id="sdPanel"></div>
+  </div>
+</div>`,
+notes:`<h4>A3 — 12 phút · dùng như tài liệu tra cứu</h4>
+<div class="blk"><b>Không đi hết 11 bước.</b> Mở 3–4 bước mà lớp vừa xếp sai hoặc tranh luận nhiều
+ở chặng A1, và bước mà lớp sẽ chấm nghẽn ở chặng sau.</div>
+<div class="blk">Với mỗi bước mở ra, hỏi: <i>"Ở đơn vị mình, đầu ra của bước này có đúng như vậy không?"</i>
+Ghi lại chỗ khác biệt.</div>
+<div class="blk">Mục <b>Điểm cần lưu ý</b> của bước 5 và bước 6 là nền cho chặng phân tích điểm nghẽn —
+có thể dừng lâu hơn ở hai bước này.</div>`};}
+(function(){
+  const at=c=>SL.findIndex(s=>s.code===c);
+  // MOVE-A3: dời slide điểm chốt về giới hạn tín dụng lên ngay sau A2
+  const i3=at('A3'); const s3=SL.splice(i3,1)[0];
+  SL.splice(at('A2')+1,0,s3);
+})();
+
+
+/* --- B1: đọc báo cáo tổng thể --- */
+function mkReadReport(){return{code:'B1',sec:'B',lbl:'B1 · Kết quả năm 2025 trên báo cáo',html:`
+<div class="stitle">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="eyebrow">Khối B · chặng 1 · 10 phút</div><span class="explore">Đọc báo cáo</span></div>
+  <h2 style="margin-top:6px">Kết quả năm 2025 trên báo cáo riêng</h2>
+</div>
+<div class="sbody">
+  <div class="modesw" style="margin-bottom:14px">
+    <button id="rrT0" class="on" onclick="rrTab(0)">Kết quả kinh doanh</button>
+    <button id="rrT1" onclick="rrTab(1)">Bảng cân đối</button>
+    <button id="rrT2" onclick="rrTab(2)">Chỉ số chính</button>
+  </div>
+  <div class="rr">
+    <div><div style="overflow-x:auto"><table id="rrTbl"></table></div>
+      <div id="rrNote" style="margin-top:12px"></div></div>
+    <div><div class="eyebrow" id="rrCapt" style="margin-bottom:10px"></div>
+      <div class="cc" id="rrChart"></div></div>
+  </div>
+</div>`,
+notes:`<h4>B1 — 10 phút · nền cho toàn bộ khối B</h4>
+<div class="blk">Đây là bức tranh tổng thể. Không có màn này thì con số <b>4.811 tỷ</b> ở chặng sau
+xuất hiện đột ngột, và lớp không có gì để đối chiếu.</div>
+<div class="blk"><b>Cách đọc:</b> đi lần lượt ba tab. Ở tab Kết quả kinh doanh, dừng ở dòng
+<b>lãi thuần hoạt động khác</b> — tăng gấp 2,7 lần, mức tăng lớn nhất bảng. Đừng bình luận vội,
+để lớp tự thấy rồi sang chặng bỏ phiếu.</div>
+<div class="blk">Ở tab Bảng cân đối, chỉ ra chênh lệch tốc độ giữa dư nợ và tiền gửi —
+nội dung này quay lại ở khối C.</div>
+<div class="q">"Nhìn ba bảng này, đâu là dòng đáng chú ý nhất?"</div>`};}
+(function(){
+  const at=c=>SL.findIndex(s=>s.code===c);
+  SL.splice(at('B2'),0,mkReadReport());
+})();
+
+(function(){
+  const at=c=>SL.findIndex(s=>s.code===c);
+  SL.splice(at('A1'),0,mkDiv('A'));
+  SL.splice(at('B1'),0,mkDiv('B'));
+  SL.splice(at('C1'),0,mkDiv('C'));
+})();
+
+/* ══════════ DỰNG DECK ══════════ */
+let cur=0;
+const deck=document.getElementById('deck');
+SL.forEach((s,i)=>{
+  const d=document.createElement('div');
+  d.className='slide'+(s.cls==='center'?' center':'');
+  d.id='sl'+i; d.innerHTML=s.html; deck.appendChild(d);
+});
+const dots=document.getElementById('dots');
+SL.forEach((s,i)=>{const b=document.createElement('i');b.onclick=()=>show(i);dots.appendChild(b);});
+
+function show(i){
+  cur=Math.max(0,Math.min(SL.length-1,i));
+  document.querySelectorAll('.slide').forEach((e,k)=>e.classList.toggle('on',k===cur));
+  [...dots.children].forEach((e,k)=>{e.className=(k<cur?'on':'')+(k===cur?' act':'');});
+  document.getElementById('barLbl').textContent=SL[cur].lbl;
+  document.getElementById('barCnt').textContent=(cur+1)+' / '+SL.length;
+  document.getElementById('prog').style.width=((cur+1)/SL.length*100)+'%';
+  document.getElementById('notes').innerHTML=SL[cur].notes||'<h4>Ghi chú</h4><div class="blk">—</div>';
+  drawCrumb();
+  if(SL[cur].code&&INIT[SL[cur].code])INIT[SL[cur].code]();
+  document.getElementById('sl'+cur).scrollTop=0;
+}
+function drawCrumb(){
+  const s=SL[cur], cb=document.getElementById('crumb'), sec=SECT[s.sec];
+  const wrap=document.getElementById('sl'+cur);
+  if(!sec){cb.className='hide';document.querySelectorAll('.slide').forEach(e=>e.classList.remove('crumbed'));return;}
+  cb.className='';
+  document.querySelectorAll('.slide').forEach(e=>e.classList.remove('crumbed'));
+  wrap.classList.add('crumbed');
+  const it=sec.items.find(x=>x[0]===s.code);
+  cb.innerHTML='<span class="cbit">'+SESSION+'</span>'+
+    '<span class="cbit'+(it?'':' act')+'">Khối '+sec.c+' · '+sec.n+'</span>'+
+    (it?'<span class="cbit act">'+it[0]+' · '+it[1]+'</span>':'')+
+    '<span class="cright">'+sec.m+' phút cho khối '+sec.c+'</span>';
+}
+function go(d){show(cur+d)}
+function toggleNotes(){document.getElementById('notes').classList.toggle('on')}
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1)}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+  else if(e.key.toLowerCase()==='n')toggleNotes();
+  else if(e.key==='Home')show(0);
+  else if(e.key==='End')show(SL.length-1);
+});
+
+/* ══════════ TƯƠNG TÁC ══════════ */
+const INIT={};
+
+
+/* ══════════ A1 · xếp thẻ ══════════ */
+const A1OK=[
+ ['Đánh giá thực hiện 9 tháng, ước cả năm','T9–T10'],
+ ['Định hướng chiến lược và khung giả định vĩ mô','T10'],
+ ['Dựng khung chỉ tiêu toàn hàng từ trên xuống','T10–T11'],
+ ['Ban hành hướng dẫn, biểu mẫu, chỉ tiêu định hướng tạm','T11'],
+ ['Chi nhánh lập kế hoạch và bảo vệ','T11–T12'],
+ ['Tổng hợp, đối chiếu chênh lệch trên xuống – dưới lên','T12'],
+ ['Cân đối nguồn – sử dụng vốn, ràng buộc an toàn','T12'],
+ ['Ngân sách chi phí, nhân sự, đầu tư','T12–T1'],
+ ['Trình Hội đồng Quản trị phê duyệt','T1–T2'],
+ ['Giao chỉ tiêu, gắn chỉ số đánh giá và cơ chế động lực','T1–T3']];
+const A1NOISE=[
+ ['Đại hội đồng cổ đông thường niên thông qua kế hoạch','T4 · sau khi kế hoạch đã chạy một quý'],
+ ['Kiểm toán độc lập báo cáo tài chính năm','T1–T3 · chu trình báo cáo, không phải lập kế hoạch'],
+ ['Xây dựng chiến lược phát triển 5 năm','chu kỳ nhiều năm, không phải hằng năm'],
+ ['Quyết toán thuế thu nhập doanh nghiệp','T3 · chu trình thuế'],
+ ['Rà soát hệ thống xếp hạng tín dụng nội bộ','hoạt động thường xuyên cả năm']];
+let A1pool=[], A1seq=[];
+function a1build(){
+  A1pool=A1OK.map((c,i)=>({t:c[0],m:c[1],ok:true,i:i}))
+        .concat(A1NOISE.map((c,i)=>({t:c[0],m:c[1],ok:false,i:100+i})));
+  for(let i=A1pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[A1pool[i],A1pool[j]]=[A1pool[j],A1pool[i]];}
+  A1seq=[]; a1draw();
+}
+function a1draw(){
+  document.getElementById('pool').innerHTML=A1pool.map((c,k)=>
+    `<div class="ct${A1seq.indexOf(c)>=0?' used':''}" onclick="a1add(${k})">${c.t}
+     <span class="cm">${c.m}</span></div>`).join('');
+  const s=document.getElementById('seq');
+  s.innerHTML=A1seq.map((c,k)=>
+    `<div class="slot" id="sl_${k}"><span class="no">${k+1}</span>
+     <span class="tx" onclick="a1rm(${k})">${c.t}</span><span class="mk"></span></div>`).join('')
+    +`<div class="slot" style="opacity:.5;justify-content:center;color:var(--dim)">
+      ${A1seq.length?'bấm thẻ bên trái để thêm':'chưa có thẻ nào — bấm thẻ bên trái'}</div>`;
+}
+function a1add(k){const c=A1pool[k]; if(A1seq.indexOf(c)<0){A1seq.push(c);a1draw();
+  document.getElementById('a1out').innerHTML='';}}
+function a1rm(k){A1seq.splice(k,1);a1draw();document.getElementById('a1out').innerHTML='';}
+function a1reset(){a1build();document.getElementById('a1out').innerHTML='';}
+function a1check(){
+  let right=0,wrongPos=0,noise=0,expect=0;
+  A1seq.forEach((c,k)=>{
+    const el=document.getElementById('sl_'+k), mk=el.querySelector('.mk');
+    if(!c.ok){el.className='slot err';mk.textContent='không thuộc chu trình';noise++;return;}
+    if(c.i===expect){el.className='slot ok';mk.textContent='đúng vị trí';right++;expect++;}
+    else{el.className='slot err';mk.textContent='lệch thứ tự';wrongPos++;expect++;}
+  });
+  const miss=A1OK.length-A1seq.filter(c=>c.ok).length;
+  document.getElementById('a1out').innerHTML=
+   `<div class="note ${noise||wrongPos?'warn':'gold'}">
+     <b>${right}/${A1OK.length} thẻ đúng vị trí.</b>
+     ${noise?` Có <b>${noise} thẻ không thuộc chu trình lập kế hoạch</b> bị đưa lên — đó là việc có thật, cùng mùa, nhưng thuộc chu trình khác.`:''}
+     ${wrongPos?` ${wrongPos} thẻ lệch thứ tự.`:''}
+     ${miss>0?` Còn ${miss} việc chưa đưa lên.`:''}
+     ${(!noise&&!wrongPos&&miss===0)?' Trùng khớp hoàn toàn với thông lệ ngành — sang màn sau để đối chiếu chi tiết.':''}
+    </div>`;
+}
+INIT['A1']=function(){ if(!A1pool.length)a1build(); };
+
+/* ══════════ A2 · trục thời gian + Gantt ══════════ */
+const STEPS=[
+ ['T9–T10','0','Đánh giá thực hiện 9 tháng, ước cả năm, chốt số nền','Khối Tài chính',0,1.5],
+ ['T10','1','Định hướng chiến lược và khung giả định vĩ mô','Hội đồng Quản trị · Ban điều hành',1,1],
+ ['T10–T11','2','Dựng khung chỉ tiêu toàn hàng từ trên xuống','Khối Kế hoạch · Khối Tài chính',1.5,1.5],
+ ['T11','3','Ban hành hướng dẫn, biểu mẫu, chỉ tiêu định hướng tạm','Khối Kế hoạch',2.5,0.8],
+ ['T11–T12','4','Chi nhánh lập kế hoạch và bảo vệ','Đơn vị kinh doanh',3,1.6],
+ ['T12','5','Tổng hợp, đối chiếu chênh lệch trên xuống và dưới lên','Khối Kế hoạch',4.2,1],
+ ['T12','6','Cân đối nguồn – sử dụng vốn, ràng buộc an toàn','Khối Nguồn vốn · Khối Tài chính',4.6,1.2],
+ ['T12–T1','7','Ngân sách chi phí, nhân sự, đầu tư','Khối Tài chính',4.3,1.8],
+ ['T1–T2','8','Trình Hội đồng Quản trị phê duyệt','Ban điều hành',5.8,1.2],
+ ['T1–T3','9','Giao chỉ tiêu, gắn chỉ số đánh giá và cơ chế động lực','Khối Kế hoạch · Nhân sự',6.3,1.7],
+ ['Cả năm','10','Giám sát, báo cáo quản trị, dự báo cuốn chiếu','Toàn hệ thống',7,3]];
+const GMONTH=['T9','T10','T11','T12','T1','T2','T3','T4+'];
+let curStep=1, gmode='line';
+function setMode(m){
+  gmode=m;
+  document.getElementById('mLine').classList.toggle('on',m==='line');
+  document.getElementById('mGantt').classList.toggle('on',m==='gantt');
+  drawSD();
+}
+function drawGantt(){
+  const TOT=10;
+  document.getElementById('sdPanel').innerHTML=
+   `<div class="gwrap"><div class="ghead">Mức độ chồng lấn giữa các bước</div>
+    <div class="gantt2">`+
+    STEPS.map((s,i)=>`<div class="grow2${i===sdCur?' sel':''}" onclick="sdSel(${i})">
+      <div class="gnum">${s[1]}</div>
+      <div class="gt">
+        <div class="gbar${i>=9?' late':''}" style="left:${s[4]/TOT*100}%;width:${s[5]/TOT*100}%">${s[0]}</div>
+      </div></div>`).join('')
+    +`<div class="gscale2">${GMONTH.map(m=>'<span>'+m+'</span>').join('')}</div>
+      <div class="gvline" data-l="kế hoạch phải chốt"
+        style="left:calc(34px + (100% - 34px) * ${(STEPS[8][4]+STEPS[8][5])/TOT})"></div>
+    </div>
+    <div class="note warn" style="margin-top:12px;font-size:13px"><b>Trình tự tuyến tính giấu mất điều này:</b>
+    ngân sách chi phí chạy song song với cân đối, và việc giao chỉ tiêu thường bắt đầu
+    trước khi phê duyệt xong. Các bước không nối đuôi nhau — chúng chồng lên nhau.</div></div>`;
+}
+INIT['A2']=function(){
+  const st=document.getElementById('tlSteps'), lb=document.getElementById('tlLbl');
+  if(!st.children.length){
+    STEPS.forEach((s,i)=>{
+      const b=document.createElement('div'); b.className='tl-step'; b.onclick=()=>{curStep=i;sdCur=i;drawTL();drawSD()};
+      st.appendChild(b);
+      const sp=document.createElement('span'); sp.textContent=s[0]; lb.appendChild(sp);
+    });
+    document.getElementById('roomT').addEventListener('input',drawTL);
+  }
+  drawTL(); drawSD(); if(gmode==='gantt')drawGantt();
+};
+function drawTL(){
+  const st=document.getElementById('tlSteps');
+  if(!st) return;
+  [...st.children].forEach((e,i)=>{e.className='tl-step'+(i===curStep?' act':(i>curStep?' dim':''))});
+  document.getElementById('tlFill').style.width=(curStep/(STEPS.length-1)*100)+'%';
+}
+
+/* ══════════ A3 · đối chiếu lịch nội bộ với mốc giao giới hạn ══════════ */
+const RLDESC=['Chốt số nền cho toàn bộ chu kỳ','Thống nhất giả định vĩ mô và khẩu vị rủi ro',
+  'Dựng phương án chỉ tiêu toàn hàng','Ban hành hướng dẫn và chỉ tiêu định hướng',
+  'Đơn vị lập kế hoạch và bảo vệ','Đối chiếu chênh lệch trên xuống – dưới lên',
+  'Cân đối nguồn vốn và ràng buộc an toàn','Lập ngân sách chi phí và đầu tư',
+  'Trình Hội đồng Quản trị phê duyệt','Phân bổ chỉ tiêu đến từng đơn vị',
+  'Theo dõi thực hiện và cập nhật dự báo'];
+let rlSel=-1;
+INIT['A3']=function(){
+  const r=document.getElementById('roomT');
+  if(r&&!r.dataset.b){r.dataset.b=1;r.addEventListener('input',drawRL);}
+  drawRL();
+};
+function rlState(i,mark){
+  const s=STEPS[i][4], e=STEPS[i][4]+STEPS[i][5];
+  if(e<=mark) return 'pre';
+  if(s<mark)  return 'cut';
+  return 'post';
+}
+function drawRL(){
+  const TOT=10, rv=+document.getElementById('roomT').value;
+  const mark=STEPS[rv][4];                       // mốc giao giới hạn = đầu bước được chọn
+  document.getElementById('roomV').textContent=STEPS[rv][0];
+  const st=STEPS.map((s,i)=>rlState(i,mark));
+  document.getElementById('rlRows').innerHTML=
+    STEPS.map((s,i)=>`<div class="rlr${i===rlSel?' sel':''}" onclick="rlPick(${i})">
+      <div class="rln"><span class="rlnum">${s[1]}</span><span>${RLDESC[i]}</span></div>
+      <div class="rlt"><div class="rlbar ${st[i]}"
+        style="left:${s[4]/TOT*100}%;width:${s[5]/TOT*100}%">${s[0]}</div></div></div>`).join('')
+    +`<div class="rlmark" data-l="giới hạn được giao"
+       style="left:calc(259px + (100% - 259px) * ${mark/TOT})"></div>`;
+  document.getElementById('rlScale').innerHTML=GMONTH.map(m=>'<span>'+m+'</span>').join('');
+  const nPre=st.filter(x=>x==='pre').length, nCut=st.filter(x=>x==='cut').length;
+  const pre=STEPS.map((s,i)=>({i:i,n:RLDESC[i],s:st[i]})).filter(x=>x.s==='pre');
+  document.getElementById('rlSide').innerHTML=
+   `<div class="mono" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">
+      Phải làm khi chưa biết giới hạn</div>
+    <div class="rlbig${nPre<=2?' ok':''}">${nPre}<span style="font-size:19px;color:var(--dim)"> / 11 bước</span></div>
+    <div class="rlcap">${nCut?'Thêm '+nCut+' bước đang thực hiện thì giới hạn mới được giao — phải điều chỉnh giữa chừng.':'Không có bước nào bị cắt ngang.'}</div>
+    ${pre.length?'<ul class="rllist">'+pre.map(x=>`<li><span>${STEPS[x.i][1]}</span>${x.n}</li>`).join('')+'</ul>':''}`;
+  const late=mark>=STEPS[8][4];
+  document.getElementById('rlNote').innerHTML=
+   `<div class="g2">
+      <div class="note ${late?'warn':'gold'}">
+        <b>${late?'Giới hạn được giao vào hoặc sau thời điểm trình phê duyệt.':'Giới hạn được giao trước khi trình phê duyệt.'}</b>
+        ${late?'Toàn bộ phần dựng khung, đàm phán và cân đối đã phải hoàn tất khi chưa biết ràng buộc lớn nhất — và giới hạn này còn có thể được nới giữa năm.':'Trường hợp thuận lợi. Thực tế ngành ngân hàng Việt Nam hiếm khi như vậy — kéo sang phải để thấy tình huống thường gặp.'}</div>
+      <div class="note gold"><b>Hệ quả cho cách lập kế hoạch.</b>
+        Kế hoạch không thể là một con số, mà phải là phương án theo từng mức giới hạn — nghĩa là
+        phải dựng được nhiều phương án, nhanh, trên cùng một bộ giả định. Đó là nội dung của
+        buổi 2 và buổi 3.</div>
+    </div>`;
+}
+function rlPick(i){rlSel=(rlSel===i?-1:i);drawRL()}
+
+/* ══════════ A2b · hồ sơ chi tiết từng bước ══════════ */
+const SDOC=[
+ {in:['Báo cáo tài chính và báo cáo quản trị 9 tháng','Số liệu thực hiện lũy kế theo đơn vị'],
+  do:['Rà soát mức độ hoàn thành chỉ tiêu năm hiện tại','Ước tính kết quả cả năm trên cơ sở xu hướng 9 tháng',
+      'Tách khoản thu bất thường khỏi kết quả từ hoạt động lõi','Xác định số dư nền cuối năm: dư nợ, huy động, vốn chủ sở hữu'],
+  out:'Bộ số liệu nền đã chuẩn hóa, dùng làm gốc cho toàn bộ chu kỳ',
+  note:'Số ước cả năm được chốt khi còn ba tháng chưa kết thúc. Chênh lệch giữa số ước và số quyết toán sẽ kéo theo sai lệch của toàn bộ kế hoạch năm sau.'},
+ {in:['Định hướng của Hội đồng Quản trị','Dự báo vĩ mô và định hướng điều hành của Ngân hàng Nhà nước'],
+  do:['Xác định trọng tâm chiến lược của năm kế hoạch','Thống nhất giả định vĩ mô: tăng trưởng kinh tế, mặt bằng lãi suất, tỷ giá',
+      'Xác định khẩu vị rủi ro và định hướng cơ cấu danh mục','Xác định các ràng buộc an toàn phải tuân thủ'],
+  out:'Nghị quyết định hướng và bộ giả định nền cho năm kế hoạch',
+  note:'Giả định vĩ mô thường được nêu dưới dạng định tính. Nếu không chuyển thành tham số cụ thể, giữa năm sẽ không truy được chênh lệch là do giả định sai hay do điều hành.'},
+ {in:['Bộ số liệu nền','Bộ giả định và định hướng chiến lược'],
+  do:['Xây dựng phương án tăng trưởng quy mô tín dụng và huy động','Ước tính biên lãi trên cơ sở cơ cấu nguồn và mặt bằng lãi suất',
+      'Dự tính chi phí hoạt động và chi phí dự phòng rủi ro','Thử nhiều phương án để xác định khoảng lợi nhuận khả thi'],
+  out:'Hai đến ba phương án chỉ tiêu toàn hàng ở mức sơ bộ',
+  note:'Đây là bước quyết định chất lượng của cả chu kỳ. Nếu phương án dựng bằng cách nội suy từ năm trước thay vì từ yếu tố dẫn dắt, các bước sau chỉ còn là phân bổ con số đã định sẵn.'},
+ {in:['Phương án chỉ tiêu toàn hàng sơ bộ'],
+  do:['Ban hành văn bản hướng dẫn lập kế hoạch','Thiết kế biểu mẫu thống nhất cho toàn hệ thống',
+      'Xác định chỉ tiêu định hướng tạm cho từng đơn vị','Tổ chức tập huấn và giải đáp cho các đơn vị'],
+  out:'Bộ hướng dẫn, biểu mẫu và chỉ tiêu định hướng gửi các đơn vị',
+  note:'Chỉ tiêu định hướng tạm nếu ban hành mà không kèm cơ sở tính toán sẽ được các đơn vị hiểu là mức áp đặt, làm giảm chất lượng phản hồi ở bước sau.'},
+ {in:['Hướng dẫn, biểu mẫu và chỉ tiêu định hướng','Số liệu thực hiện và đặc điểm địa bàn'],
+  do:['Đánh giá năng lực thị trường và nguồn lực của đơn vị','Lập kế hoạch huy động vốn, tín dụng và thu dịch vụ',
+      'Dự kiến nhân sự và chi phí hoạt động','Bảo vệ kế hoạch trước Hội sở'],
+  out:'Kế hoạch kinh doanh của từng đơn vị kèm thuyết minh cơ sở',
+  note:'Khi đơn vị dự kiến chỉ tiêu sẽ được điều chỉnh sau khi bảo vệ, phương án hợp lý với họ là đề xuất mức thận trọng. Chất lượng thông tin từ dưới lên phụ thuộc vào cơ chế động lực, không chỉ vào biểu mẫu.'},
+ {in:['Kế hoạch của toàn bộ các đơn vị','Phương án chỉ tiêu toàn hàng'],
+  do:['Tổng hợp kế hoạch các đơn vị theo từng chỉ tiêu','Đối chiếu tổng hợp từ dưới lên với khung áp từ trên xuống',
+      'Xác định khoảng chênh lệch theo từng chỉ tiêu và từng đơn vị','Tổ chức các vòng trao đổi để thu hẹp chênh lệch'],
+  out:'Bảng đối chiếu chênh lệch và phương án điều chỉnh',
+  note:'Đây là bước tốn nhiều thời gian nhất của chu kỳ. Mỗi vòng trao đổi thường mất một đến hai tuần, nên số vòng thực hiện được bị giới hạn bởi lịch chứ không bởi mức độ hội tụ.'},
+ {in:['Kế hoạch đã qua vòng đối chiếu'],
+  do:['Kiểm tra cân đối giữa nguồn vốn và sử dụng vốn','Rà soát các tỷ lệ bảo đảm an toàn theo quy định',
+      'Đánh giá cơ cấu kỳ hạn giữa tài sản và nguồn vốn','Điều chỉnh quy mô hoặc cơ cấu để đáp ứng ràng buộc'],
+  out:'Phương án kế hoạch đã bảo đảm tính khả thi về nguồn vốn và an toàn hoạt động',
+  note:'Nếu bước này thực hiện sau khi chỉ tiêu đã chốt, phát hiện không khả thi sẽ dẫn tới điều chỉnh con số thay vì điều chỉnh cơ cấu — nguyên nhân của kế hoạch khả thi trên giấy nhưng khó thực hiện.'},
+ {in:['Kế hoạch quy mô và cơ cấu đã cân đối','Định mức chi phí và kế hoạch đầu tư'],
+  do:['Lập ngân sách chi phí hoạt động theo khoản mục và đơn vị','Xây dựng kế hoạch nhân sự và quỹ lương',
+      'Lập kế hoạch đầu tư tài sản và công nghệ','Xác định tỷ lệ chi phí trên thu nhập mục tiêu'],
+  out:'Ngân sách chi phí hoạt động, nhân sự và đầu tư của năm kế hoạch',
+  note:'Ngân sách chi phí thường lập song song với bước cân đối. Nếu tách rời khỏi kế hoạch kinh doanh, tỷ lệ chi phí trên thu nhập sẽ trở thành kết quả ngoài dự tính thay vì một mục tiêu được quản trị.'},
+ {in:['Phương án kế hoạch hoàn chỉnh và ngân sách chi phí'],
+  do:['Chuẩn bị tờ trình và tài liệu thuyết minh','Trình bày các phương án kèm điều kiện và rủi ro của từng phương án',
+      'Giải trình cơ sở của các giả định chính','Tiếp thu ý kiến và hoàn thiện phương án'],
+  out:'Nghị quyết phê duyệt kế hoạch kinh doanh năm',
+  note:'Thời điểm phê duyệt thường đến trước khi Ngân hàng Nhà nước giao giới hạn tăng trưởng tín dụng chính thức. Kế hoạch vì vậy cần có phương án ứng với các mức giới hạn khác nhau.'},
+ {in:['Kế hoạch đã được phê duyệt'],
+  do:['Phân bổ chỉ tiêu đến từng đơn vị và từng khối','Gắn chỉ tiêu với hệ thống chỉ số đánh giá kết quả',
+      'Xác định cơ chế động lực gắn với mức độ hoàn thành','Ký kết cam kết thực hiện với các đơn vị'],
+  out:'Chỉ tiêu chính thức và cơ chế đánh giá đến từng đơn vị',
+  note:'Nếu phân bổ theo tỷ lệ tăng đều trên số thực hiện năm trước, đơn vị có năng suất cao sẽ nhận chỉ tiêu nặng hơn tương đối. Phân bổ theo năng suất trên lao động phản ánh năng lực thực tế sát hơn.'},
+ {in:['Chỉ tiêu chính thức','Số liệu thực hiện định kỳ'],
+  do:['Theo dõi tiến độ thực hiện theo tháng và quý','Phân tích chênh lệch giữa kế hoạch và thực hiện theo từng yếu tố',
+      'Cập nhật dự báo cuốn chiếu cho các kỳ còn lại','Đề xuất điều chỉnh khi điều kiện thay đổi'],
+  out:'Báo cáo quản trị định kỳ và dự báo cập nhật',
+  note:'Phân tích chênh lệch chỉ truy được nguyên nhân nếu các giả định ban đầu đã được ghi nhận thành tham số. Nếu không, việc giải trình dừng ở mô tả hiện tượng.'}];
+let sdCur=0;
+function drawSD(){
+  document.getElementById('sdList').innerHTML=STEPS.map((s,i)=>
+    `<button class="sdb${i===sdCur?' on':''}" onclick="sdSel(${i})">
+      <span class="sn">${s[1]}</span><span>${s[2]}</span></button>`).join('');
+  if(gmode==='gantt'){ drawGantt(); return; }
+  const s=STEPS[sdCur], d=SDOC[sdCur];
+  document.getElementById('sdPanel').innerHTML=
+   `<div class="sdh"><span class="sdno">BƯỚC ${s[1]}</span></div>
+    <div class="sdt">${s[2]}</div>
+    <div class="sdmeta"><span class="tag g">${s[0]}</span><span class="tag">${s[3]}</span></div>
+    <div class="sdg">
+      <div class="sdbox"><div class="sdl">Đầu vào</div>
+        <ul>${d.in.map(x=>'<li>'+x+'</li>').join('')}</ul></div>
+      <div class="sdbox"><div class="sdl">Đầu ra</div><p>${d.out}</p></div>
+    </div>
+    <div class="sdbox" style="margin-bottom:14px"><div class="sdl">Việc chính</div>
+      <ul>${d.do.map(x=>'<li>'+x+'</li>').join('')}</ul></div>
+    <div class="sdwarn"><b>Điểm cần lưu ý.</b> ${d.note}</div>`;
+}
+function sdSel(i){sdCur=i;curStep=i;drawSD();if(document.getElementById('tlSteps'))drawTL();}
+
+
+/* ══════════ A5 · hồ sơ ba khối ══════════ */
+const ROLES=[
+ {n:'Khối Tài chính',k:'Khung · giả định · kỷ luật ngân sách',c:'var(--green)',
+  q:'Con số này dựa trên giả định nào?',
+  steps:[0,1,2,6,7],
+  duty:['Chuẩn hóa số liệu nền và ước thực hiện cả năm',
+        'Xây dựng và quản lý bộ giả định của kế hoạch',
+        'Lập ngân sách chi phí, nhân sự và đầu tư',
+        'Giữ kỷ luật ngân sách trong suốt năm thực hiện'],
+  out:['Bộ số nền đã chuẩn hóa','Bộ giả định nền','Ngân sách chi phí toàn hàng',
+       'Báo cáo phân tích chênh lệch định kỳ'],
+  need:['Định hướng chiến lược từ Ban điều hành','Kế hoạch quy mô từ Khối Kế hoạch',
+        'Dự kiến nhân sự và đầu tư từ các đơn vị'],
+  clash:'Yêu cầu mọi con số phải có cơ sở tính toán. Khi đơn vị kinh doanh đề xuất chỉ tiêu dựa trên cảm nhận thị trường, hai bên nói bằng hai ngôn ngữ khác nhau — một bên cần bằng chứng, một bên có kinh nghiệm thực địa nhưng khó lượng hóa.'},
+ {n:'Khối Kế hoạch',k:'Điều phối · tổng hợp · cân đối',c:'var(--forest)',
+  q:'Cộng lại có khớp toàn hàng không?',
+  steps:[2,3,4,5,9,10],
+  duty:['Dựng khung chỉ tiêu toàn hàng từ trên xuống',
+        'Ban hành hướng dẫn và biểu mẫu cho toàn hệ thống',
+        'Tổng hợp kế hoạch các đơn vị và đối chiếu chênh lệch',
+        'Phân bổ chỉ tiêu chính thức và theo dõi thực hiện'],
+  out:['Khung chỉ tiêu toàn hàng','Bộ hướng dẫn và biểu mẫu',
+       'Bảng đối chiếu chênh lệch trên xuống – dưới lên','Chỉ tiêu giao đến từng đơn vị'],
+  need:['Số nền và giả định từ Khối Tài chính','Kế hoạch bảo vệ từ các đơn vị kinh doanh',
+        'Kết quả cân đối nguồn vốn từ Khối Nguồn vốn'],
+  clash:'Đứng giữa hai phía. Bị Ban điều hành ép tổng phải đạt mục tiêu, đồng thời bị các đơn vị phản đối vì chỉ tiêu quá sức. Phần lớn thời gian của mùa kế hoạch nằm ở vòng đàm phán mà khối này chủ trì.'},
+ {n:'Đơn vị kinh doanh',k:'Cam kết chỉ tiêu · sát thị trường',c:'var(--warn)',
+  q:'Địa bàn tôi có làm được không?',
+  steps:[4,9,10],
+  duty:['Đánh giá năng lực thị trường và nguồn lực của đơn vị',
+        'Lập kế hoạch huy động, tín dụng và thu dịch vụ',
+        'Bảo vệ kế hoạch trước Hội sở',
+        'Thực hiện và giải trình kết quả theo định kỳ'],
+  out:['Kế hoạch kinh doanh của đơn vị kèm thuyết minh','Cam kết chỉ tiêu đã ký',
+       'Báo cáo thực hiện định kỳ'],
+  need:['Hướng dẫn và biểu mẫu từ Khối Kế hoạch','Chỉ tiêu định hướng tạm',
+        'Cơ chế động lực gắn với mức độ hoàn thành'],
+  clash:'Là bên duy nhất phải chịu trách nhiệm về con số cuối cùng, nhưng lại tham gia muộn nhất vào quá trình dựng khung. Khi chỉ tiêu định hướng đã ban hành trước lúc đơn vị lên tiếng, phần đóng góp của họ chỉ còn là điều chỉnh biên độ.'}];
+let roleCur=-1;
+INIT['A4']=function(){drawRoles()};
+function drawRoles(){
+  document.getElementById('roleCards').innerHTML=ROLES.map((r,i)=>
+    `<div class="rc${i===roleCur?' on':''}" onclick="roleSel(${i})" style="border-top:3px solid ${r.c}">
+      <div class="rn" style="color:${r.c}">${r.n}</div>
+      <div class="rk">${r.k}</div>
+      <div class="rq" style="border-left:3px solid ${r.c}">${r.q}</div></div>`).join('');
+  drawRoleSteps();
+  const d=document.getElementById('roleDetail');
+  if(roleCur<0){
+    d.innerHTML=`<div class="quote">Ba câu hỏi này đều đúng, và đều khác nhau.
+      Đó là gốc của mọi tranh luận trong mùa kế hoạch — không phải do bên nào thiếu thiện chí.</div>
+      <div class="hint">Chọn một khối để xem hồ sơ chi tiết.</div>`;
+    return;
+  }
+  const r=ROLES[roleCur];
+  d.innerHTML=`<div class="rd" style="border-top:3px solid ${r.c}">
+    <h4 style="color:${r.c}">${r.n}</h4>
+    <div class="rdg">
+      <div class="rdbox"><div class="rdl">Nhiệm vụ trong mùa kế hoạch</div>
+        <ul>${r.duty.map(x=>'<li>'+x+'</li>').join('')}</ul></div>
+      <div class="rdbox"><div class="rdl">Đầu ra phải nộp</div>
+        <ul>${r.out.map(x=>'<li>'+x+'</li>').join('')}</ul></div>
+      <div class="rdbox"><div class="rdl">Cần nhận từ khối khác</div>
+        <ul>${r.need.map(x=>'<li>'+x+'</li>').join('')}</ul></div>
+    </div>
+    <div class="rdclash"><b>Thường va ở đâu.</b> ${r.clash}</div></div>`;
+}
+function roleSel(i){roleCur=(roleCur===i?-1:i);drawRoles()}
+function drawRoleSteps(){
+  const r=roleCur<0?null:ROLES[roleCur];
+  const on=r?r.steps:[];
+  document.getElementById('roleSteps').innerHTML=STEPS.map((s,i)=>{
+    const hit=on.indexOf(i)>=0;
+    return `<div class="rsr${hit?' hit':''}"${hit?' style="border-left-color:'+r.c+'"':''}>
+      <span class="rsn"${hit?' style="color:'+r.c+'"':''}>${s[1]}</span>
+      <span class="rst">${s[2]}</span>
+      <span class="rsm">${s[0]}</span></div>`;}).join('')
+   +(r?`<div class="rssum" style="color:${r.c}">${r.steps.length} / 11 bước</div>`
+      :`<div class="hint" style="margin-top:8px">Chọn một khối phía trên để xem các bước khối đó tham gia.</div>`);
+}
+
+/* ══════════ A6 · bỏ phiếu điểm nghẽn ══════════ */
+let VOTES=new Array(11).fill(0);
+INIT['A5']=function(){vdraw()};
+function vadd(i){VOTES[i]++;vdraw()}
+function vreset(){VOTES=new Array(11).fill(0);vdraw();document.getElementById('vout').innerHTML=''}
+function vdraw(){
+  const mx=Math.max(1,...VOTES), tot=VOTES.reduce((a,b)=>a+b,0);
+  document.getElementById('vsteps').innerHTML=STEPS.map((s,i)=>
+    `<div class="vrow${VOTES[i]===mx&&VOTES[i]>0?' hot':''}" onclick="vadd(${i})">
+      <span class="vn">Bước ${s[1]}</span><span class="vt">${s[2]}</span>
+      <span class="vbw"><span class="vb" style="width:${VOTES[i]/mx*100}%"></span></span>
+      <span class="vc">${VOTES[i]||''}</span></div>`).join('');
+  document.getElementById('vtot').textContent=tot?tot+' phiếu':'chưa có phiếu';
+  if(tot>=4){
+    const rank=STEPS.map((s,i)=>({n:s[1],t:s[2],v:VOTES[i]})).sort((a,b)=>b.v-a.v).slice(0,2);
+    document.getElementById('vout').innerHTML=
+      `<div class="note"><b>Hai điểm nghẽn được chấm nhiều nhất:</b> bước ${rank[0].n} — ${rank[0].t}${rank[1].v?`, và bước ${rank[1].n} — ${rank[1].t}`:''}.
+       Sang màn sau để phân tích nguyên nhân.</div>`;
+  }
+}
+
+/* ══════════ A7 · ba tầng ══════════ */
+const T1OPT=[
+ {n:'Mâu thuẫn lợi ích',d:'Chỉ tiêu gắn với lương thưởng nên đơn vị muốn nhận mức vừa sức; Hội sở cần đủ để đạt mục tiêu toàn hàng. Cả hai đều hành xử hợp lý với vai trò của mình.'},
+ {n:'Thông tin bất đối xứng',d:'Chi nhánh nắm địa bàn nhưng không thấy toàn cảnh. Hội sở thấy toàn cảnh nhưng không nắm địa bàn. Bất đối xứng đi <b>cả hai chiều</b>, không phải một chiều.'},
+ {n:'Phạm vi tác động khác nhau',d:'Đơn vị tối ưu phần mình. Nhưng cân đối nguồn – sử dụng vốn và an toàn vốn là bài toán toàn hàng. <b>Từng đơn vị tối ưu không cộng thành toàn hàng tối ưu.</b>'}];
+const T3OPT=[
+ {n:'Thời gian',d:'Mùa kế hoạch chỉ vài tháng, mỗi vòng lặp tốn một đến hai tuần.'},
+ {n:'Nguồn lực',d:'Tổng hợp thủ công, số người làm kế hoạch có hạn.'},
+ {n:'Sức ép kinh doanh',d:'Vẫn phải chạy chỉ tiêu năm hiện tại trong lúc lập kế hoạch năm sau.'}];
+let V1=[0,0,0], V3=[0,0,0], shown1=false;
+INIT['A6']=function(){drawT1();};
+function drawT1(){
+  const mx=Math.max(1,...V1), tot=V1.reduce((a,b)=>a+b,0);
+  document.getElementById('o1').innerHTML=T1OPT.map((o,i)=>
+    `<button class="opt${V1[i]===mx&&V1[i]>0&&tot?' win':''}" onclick="v1(${i})">
+      <span class="ofill" style="width:${tot?V1[i]/mx*100:0}%"></span>
+      <span class="on2">${o.n}</span><span class="oc">${V1[i]||0} phiếu</span></button>`).join('');
+}
+function v1(i){V1[i]++;drawT1()}
+function tierShow(n){
+  if(n===1){
+    shown1=true;
+    document.getElementById('r1').className='reveal on';
+    document.getElementById('r1').innerHTML=
+      T1OPT.map(o=>`<div class="note" style="margin-bottom:9px"><b>${o.n}.</b> ${o.d}</div>`).join('')+
+      `<div class="note warn"><b>Hệ quả không ai muốn nhưng ai cũng thấy:</b> khi biết chỉ tiêu sẽ được
+       điều chỉnh sau khi bảo vệ, hành vi hợp lý của đơn vị là khai thấp năng lực. Hội sở biết vậy nên
+       cộng thêm hệ số. Cuối cùng cả hai đàm phán trên số đã méo — và không bên nào còn biết
+       năng lực thật là bao nhiêu.</div>`;
+    document.getElementById('t2').className='tier';
+    document.getElementById('b2').innerHTML=
+      `<p style="font-size:14px;color:var(--muted);margin-bottom:11px">Hai cách này <b>bổ sung nhau</b>, không thay thế nhau.</p>
+       <div class="opts two">
+        <div class="opt" style="cursor:default"><span class="on2">Đàm phán</span>
+          <span class="oc" style="font-family:var(--sans);font-size:12.5px;color:var(--muted);line-height:1.5">
+          Vòng giao chỉ tiêu và phản hồi, lặp cho đến khi hai bên chấp nhận được</span></div>
+        <div class="opt" style="cursor:default"><span class="on2">Phân tích tổng thể</span>
+          <span class="oc" style="font-family:var(--sans);font-size:12.5px;color:var(--muted);line-height:1.5">
+          Đưa mọi đơn vị về cùng một khung số, cùng bộ giả định, so sánh trên <b>năng suất</b> thay vì số tuyệt đối</span></div>
+       </div>
+       <button class="btn sm" style="margin-top:11px" onclick="tierShow(3)">Mở tầng 3</button>`;
+  }
+  if(n===3){
+    document.getElementById('t3').className='tier';
+    document.getElementById('b3').innerHTML=
+      `<p style="font-size:14px;color:var(--muted);margin-bottom:10px">Rào cản nào lớn nhất ở đơn vị anh chị? Bấm để bỏ phiếu.</p>
+       <div class="opts" id="o3"></div><div id="r3" style="margin-top:12px"></div>`;
+    drawT3();
+  }
+}
+function v3(i){V3[i]++;drawT3()}
+function drawT3(){
+  const mx=Math.max(1,...V3), tot=V3.reduce((a,b)=>a+b,0);
+  document.getElementById('o3').innerHTML=T3OPT.map((o,i)=>
+    `<button class="opt${V3[i]===mx&&V3[i]>0&&tot?' win':''}" onclick="v3(${i})">
+      <span class="ofill" style="width:${tot?V3[i]/mx*100:0}%"></span>
+      <span class="on2">${o.n}</span>
+      <span class="oc" style="font-family:var(--sans);font-size:12px;color:var(--muted);line-height:1.45">${o.d}</span>
+      <span class="oc">${V3[i]||0} phiếu</span></button>`).join('');
+  if(tot>=3)document.getElementById('r3').innerHTML=
+    `<div class="note warn"><b>Ba rào cản, cùng một hệ quả:</b> chỉ chạy được hai đến ba vòng lặp.
+     Kế hoạch cuối cùng là cái <i>thỏa thuận được</i>, chưa chắc là cái <i>bảo vệ được</i>.</div>
+     <div class="quote" style="margin-top:12px;font-size:19px">Nếu một vòng lặp chỉ tốn vài phút
+     thay vì hai tuần, các anh chị sẽ làm gì khác?</div>
+     <div class="hint">Câu này để ngỏ — đó là nội dung buổi 2 và buổi 3.</div>`;
+}
+
+
+/* ══════════ B1 · đọc báo cáo tổng thể ══════════ */
+const RRTAB=[
+ {capt:'Cấu phần thu nhập · tỷ đồng',
+  rows:[['Thu nhập lãi thuần','nii',0],['Lãi thuần dịch vụ','fee',1],
+        ['Lãi thuần kinh doanh ngoại hối','fx',1],['Lãi thuần mua bán chứng khoán','sec',1],
+        ['Lãi thuần hoạt động khác','hdk',1],['Thu từ góp vốn, mua cổ phần','gv',1],
+        ['Tổng thu nhập hoạt động','toi',2],['Chi phí hoạt động','opex',3],
+        ['Lợi nhuận thuần trước dự phòng','ppop',2],['Chi phí dự phòng rủi ro tín dụng','prov',3],
+        ['Lợi nhuận trước thuế','pbt',4],['Lợi nhuận sau thuế','lnst',2]],
+  chart:['nii','hdk','opex','prov','pbt'],
+  note:'<b>Dòng tăng mạnh nhất là lãi thuần hoạt động khác</b> — từ '+0+' lên '+0+' tỷ. Các dòng còn lại tăng vừa phải, riêng ngoại hối và chứng khoán giảm.'},
+ {capt:'Quy mô bảng cân đối · tỷ đồng',
+  rows:[['Tổng tài sản','ta',2],['Cho vay khách hàng','loan',0],['Tiền gửi khách hàng','dep',0],
+        ['Tiền gửi và vay các tổ chức tín dụng','tctd',1],['Phát hành giấy tờ có giá','gtcg',1],
+        ['Nợ Chính phủ và Ngân hàng Nhà nước','nocp',1],['Vốn chủ sở hữu','equity',2]],
+  chart:['loan','dep','tctd','equity'],
+  note:''},
+ {capt:'Chỉ số chính · %',
+  rows:[],chart:[],note:''}];
+let rrCur=0;
+INIT['B1']=function(){rrTab(rrCur)};
+function rrTab(k){
+  rrCur=k;
+  [0,1,2].forEach(i=>document.getElementById('rrT'+i).classList.toggle('on',i===k));
+  const T=RRTAB[k];
+  document.getElementById('rrCapt').textContent=T.capt;
+  if(k===2){ rrRatios(); return; }
+  const cls=t=>t===2?'tot':(t===4?'tot':(t===1?'sub':''));
+  document.getElementById('rrTbl').innerHTML=
+   '<thead><tr><th>Chỉ tiêu</th><th class="n">2024</th><th class="n">2025</th>'+
+   '<th class="n">Δ tuyệt đối</th><th class="n">Δ%</th></tr></thead><tbody>'+
+   T.rows.map(r=>{const a=D[r[1]].y24,b=D[r[1]].y25,g=pc(b,a),d0=b-a,neg=r[2]===3;
+     const col=(neg?-g:g)>=0?'var(--green)':'var(--warn)';
+     return `<tr class="${cls(r[2])}"><td class="lb">${neg?'− ':''}${r[0]}</td>
+       <td class="n">${f(a)}</td><td class="n">${f(b)}</td>
+       <td class="n" style="color:${col};font-weight:500">${(d0>=0?'+':'−')+f(Math.abs(d0))}</td>
+       <td class="n" style="color:${col}">${(g>=0?'+':'−')+f2(Math.abs(g))}%</td></tr>`;}).join('')+
+   '</tbody>';
+  if(k===1) drawBSChart(); else rrChart(T.chart);
+  document.getElementById('rrNote').innerHTML= k===0
+   ? `<div class="note gold" style="font-size:13.5px"><b>Dòng tăng mạnh nhất là lãi thuần hoạt động khác</b> —
+      từ ${f(D.hdk.y24)} lên ${f(D.hdk.y25)} tỷ, gấp ${f1(D.hdk.y25/D.hdk.y24)} lần. Trong khi đó ngoại hối
+      và mua bán chứng khoán đều giảm. Lợi nhuận trước thuế tăng ${f(D.pbt.y25-D.pbt.y24)} tỷ.</div>`
+   : `<div class="note" style="font-size:13.5px">Dư nợ cho vay tăng ${f2(pc(D.loan.y25,D.loan.y24))}%
+      trong khi tiền gửi khách hàng tăng ${f2(pc(D.dep.y25,D.dep.y24))}%. Phần chênh được bù bằng
+      tiền gửi và vay các tổ chức tín dụng, tăng ${f2(pc(D.tctd.y25,D.tctd.y24))}%.</div>`;
+}
+function rrChart(keys){
+  const NAME={nii:'Thu nhập lãi thuần',hdk:'Lãi thuần HĐ khác',opex:'Chi phí hoạt động',
+              prov:'Chi phí dự phòng',pbt:'Lợi nhuận trước thuế',loan:'Cho vay khách hàng',
+              dep:'Tiền gửi khách hàng',tctd:'Tiền gửi & vay TCTD',equity:'Vốn chủ sở hữu'};
+  const mx=Math.max(...keys.map(k=>Math.max(D[k].y24,D[k].y25)));
+  document.getElementById('rrChart').innerHTML=
+   `<div class="cclg"><span><i style="background:rgba(0,112,74,.32)"></i>2024</span>
+     <span><i style="background:var(--green)"></i>2025</span></div>`+
+   keys.map(k=>{const a=D[k].y24,b=D[k].y25,g=pc(b,a);
+     return `<div class="ccrow"><div class="ccn">${NAME[k]}
+       <span class="mono" style="font-size:11px;color:${g>=0?'var(--green)':'var(--warn)'}">
+       ${(g>=0?'+':'−')+f1(Math.abs(g))}%</span></div>
+       <div class="ccbars"><span class="ccb y24" style="height:${a/mx*100}%"></span>
+         <span class="ccb y25" style="height:${b/mx*100}%"></span></div>
+       <div class="ccv"><span>${f(a)}</span><span>${f(b)}</span></div></div>`;}).join('');
+}
+function rrRatios(){ drawRatio(); }
+
+/* ── năm chỉ số với cấu phần tử số / mẫu số ── */
+const RATIOS=[
+ {n:'Tỷ lệ chi phí trên thu nhập',short:'Chi phí / thu nhập',inv:true,
+  num:{n:'Chi phí hoạt động',k:'opex'}, den:{n:'Tổng thu nhập hoạt động',k:'toi'},
+  why:(a,b)=>`Chi phí hoạt động tăng ${f2(pc(D.opex.y25,D.opex.y24))}%, nhưng tổng thu nhập tăng nhanh hơn — ${f2(pc(D.toi.y25,D.toi.y24))}%. Mẫu số tăng nhanh hơn tử số nên tỷ lệ giảm.`},
+ {n:'Tỷ lệ tiền gửi không kỳ hạn',short:'Tiền gửi không kỳ hạn',inv:false,
+  num:{n:'Tiền gửi không kỳ hạn',k:'casaAmt'}, den:{n:'Tổng tiền gửi khách hàng',k:'dep'},
+  why:()=>`Tiền gửi không kỳ hạn tăng ${f2(pc(D.casaAmt.y25,D.casaAmt.y24))}%, nhanh hơn tổng tiền gửi khách hàng ${f2(pc(D.dep.y25,D.dep.y24))}%. Cơ cấu nguồn dịch chuyển sang phần chi phí thấp.`},
+ {n:'Tỷ lệ nợ xấu',short:'Nợ xấu',inv:true,
+  num:{n:'Nợ nhóm 3, 4 và 5',k:'nplAmt'}, den:{n:'Tổng dư nợ cho vay',k:'loan'},
+  why:()=>`Nợ xấu tăng ${f2(pc(D.nplAmt.y25,D.nplAmt.y24))}%, nhanh hơn tăng trưởng dư nợ ${f2(pc(D.loan.y25,D.loan.y24))}%. Chênh lệch tốc độ này đẩy tỷ lệ lên.`},
+ {n:'Tỷ lệ bao phủ nợ xấu',short:'Bao phủ nợ xấu',inv:false,
+  num:{n:'Dự phòng rủi ro cho vay',k:'llr'}, den:{n:'Nợ nhóm 3, 4 và 5',k:'nplAmt'},
+  why:()=>`Hai chiều ngược nhau: dự phòng <b>giảm</b> ${f2(Math.abs(pc(D.llr.y25,D.llr.y24)))}% trong khi nợ xấu <b>tăng</b> ${f2(pc(D.nplAmt.y25,D.nplAmt.y24))}%. Tử số nhỏ đi và mẫu số lớn lên cùng lúc, nên tỷ lệ rơi mạnh.`},
+ {n:'Dư nợ trên tiền gửi khách hàng',short:'Dư nợ / tiền gửi',inv:true,
+  num:{n:'Dư nợ cho vay khách hàng',k:'loan'}, den:{n:'Tiền gửi khách hàng',k:'dep'},
+  why:()=>`Dư nợ tăng ${f2(pc(D.loan.y25,D.loan.y24))}%, nhanh hơn tiền gửi khách hàng ${f2(pc(D.dep.y25,D.dep.y24))}%. Phần chênh phải bù bằng nguồn khác.`}];
+let ratCur=3;
+function ratVal(r,y){return D[r.num.k][y]/D[r.den.k][y]*100;}
+function drawRatio(){
+  document.getElementById('rrCapt').textContent='Cấu phần tính ra chỉ số · tỷ đồng';
+  document.getElementById('rrTbl').innerHTML=
+   '<thead><tr><th>Chỉ số</th><th class="n">2024</th><th class="n">2025</th><th class="n">Thay đổi</th></tr></thead><tbody>'+
+   RATIOS.map((r,i)=>{const a=ratVal(r,'y24'),b=ratVal(r,'y25'),d0=b-a;
+     const good=r.inv?d0<=0:d0>=0;
+     return `<tr class="ratr${i===ratCur?' on':''}" onclick="ratSel(${i})" style="cursor:pointer">
+       <td class="lb">${r.n}</td><td class="n">${f2(a)}%</td><td class="n">${f2(b)}%</td>
+       <td class="n" style="color:${good?'var(--green)':'var(--warn)'}">${(d0>=0?'+':'−')+f2(Math.abs(d0))} điểm</td></tr>`;}).join('')+
+   '</tbody>';
+  const r=RATIOS[ratCur], a=ratVal(r,'y24'), b=ratVal(r,'y25'), d0=b-a;
+  document.getElementById('rrNote').innerHTML=
+   `<div class="fml"><div class="fmlh">Công thức · ${r.n}</div>
+      <div class="fmlrow"><div class="fmlfrac">
+        <span class="fnum">${r.num.n}</span><span class="fbar"></span><span class="fden">${r.den.n}</span></div>
+        <span class="fmleq">=</span>
+        <div class="fmlyr"><span class="fy">2024</span>
+          <span class="fnum">${f(D[r.num.k].y24)}</span><span class="fbar"></span>
+          <span class="fden">${f(D[r.den.k].y24)}</span><span class="fres">${f2(a)}%</span></div>
+        <div class="fmlyr on"><span class="fy">2025</span>
+          <span class="fnum">${f(D[r.num.k].y25)}</span><span class="fbar"></span>
+          <span class="fden">${f(D[r.den.k].y25)}</span><span class="fres">${f2(b)}%</span></div>
+      </div></div>
+    <div class="note ${(r.inv?d0<=0:d0>=0)?'gold':'warn'}" style="margin-top:12px;font-size:13.5px">
+      <b>Vì sao thay đổi ${(d0>=0?'+':'−')+f2(Math.abs(d0))} điểm.</b> ${r.why()}</div>`;
+  // biểu đồ: tử số và mẫu số, mỗi cái tự chia thang
+  const parts=[{t:'Tử số',o:r.num},{t:'Mẫu số',o:r.den}];
+  document.getElementById('rrChart').innerHTML=
+   `<div class="cclg"><span><i style="background:rgba(0,112,74,.32)"></i>2024</span>
+     <span><i style="background:var(--green)"></i>2025</span></div>`+
+   parts.map(p=>{const A=D[p.o.k].y24,B=D[p.o.k].y25,g=pc(B,A),mx=Math.max(A,B)*1.05;
+     return `<div class="ccrow" style="margin-bottom:16px">
+       <div class="mono" style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">${p.t}</div>
+       <div class="ccn" style="margin:2px 0 5px">${p.o.n}
+         <span class="mono" style="font-size:11px;color:${g>=0?'var(--green)':'var(--warn)'}">
+         ${(g>=0?'+':'−')+f2(Math.abs(g))}%</span></div>
+       <div class="ccbars" style="height:56px">
+         <span class="ccb y24" style="height:${A/mx*100}%"></span>
+         <span class="ccb y25" style="height:${B/mx*100}%"></span></div>
+       <div class="ccv"><span>${f(A)}</span><span>${f(B)}</span></div></div>`;}).join('')+
+   `<div class="ccgap">Chênh lệch tốc độ giữa tử số và mẫu số:
+     <b>${(pc(D[r.num.k].y25,D[r.num.k].y24)-pc(D[r.den.k].y25,D[r.den.k].y24)>=0?'+':'−')
+       +f2(Math.abs(pc(D[r.num.k].y25,D[r.num.k].y24)-pc(D[r.den.k].y25,D[r.den.k].y24)))} điểm phần trăm</b></div>`;
+}
+function ratSel(i){ratCur=i;drawRatio()}
+
+
+/* ══════════ B1 · biểu đồ bảng cân đối ══════════ */
+const BSITEMS=[
+ {n:'Cho vay khách hàng',s:'Cho vay KH',k:'loan'},
+ {n:'Tiền gửi khách hàng',s:'Tiền gửi KH',k:'dep'},
+ {n:'Tiền gửi và vay các TCTD',s:'TG & vay TCTD',k:'tctd'},
+ {n:'Phát hành giấy tờ có giá',s:'Giấy tờ có giá',k:'gtcg'},
+ {n:'Nợ Chính phủ và NHNN',s:'Nợ CP & NHNN',k:'nocp'},
+ {n:'Vốn chủ sở hữu',s:'Vốn chủ sở hữu',k:'equity'}];
+const BSMIX=[
+ {n:'Tiền gửi khách hàng',k:'dep',c:'var(--green)'},
+ {n:'Tiền gửi và vay các TCTD',k:'tctd',c:'var(--warn)'},
+ {n:'Phát hành giấy tờ có giá',k:'gtcg',c:'var(--gold)'},
+ {n:'Nợ Chính phủ và NHNN',k:'nocp',c:'var(--forest)'},
+ {n:'Vốn chủ sở hữu',k:'equity',c:'var(--teal)'}];
+function drawBSChart(){
+  document.getElementById('rrCapt').textContent='So sánh cấu phần và cơ cấu nguồn';
+  const items=BSITEMS.slice(0,5);
+  const mx=Math.max(...items.map(x=>Math.max(D[x.k].y24,D[x.k].y25)))*1.08;
+  let g1=`<div class="cclg"><span><i style="background:rgba(0,112,74,.32)"></i>2024</span>
+      <span><i style="background:var(--green)"></i>2025</span></div>
+    <div class="gbc">`;
+  items.forEach(x=>{
+    const a=D[x.k].y24,b=D[x.k].y25,gr=pc(b,a);
+    g1+=`<div class="gbcg">
+      <div class="gbcb"><span class="gbcbar y24" style="height:${a/mx*100}%"></span></div>
+      <div class="gbcb"><span class="gbcbar y25" style="height:${b/mx*100}%"></span></div>
+      <div class="gbcn">${x.s}<br><span class="mono" style="color:${gr>=0?'var(--green)':'var(--warn)'};font-size:10.5px">
+        ${(gr>=0?'+':'−')+f2(Math.abs(gr))}%</span></div></div>`;
+  });
+  g1+='</div>';
+  // tỷ trọng trên tổng tài sản
+  const rowMix=y=>{
+    let out='',acc=0;
+    BSMIX.forEach(m=>{const p=D[m.k][y]/D.ta[y]*100; acc+=p;
+      out+=`<span class="mxs" style="width:${p}%;background:${m.c}" title="${m.n} ${f2(p)}%">
+        ${p>7?f1(p)+'%':''}</span>`;});
+    out+=`<span class="mxs" style="width:${100-acc}%;background:var(--line2)"></span>`;
+    return out;
+  };
+  const g2=`<div class="mxwrap">
+    <div class="mxrow"><span class="mxy">2024</span><span class="mxbar">${rowMix('y24')}</span></div>
+    <div class="mxrow"><span class="mxy">2025</span><span class="mxbar">${rowMix('y25')}</span></div>
+    <div class="mxlg">${BSMIX.map(m=>`<span><i style="background:${m.c}"></i>${m.n}
+      <b class="mono">${f1(D[m.k].y24/D.ta.y24*100)}% → ${f1(D[m.k].y25/D.ta.y25*100)}%</b></span>`).join('')}
+      <span><i style="background:var(--line2)"></i>Khác
+      <b class="mono">${f1(100-BSMIX.reduce((s,m)=>s+D[m.k].y24/D.ta.y24*100,0))}% → ${f1(100-BSMIX.reduce((s,m)=>s+D[m.k].y25/D.ta.y25*100,0))}%</b></span></div>
+    <div class="mxnote">Tỷ trọng trên tổng tài sản. Tiền gửi khách hàng giảm từ
+      <b>${f1(D.dep.y24/D.ta.y24*100)}%</b> xuống <b>${f1(D.dep.y25/D.ta.y25*100)}%</b>,
+      trong khi tiền gửi và vay các tổ chức tín dụng tăng từ
+      <b>${f1(D.tctd.y24/D.ta.y24*100)}%</b> lên <b>${f1(D.tctd.y25/D.ta.y25*100)}%</b>.</div>
+  </div>`;
+  document.getElementById('rrChart').innerHTML=g1+
+    `<div class="eyebrow" style="margin:20px 0 10px">Cơ cấu nguồn trên tổng tài sản · 100%</div>`+g2;
+}
+
+/* ══════════ B2 · bỏ phiếu ══════════ */
+const BP=[{n:'Phần lớn',d:'trên 60% mức tăng đến từ lõi'},
+          {n:'Khoảng một nửa',d:'lõi và các khoản khác đóng góp tương đương'},
+          {n:'Rất nhỏ',d:'dưới 20% mức tăng đến từ lõi'}];
+let VBP=[0,0,0];
+INIT['B2']=function(){drawBP()};
+function drawBP(){
+  const mx=Math.max(1,...VBP), tot=VBP.reduce((a,b)=>a+b,0);
+  document.getElementById('bp').innerHTML=BP.map((o,i)=>
+    `<button class="opt${VBP[i]===mx&&VBP[i]>0&&tot?' win':''}" onclick="vbp(${i})">
+      <span class="ofill" style="width:${tot?VBP[i]/mx*100:0}%"></span>
+      <span class="on2">${o.n}</span>
+      <span class="oc" style="font-family:var(--sans);font-size:12.5px;color:var(--muted)">${o.d}</span>
+      <span class="oc">${VBP[i]||0} phiếu</span></button>`).join('');
+}
+function vbp(i){VBP[i]++;drawBP()}
+function bpShow(){
+  const core=D.pbt.y25-D.pbt.y24-(D.hdk.y25-D.hdk.y24)-(D.fx.y25-D.fx.y24)
+             -(D.sec.y25-D.sec.y24)-(D.gv.y25-D.gv.y24);
+  const tot=D.pbt.y25-D.pbt.y24;
+  document.getElementById('bpOut').innerHTML=
+    `<div class="note gold" style="font-size:15px"><b>Phần lõi đóng góp ${f(core)} tỷ trên tổng mức tăng
+     ${f(tot)} tỷ — tức ${f1(core/tot*100)}%.</b> Phần còn lại đến từ những khoản không thuộc hoạt động lõi.
+     <br><br>Sang chặng sau để phân loại xem khoản nào nhân được cho năm sau, khoản nào không.</div>`;
+}
+
+/* ══════════ B2 · phân loại ══════════ */
+const GRP=[{k:1,n:'Lặp lại được',c:'g1'},{k:2,n:'Không lặp lại được',c:'g2'}];
+const BITEM=[
+ {n:'Thu nhập lãi thuần',v:[D.nii.y24,D.nii.y25],g:1,
+  m:'Sinh ra từ số dư trên bảng cân đối, mà số dư có quán tính lớn — năm sau vẫn còn đó. Đây là nền bền vững nhất.'},
+ {n:'Lãi thuần dịch vụ',v:[D.fee.y24,D.fee.y25],g:1,
+  m:'Gắn với tần suất giao dịch của nền khách hàng hiện hữu. Nền khách hàng không biến mất sau một năm.'},
+ {n:'Lãi kinh doanh ngoại hối',v:[D.fx.y24,D.fx.y25],g:2,
+  m:'Phần phục vụ khách hàng thì tương đối đều, nhưng phần chênh lệch tỷ giá phụ thuộc biến động thị trường — không do ngân hàng quyết.'},
+ {n:'Lãi mua bán chứng khoán',v:[D.sec.y24,D.sec.y25],g:2,
+  m:'Phụ thuộc mặt bằng lãi suất và thời điểm chốt lời. Bán rồi thì năm sau không bán lại khoản đó được nữa.'},
+ {n:'Thu từ góp vốn, mua cổ phần',v:[D.gv.y24,D.gv.y25],g:2,
+  m:'Theo lịch chia cổ tức của bên nhận đầu tư, không do ngân hàng quyết định.'},
+ {n:'Hoàn nhập dự phòng',v:null,g:2,
+  m:'Không có dòng riêng trên báo cáo — nằm trong chi phí dự phòng ròng (xem chuỗi biến động dự phòng ở chặng sau). Chỉ xảy ra khi khoản nợ chuyển nhóm tốt lên hoặc tài sản bảo đảm được định giá lại. Mức tối đa bị chặn bởi số dự phòng đã trích.'},
+ {n:'Thu hồi nợ đã xử lý rủi ro',v:null,g:2,
+  m:'Chỉ thu được từ danh mục đã dùng dự phòng để xử lý rủi ro trong quá khứ — một trữ lượng hình thành từ các năm trước và <b>vơi dần khi khai thác</b>. Thu được nhiều trong năm nay đồng nghĩa còn ít hơn cho năm sau.'}];
+let BPICK=BITEM.map(()=>0), b2done=false;
+INIT['B3']=function(){drawB2()};
+function drawB2(){
+  document.getElementById('bitems').innerHTML=BITEM.map((it,i)=>{
+    const cls=b2done?(' '+GRP[it.g-1].c):(BPICK[i]?' '+GRP[BPICK[i]-1].c:'');
+    return `<div class="bitem${cls}">
+      <div class="bn"><span>${it.n}</span>${it.v?`<span class="bnum">${f(it.v[0])} → ${f(it.v[1])}</span>`:'<span class="bnum">—</span>'}</div>
+      <div class="bsel">${GRP.map(g=>
+        `<button class="${b2done?(g.k===it.g?'pick':(BPICK[i]===g.k?'wrong':'')):(BPICK[i]===g.k?'pick':'')}"
+          onclick="b2pick(${i},${g.k})">${g.n}</button>`).join('')}</div>
+      <div class="bmech${b2done?' on':''}">${it.m}</div></div>`;}).join('');
+  const n=BPICK.filter(x=>x).length;
+  document.getElementById('b2stat').textContent=b2done?'':(n+'/'+BITEM.length+' khoản đã phân loại');
+}
+function b2pick(i,k){ if(b2done)return; BPICK[i]=k; drawB2(); }
+function b2reset(){BPICK=BITEM.map(()=>0);b2done=false;drawB2();document.getElementById('b2out').innerHTML=''}
+function b2check(){
+  b2done=true; drawB2();
+  const right=BITEM.filter((it,i)=>BPICK[i]===it.g).length;
+  document.getElementById('b2out').innerHTML=
+    `<div class="note gold"><b>${right}/${BITEM.length} khoản phân đúng nhóm.</b>
+     Điểm cần thấy nằm ở <b>cơ chế phát sinh</b>, không ở tên nhóm. Hai khoản đầu sinh ra từ số dư trên
+     bảng cân đối và nền khách hàng — những thứ còn nguyên vào năm sau. Năm khoản còn lại phụ thuộc
+     giá thị trường, lịch chia cổ tức của bên khác, hoặc một trữ lượng vơi dần khi khai thác.
+     Khi lập kế hoạch, chỉ nhóm đầu được phép ngoại suy.</div>`;
+}
+
+/* ══════════ B4 · đối chiếu mức tăng lợi nhuận ══════════ */
+const REC=[
+ {n:'Thu nhập lãi thuần',k:'nii',core:true},
+ {n:'Lãi thuần dịch vụ',k:'fee',core:true},
+ {n:'Chi phí hoạt động',k:'opex',core:true,neg:true},
+ {n:'Chi phí dự phòng rủi ro',k:'prov',core:true,neg:true},
+ {n:'Lãi thuần hoạt động khác',k:'hdk',core:false},
+ {n:'Lãi thuần kinh doanh ngoại hối',k:'fx',core:false},
+ {n:'Lãi thuần mua bán chứng khoán',k:'sec',core:false},
+ {n:'Thu từ góp vốn, mua cổ phần',k:'gv',core:false}];
+let RECON=REC.map(()=>true);
+INIT['B4']=function(){drawRec()};
+function recDelta(i){const r=REC[i];const d=D[r.k].y25-D[r.k].y24;return r.neg?-d:d;}
+function recAll(v){RECON=REC.map(()=>!!v);drawRec()}
+function recCore(){RECON=REC.map((r,i)=>r.core);drawRec()}
+function recTog(i){RECON[i]=!RECON[i];drawRec()}
+function drawRec(){
+  const tot=REC.reduce((s,r,i)=>s+(RECON[i]?recDelta(i):0),0);
+  const base=D.pbt.y24, actual=D.pbt.y25-D.pbt.y24;
+  document.getElementById('recTbl').innerHTML=
+   '<thead><tr><th></th><th>Cấu phần</th><th class="n">2024</th><th class="n">2025</th>'+
+   '<th class="n">Δ tuyệt đối</th><th class="n">Δ%</th></tr></thead><tbody>'+
+   REC.map((r,i)=>{const a=D[r.k].y24,b=D[r.k].y25,d0=recDelta(i),g=pc(b,a);
+     return `<tr class="${RECON[i]?'on':'off'}" onclick="recTog(${i})">
+       <td class="ck"><span class="bx">${RECON[i]?'✓':''}</span></td>
+       <td>${r.neg?'− ':''}${r.n}</td>
+       <td class="v">${f(a)}</td><td class="v">${f(b)}</td>
+       <td class="v" style="color:${d0>=0?'var(--green)':'var(--warn)'};font-weight:500">
+         ${(d0>=0?'+':'−')+f(Math.abs(d0))}</td>
+       <td class="v" style="color:${(r.neg?-g:g)>=0?'var(--green)':'var(--warn)'}">
+         ${(g>=0?'+':'−')+f2(Math.abs(g))}%</td></tr>`;}).join('')+
+   `<tr class="sum"><td class="ck"></td><td>Tổng các cấu phần đang chọn</td>
+     <td class="v">—</td><td class="v">—</td>
+     <td class="v" style="color:${tot>=0?'var(--green)':'var(--warn)'}">${(tot>=0?'+':'−')+f(Math.abs(tot))}</td>
+     <td class="v" style="color:${tot>=0?'var(--green)':'var(--warn)'}">${(tot>=0?'+':'−')+f2(Math.abs(tot/base*100))}%</td></tr>`+
+   '</tbody>';
+  drawRecWf(tot);
+  const nOff=RECON.filter(x=>!x).length, coreOnly=RECON.every((v,i)=>v===REC[i].core);
+  let msg;
+  if(nOff===0) msg=`<div class="note gold"><b>Đủ tám cấu phần: +${f(actual)} tỷ, tương đương +${f2(actual/base*100)}%.</b>
+    Đây là mức tăng lợi nhuận trước thuế công bố — khớp với bảng ở chặng trước.</div>`;
+  else if(coreOnly) msg=`<div class="note warn"><b>Chỉ giữ hoạt động lõi: ${(tot>=0?'+':'−')+f(Math.abs(tot))} tỷ,
+    tương đương ${(tot>=0?'+':'−')+f2(Math.abs(tot/base*100))}%.</b> Thu nhập lãi thuần và dịch vụ trừ chi phí
+    hoạt động và dự phòng. Đây là phần lặp lại được theo kế hoạch.</div>`;
+  else if(!RECON[4]) msg=`<div class="note warn"><b>Bỏ lãi thuần hoạt động khác: ${(tot>=0?'+':'−')+f(Math.abs(tot))} tỷ.</b>
+    Riêng cấu phần này đóng góp +${f(recDelta(4))} tỷ — lớn hơn toàn bộ mức tăng lợi nhuận ${f(actual)} tỷ.
+    Phần dư của nó bù cho các cấu phần sụt giảm.</div>`;
+  else msg=`<div class="note"><b>Tổng ${nOff} cấu phần bị loại: ${(tot>=0?'+':'−')+f(Math.abs(tot))} tỷ,
+    tương đương ${(tot>=0?'+':'−')+f2(Math.abs(tot/base*100))}%.</b> Con số này chỉ có nghĩa khi nói rõ
+    đang loại những gì.</div>`;
+  document.getElementById('recMsg').innerHTML=msg;
+}
+function drawRecWf(tot){
+  const base=D.pbt.y24, end=base+tot;
+  const items=REC.map((r,i)=>({n:r.n,d:recDelta(i),on:RECON[i]}));
+  // trục: từ 0, thang theo giá trị lớn nhất
+  const peaks=[base]; let run=base;
+  items.forEach(x=>{ if(x.on){run+=x.d; peaks.push(run);} });
+  peaks.push(end);
+  const mx=Math.max(...peaks)*1.06;
+  let cum=base;
+  const cols=[`<div class="wcol"><div class="wv">${f(base)}</div>
+     <div class="wbar base" style="height:${base/mx*100}%"></div>
+     <div class="wn">Lợi nhuận<br>2024</div></div>`];
+  items.forEach(x=>{
+    const st=x.on?cum:cum, h0=Math.abs(x.d)/mx*100;
+    const bot=x.on?(x.d>=0?cum:cum+x.d):cum;
+    if(x.on)cum+=x.d;
+    cols.push(`<div class="wcol">
+      <div class="wv" style="color:${x.d>=0?'var(--green)':'var(--warn)'};opacity:${x.on?1:.35}">
+        ${(x.d>=0?'+':'−')+f(Math.abs(x.d))}</div>
+      <div class="wbar ${x.d>=0?'up':'dn'}${x.on?'':' dim'}"
+        style="height:${h0}%;margin-bottom:${bot/mx*100}%"></div>
+      <div class="wn" style="opacity:${x.on?1:.35}">${x.n.replace('Lãi thuần ','').replace('Chi phí ','CP ')}</div></div>`);
+  });
+  cols.push(`<div class="wcol"><div class="wv">${f(end)}</div>
+    <div class="wbar base" style="height:${end/mx*100}%"></div>
+    <div class="wn">Kết quả<br>đang chọn</div></div>`);
+  document.getElementById('recWf').innerHTML=cols.join('');
+}
+
+/* ══════════ B4 · chuỗi dự phòng & nợ xấu ══════════ */
+INIT['B5']=function(){
+  const rows=[['Dự phòng đầu kỳ (31/12/2024)',D.llr.y24,'',''],
+              ['Trích lập trong kỳ',D.prov.y25,'+','op'],
+              ['Dùng để xử lý rủi ro',D.xlrrUsed.y25,'−','op'],
+              ['Dự phòng cuối kỳ (31/12/2025)',D.llr.y25,'=','tot']];
+  document.getElementById('flow').innerHTML=rows.map(r=>
+    `<div class="fr ${r[3]}"><span class="fs">${r[2]}</span><span class="fl">${r[0]}</span>
+     <span class="fv">${f(r[1])}</span></div>`).join('')+
+    `<div class="hint" style="margin-top:6px">Chênh ${f(Math.abs(D.llr.y24+D.prov.y25-D.xlrrUsed.y25-D.llr.y25))} tỷ
+     so với số công bố — do dự phòng các tài sản khác ngoài cho vay khách hàng.</div>`;
+  const N=[['Nhóm 1 — Đủ tiêu chuẩn',96.98,97.25],['Nhóm 2 — Cần chú ý',1.65,1.31],
+           ['Nhóm 3 — Dưới tiêu chuẩn',0.16,0.17],['Nhóm 4 — Nghi ngờ',0.27,0.20],
+           ['Nhóm 5 — Có khả năng mất vốn',0.94,1.07]];
+  document.getElementById('nplt').innerHTML=
+   '<thead><tr><th>Nhóm nợ</th><th class="n">2024</th><th class="n">2025</th></tr></thead><tbody>'+
+   N.map((r,i)=>{const up=r[2]>r[1], good=(i===0)?up:!up;   // nhóm 1 tăng là tốt, nhóm 2–5 ngược lại
+     return `<tr><td>${r[0]}</td><td class="n">${f2(r[1])}%</td>
+     <td class="n" style="color:${good?'var(--green)':'var(--warn)'}">${f2(r[2])}%</td></tr>`;}).join('')+
+   `<tr class="tot"><td>Tỷ lệ nợ xấu (nhóm 3–5)</td><td class="n">${f2(D.npl.y24)}%</td>
+     <td class="n">${f2(D.npl.y25)}%</td></tr>
+    <tr class="tot"><td>Tỷ lệ bao phủ nợ xấu</td><td class="n">${f2(D.cov.y24)}%</td>
+     <td class="n" style="color:var(--warn)">${f2(D.cov.y25)}%</td></tr></tbody>`;
+};
+
+/* ══════════ B5 · kéo giả định ══════════ */
+INIT['B6']=function(){
+  const r=document.getElementById('recov');
+  if(!r.dataset.b){r.dataset.b=1;r.addEventListener('input',drawRecov);}
+  drawRecov();
+};
+function drawRecov(){
+  const p=+document.getElementById('recov').value;
+  document.getElementById('recovV').textContent=p+'% mức thực tế';
+  const hdk=D.hdk.y25*p/100;
+  const pbt=D.pbt.y25-D.hdk.y25+hdk;          // giữ nguyên các cấu phần khác của 2025
+  const g=pc(pbt,D.pbt.y24);
+  const at24=Math.abs(p-D.hdk.y24/D.hdk.y25*100)<2;
+  const beven=(D.pbt.y24-(D.pbt.y25-D.hdk.y25))/D.hdk.y25*100;   // mức hòa với 2024
+  document.getElementById('recovKpi').innerHTML=
+   `<div class="kpi"><div class="k">Lãi thuần hoạt động khác</div><div class="v">${f(hdk)}</div>
+      <div class="d">tỷ · thực tế ${f(D.hdk.y25)}</div></div>
+    <div class="kpi ${g>=0?'good':'bad'}"><div class="k">Lợi nhuận trước thuế 2025</div><div class="v">${f(pbt)}</div>
+      <div class="d">tỷ · thực tế ${f(D.pbt.y25)}</div></div>
+    <div class="kpi ${g>=0?'good':'bad'}" style="grid-column:1/-1"><div class="k">Mức tăng so với 2024</div>
+      <div class="v">${(g>=0?'+':'−')+f2(Math.abs(g))}%</div>
+      <div class="d">2024: ${f(D.pbt.y24)} tỷ · thực tế 2025 tăng ${f2(pc(D.pbt.y25,D.pbt.y24))}%</div></div>`;
+  document.getElementById('recovNote').innerHTML=
+   `<div class="note ${g>=0?'gold':'warn'}">${at24
+     ? '<b>Đây chính là mức của năm 2024.</b> Nếu lãi thuần hoạt động khác giữ nguyên như năm trước, lợi nhuận trước thuế 2025 chỉ còn '+f(pbt)+' tỷ — <b>thấp hơn năm 2024</b>, dù mọi cấu phần khác vẫn như thực tế đã xảy ra.'
+     : (g<0
+       ? '<b>Lợi nhuận 2025 thấp hơn 2024.</b> Toàn bộ mức tăng của năm 2025 nằm ở một cấu phần duy nhất; hạ cấu phần đó xuống là mức tăng biến mất.'
+       : '<b>Điểm hòa nằm ở mức '+f1(beven)+'%.</b> Nếu lãi thuần hoạt động khác chỉ đạt dưới mức này, lợi nhuận 2025 đã không tăng so với 2024. Kéo về mốc của năm 2024 để thấy rõ hơn.')}</div>`;
+}
+
+/* ══════════ C1 · giải phẫu mô hình ══════════ */
+const LA=(D.loan.y24+D.loan.y25)/2, DA=(D.dep.y24+D.dep.y25)/2;
+const NII_RESID=D.nii.y25-(LA*D.rate.lend/100-DA*D.rate.cof/100);
+const ANAT={rLend:D.rate.lend,rCof:D.rate.cof,feeR:D.fee.y25/D.ta25*100,
+            mktIdx:100,opexPP:D.opex.y25/D.staff,ccost:D.prov.y25/LA*100,
+            reversal:0,recover:D.hdk.y25};   // bắt đầu từ mức thực tế 2025
+const CAP_REV=D.llr.y24;              // trần hoàn nhập = số dư dự phòng đầu kỳ
+const CAP_REC=D.xlrrUsed.y24+D.xlrrUsed.y25;   // trữ lượng hình thành trong 2024–2025
+let anatLv=1;
+const LAYERS=[
+ {id:1,n:'Thu nhập lãi thuần',kind:1,
+  base:'Dư nợ bình quân '+f(LA)+' tỷ · tiền gửi bình quân '+f(DA)+' tỷ',
+  why:'Cơ sở là <b>số dư trên bảng cân đối</b>. Số dư có quán tính lớn — sang năm sau vẫn còn đó, chỉ thay đổi dần theo tăng trưởng. Đây là nền bền vững nhất của ngân hàng.',
+  val:()=>LA*ANAT.rLend/100-DA*ANAT.rCof/100+NII_RESID,
+  sl:[{k:'rLend',n:'Lãi suất cho vay bình quân',u:'%',min:5,max:7,st:0.01},
+      {k:'rCof',n:'Chi phí vốn tiền gửi bình quân',u:'%',min:3,max:4.5,st:0.01}],
+  eq:()=>`<b>${f(LA)}</b> <span class="op">×</span> <b>${f2(ANAT.rLend)}%</b> <span class="op">−</span> <b>${f(DA)}</b> <span class="op">×</span> <b>${f2(ANAT.rCof)}%</b> <span class="op">+</span> <b>${f(NII_RESID)}</b> <span class="op">=</span> <b>${f(LA*ANAT.rLend/100-DA*ANAT.rCof/100+NII_RESID)}</b>`,
+  note:'Dòng <b>+'+f(NII_RESID)+'</b> là lãi thuần từ chứng khoán nợ và tiền gửi liên ngân hàng, trừ chi phí giấy tờ có giá và tiền vay.'},
+ {id:2,n:'Lãi thuần dịch vụ',kind:1,
+  base:'Tổng tài sản '+f(D.ta25)+' tỷ · nền khách hàng hiện hữu',
+  why:'Cơ sở là <b>nền khách hàng và tần suất giao dịch</b>. Nền khách hàng không biến mất sau một năm, nên khoản này lặp lại được — dù tỷ suất có thể cải thiện hoặc xấu đi.',
+  val:()=>D.ta25*ANAT.feeR/100,
+  sl:[{k:'feeR',n:'Thu dịch vụ trên tổng tài sản',u:'%',min:0.10,max:0.30,st:0.005,dec:3}],
+  eq:()=>`<b>${f(D.ta25)}</b> <span class="op">×</span> <b>${ANAT.feeR.toFixed(3).replace('.',',')}%</b> <span class="op">=</span> <b>${f(D.ta25*ANAT.feeR/100)}</b>`},
+ {id:3,n:'Ngoại hối, chứng khoán và góp vốn',kind:2,
+  base:'Danh mục đầu tư và doanh số giao dịch — cơ sở còn nguyên, nhưng giá do thị trường',
+  why:'Cơ sở <b>không bị tiêu hao</b>, danh mục vẫn còn đó. Nhưng kết quả phụ thuộc mặt bằng lãi suất, tỷ giá và thời điểm chốt lời — <b>ngân hàng không kiểm soát được</b>. Bằng chứng: nhóm này giảm 36,5% chỉ trong một năm.',
+  val:()=>(D.fx.y25+D.sec.y25+D.gv.y25)*ANAT.mktIdx/100,
+  sl:[{k:'mktIdx',n:'So với mức thực hiện 2025',u:'%',min:0,max:200,st:5}],
+  eq:()=>`<b>${f(D.fx.y25+D.sec.y25+D.gv.y25)}</b> <span class="op">×</span> <b>${ANAT.mktIdx}%</b> <span class="op">=</span> <b>${f((D.fx.y25+D.sec.y25+D.gv.y25)*ANAT.mktIdx/100)}</b>`,
+  note:'Năm 2024 nhóm này là <b>'+f(D.fx.y24+D.sec.y24+D.gv.y24)+' tỷ</b>, năm 2025 còn <b>'+f(D.fx.y25+D.sec.y25+D.gv.y25)+' tỷ</b>. Kéo thanh để thấy khoảng dao động thực tế đã xảy ra.'},
+ {id:4,n:'Chi phí hoạt động',kind:1,neg:true,
+  base:D.staff.toLocaleString('vi-VN')+' nhân sự · mạng lưới chi nhánh',
+  why:'Cơ sở là <b>nhân sự và mạng lưới</b> — cũng có quán tính như bảng cân đối. Chi phí không biến mất sau một năm, và cũng không cắt được nhanh.',
+  val:()=>D.staff*ANAT.opexPP,
+  sl:[{k:'opexPP',n:'Chi phí hoạt động trên mỗi nhân sự',u:' tỷ',min:0.9,max:1.3,st:0.005,dec:3}],
+  eq:()=>`<b>${D.staff.toLocaleString('vi-VN')}</b> <span class="op">×</span> <b>${ANAT.opexPP.toFixed(3).replace('.',',')}</b> <span class="op">=</span> <b>${f(D.staff*ANAT.opexPP)}</b>`},
+ {id:5,n:'Chi phí dự phòng rủi ro',kind:1,neg:true,
+  base:'Dư nợ bình quân '+f(LA)+' tỷ × chi phí rủi ro tín dụng',
+  why:'Trích lập sinh ra từ <b>dư nợ và chất lượng danh mục</b>. Đây là khoản chi, nhưng nó tạo ra hai nhánh vòng ngược ở lớp sau.',
+  val:()=>LA*ANAT.ccost/100,
+  sl:[{k:'ccost',n:'Chi phí rủi ro tín dụng trên dư nợ bình quân',u:'%',min:0.5,max:1.5,st:0.01}],
+  eq:()=>`<b>${f(LA)}</b> <span class="op">×</span> <b>${f2(ANAT.ccost)}%</b> <span class="op">=</span> <b>${f(LA*ANAT.ccost/100)}</b>`},
+ {id:6,n:'Hoàn nhập dự phòng và thu hồi nợ đã xử lý',kind:3,
+  base:'Số dư dự phòng đã trích '+f(CAP_REV)+' tỷ · trữ lượng nợ đã xử lý rủi ro',
+  why:'<b>Khác về bản chất với mọi lớp trên.</b> Cơ sở không tự tái tạo — nó là một trữ lượng đã hình thành từ quá khứ. Khai thác đồng nào thì vơi đồng đó. Và nó có <b>trần tuyệt đối</b>: không thể hoàn nhập nhiều hơn số đã trích.',
+  val:()=>ANAT.reversal+ANAT.recover,
+  sl:[{k:'reversal',n:'Hoàn nhập dự phòng',u:' tỷ',min:0,max:Math.round(CAP_REV),st:500,cap:CAP_REV,
+       capn:'Trần = số dư dự phòng đầu kỳ '+f(CAP_REV)+' tỷ'},
+      {k:'recover',n:'Thu hồi nợ đã xử lý rủi ro',u:' tỷ',min:0,max:30000,st:500,cap:CAP_REC,
+       capn:'Trữ lượng hình thành 2024–2025: '+f(CAP_REC)+' tỷ'}],
+  eq:()=>`<b>${f(ANAT.reversal)}</b> <span class="op">+</span> <b>${f(ANAT.recover)}</b> <span class="op">=</span> <b>${f(ANAT.reversal+ANAT.recover)}</b>`,
+  note:'Thực tế 2025: lãi thuần hoạt động khác <b>'+f(D.hdk.y25)+' tỷ</b>, phần lớn là thu hồi nợ đã xử lý. Mốc so sánh ở đây là số dự phòng đã dùng để xử lý rủi ro trong hai năm 2024 và 2025 — phần trữ lượng hình thành trong kỳ. Số dư lũy kế ngoài bảng không được công bố trên báo cáo riêng.'}
+];
+const KN={1:['LẶP LẠI ĐƯỢC','k1'],2:['KHÔNG LẶP LẠI','k2'],3:['KHÔNG LẶP LẠI · CÓ TRẦN','k3']};
+INIT['C1']=function(){drawAnat()};
+function anatNext(){ if(anatLv<LAYERS.length){anatLv++;drawAnat();} }
+function anatReset(){anatLv=1;drawAnat()}
+function drawAnat(){
+  let run=0;
+  document.getElementById('stack').innerHTML=LAYERS.map((L,i)=>{
+    const on=i<anatLv, v=L.val(), sv=L.neg?-v:v;
+    if(on)run+=sv;
+    return `<div class="lay${on?' on':''}${i===anatLv-1?' act':''}${L.neg?' neg':''}" onclick="anatSel(${i})" style="cursor:pointer">
+      <div class="lh"><span class="ln">${L.neg?'− ':''}${L.n}</span>
+        <span class="lv">${L.neg?'−':''}${f(v)}</span></div>
+      <div class="lh" style="margin-top:5px"><span class="kind ${KN[L.kind][1]}">${KN[L.kind][0]}</span>
+        <span class="lb">${L.base.length>52?L.base.slice(0,52)+'…':L.base}</span></div></div>`;
+  }).join('')+
+  `<div class="lay on sum"><div class="lh"><span class="ln">Lợi nhuận trước thuế</span>
+     <span class="lv">${f(run)}</span></div>
+     <div class="lb">thực hiện 2025: ${f(D.pbt.y25)} tỷ${anatLv>=LAYERS.length&&Math.abs(run-D.pbt.y25)>50?' · lệch '+f(run-D.pbt.y25):(anatLv<LAYERS.length?' · còn '+(LAYERS.length-anatLv)+' lớp chưa mở':'')}</div></div>`;
+  document.getElementById('anatStep').textContent='lớp '+anatLv+' / '+LAYERS.length;
+  document.getElementById('anatNext').disabled=anatLv>=LAYERS.length;
+  drawPanel();
+}
+function anatSel(i){ if(i<anatLv){anatLv=i+1;drawAnat();} }
+function drawPanel(){
+  const L=LAYERS[anatLv-1];
+  document.getElementById('anatPanel').innerHTML=
+   `<div class="basebox">
+     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
+       <h4>${L.n}</h4><span class="kind ${KN[L.kind][1]}">${KN[L.kind][0]}</span></div>
+     <div class="mono" style="font-size:11px;color:var(--dim)">Cơ sở: ${L.base}</div>
+     <div class="bwhy">${L.why}</div>
+     <div class="eqn">${L.eq()}</div>
+     ${L.sl.map((s,k)=>{
+       const val=ANAT[s.k], dec=s.dec||2;
+       const capped=s.cap!=null;
+       return `<div class="sld" style="margin-bottom:12px"><div class="row">
+         <label>${s.n}</label><span class="v">${s.u===' tỷ'?f(val):val.toFixed(dec).replace('.',',')}${s.u}</span></div>
+         <input type="range" min="${s.min}" max="${s.max}" step="${s.st}" value="${val}"
+           oninput="anatSet('${s.k}',this.value)">
+         ${capped?`<div class="capbar"><div class="ct2">
+            <span class="cf${val>=s.cap*0.995?' over':''}" style="width:${Math.min(100,val/s.cap*100)}%"></span></div>
+            <div class="cl2"><span>${s.capn}</span><span>${f1(val/s.cap*100)}% của trần</span></div></div>`:''}
+        </div>`;}).join('')}
+     ${L.note?`<div class="note" style="font-size:13px;margin-top:4px">${L.note}</div>`:''}
+     ${L.kind===3?`<div class="note warn" style="font-size:13px;margin-top:10px">
+       <b>Kéo hết thanh hoàn nhập để thấy chốt chặn.</b> Dù muốn đến đâu, không thể hoàn nhập
+       nhiều hơn số dự phòng đã trích. Mọi lớp trên đều có thể tăng nếu cơ sở lớn lên —
+       riêng lớp này thì cơ sở <b>chỉ nhỏ đi khi khai thác</b>.</div>`:''}
+   </div>`;
+}
+function anatSet(k,v){ANAT[k]=+v;drawAnat()}
+
+/* --- màn 10: cơ cấu nguồn + chuỗi --- */
+INIT['C2']=function(){
+  const F=[['Tiền gửi khách hàng',D.dep.y25,D.dep.y24,'var(--green)'],
+           ['Tiền gửi và vay các TCTD',D.tctd.y25,D.tctd.y24,'var(--warn)'],
+           ['Phát hành giấy tờ có giá',D.gtcg.y25,D.gtcg.y24,'var(--gold)'],
+           ['Nợ Chính phủ và NHNN',D.nocp.y25,D.nocp.y24,'var(--forest)']];
+  const mx=Math.max(...F.map(x=>x[1]));
+  document.getElementById('fund').innerHTML=F.map(x=>{
+    const g=pc(x[1],x[2]);
+    return `<div class="frow"><div class="fn">${x[0]}</div>
+      <div class="fw"><span class="fb" style="width:${x[1]/mx*100}%;background:${x[3]}"></span></div>
+      <div class="fv">${f(x[1])}</div>
+      <div class="fg" style="color:${g>40?'var(--warn)':'var(--green)'}">${sg(g)}</div></div>`;}).join('');
+};
+function drawChain(){
+  const g=+document.getElementById('depG').value;
+  document.getElementById('depGV').textContent='+'+f2(g)+'%';
+  const loanG=5.50;
+  const dep=D.dep.y25*(1+g/100), loan=D.loan.h1;
+  const ldr=loan/dep*100;
+  // dòng tiền: mỗi điểm % tiền gửi hụt so với thực tế -> thiếu nguồn tương ứng
+  const cf=D.cf.h126+(g-1.85)/100*D.dep.y25;
+  const gap=loanG-g;
+  document.getElementById('chain').innerHTML=
+   `<div class="ci ${gap>2?'alert':''}"><div class="cl">1 · Chênh lệch tốc độ</div>
+      <div class="cv">${Math.abs(gap)<0.005?'':(gap>=0?'−':'+')}${f2(Math.abs(gap))} đ%</div>
+      <div class="cs">Dư nợ tăng ${f2(loanG)}% · tiền gửi tăng ${f2(g)}%</div></div>
+    <div class="ci ${ldr>107?'alert':''}"><div class="cl">2 · Dư nợ trên tiền gửi</div>
+      <div class="cv">${f2(ldr)}%</div>
+      <div class="cs">Cuối 2025: ${f2(D.ldr.y25)}% · tỷ lệ thô</div></div>
+    <div class="ci ${cf<0?'alert':''}"><div class="cl">3 · Lưu chuyển tiền từ hoạt động kinh doanh</div>
+      <div class="cv">${cf<0?'−':'+'}${f(Math.abs(cf))}</div>
+      <div class="cs">Cùng kỳ 2025: +${f(D.cf.h125)} tỷ</div></div>`;
+}
+
+/* --- màn 12: độ nhạy --- */
+const TOR=[
+ {n:'Lãi suất cho vay bình quân',u:'điểm %',r:0.25,st:0.05,mx:0.6,
+  imp:x=>loanAvg()*x/100, dir:1},
+ {n:'Chi phí rủi ro tín dụng',u:'điểm %',r:0.25,st:0.05,mx:0.6,
+  imp:x=>loanAvg()*x/100, dir:-1},
+ {n:'Lãi suất huy động có kỳ hạn',u:'điểm %',r:0.25,st:0.05,mx:0.6,
+  imp:x=>depAvg()*(1-D.casa.y25/100)*x/100, dir:-1},
+ {n:'Tỷ lệ tiền gửi không kỳ hạn',u:'điểm %',r:2,st:0.5,mx:5,
+  imp:x=>depAvg()*(D.rate.term-D.rate.casa)/100*x/100, dir:1},
+ {n:'Tăng trưởng dư nợ',u:'điểm %',r:3,st:0.5,mx:8,
+  imp:x=>D.loan.y25*x/200*(D.rate.lend-0.97)/100, dir:1},
+ {n:'Tăng trưởng chi phí hoạt động',u:'điểm %',r:5,st:1,mx:15,
+  imp:x=>D.opex.y25*x/100, dir:-1},
+ {n:'Tăng trưởng thu dịch vụ',u:'điểm %',r:10,st:1,mx:25,
+  imp:x=>D.fee.y25*x/100, dir:1}];
+function loanAvg(){return (D.loan.y24+D.loan.y25)/2}
+function depAvg(){return (D.dep.y24+D.dep.y25)/2}
+INIT['C4']=function(){
+  const c=document.getElementById('torCtl');
+  if(!c.children.length){
+    c.innerHTML='<div class="eyebrow" style="margin-bottom:10px">Biên độ dao động hợp lý trong một năm</div>'+
+      TOR.map((t,i)=>`<div class="sld" style="margin-bottom:9px"><div class="row">
+        <label>${t.n}</label><span class="v" id="tv${i}">±${t.r}</span></div>
+        <input type="range" id="ti${i}" min="0" max="${t.mx}" step="${t.st}" value="${t.r}"></div>`).join('');
+    TOR.forEach((t,i)=>document.getElementById('ti'+i).addEventListener('input',e=>{
+      TOR[i].r=+e.target.value; drawTor();}));
+  }
+  drawTor();
+};
+function drawTor(){
+  const rows=TOR.map(t=>({n:t.n,u:t.u,r:t.r,v:t.imp(t.r),d:t.dir}))
+                .sort((a,b)=>b.v-a.v);
+  const mx=Math.max(...rows.map(r=>r.v))||1;
+  document.getElementById('tor').innerHTML=rows.map(r=>{
+    const w=r.v/mx*46;
+    return `<div class="trow"><div class="tn">${r.n}</div>
+      <div class="tmid"><div class="taxis"></div>
+        <div class="tb pos" style="width:${w}%"></div>
+        <div class="tb neg" style="width:${w}%"></div></div>
+      <div class="tv">±${f(r.v)}</div>
+      <div class="tr">±${r.r} ${r.u}</div></div>`;}).join('');
+  TOR.forEach((t,i)=>{const e=document.getElementById('tv'+i);if(e)e.textContent='±'+t.r;});
+  const top=rows[0], loanRow=rows.find(r=>r.n.indexOf('Tăng trưởng dư nợ')>=0);
+  const rank=rows.indexOf(loanRow)+1;
+  document.getElementById('torNote').innerHTML=
+   `<div class="note gold"><b>Đòn bẩy mạnh nhất hiện tại: ${top.n}</b> — dao động ±${top.r} ${top.u}
+    làm lợi nhuận trước thuế đổi khoảng <b class="mono">${f(top.v)} tỷ</b>.
+    <br><br>Tăng trưởng dư nợ đứng thứ <b>${rank}</b> trong bảng xếp hạng này.
+    ${rank>2?'Quy mô không phải đòn bẩy mạnh nhất — giá và chi phí rủi ro chi phối kết quả nhiều hơn.':''}
+    </div>
+    <div class="note" style="margin-top:12px;font-size:13px"><b>Cách đọc:</b> mỗi thanh là mức thay đổi
+    lợi nhuận trước thuế khi tham số đó lệch khỏi giả định một biên độ hợp lý, các tham số khác giữ nguyên.
+    Tính trên nền dư nợ và tiền gửi bình quân của năm 2025.</div>`;
+}
+
+show(0);
+</script>
+</body>
+</html>
